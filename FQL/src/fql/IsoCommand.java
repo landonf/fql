@@ -1,5 +1,10 @@
 package fql;
 
+/**
+ * 
+ * @author ryan
+ * Command for checking isomorphism.
+ */
 public class IsoCommand extends Command {
 	
 	String lhs, rhs;

@@ -1,5 +1,11 @@
 package fql;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Syntax for equality of paths.
+ */
 public class Eq {
 
 	Path lhs, rhs;

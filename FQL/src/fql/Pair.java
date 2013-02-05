@@ -1,6 +1,17 @@
 package fql;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Pairs
+ * @param <T1> the type of left
+ * @param <T2> the type of right
+ */
 public class Pair<T1, T2> {
+
+	public T1 first;
+	public T2 second;
 
 	public Pair(T1 value, T2 value2) {
 		first = value;
@@ -11,8 +22,7 @@ public class Pair<T1, T2> {
 		return "(" + first + "," + second + ")";
 		
 	}
-	public T1 first;
-	public T2 second;
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -21,6 +31,7 @@ public class Pair<T1, T2> {
 		result = prime * result + ((second == null) ? 0 : second.hashCode());
 		return result;
 	}
+	
 	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean equals(Object obj) {

@@ -8,6 +8,12 @@ import fql.parse.IllTyped;
 import fql.parse.Partial;
 import fql.parse.Tokens;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Wrapper for a list of commands.
+ */
 public class Commands {
 
 	public static Commands parse(String program) throws BadSyntax, IllTyped {

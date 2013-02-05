@@ -6,18 +6,18 @@ import fql.parse.Parser;
 import fql.parse.Partial;
 import fql.parse.Tokens;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Parser for commands.
+ */
 public class CommandParser implements Parser<Command> {
 
 	@Override
 	public Partial<Command> parse(Tokens s) throws BadSyntax, IllTyped {
 		Parser<Command> p;
 		
-		try {
-			p = new PlanCommandParser();
-			return p.parse(s);
-		} catch (Exception e) {
-		
-		}
 		try {
 			p = new ShowCommandParser();
 				return p.parse(s);

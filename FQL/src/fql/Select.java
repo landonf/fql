@@ -1,6 +1,11 @@
 package fql;
 
-
+/**
+ * 
+ * @author ryan
+ *
+ * Selection as relational syntax.
+ */
 public class Select extends RA {
 	
 	int i, j;

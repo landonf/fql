@@ -2,12 +2,20 @@ package fql;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Finite instances - functors to set.
+ * 
+ * @param <Obj> type of objects
+ * @param <Arrow> type of arrows
+ * @param <Y> carrier for set objects
+ * @param <X> carrier for set arrows
+ */
 public class Inst<Obj, Arrow, Y, X>  {
 
 	Map<Obj, Set<Value<Y, X>>> objM;
@@ -19,7 +27,9 @@ public class Inst<Obj, Arrow, Y, X>  {
 		this.objM = objM;
 		this.arrM = arrM;
 		this.cat = cat;
-		validate();
+		if (DEBUG.VALIDATE) {
+			validate();
+		}
 	}
 	
 	
@@ -59,21 +69,6 @@ public class Inst<Obj, Arrow, Y, X>  {
 				}
 			}
 			
-//			for (Value<Y,X> e : applyA(a).keySet()) {
-//				if (!applyO(a.src).contains(e)) {
-//					System.out.println(a);
-//					System.out.println(e);
-//					System.out.println(applyO(a.src));
-//					System.out.println(e);
-//					System.out.println(applyO(a.src).contains(e));
-//					System.out.println((applyO(a.src).iterator().next().equals(e)));
-//					throw new RuntimeException("Functor has bad src " + a + "\n" + e + "\n" + this);
-//				}
-//				if (!applyO(a.dst).contains(e)) {
-//					throw new RuntimeException("Functor has bad dst " + a + "\n" + e + "\n" + this);
-//				}
-//			}
-			
 			for (Arr<Obj, Arrow> b : cat.arrows) {
 				Arr<Obj, Arrow> c = cat.compose(a, b);
 				if (c == null) {
@@ -98,6 +93,9 @@ public class Inst<Obj, Arrow, Y, X>  {
 		return ret;
 	}
 
+	/**
+	 * Constructs a terminal (one element) instance
+	 */
 	public static <Obj,Arrow,Y> Inst<Obj,Arrow,Y,Obj> terminal(FinCat<Obj,Arrow> s) throws FQLException {
 		
 		Map<Obj, Set<Value<Y,Obj>>> ret1 = new HashMap<>();

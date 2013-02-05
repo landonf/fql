@@ -1,14 +1,18 @@
 package fql;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Class for edges in a signature.
+ */
 public class Edge {
 	
 	public String toString() {
 		return name + " : " + source + " -> " + target;
 	}
 	
-	
-	//int x, y;
-	
+		
 	String name;
 	Node source;
 	Node target;

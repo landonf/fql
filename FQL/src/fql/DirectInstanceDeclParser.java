@@ -8,6 +8,12 @@ import fql.parse.Partial;
 import fql.parse.StringParser;
 import fql.parse.Tokens;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Parser for instances given by delta, sigma, pi
+ */
 public class DirectInstanceDeclParser implements Parser<Decl> {
 
 	@Override

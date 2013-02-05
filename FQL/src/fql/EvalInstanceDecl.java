@@ -1,5 +1,11 @@
 package fql;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Instances that are given by evaluation of a query.
+ */
 public class EvalInstanceDecl extends InstanceDecl {
 	
 	String query;

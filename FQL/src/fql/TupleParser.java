@@ -9,6 +9,13 @@ import fql.parse.Partial;
 import fql.parse.StringParser;
 import fql.parse.Tokens;
 
+
+/**
+ * 
+ * @author ryan
+ *
+ * Parser for tuples.
+ */
 public class TupleParser implements Parser<Pair<String, String>> {
 
 	@Override

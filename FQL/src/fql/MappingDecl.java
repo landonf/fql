@@ -2,7 +2,21 @@ package fql;
 
 import java.util.List;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Declarations for mappings
+ */
 public class MappingDecl extends Decl {
+	
+	enum KIND { ID, COMPOSE, MORPHISM }
+	KIND kind;
+	String source, target;
+	String schema;
+	List<Pair<String,List<String>>> arrows;
+	List<Pair<String, String>> objs;
+
 	
 	public MappingDecl(String name, String schema) {
 		super(name);
@@ -33,16 +47,5 @@ public class MappingDecl extends Decl {
 				+ ", objs=" + objs + "]";
 	}
 
-	enum KIND { ID, COMPOSE, MORPHISM }
-	
-	KIND kind;
-
-	String source, target;
-	
-	String schema;
-	
-	List<Pair<String,List<String>>> arrows;
-	
-	List<Pair<String, String>> objs;
 	
 }

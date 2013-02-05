@@ -9,6 +9,12 @@ import fql.parse.Partial;
 import fql.parse.StringParser;
 import fql.parse.Tokens;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Parser for isomorphisms commands.
+ */
 public class IsosCommandParser implements Parser<Command> {
 
 	@Override

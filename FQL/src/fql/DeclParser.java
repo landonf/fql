@@ -7,6 +7,12 @@ import fql.parse.Partial;
 import fql.parse.SchemaDeclParser;
 import fql.parse.Tokens;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Parser for declarations.
+ */
 public class DeclParser implements Parser<Decl> {
 
 	@Override
@@ -45,14 +51,6 @@ public class DeclParser implements Parser<Decl> {
 		
 		throw new BadSyntax("Cannot parse from " + s);
 		
-		
-//		MappingDeclParser p2 = new MappingDeclParser();
-		
-	//	InstanceDeclParser p3 = new InstanceDeclParser();
-		
-	//	QueryDeclParser p4 = new QueryDeclParser();
-		
-		//return null;
 	}
 
 }

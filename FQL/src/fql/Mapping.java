@@ -29,9 +29,13 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.BasicVisualizationServer;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Implementation of signature morphisms
+ */
 public class Mapping implements Viewable<Mapping> {
-	
-	
 	
 	Map<Node, Node> nm = new HashMap<Node, Node>();
 	Map<Edge, Path> em = new HashMap<Edge, Path>();
@@ -66,11 +70,12 @@ public class Mapping implements Viewable<Mapping> {
 			break;
 		case ID : 
 			Signature s = env.getSchema(md.schema);
-			identity(env, s); break;
+			identity(env, s);
+			break;
 		case MORPHISM :
 			morphism(env.getSchema(md.source), env.getSchema(md.target), md.objs, md.arrows);
+			break;
 		}
-		abortIfNotWf();
 	}
 	
 	private Path expand(Path v, Map<Node, Node> nm2, Map<Edge, Path> em2) {
@@ -89,6 +94,9 @@ public class Mapping implements Viewable<Mapping> {
 		identity(env, s);
 	}
 	
+	/**
+	 * Constructs a new mapping.  
+	 */
 	public Mapping(String name, Signature source, Signature target,
 			List<Pair<String, String>> objs,
 			List<Pair<String, List<String>>> arrows) throws FQLException {
@@ -96,6 +104,9 @@ public class Mapping implements Viewable<Mapping> {
 		morphism(source, target, objs, arrows);
 	}
 
+	/**
+	 * Does most of the work of the constructor.
+	 */
 	private void morphism(Signature source, Signature target,
 			List<Pair<String, String>> objs,
 			List<Pair<String, List<String>>> arrows) throws FQLException {
@@ -123,11 +134,9 @@ public class Mapping implements Viewable<Mapping> {
 		}
 	}
 	
-	public void abortIfNotWf() throws FQLException {
-		//TODO: (DEFER) eq-paths check for mappings
-	}
-
-	
+	/**
+	 *  Constructs an identity mapping
+	 */
 	private void identity(Environment env, Signature s)  throws FQLException {
 		for (Node n : s.nodes) {
 			nm.put(n, n);
@@ -141,6 +150,9 @@ public class Mapping implements Viewable<Mapping> {
 	}
 
 	@Override
+	/**
+	 * The viewer for mappings.
+	 */
 	public JPanel view() {
 		Object[][] arr = new Object[nm.size()][2];
 		int i = 0;
@@ -171,12 +183,6 @@ public class Mapping implements Viewable<Mapping> {
 		}
 		
 		JPanel p = new JPanel(new GridLayout(1,2));
-		//p.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-		//JSplitPane p = new FQLSplit(.5, JSplitPane.VERTICAL_SPLIT);
-		
-//		nmC.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-		
-	//	emC.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 		
 		JScrollPane q1 = new JScrollPane(nmC);
 		JScrollPane q2 = new JScrollPane(emC);
@@ -190,20 +196,7 @@ public class Mapping implements Viewable<Mapping> {
 		j2.add(q2);
 		j2.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "Edge mapping"));
 		p.add(j2);
-		
-	
-		
-		
-		
-		
-		
-//		p1.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
-	//	p2.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
-		
-//		JPanel px = new JPanel(new GridLayout(1,1));
-//		px.add(p);
-//		px.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
-//		
+				
 		return p;
 	}
 
@@ -217,8 +210,10 @@ public class Mapping implements Viewable<Mapping> {
 	}
 
 	@Override
+	/**
+	 * Text view for mappings.
+	 */
 	public JPanel text() {
-//		String s = toString().replace(";", "\n\n;\n\n");
 		
 		String[] t = toString().split(";");
 		String ret = "";
@@ -236,7 +231,6 @@ public class Mapping implements Viewable<Mapping> {
 		p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "Mapping " + name + " : " + source.name0 + " -> " + target.name0 ));
 		p.add(xxx);
 		tap.add(p);
-
 		
 		String delta = "";
 		try {
@@ -287,27 +281,7 @@ public class Mapping implements Viewable<Mapping> {
 		p4.add(xxx4);
 		tap.add(p4);
 
-
-		
-//		
-//		tap.setBorder(BorderFactory.createEmptyBorder());
-	//	xxx.setBorder(BorderFactory.createEmptyBorder());
-//		
-//		tap.setSize(600, 600);
-
-//		JPanel q3 = new FQLTextPanel("Delta",delta);
-	//	JPanel q4 = new FQLTextPanel("Sigma", sigma);
-		//JPanel q5 = new FQLTextPanel("Pi", pi);
-
-		//p1.add(q1);
-		//p2.add(q2);
-		
-//		JPanel s2 = new JPanel(new GridLayout(1,3));
-	//	s2.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-	
-		
 		return tap;
-
 	}
 
 	
@@ -320,11 +294,7 @@ public class Mapping implements Viewable<Mapping> {
 
 	@Override
 	public boolean equals0(Mapping view2) {
-//		if (Equality.which.equals(Equality.syntactic)) {
-//			return equals(view2);
-//		}
-		return false;
-		//TODO (DEFER) eq mapping
+		throw new RuntimeException("equality for mapping");
 	}
 
 	@Override
@@ -344,15 +314,6 @@ public class Mapping implements Viewable<Mapping> {
 		// TODO (DEFER) morphs mapping
 		return "todo - morphs mapping";
 	}
-
-	public Signature getSource() {
-		return source;
-	}
-
-	public Signature getTarget() {
-		return target;
-	}
-
 
 	@Override
 	public String toString() {
@@ -389,6 +350,9 @@ public class Mapping implements Viewable<Mapping> {
 		return sb.toString();
 	}
 
+	/**
+	 * Applies to a path
+	 */
 	public Path appy(Path path) {
 		List<Edge> r = new LinkedList<Edge>();
 		for (Edge e : path.path) {
@@ -399,6 +363,10 @@ public class Mapping implements Viewable<Mapping> {
 		return new Path(nm.get(path.source), nm.get(path.target), r);
 	}
 	
+	/**
+	 * Converts a mapping to a functor.
+	 * @return the functor, and some isomorphisms
+	 */
 	public Triple<FinFunctor<String, List<List<String>>, String, List<List<String>>>, Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>>, Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>>> toFunctor() throws FQLException {
 		HashMap<String, String> objMapping = new HashMap<String, String>();
 		HashMap<Arr<String,List<List<String>>>, Arr<String,List<List<String>>>> arrowMapping = new HashMap<>();
@@ -424,6 +392,12 @@ public class Mapping implements Viewable<Mapping> {
 		return new Triple<>(new FinFunctor<>(objMapping, arrowMapping, srcCat, dstCat), srcCat0, dstCat0);
 	}
 
+	/**
+	 * Finds the equivalence class a path is in.
+	 * @param cat
+	 * @param path
+	 * @return
+	 */
 	private Arr<String, List<List<String>>> findeqc(
 			FinCat<String, List<List<String>>> cat, List<String> path) {
 		for (Arr<String, List<List<String>>> eqc : cat.arrows) {
@@ -609,23 +583,23 @@ public class Mapping implements Viewable<Mapping> {
 	}
 
 	public static Mapping compose(String string, Mapping l, Mapping r) throws FQLException {
-		if (!l.getTarget().equals(r.getSource())) {
-			throw new RuntimeException(l.getTarget() + "\n\n" + r.getSource());
+		if (!l.target.equals(r.source)) {
+			throw new RuntimeException(l.target + "\n\n" + r.source);
 		}
 		
 		List<Pair<String, String>> xxx = new LinkedList<>();
 		List<Pair<String, List<String>>> yyy = new LinkedList<>();
 		
-		for (Node n : l.getSource().nodes) {
+		for (Node n : l.source.nodes) {
 			xxx.add(new Pair<>(n.string, r.nm.get(l.nm.get(n)).string));
 		}
 		
-		for (Edge e : l.getSource().edges) {
+		for (Edge e : l.source.edges) {
 			Path p = l.em.get(e);
 			yyy.add(new Pair<>(e.name, r.appy(p).asList()));
 		}
 		
-		return new Mapping(string, l.getSource(), r.getTarget(), xxx, yyy);
+		return new Mapping(string, l.source, r.target, xxx, yyy);
 	}
 	
 	

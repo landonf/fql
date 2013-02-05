@@ -12,6 +12,12 @@ import fql.parse.PathParser;
 import fql.parse.StringParser;
 import fql.parse.Tokens;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Parser for mapping declarations.
+ */
 public class MappingDeclParser implements Parser<Decl> {
 
 	@Override

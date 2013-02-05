@@ -1,5 +1,11 @@
 package fql;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Command to take equality (of schemas, mappings, etc)
+ */
 public class EqCommand extends Command {
 
 	public String lhs;

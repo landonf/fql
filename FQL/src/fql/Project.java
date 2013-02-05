@@ -1,5 +1,11 @@
 package fql;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Projection as RA syntax.
+ */
 public class Project extends RA {
 
 	RA e;

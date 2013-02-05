@@ -3,6 +3,12 @@ package fql;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Paths
+ */
 public class Path {
 
 	Node source;
@@ -52,8 +58,6 @@ public class Path {
 		this(s, doStuff(s,e));
 	}
 
-	
-
 	private static List<String> doStuff(Signature s, Edge e) {
 		List<String> ret = new LinkedList<String>();
 		ret.add(e.source.string);
@@ -82,6 +86,9 @@ public class Path {
 	}
 
 	@Override
+	/**
+	 * Syntactic equality of paths
+	 */
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -109,10 +116,7 @@ public class Path {
 	}
 
 	public boolean equals0(Path p, Signature s) {
-//		if (Equality.which.equals(Equality.syntactic)) {
-//			return equals(p);
-//		}
-		return false;
+		throw new RuntimeException();
 		//TODO (DEFER) eq path
 	}
 

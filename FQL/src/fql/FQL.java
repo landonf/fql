@@ -3,10 +3,14 @@ package fql;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Program entry point.
+ */
 public class FQL  {
 
-	
-	
 	public static void main(String[] args) {
 		JPanel gui = GUI.makeGUI();
 		JFrame f = new JFrame("FQL IDE");

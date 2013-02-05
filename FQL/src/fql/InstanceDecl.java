@@ -1,6 +1,11 @@
 package fql;
 
-
+/**
+ * 
+ * @author ryan
+ *
+ * Superclass for instance declarations.
+ */
 public class InstanceDecl extends Decl {
 
 	String type;

@@ -1,6 +1,11 @@
 package fql;
 
-
+/**
+ * 
+ * @author ryan
+ *
+ * RA syntax for binary products
+ */
 public class Product extends RA {
 
 	public RA e1, e2;

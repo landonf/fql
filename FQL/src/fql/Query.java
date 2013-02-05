@@ -29,22 +29,36 @@ import edu.uci.ics.jung.visualization.BasicVisualizationServer;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import fql.Value.VALUETYPE;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Queries, and composition.
+ */
 public class Query implements Viewable<Query> {
 
 	Mapping project, join, union;
 	
 	String name;
-	
 
 	public Signature getSource() {
-		return project.getTarget();
+		return project.target;
 	}
 
 	public Signature getTarget() {
-		return union.getTarget();
+		return union.target;
 	}
 
-	public Query(String name, Environment env, Mapping project, Mapping join, Mapping union) throws FQLException {
+	/**
+	 * 
+	 * @param name
+	 * @param env
+	 * @param project
+	 * @param join
+	 * @param union
+	 * @throws FQLException
+	 */
+	public Query(String name, Mapping project, Mapping join, Mapping union) throws FQLException {
 		if (!project.source.equals(join.source)) {
 			throw new FQLException("Ill-typed: " + name + "\nProject source: " + project.source + "\nJoin source: " + join.source);
 		}
@@ -98,14 +112,8 @@ public class Query implements Viewable<Query> {
 			}
 			break;
 		}
-		//abortIfNotDiscreteOp();
 	}
 
-
-	
-	private void abortIfNotDiscreteOp() throws FQLException {
-		// TODO (DEFER) abort query when not discrete op fibration
-	}
 
 	@Override
 	public JPanel view() throws FQLException {
@@ -129,12 +137,7 @@ public class Query implements Viewable<Query> {
 
 	@Override
 	public JPanel text() {
-			
-		//	String[] t = toString().split("@");
 			String ret = toString();
-			//for (String a : t) {
-		//	  ret += (a.trim() + ";\n\n");
-			//}
 			
 			JPanel tap = new JPanel(new GridLayout(2,2));
 
@@ -229,11 +232,7 @@ public class Query implements Viewable<Query> {
 
 	@Override
 	public boolean equals0(Query view2) {
-//		if (Equality.which.equals(Equality.syntactic)) {
-//			return equals(view2);
-//		}
-		return false;
-		//TODO (DEFER) eq query
+		throw new RuntimeException();
 	}
 
 	@Override
@@ -259,8 +258,9 @@ public class Query implements Viewable<Query> {
 		return "delta " + project + "\n\n\npi " + join + "\n\n\nsigma " + union;
 	}
 
-	//TODO this is where evaluation happens
-	//delta pi sigma
+	/**
+	 * Evaluates a query on an instance
+	 */
 	public Map<String, Set<Pair<String, String>>> eval(Instance theinstance) throws FQLException {
 		Map<String, RA> delta = RA.delta(project);
 		Map<String, RA> sigma = RA.sigma(union);
@@ -276,7 +276,6 @@ public class Query implements Viewable<Query> {
 	}
 	
 	
-
 	public static Map<String, Set<String[]>> convert0(Instance theinstance) {
 		Map<String, Set<String[]>> ret = new HashMap<String, Set<String[]>>();
 		for (Entry<String, Set<Pair<String, String>>> k : theinstance.data.entrySet()) {
@@ -345,13 +344,13 @@ public class Query implements Viewable<Query> {
 				//String j = t.substring(i+1);
 				String p = t.substring(0, i);
 				if (p.equals("@project_source")) {
-					return Environment.colors.get(project.getSource().name0);
+					return Environment.colors.get(project.source.name0);
 				} else if (p.equals("@project_target")) {
-					return Environment.colors.get(project.getTarget().name0);
+					return Environment.colors.get(project.target.name0);
 				} else if (p.equals("@join_target")) {
-					return Environment.colors.get(join.getTarget().name0);
+					return Environment.colors.get(join.target.name0);
 				} else {
-					return Environment.colors.get(union.getTarget().name0);
+					return Environment.colors.get(union.target.name0);
 				}
 			}
 		};
@@ -449,6 +448,9 @@ public class Query implements Viewable<Query> {
 		return g2;
 	}
 	
+	/**
+	 * Implements composition at the semantic level
+	 */
 	public static 
 	<ObjS,ArrowS,ObjB,ArrowB,ObjA,ArrowA,ObjT,ArrowT,ObjD,ArrowD,ObjC,ArrowC,ObjU,ArrowU> 
 	SemQuery<Triple<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, Pair<Arr<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>>, Arr<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>>>, ObjS, ArrowS, Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjC, ArrowC>, ObjU, ArrowU> 
@@ -462,13 +464,13 @@ public class Query implements Viewable<Query> {
 		
 //		name = name;
 		
-		FinCat<ObjS, ArrowS> S = s.dstCat;
+	//	FinCat<ObjS, ArrowS> S = s.dstCat;
 		FinCat<ObjB, ArrowB> B = s.srcCat;
 		FinCat<ObjA, ArrowA> A = t.srcCat;
 		FinCat<ObjT, ArrowT> T = t.dstCat;
 		FinCat<ObjD, ArrowD> D = g.srcCat;
-		FinCat<ObjC, ArrowC> C = g.dstCat;
-		FinCat<ObjU, ArrowU> U = v.dstCat;
+		//FinCat<ObjC, ArrowC> C = g.dstCat;
+		//FinCat<ObjU, ArrowU> U = v.dstCat;
 				
 		Triple<FinCat<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>, FinFunctor<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>, ObjA, ArrowA>, FinFunctor<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>, ObjD, ArrowD>> 
 		  one = FDM.pullback(A, D, T, t, u);
@@ -480,8 +482,10 @@ public class Query implements Viewable<Query> {
 		
 		
 		CommaCat<ObjB, ArrowB, Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>, ObjA, ArrowA> Bprime = new CommaCat<>(B, Aprime, A, f, h);
-		FinFunctor<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, ObjB, ArrowB> m = Bprime.projA();
-		FinFunctor<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>> r = Bprime.projB();
+		FinFunctor<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, ObjB, ArrowB> 
+		m = Bprime.projA;
+		FinFunctor<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>> 
+		r = Bprime.projB;
 
 		Inst<ObjD, ArrowD, Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>> du = FDM.degrothendieck(k);
 		Inst<ObjC, ArrowC, Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>> piresult = FDM.pi(g, du);
@@ -499,7 +503,7 @@ public class Query implements Viewable<Query> {
 //		System.out.println(k.srcCat);
 //		System.out.println("integraldu's srcCat is");
 //		FinFunctor<Triple<ObjA, ObjD, ObjT>,                                              Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>, ObjD, ArrowD> kkk = one.third;
-	FinFunctor<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>,                                               ObjD, ArrowD> xxx = FDM.grothendieck(du);
+	//FinFunctor<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>,                                               ObjD, ArrowD> xxx = FDM.grothendieck(du);
 //		System.out.println(xxx.srcCat);
 //		System.out.println("deltapiu is");
 //		System.out.println(deltaresult);
@@ -518,7 +522,6 @@ public class Query implements Viewable<Query> {
 
 		Map<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Triple<ObjA, ObjD, ObjT>> pairToTripleBe1 = new HashMap<>();
 		for (Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>> c : e0.dstCat.objects) {
-			//System.out.println("must compute target for " + c);
 			if (!c.second.which.equals(VALUETYPE.CHOICE)) {
 				throw new RuntimeException("Bad target type " + c.second + " " + c.second.which);
 			}
@@ -526,9 +529,7 @@ public class Query implements Viewable<Query> {
 	}
 		Map<Arr<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>> 
 		pairToTripleBe2 = new HashMap<>();
-	//	System.out.println("target arrows are " + k.srcCat.arrows);
 		for (Arr<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>> c : e0.dstCat.arrows) {
-		//	System.out.println("must compute target for " + c);
 			Triple<ObjA, ObjD, ObjT> arrsrc = pairToTripleBe1.get(c.src);
 			Triple<ObjA, ObjD, ObjT> arrdst = pairToTripleBe1.get(c.dst);
 			for (Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>> cand : k.srcCat.hom(arrsrc, arrdst)) {
@@ -540,50 +541,22 @@ public class Query implements Viewable<Query> {
 				throw new RuntimeException("no candidate");
 			}
 		}
-//		
-//		FinCat<Pair<ObjD, String>, Arr<ObjD, ArrowD>> sss = e0.dstCat;
-//		
+
 		FinFunctor<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>, Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>> 
 		pairToTripleBe = 
 				new FinFunctor<>(pairToTripleBe1, pairToTripleBe2, e0.dstCat, k.srcCat);
-
-	  //FinFunctor<Pair<ObjD, String>, ArrowD, Pair<ObjD, String>, ArrowD> e0 = FDM.grothendieck(epsilonresult);
-	
 		
 		FinFunctor<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>, Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>> e
 				= FinFunctor.compose(e0, pairToTripleBe);
 
-//		System.out.println("^^^^epsilonresult is " + epsilonresult );
-//		System.out.println("^^^^e0 is " + e0 );
-//		System.out.println("^^^^pairToTripleBe is " + pairToTripleBe);
-//		System.out.println("^^^^e is " + e );
-
-		
-//		Map<Triple<ObjA, ObjD, ObjT>, Pair<ObjD, String>> tripleToPairBe1 = new HashMap<>();
-////		for (Triple<ObjA, ObjD, ObjT> c : k.srcCat.objects) {
-////			tripleToPairBe1.put(c, FDM.find(c.second, e0.srcCat.objects));
-////		}
-//		Map<Triple<ArrowA, ArrowD, ArrowT>, ArrowD> tripleToPairBe2 = new HashMap<>();
-////		for (Triple<ArrowA, ArrowD, ArrowT> c : k.srcCat.arrows) {
-////			tripleToPairBe2.put(c, c.second);
-////		}
-//		FinFunctor<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA,ArrowA>, Arr<ObjD,ArrowD>, Arr<ObjT,ArrowT>>, 
-//		           Pair<ObjD, String>, Arr<ObjD,ArrowD>> tripleToPairBe 
-//		= null;  //new FinFunctor<>(tripleToPairBe1, tripleToPairBe2, k.srcCat, e0.srcCat);
-////
-//		FinFunctor<Pair<ObjD, String>, Arr<ObjD, ArrowD>, Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>> e
-	//	= e0; //FinFunctor.compose(tripleToPairBe, e0);
-		
 		////////////////////////////////////
 		
 		CommaCat<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>, Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>> 
 		N = new CommaCat<>(Bprime, Dprime, Aprime, r, e);
 		FinFunctor<Triple<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, Pair<Arr<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>>, Arr<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>>>, Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>> 
-		n = N.projA();
+		n = N.projA;
 		FinFunctor<Triple<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, Pair<Arr<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>>, Arr<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>>>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>>
-		p = N.projB();
-//
-		//System.out.println("$$$$$$$$$$$$$$$ size of N " + N.objects.size());
+		p = N.projB;
 		
 		FinFunctor<Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjC, ArrowC>, ObjU, ArrowU> union = FinFunctor.compose(w, v);
 		
@@ -592,32 +565,16 @@ public class Query implements Viewable<Query> {
 		FinFunctor<Triple<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, Pair<Arr<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>>, Arr<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>>>, ObjS, ArrowS> project = FinFunctor.compose(FinFunctor.compose(n,m),s);
 				
 		SemQuery<Triple<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, Pair<Arr<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>>, Arr<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>>>, ObjS, ArrowS, Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjC, ArrowC>, ObjU, ArrowU> ret = new SemQuery<>(project, join, union);
-		
-//		env.signatures.put("Aprime", Aprime.toSig("Aprime").first);
-//		env.signatures.put("Bprime", Bprime.toSig("Bprime").first);
-//		env.signatures.put("N", N.toSig("Nprime").first);
-//		env.signatures.put("Dprime", Dprime.toSig("Dprime").first);
-//		env.signatures.put("M", M.toSig("MMM").first);
 
+		if (DEBUG.VALIDATE) {
+			env.signatures.put("Aprime", Aprime.toSig("Aprime").first);
+			env.signatures.put("Bprime", Bprime.toSig("Bprime").first);
+			env.signatures.put("N", N.toSig("Nprime").first);
+			env.signatures.put("Dprime", Dprime.toSig("Dprime").first);
+			env.signatures.put("M", M.toSig("MMM").first);
+		}
 		
 		return ret;
-//		
-		
-//		return null;
-//		System.out.println("m1 is " + m1);
-//		System.out.println("m2 is " + m2);
-//		
-//		Triple<Mapping, Triple<Signature, Pair<Map<Triple<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, ArrowA>, Pair<ObjD, String>, Triple<ArrowA, ArrowD, ArrowT>>, String>, Map<String, Triple<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, ArrowA>, Pair<ObjD, String>, Triple<ArrowA, ArrowD, ArrowT>>>>, Pair<Map<Pair<Pair<ArrowB, Triple<ArrowA, ArrowD, ArrowT>>, ArrowD>, String>, Map<String, Pair<Pair<ArrowB, Triple<ArrowA, ArrowD, ArrowT>>, ArrowD>>>>, Triple<Signature, Pair<Map<ObjS, String>, Map<String, ObjS>>, Pair<Map<ArrowS, String>, Map<String, ArrowS>>>> xxx = project.toMapping(name + "_delta", name + "_S", name + "_B");
-//		
-//		List<Pair<String, String>> xxx1 = new LinkedList<>();
-////		for (Node xxxS : ssig.nodes) {
-////			xxx1.put(xxxS.string, xxx.second.third.second.get(m1.get(xxxS.string)));
-////		}
-//		List<Pair<String, List<String>>> xxx2 = new LinkedList<>();
-//		
-//		Mapping iso1 = new Mapping(name + "_delta", ssig, xxx.second.first, xxx1, xxx2);
-//		
-//		return new Query(name, env, xxx.first, ret.join.toMapping(name + "_pi", name + "_S", name + "_A" ).first, ret.union.toMapping(name + "_sigma", name + "_A", name + "_T").first);		
 	}
 	
 	static <ObjD,ArrowD,ObjA,ArrowA,ObjT,ArrowT> Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>
@@ -631,7 +588,9 @@ public class Query implements Viewable<Query> {
 		throw new RuntimeException("Couldn't find " + c + " in " + sss);
 	}
 
-	
+	/**
+	 * Implements composition at a syntactic level, adding to the environment.
+	 */
 	public static Query compose(Environment env, String name, Query q2, Query q1) throws FQLException {
 		Mapping s0 = q1.project;
 		Mapping f0 = q1.join;
@@ -663,46 +622,21 @@ public class Query implements Viewable<Query> {
 		env.signatures.put(name + "_A", join1.third.first);
 		env.mappings.put(name + "_pi", join1.first);
 		
-//		System.out.println("Have " + proj1.first.getTarget());
-//		System.out.println("Want " + q1.getSource());
-//		System.out.println("Map 1" + isoS.second.second.first);
-//		System.out.println("Map 2" + isoS.second.second.second);
-//		System.out.println("Map 3" + isoS.third.second.first);
-//		System.out.println("Map 4" + isoS.third.second.second);
-//		System.out.println("Map 5" + proj1.second.second.first);
-//		System.out.println("Map 6" + proj1.second.second.second);
-//		System.out.println("Map 7" + proj1.second.third.first);
-//		System.out.println("Map 8" + proj1.second.third.second);
-//		System.out.println("Map 9" + proj1.third.second.first);
-//		System.out.println("Map 10" + proj1.third.second.second);
-//		System.out.println("Map 11" + proj1.third.third.first);
-//		System.out.println("Map 12" + proj1.third.third.second);
-//		
 		Map<String, String> map1 =  proj1.third.second.second;
 		Map<String, String> map2 = isoS.third.second.first.first;
 		List<Pair<String,String>> xxx = new LinkedList<>();
 		List<Pair<String, List<String>>> yyy = new LinkedList<>();
-		for (Node n : proj1.first.getTarget().nodes) {
-//			System.out.println(n.string);
-//			System.out.println(map1);
-//			System.out.println(map2);
+		for (Node n : proj1.first.target.nodes) {
 			String x1 = map1.get(n.string);
 			String x2 =  map2.get(x1);
-//			System.out.println(x1);
-//			System.out.println(x2);
 			xxx.add(new Pair<>(n.string, x2));
 		}
 
 		Map<String, Arr<String, List<List<String>>>> mapA =  proj1.third.third.second;
 		Map<Arr<String, List<List<String>>>, String> mapB = isoS.third.second.second.second;
-		for (Edge e : proj1.first.getTarget().edges) {
-//			System.out.println(e.name);
-//			System.out.println(map1);
-//			System.out.println(map2);
+		for (Edge e : proj1.first.target.edges) {
 			Arr<String, List<List<String>>> x1 = mapA.get(e.name);
 			String x2 =  mapB.get(x1);
-//			System.out.println(x1);
-//			System.out.println(x2);
 			List<String> yyy2 = new LinkedList<>();
 			yyy2.add(x1.src);
 			if (!isoS.second.first.isId(x1)) {
@@ -711,53 +645,26 @@ public class Query implements Viewable<Query> {
 			yyy.add(new Pair<>(e.name, yyy2));
 		}
 		
-	//	System.out.println(xxx);
-		Mapping xyz = new Mapping(name + "iso1",proj1.first.getTarget(), q1.getSource(),  xxx, yyy);
+		Mapping xyz = new Mapping(name + "iso1",proj1.first.target, q1.getSource(),  xxx, yyy);
 		
 		Mapping newproj = Mapping.compose(name + "_delta", proj1.first, xyz);
 		env.mappings.put(name + "_delta", newproj);
 
-//		System.out.println("Have " + union1.first.getTarget());
-//		System.out.println("Want " + q2.getTarget());
-//		System.out.println("Map 1" + isoT.second.second.first);
-//		System.out.println("Map 2" + isoT.second.second.second);
-//		System.out.println("Map 3" + isoT.third.second.first);
-//		System.out.println("Map 4" + isoT.third.second.second);
-//		System.out.println("Map 5" + union1.second.second.first);
-//		System.out.println("Map 6" + union1.second.second.second);
-//		System.out.println("Map 7" + union1.second.third.first);
-//		System.out.println("Map 8" + union1.second.third.second);
-//		System.out.println("Map 9" + union1.third.second.first);
-//		System.out.println("Map 10" + union1.third.second.second);
-//		System.out.println("Map 11" + union1.third.third.first);
-//		System.out.println("Map 12" + union1.third.third.second);
-//		
 		map1 =  union1.third.second.second;
 		map2 = isoT.third.second.first.first;
 		xxx = new LinkedList<>();
 		yyy = new LinkedList<>();
-		for (Node n : union1.first.getTarget().nodes) {
-//			System.out.println(n.string);
-//			System.out.println(map1);
-//			System.out.println(map2);
+		for (Node n : union1.first.target.nodes) {
 			String x1 = map1.get(n.string);
 			String x2 =  map2.get(x1);
-//			System.out.println(x1);
-//			System.out.println(x2);
 			xxx.add(new Pair<>(n.string, x2));
 		}
-	//	System.out.println(xxx);
 		
 		mapA =  union1.third.third.second;
 		mapB = isoT.third.second.second.second;
-		for (Edge e : union1.first.getTarget().edges) {
-//			System.out.println(e.name);
-//			System.out.println(map1);
-//			System.out.println(map2);
+		for (Edge e : union1.first.target.edges) {
 			Arr<String, List<List<String>>> x1 = mapA.get(e.name);
 			String x2 =  mapB.get(x1);
-//			System.out.println(x1);
-//			System.out.println(x2);
 			List<String> yyy2 = new LinkedList<>();
 			yyy2.add(x1.src);
 			if (!isoS.second.first.isId(x1)) {
@@ -765,14 +672,12 @@ public class Query implements Viewable<Query> {
 			}
 			yyy.add(new Pair<>(e.name, yyy2));
 		}
-		xyz = new Mapping(name + "iso2",union1.first.getTarget(), q2.getTarget(),  xxx, yyy);
+		xyz = new Mapping(name + "iso2",union1.first.target, q2.getTarget(),  xxx, yyy);
 		
 		Mapping newunion = Mapping.compose(name + "_sigma", union1.first, xyz);
 		env.mappings.put(name + "_sigma", newunion);
 		
-		//	System.out.println(ret);
-
-		return new Query(name, env, newproj, join1.first, newunion);		
+		return new Query(name, newproj, join1.first, newunion);		
 
 	}
 	

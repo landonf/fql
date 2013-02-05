@@ -1,9 +1,13 @@
 package fql;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Syntax for disjoint union as an RA operation.  Takes 2n tags for n tables.
+ */
 public class DisjointUnion extends RA {
 
 	public List<String> tags;
@@ -15,12 +19,6 @@ public class DisjointUnion extends RA {
 		this.tags = tags;
 	}
 	
-	static Set<String> exec1(Object a, Object b) {
-		return null;
-	}
-	static Map<String, String> exec2(Object a, Object b) {
-		return null;
-	}
 	
 	@Override
 	public String toString() {

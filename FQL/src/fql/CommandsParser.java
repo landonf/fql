@@ -9,6 +9,12 @@ import fql.parse.ParserUtils;
 import fql.parse.Partial;
 import fql.parse.Tokens;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Parser for a list of commands.
+ */
 public class CommandsParser implements Parser<Commands> {
 
 	@Override

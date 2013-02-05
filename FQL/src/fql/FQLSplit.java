@@ -3,6 +3,10 @@ package fql;
 import javax.swing.JSplitPane;
 
 @SuppressWarnings("serial")
+/**
+ * @author ryan
+ * A split panel, but doesn't work well.
+ */
 public class FQLSplit extends JSplitPane {
 
 	double bias;

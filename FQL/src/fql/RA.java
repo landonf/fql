@@ -8,19 +8,24 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Syntax for RA, and query generation.
+ */
 public abstract class RA {
 
-	// forms a binary reflexive table from an n-ary table with an id column 0
+	/** Forms a binary reflexive table from an n-ary table with an id column 0 */
 	public static RA squish(RA e) {
 		return new Project(e, new int[] { 0, 1 });
 	}
 
-	// public static int GUID = 0;
-
-	static int count = 0;
+	/**
+	 * Evaluates an RA expression on an instance.
+	 */
 	public static Set<String[]> eval(RA e, Map<String, Set<String[]>> inst)
 			throws FQLException {
-		// System.out.println("Eval " + e);
 		if (e instanceof Keygen) {
 			Keygen k = (Keygen) e;
 			Set<String[]> i = eval(k.e, inst);
@@ -29,7 +34,7 @@ public abstract class RA {
 			//int count = 0;
 			for (String[] tuple : i) {
 				String[] newtuple = new String[tuple.length + 2];
-				newtuple[0] = makeKey(tuple); //Integer.toString(count++);
+				newtuple[0] = makeKey(tuple); 
 				newtuple[1] = newtuple[0];
 				for (int j = 1; j <= tuple.length; j++) {
 					newtuple[j + 1] = tuple[j - 1];
@@ -118,7 +123,7 @@ public abstract class RA {
 		throw new FQLException("Unknown RA " + e);
 	}
 
-	static String makeKey(String[] tuple) {
+	private static String makeKey(String[] tuple) {
 		if (tuple.length == 1) {
 			return tuple[0];
 		}
@@ -129,6 +134,9 @@ public abstract class RA {
 		return ret;
 	}
 
+	/**
+	 * Adds tags to the tuples in a binary relation
+	 */
 	private static Set<String[]> tag(Set<String[]> ix, String i, String k) throws FQLException {
 		Set<String[]> ret = new HashSet<String[]>();
 		for (String[] s : ix) {
@@ -143,12 +151,7 @@ public abstract class RA {
 		return ret;
 	}
 
-	// static String[] makeGuid() {
-	// String s = "_" + GUID;
-	// return new String[] { s };
-	// }
-
-	static String[] mergeTuple(String[] t1, String[] t2) {
+	private static String[] mergeTuple(String[] t1, String[] t2) {
 		String[] ret = new String[t1.length + t2.length];
 		for (int i = 0; i < t1.length; i++) {
 			ret[i] = t1[i];
@@ -160,7 +163,12 @@ public abstract class RA {
 		return ret;
 	}
 
-	static Map<String, Set<String[]>> test0() {
+	/**
+	 * A private test instances for pi
+	 * @return
+	 */
+	@SuppressWarnings("unused")
+	private static Map<String, Set<String[]>> test0() {
 		Map<String, Set<String[]>> ret = new HashMap<String, Set<String[]>>();
 
 		Set<String[]> C1 = new HashSet<String[]>();
@@ -181,8 +189,11 @@ public abstract class RA {
 		return ret;
 	}
 	
-	
-	public static  <Arrow> Pair<RA, String[]> lim(CommaCat<String, List<List<String>>, String, List<List<String>>, String, List<List<String>>> b,
+	/**
+	 * Limit as join all.  Compare to FDM.lim
+	 */
+	public static  <Arrow> Pair<RA, String[]> 
+	lim(CommaCat<String, List<List<String>>, String, List<List<String>>, String, List<List<String>>> b,
 			Map<Triple<String, String, Arr<String, List<List<String>>>>, RA> q1, Map<Pair<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>, RA> map) throws FQLException {
 		// System.out.println("Taking limit for " + B);
 		RA x0 = null;
@@ -256,7 +267,8 @@ public abstract class RA {
 		return ret;
 	}
 
-	 private static void printNicely(Set<String[]> eval) {
+	 @SuppressWarnings("unused")
+	private static void printNicely(Set<String[]> eval) {
 		 for (String[] s : eval) {
 			 for (String x : s) {
 				 System.out.print(x + " ");
@@ -265,40 +277,6 @@ public abstract class RA {
 		 }
 	 }
 
-//	public static RA lim(Signature B) throws FQLException {
-//		RA x0 = null;
-//		int m = B.nodes.size();
-//		String[] cnames = new String[m];
-//		int temp = 0;
-//
-//		if (m == 0) {
-//			x0 = new SingletonRA();
-//		} else {
-//			for (Node n : B.nodes) {
-//				if (x0 == null) {
-//					x0 = new Relvar(n.string);
-//				} else {
-//					x0 = new Product(x0, new Relvar(n.string));
-//				}
-//				x0 = new Project(x0, new int[] { 0 });
-//				cnames[temp++] = n.string;
-//			}
-//		}
-//
-//		int[] cols = new int[m];
-//		for (int i = 0; i < m; i++) {
-//			cols[i] = i;
-//		}
-//
-//		for (Edge e : B.edges) {
-//			x0 = new Product(x0, new Relvar(e.name));
-//			x0 = new Select(x0, m, cnamelkp(cnames, e.source.string));
-//			x0 = new Select(x0, m + 1, cnamelkp(cnames, e.target.string));
-//			x0 = new Project(x0, cols);
-//		}
-//
-//		return x0;
-//	}
 
 	private static <Obj> int cnamelkp(Obj[] cnames, Obj s) throws FQLException {
 		for (int i = 0; i < cnames.length; i++) {
@@ -311,7 +289,9 @@ public abstract class RA {
 	}
 
 	
-	
+	/**
+	 * Query generation for sigma.
+	 */
 	public static Map<String, RA> sigma(Mapping F) throws FQLException {
 		Signature C = F.source;
 		Signature D = F.target;
@@ -330,7 +310,6 @@ public abstract class RA {
 			}
 			ret.put(d.string, new DisjointUnion(tn, tj));
 			tags.put(d, tj);
-//			System.out.println("on " + d + " tags " + tj.toString());
 		}
 
 		for (Edge e : D.edges) {
@@ -340,26 +319,10 @@ public abstract class RA {
 			List<String> tx = new LinkedList<String>();
 			for (Node c : C.nodes) {
 				if (F.nm.get(c).equals(d)) {
-					Path pc = findEquiv(c, F, e);
-					//System.out.println("path is " + pc);
-
-					//System.out.println("in " + e + " c is " + c + " mapped " + tags.get(c));
-					//System.out.println("in " + e + " d is " + F.nm.get + " mapped " + tags.get(c));
-					
-//					System.out.println("zzzz " + pc.target);
-					
+					Path pc = findEquiv(c, F, e);					
 					RA q = compose(pc);
 					tn.add(q);
 					tx.add(c.string);
-					tx.add(pc.target.string);
-//					tx.add(new Integer(tags.get(d).indexOf(c.string)).toString());
-	//				System.out.println("tags get d is " + tags.get(d) + " d is " + d + " c is " + c + " indexof " + tags.get(d).indexOf(c) + " contains " + tags.get(d).contains(c));
-//					List<String> s = tags.get(pc.source);
-//					List<String> t = tags.get(pc.target);
-//					System.out.println("in " + e + " src " + pc.source + " srctags " + s + " dst " + pc.target + " dsttags " + t);
-
-//					tx.add();
-	//				tx.add(tags.get(pc.target));
 				}
 			}
 			ret.put(e.name, new DisjointUnion(tn, tx));
@@ -400,9 +363,10 @@ public abstract class RA {
 		throw new RuntimeException("eqpath cannot find " + p1 + " and " + p2
 				+ " in " + c);
 	}
-	
-	
 
+	/**
+	 * Query generation for pi
+	 */
 	public static Map<String, RA> pi(Mapping F0) throws FQLException {
 		Signature D0 = F0.target;
 		Signature C0 = F0.source;
@@ -412,11 +376,11 @@ public abstract class RA {
 				.toFunctor().first;
 		Map<String, RA> ret = new HashMap<String, RA>();
 
-		for (String d0 : D.objects()) {
+		for (String d0 : D.objects) {
 			CommaCat<String, List<List<String>>, String, List<List<String>>, String, List<List<String>>> B = doComma(
 					D, C, F, d0);
 
-			RA r = lim(B, deltaObj(B.projB()), deltaArr(B.projB())).first;
+			RA r = lim(B, deltaObj(B.projB), deltaArr(B.projB)).first;
 			ret.put(d0, squish(r));
 		}
 
@@ -425,31 +389,14 @@ public abstract class RA {
 			CommaCat<String, List<List<String>>, String, List<List<String>>, String, List<List<String>>> BA = doComma(
 					D, C, F, dA);
 			Pair<RA, String[]> q1 = lim(BA,
-					deltaObj(BA.projB()), deltaArr(BA.projB()));
+					deltaObj(BA.projB), deltaArr(BA.projB));
 
 			String dB = s.target.string;
 			CommaCat<String, List<List<String>>, String, List<List<String>>, String, List<List<String>>> BB = doComma(
 					D, C, F, dB);
 			Pair<RA, String[]> q2 = lim(BB,
-					deltaObj(BB.projB()), deltaArr(BB.projB()));
+					deltaObj(BB.projB), deltaArr(BB.projB));
 			
-//			System.out.println("----------------");
-//			System.out.println("cols for q2");
-//			System.out.println(printNice(q2.second));
-//			System.out.println("cols for q1");
-//			System.out.println(printNice(q1.second));			
-//			System.out.println("----------------");
-
-//			System.out.println("Testing q2 ");
-//			System.out.println("Query is " + q2.first);
-//			printNicely(eval(q2.first, test0()));
-//			System.out.println("end test");
-////
-//			System.out.println("Testing q1 ");
-//			System.out.println("Query is " + q1.first);
-//			printNicely(eval(q1.first, test0()));
-//			System.out.println("end test");
-//			
 			RA rau = chop1(q2.second.length, q2.first);
 			RA rav = chop1(q1.second.length, q1.first);
 			RA raw = new Product(rau, rav);
@@ -500,22 +447,22 @@ public abstract class RA {
 		return q1q2;
 	}
 
-	//save
-//	private static String printNice(
-//			Triple<String, String, List<List<String>>>[] x) {
-//		String s = "";
-//		for (Triple<String, String, List<List<String>>> y : x) {
-//			String sx = "(" + y.first + ", " + y.second + ", [";
-//			for (List<String> a : y.third) {
-//				for (String b : a) {
-//					sx += (b + " , ");
-//				}
-//			}
-//			sx += "])";
-//			s += sx;
-//		}
-//		return s;
-//	}
+	@SuppressWarnings("unused")
+	private static String printNice(
+			Triple<String, String, List<List<String>>>[] x) {
+		String s = "";
+		for (Triple<String, String, List<List<String>>> y : x) {
+			String sx = "(" + y.first + ", " + y.second + ", [";
+			for (List<String> a : y.third) {
+				for (String b : a) {
+					sx += (b + " , ");
+				}
+			}
+			sx += "])";
+			s += sx;
+		}
+		return s;
+	}
 
 	private static RA chop1(int n, RA r) {
 		int[] cols = new int[n + 1];
@@ -525,8 +472,9 @@ public abstract class RA {
 		return new Project(r, cols);
 	}
 	
-	
-
+	/**
+	 * wrapper for comma categories
+	 */
 	private static CommaCat<String, List<List<String>>, String, List<List<String>>, String, List<List<String>>> doComma(
 			FinCat<String, List<List<String>>> D,
 			FinCat<String, List<List<String>>> C,
@@ -543,6 +491,9 @@ public abstract class RA {
 		return B;
 	}
 
+	/**
+	 * Query generation for delta.
+	 */
 	public static Map<String, RA> delta(Mapping m) {
 		Map<String, RA> ret = new HashMap<String, RA>();
 		for (Entry<Node, Node> n : m.nm.entrySet()) {
@@ -554,8 +505,9 @@ public abstract class RA {
 		return ret;
 	}
 
-	// these bastardized versions of delta only works in support of pi
-	public static Map<Triple<String, String, Arr<String, List<List<String>>>>, RA> deltaObj(
+	/** these bastardized versions of delta only works in support of pi
+	 */
+	private static Map<Triple<String, String, Arr<String, List<List<String>>>>, RA> deltaObj(
 			FinFunctor<Triple<String, String, Arr<String, List<List<String>>>>, Pair<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>, String, List<List<String>>> finFunctor) {
 		Map<Triple<String, String, Arr<String, List<List<String>>>>, RA> ret = new HashMap<>();
 		for (Entry<Triple<String, String, Arr<String, List<List<String>>>>, String> p : finFunctor.objMapping
@@ -565,7 +517,9 @@ public abstract class RA {
 		return ret;
 	}
 
-	public static Map<Pair<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>, RA> deltaArr(
+	/** these bastardized versions of delta only works in support of pi
+	 */
+	private static Map<Pair<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>, RA> deltaArr(
 			FinFunctor<Triple<String, String, Arr<String, List<List<String>>>>, Pair<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>, String, List<List<String>>> finFunctor) {
 		Map<Pair<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>, RA> ret = new HashMap<>();
 		for (Entry<Arr<Triple<String, String, Arr<String, List<List<String>>>>, Pair<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>>, Arr<String, List<List<String>>>> p : finFunctor.arrowMapping.entrySet()) {
@@ -576,7 +530,7 @@ public abstract class RA {
 		return ret;
 	}
 
-	static RA compose(List<String> p) {
+	private static RA compose(List<String> p) {
 		RA r = new Relvar(p.get(0));
 		for (int i = 1; i < p.size(); i++) {
 			r = compose(r, new Relvar(p.get(i)));
@@ -584,7 +538,7 @@ public abstract class RA {
 		return r;
 	}
 
-	static RA compose(RA a, RA b) {
+	private static RA compose(RA a, RA b) {
 		RA c = new Product(a, b);
 		RA d = new Select(c, 1, 2);
 		return new Project(d, new int[] { 0, 3 });
@@ -598,6 +552,9 @@ public abstract class RA {
 		return r;
 	}
 
+	/**
+	 * Wrapper for evaluation.
+	 */
 	public static Map<String, Set<String[]>> eval0(Map<String, RA> ras,
 			Map<String, Set<String[]>> i) throws FQLException {
 		Map<String, Set<String[]>> ret = new HashMap<String, Set<String[]>>();

@@ -1,5 +1,11 @@
 package fql;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Command to enumerate homomorphisms.
+ */
 public class HomosCommand extends Command {
 
 	String lhs, rhs;

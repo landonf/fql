@@ -6,6 +6,12 @@ import fql.parse.Parser;
 import fql.parse.Partial;
 import fql.parse.Tokens;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Parser for various kinds of instances.
+ */
 public class InstanceDeclParser implements Parser<Decl> {
 
 	@Override

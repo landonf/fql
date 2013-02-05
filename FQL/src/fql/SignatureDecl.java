@@ -3,6 +3,12 @@ package fql;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Declarations for signatures.
+ */
 public class SignatureDecl extends Decl {
 
 	@Override

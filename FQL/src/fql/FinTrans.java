@@ -2,18 +2,28 @@ package fql;
 
 import java.util.Map;
 
+/** 
+ * @author ryan
+ * Implementation of finite natural transformations.
+ */
 public class FinTrans<Obj1, Arrow1, Obj2, Arrow2> {
 
 	Map<Obj1, Arr<Obj2, Arrow2>> eta;
 	FinFunctor<Obj1, Arrow1, Obj2, Arrow2> F, G;
 	
+	/**
+	 * Construct a new natural transformation.
+	 * Does not copy inputs.
+	 */
 	public FinTrans(Map<Obj1, Arr<Obj2,Arrow2>> eta,
 			FinFunctor<Obj1, Arrow1, Obj2, Arrow2> F,
 			FinFunctor<Obj1, Arrow1, Obj2, Arrow2> G) {
 		this.eta = eta;
 		this.F = F;
 		this.G = G;
-		validate();
+		if (DEBUG.VALIDATE) {
+			validate();
+		}
 	}
 	
 	public Arr<Obj2,Arrow2> eta(Obj1 X) {
@@ -35,7 +45,6 @@ public class FinTrans<Obj1, Arrow1, Obj2, Arrow2> {
 			}
 		}
 		
-//	    \eta_Y \circ F(f) = G(f) \circ \eta_X 
 	}
 	
 	public boolean equals() {
@@ -44,7 +53,7 @@ public class FinTrans<Obj1, Arrow1, Obj2, Arrow2> {
 
 	@Override
 	public String toString() {
-		return "FinTrans [eta=" + eta + "]";
+		return "FinTrans [eta=\n" + eta + "]";
 	}
 	
 	

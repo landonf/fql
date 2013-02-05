@@ -11,6 +11,12 @@ import fql.parse.Partial;
 import fql.parse.StringParser;
 import fql.parse.Tokens;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Parser for the data part of instance declarations.
+ */
 public class TableDeclParser implements
 		Parser<Pair<String, List<Pair<String, String>>>> {
 

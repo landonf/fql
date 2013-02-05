@@ -3,6 +3,12 @@ package fql;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Natural transformations, specialized to finite sets.
+ */
 public class SetFunTrans <Obj, Arrow, Y, X> {
 
 		Map<Obj, Map<Value<Y,X>, Value<Y,X>>> eta;
@@ -34,8 +40,6 @@ public class SetFunTrans <Obj, Arrow, Y, X> {
 							+"\n\nF(f) is " + F.applyA(f) + "\n\neta(F(f)) is " + eta(f.dst) + "\n\neta(G(f)) is " + eta(f.src) + "\n\nG(f) is " + G.applyA(f));
 				}
 			}
-			
-//		    \eta_Y \circ F(f) = G(f) \circ \eta_X 
 		}
 		
 		private Map<Value<Y,X>, Value<Y,X>> compose(Map<Value<Y,X>, Value<Y,X>> f,
@@ -55,7 +59,6 @@ public class SetFunTrans <Obj, Arrow, Y, X> {
 		public String toString() {
 			return "SetFunTrans [eta=" + eta + "]";
 		}
-		
 		
 
 	}

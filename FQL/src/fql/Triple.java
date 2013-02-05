@@ -1,5 +1,15 @@
 package fql;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Triples
+ *
+ * @param <S1>
+ * @param <S2>
+ * @param <S3>
+ */
 public class Triple<S1, S2, S3> {
 
 	public Triple(S1 a, S2 b, S3 c) {

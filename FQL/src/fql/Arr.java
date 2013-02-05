@@ -1,11 +1,18 @@
 package fql;
 
 
+/**
+ * 
+ * @author ryan
+ *
+ * @param <Obj> type of source and target objects
+ * @param <Arrow> type of the arrow data
+ */
 public class Arr<Obj,Arrow> {
 
 		@Override
 	public String toString() {
-		return "(" + arr + " : " + src + " -> " + dst + ")";
+		return arr.toString(); //"(" + arr + " : " + src + " -> " + dst + ")";
 	}
 		Arrow arr;
 		Obj src;
@@ -19,7 +26,12 @@ public class Arr<Obj,Arrow> {
 		}
 		@Override
 		public int hashCode() {
-			return 0;
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((arr == null) ? 0 : arr.hashCode());
+			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
+			result = prime * result + ((src == null) ? 0 : src.hashCode());
+			return result;
 		}
 		@Override
 		public boolean equals(Object obj) {
@@ -29,6 +41,7 @@ public class Arr<Obj,Arrow> {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
+			@SuppressWarnings("rawtypes")
 			Arr other = (Arr) obj;
 			if (arr == null) {
 				if (other.arr != null)

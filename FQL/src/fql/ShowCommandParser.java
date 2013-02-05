@@ -8,6 +8,12 @@ import fql.parse.Partial;
 import fql.parse.StringParser;
 import fql.parse.Tokens;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Parser for show commands.
+ */
 public class ShowCommandParser implements Parser<Command> {
 
 	@Override

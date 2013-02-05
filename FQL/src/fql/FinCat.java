@@ -7,80 +7,53 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * @author ryan
+ *
+ * Implementation of finite categories.
+ * 
+ * @param <Obj> type of objects
+ * @param <Arrow> type of arrows
+ */
 public class FinCat<Obj, Arrow>  {
-
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		FinCat other = (FinCat) obj;
-		if (arrows == null) {
-			if (other.arrows != null)
-				return false;
-		} else if (!arrows.equals(other.arrows))
-			return false;
-		if (composition == null) {
-			if (other.composition != null)
-				return false;
-		} else if (!composition.equals(other.composition))
-			return false;
-		if (identities == null) {
-			if (other.identities != null)
-				return false;
-		} else if (!identities.equals(other.identities))
-			return false;
-		if (objects == null) {
-			if (other.objects != null)
-				return false;
-		} else if (!objects.equals(other.objects))
-			return false;
-		return true;
-	}
-
 
 	List<Obj> objects = new LinkedList<>();
 	List<Arr<Obj,Arrow>> arrows = new LinkedList<>();
-//	Map<Arr<Obj,Arrow>, Obj> src = new HashMap<>();
-//	Map<Arr<Obj,Arrow>, Obj> dst = new HashMap<>();
 	Map<Pair<Arr<Obj,Arrow>, Arr<Obj,Arrow>>, Arr<Obj,Arrow>> composition = new HashMap<>();
 	Map<Obj, Arr<Obj,Arrow>> identities = new HashMap<>();
 
-//	public Map<Obj, Arr<Obj,Arrow>> identities() {
-//		return identities;
-//	}
-	
-	//empty category
+	/**
+	 * Empty Category
+	 */
 	public FinCat() { }
 	
-	//singleton category
+	/**
+	 * Singleton category
+	 * @param o the object
+	 * @param a the identity arrow
+	 */
 	public FinCat(Obj o, Arr<Obj,Arrow> a) {
 		objects.add(o);
 		arrows.add(a);
-//		src.put(a, o);
-//		dst.put(a, o);
 		composition.put(new Pair<>(a,a), a);
 		identities.put(o, a);
 	}
 	
-	//does not copy inputs
+	/**
+	 * Creates a new category, does not copy inputs.
+	 */
 	public FinCat(List<Obj> objects, List<Arr<Obj,Arrow>> arrows, Map<Pair<Arr<Obj,Arrow>, Arr<Obj,Arrow>>, Arr<Obj,Arrow>> composition,
 			Map<Obj, Arr<Obj,Arrow>> identities) {
 		noDupes(objects);
 		noDupes(arrows);
 		this.objects = objects;
 		this.arrows = arrows;
-//		this.src = src;
-//		this.dst = dst;
 		this.composition = composition;
 		this.identities = identities;
-		validate();
+		if (DEBUG.VALIDATE) {
+			validate();
+		}
 	}
-
 
 	private <X> void noDupes(List<X> X) {
 		Set<X> x = new HashSet<X>(X);
@@ -147,34 +120,6 @@ public class FinCat<Obj, Arrow>  {
 		
 	}
 
-
-	@Override
-	public String toString() {
-		return "FinCat [objects=" + objects + "\n\narrows=" + arrows + "\n\ncomposition=" + composition
-				+ "\n\nidentities=" + identities + "]";
-	}
-
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((arrows == null) ? 0 : arrows.hashCode());
-		result = prime * result
-				+ ((composition == null) ? 0 : composition.hashCode());
-		result = prime * result
-				+ ((identities == null) ? 0 : identities.hashCode());
-		result = prime * result + ((objects == null) ? 0 : objects.hashCode());
-		return result;
-	}
-
-	
-
-	public List<Obj> objects() {
-		return objects;
-	}
-
-
 	public Arr<Obj,Arrow> id(Obj o) {
 		return identities.get(o);
 	}
@@ -197,13 +142,14 @@ public class FinCat<Obj, Arrow>  {
 		return identities.containsValue(a);
 	}
 	
-
-	static int idx = 0;
+	/**
+	 * Converts a category to a signature.  
+	 * @param n the "name" of the signature
+	 * @return a signature and isomorphism
+	 * @throws FQLException
+	 */
 	public Triple<Signature, Pair<Map<Obj, String>, Map<String, Obj>>, Pair<Map<Arr<Obj, Arrow>, String>, Map<String, Arr<Obj, Arrow>>>> 
 	toSig(String n) throws FQLException {
-		//Map<Arrow, String> ret1 = new HashMap<>();
-
-//		String n = "tempCat" + idx++;
 		
 		int i = 0;
 		Map<String, Obj> objM = new HashMap<>();
@@ -270,5 +216,62 @@ public class FinCat<Obj, Arrow>  {
 		
 		return ret;
 	}
+	
+
+
+	@Override
+	public String toString() {
+		return "FinCat [objects=" + objects + "\n\narrows=" + arrows + "\n\ncomposition=" + composition
+				+ "\n\nidentities=" + identities + "]";
+	}
+
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((arrows == null) ? 0 : arrows.hashCode());
+		result = prime * result
+				+ ((composition == null) ? 0 : composition.hashCode());
+		result = prime * result
+				+ ((identities == null) ? 0 : identities.hashCode());
+		result = prime * result + ((objects == null) ? 0 : objects.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		@SuppressWarnings("rawtypes")
+		FinCat other = (FinCat) obj;
+		if (arrows == null) {
+			if (other.arrows != null)
+				return false;
+		} else if (!arrows.equals(other.arrows))
+			return false;
+		if (composition == null) {
+			if (other.composition != null)
+				return false;
+		} else if (!composition.equals(other.composition))
+			return false;
+		if (identities == null) {
+			if (other.identities != null)
+				return false;
+		} else if (!identities.equals(other.identities))
+			return false;
+		if (objects == null) {
+			if (other.objects != null)
+				return false;
+		} else if (!objects.equals(other.objects))
+			return false;
+		return true;
+	}
+
+	
 	
 	}

@@ -155,30 +155,30 @@ public class Instance implements Viewable<Instance> {
 	public Instance(String name, Mapping m, Instance i, String type)
 			throws FQLException {
 		if (type.equals("delta")) {
-			if (!m.getTarget().equals0(i.thesig)) {
+			if (!m.target.equals0(i.thesig)) {
 				throw new FQLException("Incompatible types. Expected "
-						+ m.getTarget() + " received " + i.thesig);
+						+ m.target + " received " + i.thesig);
 			}
-			thesig = m.getSource();
+			thesig = m.source;
 			data = m.evalDelta(i);
 			conformsTo(thesig);
 
 		} else if (type.equals("sigma")) {
-			if (!m.getSource().equals0(i.thesig)) {
+			if (!m.source.equals0(i.thesig)) {
 				throw new FQLException("Incompatible types. Expected "
-						+ m.getSource() + " received " + i.thesig);
+						+ m.source + " received " + i.thesig);
 			}
-			thesig = m.getTarget();
+			thesig = m.target;
 			data = m.evalSigma(i);
 
 			conformsTo(thesig);
 
 		} else if (type.equals("pi")) {
-			if (!m.getSource().equals0(i.thesig)) {
+			if (!m.source.equals0(i.thesig)) {
 				throw new FQLException("Incompatible types. Expected "
-						+ m.getSource() + " received " + i.thesig);
+						+ m.source + " received " + i.thesig);
 			}
-			thesig = m.getTarget();
+			thesig = m.target;
 			data = m.evalPi(i);
 			conformsTo(thesig);
 
@@ -360,8 +360,6 @@ public class Instance implements Viewable<Instance> {
 		// }
 	}
 
-	// public Instance
-
 	// TODO isHomo
 	public static boolean isHomo(Map<String, Map<String, String>> subst) {
 		return false;
@@ -474,14 +472,7 @@ public class Instance implements Viewable<Instance> {
 		return vv;
 	}
 
-	static List<Map<String, Map<String, String>>> homos(Instance a, Instance b) {
-
-		// table name -> all substitutions
-		Map<String, List<Map<String, String>>> perTable;
-
-		return null;
-	}
-
+	
 	@SuppressWarnings("unchecked")
 	static <K, V> List<Map<K, V>> substitutions(List<K> a, List<V> b) {
 		// List<Map<String, String>> ret = new LinkedList<>();
@@ -536,43 +527,23 @@ public class Instance implements Viewable<Instance> {
 
 		return ret;
 	}
-	
-//	public static <Obj,Arrow> Instance  
-//	populate(FinCat<Obj,Arrow> C, Map<Obj, Set<String>> i1, Map<Arrow, Map<String, String>> i2) 
-//	throws FQLException {
-//	
-//		List<Pair<String, List<Pair<String, String>>>> ret = new LinkedList<>();
-//		
-//		Pair<Signature, Map<Arrow, String>> p = C.toSig();
-//		Signature s = p.first;
-//		Map<Arrow, String> m = p.second;
-//		
-//		for (Arrow a : C.arrows) {
-//			if (C.isId(a)) {
-//				ret.add(new Pair<>(m.get(a), dupl(i1.get(C.src(a)))));
-//			} else {
-//				ret.add(new Pair<>(m.get(a), dupl(i2.get(a))));
-//			}
+
+
+//	private static List<Pair<String,String>> dupl(Map<String, String> map) {
+//		List<Pair<String,String>> ret = new LinkedList<Pair<String,String>>();
+//		for (String k : map.keySet()) {
+//			ret.add(new Pair<>(k,map.get(k)));
 //		}
-//		
-//		return new Instance(s.name0 + "popinst", s, ret);
+//		return ret;	
 //	}
-
-	private static List<Pair<String,String>> dupl(Map<String, String> map) {
-		List<Pair<String,String>> ret = new LinkedList<Pair<String,String>>();
-		for (String k : map.keySet()) {
-			ret.add(new Pair<>(k,map.get(k)));
-		}
-		return ret;	
-	}
-
-	private static List<Pair<String,String>> dupl(Set<String> set) {
-		List<Pair<String,String>> ret = new LinkedList<Pair<String,String>>();
-		for (String s : set) {
-			ret.add(new Pair<>(s,s));
-		}
-		return ret;		
-	}
+//
+//	private static List<Pair<String,String>> dupl(Set<String> set) {
+//		List<Pair<String,String>> ret = new LinkedList<Pair<String,String>>();
+//		for (String s : set) {
+//			ret.add(new Pair<>(s,s));
+//		}
+//		return ret;		
+//	}
 
 	public static Instance terminal(Signature s) throws FQLException {
 		List<Pair<String, List<Pair<String, String>>>> ret = new LinkedList<>();
@@ -602,7 +573,7 @@ public class Instance implements Viewable<Instance> {
 		FinCat<String, List<List<String>>> cat = thesig.toCategory().first;
 		
 		Map<String, Set<Value<String, String>>> objM = new HashMap<>();
-		for (String obj : cat.objects()) {
+		for (String obj : cat.objects) {
 			objM.put(obj, conv(data.get(obj)));
 		}
 		

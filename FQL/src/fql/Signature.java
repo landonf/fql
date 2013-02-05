@@ -27,6 +27,12 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.BasicVisualizationServer;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Signatures.
+ */
 public class Signature implements Viewable<Signature> {
 
 	List<Node> nodes;
@@ -73,10 +79,6 @@ public class Signature implements Viewable<Signature> {
 			edgesA.add(e);		
 		}
 		
-//		if (Equality.which == Equality.acyclic) {
-//			abortIfAcyclic();
-//		}
-		
 		nodes = new LinkedList<Node>(nodesA);
 		edges = new LinkedList<Edge>(edgesA);
 		
@@ -94,7 +96,6 @@ public class Signature implements Viewable<Signature> {
 			eqs.add(eq);
 		}
 		
-		//toCategory();
 	}
 	
 	public boolean acyclic() {
@@ -107,12 +108,6 @@ public class Signature implements Viewable<Signature> {
 		return true;
 	}
 
-//	private void abortIfAcyclic() throws FQLException {
-//		if (!acyclic()) {
-//				throw new FQLException("Cyclic schema " + name0);
-//		}
-//	}
-
 	private Set<Node> reachable1(Node n) {
 		Set<Node> ret = new HashSet<Node>();
 		for (Edge e : edges) {
@@ -122,6 +117,7 @@ public class Signature implements Viewable<Signature> {
 		}
 		return ret;
 	}
+	
 	private Set<Node> reachableS1(Set<Node> nodes) {
 		Set<Node> ret = new HashSet<Node>();
 		for (Node node : nodes) {
@@ -129,6 +125,7 @@ public class Signature implements Viewable<Signature> {
 		}
 		return ret;
 	}
+	
 	private Set<Node> reachableFix(Set<Node> nodes) {
 		Set<Node> x = new HashSet<Node>(nodes);
 		for(;;) {
@@ -139,6 +136,7 @@ public class Signature implements Viewable<Signature> {
 			}
 		}
 	}
+	
 	private Set<Node> reachable(Node node) {
 		Set<Node> init = reachable1(node);
 		Set<Node> cl = reachableFix(init);
@@ -172,55 +170,8 @@ public class Signature implements Viewable<Signature> {
 		throw new FQLException("Unknown node: " + string);
 	}
 
-
-
 	@Override
 	public JPanel view() {
-		
-//		mxGraph graph = new mxGraph();
-//		
-//		graph.getModel().beginUpdate();
-//		Object parent = graph.getDefaultParent();
-//
-//		Random r = new Random();
-//
-//		Set<Integer> x = new HashSet<Integer>();
-//		Set<Integer> y = new HashSet<Integer>();
-//		Map<String, Object> nodes2 = new HashMap<String, Object>();
-//		//List<Node> randomly_ordered_nodes = makeRandom(nodes);
-//		for (Node k : nodes) {
-//			int ran1, ran2;
-//			for (;;) {
-//				ran1 = r.nextInt(300);
-//				ran2 = r.nextInt(200);
-//				if (x.contains(ran1 % 80) || y.contains(ran2 % 20)) {
-//					continue;
-//				}
-//				x.add(ran1 % 80);
-//				y.add(ran1 % 20);
-//				break;
-//			}
-//			Object o = graph.insertVertex(parent, null, k.string, ran1, ran2, 80, 20, "strokeColor=white;fillColor=white");
-//			nodes2.put(k.string, o);
-//		}
-//		for (Edge e : edges) {
-//			Object v1 = nodes2.get(e.source.string);
-//			Object v2 = nodes2.get(e.target.string);
-//			assert (v1 != null);
-//			assert (v2 != null);
-//			graph.insertEdge(parent, null, e.name, v1, v2, "edgeStyle=elbowEdgeStyle;shape=curve");
-//		}
-//
-//		// define layout
-//	    mxIGraphLayout layout = new mxParallelEdgeLayout(graph);
-//
-//	    // layout graph
-//	    layout.execute(graph.getDefaultParent());
-	    
-	//	JPanel graphComponent = makeViewer();
-		
-	//	graph.getModel().endUpdate();
-		
 		Object[][] arr = new Object[eqs.size()][2];
 		int i = 0;
 		for (Eq eq : eqs) {
@@ -238,8 +189,6 @@ public class Signature implements Viewable<Signature> {
 		eqsComponent.setColumnSelectionAllowed(false);
 		
 		JPanel p = new JPanel(new GridLayout(1,3));
-	//	JPanel p1 = new JPanel();
-		//JPanel p2 = new JPanel();
 		
 		p.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 		
@@ -278,7 +227,6 @@ public class Signature implements Viewable<Signature> {
 		edgesTemp.add(new JScrollPane(esC));
 		edgesTemp.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(2,2,2,2), "Edges"));
 
-		//		edgesTemp.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), "Edges"));
 		esC.setRowSelectionAllowed(false);
 		esC.setColumnSelectionAllowed(false);
 		listeners = esC.getMouseListeners();
@@ -286,29 +234,10 @@ public class Signature implements Viewable<Signature> {
 		{
 		    esC.removeMouseListener(l);
 		}
-	//	JPanel edgesTemp = new JPanel(new GridLayout(1,1));
-	//	edgesTemp.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), "Edges"));
-		//edgesTemp.add(esC);
-		
-		
-		
-		//JScrollPane q1 = new JScrollPane(eqsComponent);
-		
-		//JScrollPane q2 = new JScrollPane(graphComponent);
-
-		//p1.add(q1);
-		//p2.add(q2);
-		
+			
 		p.add(nodesTemp);
 		p.add(edgesTemp);
 		p.add(eqsTemp);
-		
-//		p1.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
-	//	p2.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
-		
-		//JPanel px = new JPanel(new GridLayout(1,1));
-		//px.add(p);
-		//px.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
 		
 		return p;
 	}
@@ -377,13 +306,6 @@ public class Signature implements Viewable<Signature> {
 			for (String a : t) {
 			  ret += (a.trim() + ",\n\n");
 			}
-
-//			t = ret.split(";");
-//			ret = "";
-//
-//			for (String a : t) {
-//			  ret += (a.trim() + "\n\n;\n\n");
-//			}
 			
 			JTextArea ta = new JTextArea(ret);
 			JPanel tap = new JPanel(new GridLayout(1,1));
@@ -393,11 +315,8 @@ public class Signature implements Viewable<Signature> {
 			ta.setWrapStyleWord(true);
 			ta.setLineWrap(true);
 			JScrollPane xxx = new JScrollPane(ta);
-	//		xxx.setBorder(BorderFactory.createEmptyBorder());
 //			
 			tap.add(xxx);
-//			tap.setSize(600, 600);
-
 			
 			return tap;
 
@@ -454,6 +373,11 @@ public class Signature implements Viewable<Signature> {
 		return all().contains(s);
 	}
 
+	/**
+	 * Converts a signature to a category.
+	 * @return the category, and some isomorphisms
+	 * @throws FQLException
+	 */
 	public Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>>
 	toCategory() throws FQLException {
 		if (!acyclic()) {
@@ -489,25 +413,6 @@ public class Signature implements Viewable<Signature> {
 			arrows.add(new Arr<>(eqc, srcOf(eqc), dstOf(eqc)));
 		}
 		
-//		Map<List<List<String>>, String> src = new HashMap<List<List<String>>, String>();
-//		for (List<List<String>> eqc : eqcs) {
-//			List<String> apath = eqc.get(0);
-//			String srcnode = apath.get(0);
-//			src.put(eqc, srcnode);
-//		}
-//		
-//		Map<List<List<String>>, String> dst = new HashMap<List<List<String>>, String>();
-//		for (List<List<String>> eqc : eqcs) {
-//			List<String> apath = eqc.get(0);
-//			if (apath.size() == 1) {
-//				dst.put(eqc, apath.get(0));
-//			} else {
-//				String lastedge = apath.get(apath.size() - 1);
-//				Edge e = getEdge(lastedge);
-//				dst.put(eqc, e.target.string);
-//			}
-//		}
-//		
 		Map<Pair<Arr<String, List<List<String>>>, Arr<String,List<List<String>>>>, Arr<String,List<List<String>>>> composition = new HashMap<>();
 		for (Arr<String, List<List<String>>> a : arrows) {
 			for (Arr<String, List<List<String>>> b : arrows) {
@@ -521,7 +426,6 @@ public class Signature implements Viewable<Signature> {
 				}
 			}
 		}
-		
 		
 		Map<String, Arr<String, List<List<String>>>> identities = new HashMap<>();
 		for (Node n : nodes) {
@@ -622,8 +526,6 @@ public class Signature implements Viewable<Signature> {
 			}
 		}
 	}
-
-
 
 	public static List<String> pathToList(Path p) {
 		List<String> ret = new LinkedList<String>();
@@ -741,17 +643,15 @@ public class Signature implements Viewable<Signature> {
 	}
 	
 	@Override
+	/**
+	 * Equality of denoted categories.
+	 */
 	public boolean equals(Object o) {
 		if (!(o instanceof Signature)) {
 			return false;
 		}
 		Signature s = (Signature) o;
 		try {
-//			System.out.println("Comparing " + this);
-//			System.out.println(toCategory());
-//			System.out.println("\n");
-//			System.out.println(s.toCategory());
-//			
 			return (toCategory().equals(s.toCategory()));
 		} catch (FQLException e) {
 			throw new RuntimeException(e);

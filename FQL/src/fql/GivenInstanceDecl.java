@@ -3,6 +3,10 @@ package fql;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * @author ryan
+ * An instance given by explicit tuples.
+ */
 public class GivenInstanceDecl extends InstanceDecl {
 
 	List<Pair<String, List<Pair<String, String>>>> data;

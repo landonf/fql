@@ -1,10 +1,22 @@
 package fql;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Implementation of comma categories.
+ * 
+ * @param <ObjA> Left
+ * @param <ArrowA> Left
+ * @param <ObjB> Right 
+ * @param <ArrowB> Right
+ * @param <ObjC> Middle 
+ * @param <ArrowC> Middle
+ */
 public class CommaCat<ObjA, ArrowA, ObjB, ArrowB, ObjC, ArrowC> extends
 		FinCat<Triple<ObjA, ObjB, Arr<ObjC,ArrowC>>, Pair<Arr<ObjA,ArrowA>, Arr<ObjB,ArrowB>>> {
 
@@ -13,8 +25,9 @@ public class CommaCat<ObjA, ArrowA, ObjB, ArrowB, ObjC, ArrowC> extends
 	FinCat<ObjC, ArrowC> C;
 	FinFunctor<ObjA, ArrowA, ObjC, ArrowC> F;
 	FinFunctor<ObjB, ArrowB, ObjC, ArrowC> G;
+	FinFunctor<Triple<ObjA, ObjB, Arr<ObjC, ArrowC>>, Pair<Arr<ObjA, ArrowA>, Arr<ObjB, ArrowB>>, ObjA, ArrowA> projA;
+	FinFunctor<Triple<ObjA, ObjB, Arr<ObjC, ArrowC>>, Pair< Arr<ObjA, ArrowA>,  Arr<ObjB, ArrowB>>, ObjB, ArrowB> projB;
 
-	//order: left, right, middle; leftarr, rightarr
 	public CommaCat(FinCat<ObjA, ArrowA> A, FinCat<ObjB, ArrowB> B,
 			FinCat<ObjC, ArrowC> C, FinFunctor<ObjA, ArrowA, ObjC, ArrowC> F,
 			FinFunctor<ObjB, ArrowB, ObjC, ArrowC> G) {
@@ -48,8 +61,6 @@ public class CommaCat<ObjA, ArrowA, ObjB, ArrowB, ObjC, ArrowC> extends
 	//	System.out.println("objects are " + objects);
 
 		//arrows = new LinkedList<Pair<Arr<ObjA,ArrowA>, Arr<ObjB,ArrowB>>>();
-	//	src = new HashMap<Pair<Arr<ObjA,ArrowA>, Arr<ObjB,ArrowB>>, Triple<ObjA, ObjB, Arr<ObjC,ArrowC>>>();
-	//	dst = new HashMap<Pair<ArrowA, ArrowB>, Triple<ObjA, ObjB, Arr<ObjC,ArrowC>>>();
 		for (Triple<ObjA, ObjB, Arr<ObjC, ArrowC>> obj1 : objects) {
 			for (Triple<ObjA, ObjB, Arr<ObjC, ArrowC>> obj2 : objects) {
 				ObjA a1 = obj1.first;
@@ -87,9 +98,6 @@ public class CommaCat<ObjA, ArrowA, ObjB, ArrowB, ObjC, ArrowC> extends
 //						System.out.println("E" + G.arrowMapping.get(c1));
 //						System.out.println("--------\n");
 //						System.out.println("F" + F);
-						//the arrow mapping contains [T1] but should also contain [T1, t1_last]
-						//i.e., the constructed arrow mappings appear to be incomplete
-						//they do not extend to all path equivalences
 					//	ArrowC lhs = C.compose(c2, F.arrowMapping.get(m));
 						
 						//note composition is backwards - is ; not o
@@ -111,8 +119,6 @@ public class CommaCat<ObjA, ArrowA, ObjB, ArrowB, ObjC, ArrowC> extends
 						if (lhs.equals(rhs)) {
 							Pair<Arr<ObjA,ArrowA>, Arr<ObjB,ArrowB>> arr = new Pair<>(m, n);
 							arrows.add(new Arr<>(arr, obj1, obj2));
-						//	src.put(arr, obj1);
-						//	dst.put(arr, obj2);
 						}
 					}
 				}
@@ -120,12 +126,10 @@ public class CommaCat<ObjA, ArrowA, ObjB, ArrowB, ObjC, ArrowC> extends
 		}
 	//	System.out.println("arrows are " + arrows);
 
-		//identities = new HashMap<Triple<ObjA, ObjB, ArrowC>, Pair<ArrowA, ArrowB>>();
 		for (Triple<ObjA, ObjB, Arr<ObjC,ArrowC>> obj : objects) {
 			identities.put(obj, new Arr<>(new Pair<>(A.identities.get(obj.first), B.identities.get(obj.second)),obj,obj));
 		}
 
-	//	composition = new HashMap<Pair<Pair<ArrowA, ArrowB>, Pair<ArrowA, ArrowB>>, Pair<ArrowA, ArrowB>>();
 		for (Arr<Triple<ObjA, ObjB, Arr<ObjC, ArrowC>>, Pair<Arr<ObjA, ArrowA>, Arr<ObjB, ArrowB>>> arrow1 : arrows) {
 			for (Arr<Triple<ObjA, ObjB, Arr<ObjC, ArrowC>>, Pair<Arr<ObjA, ArrowA>, Arr<ObjB, ArrowB>>> arrow2 : arrows) {
 				if (arrow1.dst.equals(arrow2.src)) {
@@ -137,13 +141,18 @@ public class CommaCat<ObjA, ArrowA, ObjB, ArrowB, ObjC, ArrowC> extends
 				}
 			};
 		}
+		
+		projA();
+		projB();
 
-		validate();
+		if (DEBUG.VALIDATE) {
+			validate();
+		}
 //		System.out.println("result is " + this);
 //		System.out.println("***********************");
 	}
 
-	public FinFunctor<Triple<ObjA, ObjB, Arr<ObjC, ArrowC>>, Pair<Arr<ObjA, ArrowA>, Arr<ObjB, ArrowB>>, ObjA, ArrowA> projA() {
+	private void projA() {
 		Map<Triple<ObjA, ObjB, Arr<ObjC,ArrowC>>, ObjA> objMapping = new HashMap<>();
 		Map<Arr<Triple<ObjA, ObjB, Arr<ObjC, ArrowC>>,Pair<Arr<ObjA,ArrowA>, Arr<ObjB,ArrowB>>>, Arr<ObjA,ArrowA>> arrowMapping = new HashMap<>();
 		
@@ -154,11 +163,10 @@ public class CommaCat<ObjA, ArrowA, ObjB, ArrowB, ObjC, ArrowC> extends
 			arrowMapping.put(arr, arr.arr.first);
 		}
 
-		return new FinFunctor<>(
-				objMapping, arrowMapping, this, A);
+		projA = new FinFunctor<>(objMapping, arrowMapping, this, A);
 	}
 
-	public FinFunctor<Triple<ObjA, ObjB, Arr<ObjC, ArrowC>>, Pair< Arr<ObjA, ArrowA>,  Arr<ObjB, ArrowB>>, ObjB, ArrowB> projB() {
+	private void projB() {
 		Map<Triple<ObjA, ObjB,  Arr<ObjC, ArrowC>>, ObjB> objMapping = new HashMap<>();
 		Map<Arr<Triple<ObjA, ObjB, Arr<ObjC, ArrowC>>,Pair<Arr<ObjA,ArrowA>, Arr<ObjB,ArrowB>>>, Arr<ObjB,ArrowB>> arrowMapping = new HashMap<>();
 		
@@ -169,20 +177,8 @@ public class CommaCat<ObjA, ArrowA, ObjB, ArrowB, ObjC, ArrowC> extends
 			arrowMapping.put(arr, arr.arr.second);
 		}
 
-		return new FinFunctor<>(
-				objMapping, arrowMapping, this, B);
+		projB = new FinFunctor<>(objMapping, arrowMapping, this, B);
 	}
-//	
-//	//these queries assume that category A is the degenerate one, 
-//	//and that B is built by denoting a signature
-//	public RA piQuery(Pair<ArrowA, ArrowB> edge) {
-//		ArrowB edge0 = edge.second;
-//		Set<List<String>> edge1 = (Set<List<String>>) edge0;
-//	}
-//	
-//	public RA piQuery(Triple<ObjA, ObjB, ArrowC> node) {
-//		
-//		return null;
-//	}
+
 
 }

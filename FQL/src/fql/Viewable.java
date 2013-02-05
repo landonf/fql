@@ -2,6 +2,14 @@ package fql;
 
 import javax.swing.JPanel;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Collects together the GUI methods used.
+ *
+ * @param <X>
+ */
 public interface Viewable<X> {
 
 	public JPanel text();

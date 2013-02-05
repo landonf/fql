@@ -169,13 +169,6 @@ public class GUI extends JPanel {
 	    	 
 	     });
 	     
-	     final JTextField jcb = new JTextField(Long.toString(Equality.def));
-	     jcb.addActionListener(new ActionListener() {
-	    	 public void actionPerformed(ActionEvent e) {
-	    		 //TODO: KB timeout
-	 //   		 comboAction(jcb.getSelectedItem());
-	    	 }
-	     });
 	     
 	     
 	     JButton new_button = new JButton("New");

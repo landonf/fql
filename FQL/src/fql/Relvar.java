@@ -1,5 +1,11 @@
 package fql;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Relational variables as syntax.
+ */
 public class Relvar extends RA {
 
 	String r;

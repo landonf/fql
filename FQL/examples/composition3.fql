@@ -1,0 +1,22 @@
+schema S = { s ; }
+schema T = { t ; }
+schema B = { b ; }
+schema A = { a ; }
+
+mapping s : B -> S = { (b,s) ; }
+mapping f : B -> A = { (b,a) ; }
+mapping t : A -> T = { (a,t) ; }
+
+query q1 = delta s pi f sigma t
+
+schema D = { d ; }
+schema C = { c ; }
+schema U = { u ; }
+
+mapping u : D -> T = { (d,t) ; }
+mapping g : D -> C = { (d,c) ; }
+mapping v : C -> U = { (c,u) ; }
+
+query q2 = delta u pi g sigma v
+query q = q2 o q1
+

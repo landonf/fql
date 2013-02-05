@@ -1,5 +1,11 @@
 package fql;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Nodes in a signature.
+ */
 public class Node {
 	
 	public String toString() {
@@ -8,10 +14,6 @@ public class Node {
 	
 	String string;
 	
-	int x, y;
-	
-	//public Object object;
-
 	public Node(String string) {
 		assert(string != null);
 		this.string = string;

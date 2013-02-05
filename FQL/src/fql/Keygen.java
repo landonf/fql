@@ -1,5 +1,11 @@
 package fql;
 
+/**
+ * 
+ * @author ryan
+ *
+ * RA syntax for key generation.
+ */
 public class Keygen extends RA {
 	
 	RA e;

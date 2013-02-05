@@ -8,6 +8,12 @@ import fql.parse.Partial;
 import fql.parse.StringParser;
 import fql.parse.Tokens;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Parser for query declarations.
+ */
 public class QueryDeclParser implements Parser<Decl> {
 
 	@Override

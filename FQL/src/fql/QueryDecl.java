@@ -1,7 +1,18 @@
 package fql;
 
-
+/**
+ * 
+ * @author ryan
+ *
+ * Query declarations.
+ */
 public class QueryDecl extends Decl {
+	
+	enum KIND { ID, COMPOSE, QUERY }
+	KIND kind;
+	String source, target;
+	String schema;
+	String	project, join, union;	
 
 	public QueryDecl(String name, String schema) {
 		super(name);
@@ -28,16 +39,6 @@ public class QueryDecl extends Decl {
 	public String toString() {
 		return "project " + project + " join " + join + " union " + union;
 	}
-
-	enum KIND { ID, COMPOSE, QUERY }
-
-	KIND kind;
-	
-	String source, target;
-	
-	String schema;
-	
-	String	project, join, union;	
 
 
 }

@@ -2,6 +2,12 @@ package fql;
 
 import java.util.Date;
 
+/**
+ * 
+ * @author ryan
+ *
+ * This class contains the text of the hard-coded demo examples and help dialog.
+ */
 public class Examples {
 	
 	

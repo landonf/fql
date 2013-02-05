@@ -1,5 +1,11 @@
 package fql;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Show command syntax.
+ */
 public class ShowCommand extends Command {
 
 	String name;

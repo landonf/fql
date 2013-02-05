@@ -1,5 +1,11 @@
 package fql;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Instances that were created by delta, sigma, pi.
+ */
 public class DirectInstanceDecl extends InstanceDecl {
 	
 	String mapping, inst, type;

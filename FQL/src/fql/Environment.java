@@ -7,6 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 
+ * @author ryan
+ *
+ * The environment keeps a list of schemas, mappings, instances, and queries.
+ * It also keeps a global static assignment of colors to schema names.
+ * It wraps colors after they've been used.
+ */
 public class Environment {
 
 	static Map<String, Color> colors;

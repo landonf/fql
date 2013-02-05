@@ -1,5 +1,14 @@
 package fql;
 
+/**
+ * 
+ * @author ryan
+ *
+ * A value is either a constant, record, or choice.
+ *
+ * @param <Y> type of tags
+ * @param <X> type of data
+ */
 public class Value<Y, X> {
 
 	X x;
@@ -43,6 +52,7 @@ public class Value<Y, X> {
 			throw new RuntimeException();
 //			return false;
 		}
+		@SuppressWarnings("rawtypes")
 		Value that = (Value) o;
 		if (this.which == VALUETYPE.ATOM && that.which == VALUETYPE.ATOM) {
 			return (this.x.equals(that.x));

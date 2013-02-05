@@ -1,0 +1,16 @@
+schema C = { c1 : C1 -> C2, c2 : C3 -> C2 ; }
+
+schema D = { d : D1 -> D2 ; }
+
+instance I : C = {
+C1 = {(X,X)},
+C2 = {(Y,Y),(Z,Z)},
+C3 = {(U,U)} ;
+c1 = {(X,Y)},
+c2 = {(U,Y)}
+}
+
+mapping F = { (C1,D1), (C2,D2), (C3,D1) ; (c1,D1.d), (c2,D1.d) }
+
+instance J = pi F I
+

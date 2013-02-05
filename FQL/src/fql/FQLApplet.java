@@ -4,6 +4,10 @@ import javax.swing.JApplet;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+/**
+ * @author ryan
+ * Entry point for the applet.
+ */
 public class FQLApplet extends JApplet {
 	
 	private static final long serialVersionUID = 1L;
@@ -16,7 +20,6 @@ public class FQLApplet extends JApplet {
             SwingUtilities.invokeAndWait(new Runnable() {
                 public void run() {
                     JPanel lbl = GUI.makeGUI();
-            //        lbl.setBorder(BorderFactory.createLineBorder(Color.BLACK));
                     add(lbl);
                 }
             });

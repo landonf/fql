@@ -22,10 +22,15 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Class for showing all the viewers.
+ */
 public class Display {
 
 	Map<String, JComponent> frames;
@@ -39,23 +44,6 @@ public class Display {
 			if (command instanceof ShowCommand) {
 				ShowCommand c = (ShowCommand) command;
 				Viewable<?> view = environment.get(c.name);
-//				JPanel p1 = view.view();
-//				Border b = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), "Graphical View");
-//				p1.setBorder(b);
-//				JPanel p2 = new JPanel(new GridLayout(1, 1));
-//				FQLTextPanel bar = new FQLTextPanel("Textual View", view.text());
-//				bar.setWordWrap(true);
-//				p2.add(bar);
-//				// bar.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
-//				//bar.setSelectionStart(0);
-//				//bar.setSelectionEnd(0);
-//
-//				FQLSplit jsc = new FQLSplit(.5, JSplitPane.VERTICAL_SPLIT);
-//				// jsc.setDividerSize(3);
-//				// jsc.setDividerLocation(-1);
-//				jsc.add(p2);
-//				jsc.add(p1);
-//				
 	
 				JTabbedPane px = new JTabbedPane();
 				
@@ -67,34 +55,14 @@ public class Display {
 				gp0.setSize(600, 600);
 
 				JPanel tp = view.view();
-				//JPanel tp0 = new JPanel(new GridLayout(1,1));
-				//tp0.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-				//tp0.add(tp);
-				//tp0.setSize(600, 600);
 
 
 				px.add("Tabular", tp);
 				
 				JPanel ta = view.text();
-//				JPanel tap = new JPanel(new GridLayout(1,1));
-//				ta.setBorder(BorderFactory.createEmptyBorder());
-//				
-//				tap.setBorder(BorderFactory.createEmptyBorder());
-//				ta.setWrapStyleWord(true);
-//				ta.setLineWrap(true);
-//				JScrollPane xxx = new JScrollPane(ta);
-//				xxx.setBorder(BorderFactory.createEmptyBorder());
-//				
-//				tap.add(xxx);
-//				tap.setSize(600, 600);
 
 				px.add("Textual", ta);
 				
-//				JPanel px = new JPanel(new GridLayout(1, 1));
-				//px.add(jsc);
-//				JFrame frame = new JFrame();
-	//			frame.setContentPane(px);
-		//		frame.setTitle(command.text);
 				
 				JPanel top = new JPanel(new GridLayout(1,1));
 				top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
@@ -109,24 +77,12 @@ public class Display {
 				}
 
 				frames.put(xxx, top);
-			} else if (command instanceof PlanCommand) {
-				PlanCommand c = (PlanCommand) command;
-				Viewable<?> view = environment.get(c.name);
-				FQLTextPanel a = new FQLTextPanel("SQL", view.plan());
-			//	JFrame frame = new JFrame();
-				//frame.setContentPane(a);
-				//frame.setTitle(command.text);
-				//frames.add(frame);
-				frames.put(command.text, a);
 			} else if (command instanceof EqCommand) {
 				EqCommand c = (EqCommand) command;
 				Viewable view1 = environment.get(c.lhs);
 				Viewable view2 = environment.get(c.rhs);
 				boolean b = view1.equals0(view2);
 				JLabel l = new JLabel(new Boolean(b).toString());
-			//	JFrame frame = new JFrame();
-				//frame.setContentPane(l);
-				//frame.setTitle(command.text);
 				JPanel p = new JPanel();
 				p.add(l);
 				frames.put(command.text, p);
@@ -138,9 +94,6 @@ public class Display {
 				JLabel l = new JLabel(new Boolean(b).toString());
 				JPanel p = new JPanel();
 				p.add(l);
-//				JFrame frame = new JFrame();
-	//			frame.setContentPane(l);
-		//		frame.setTitle(command.text);
 				frames.put(command.text, p);
 			} else if (command instanceof IsosCommand) {
 				IsosCommand c = (IsosCommand) command;
@@ -149,9 +102,6 @@ public class Display {
 				String b = view1.isos(view2);
 				FQLTextPanel l = new FQLTextPanel(
 						"Enumeration of Isomorphisms", b);
-		//		JFrame frame = new JFrame();
-			//	frame.setContentPane(l);
-				//frame.setTitle(command.text);
 				frames.put(command.text, l);
 			} else if (command instanceof HomosCommand) {
 				HomosCommand c = (HomosCommand) command;
@@ -160,9 +110,6 @@ public class Display {
 				String b = view1.homos(view2);
 				FQLTextPanel l = new FQLTextPanel(
 						"Enumeration of Homomorphisms", b);
-				//JFrame frame = new JFrame();
-				//frame.setContentPane(l);
-				//frame.setTitle(command.text);
 				frames.put(command.text, l);
 			} else {
 				throw new FQLException("Unknown command " + command);
@@ -193,7 +140,7 @@ public class Display {
 			
 		});
 		
-		final Vector ooo = new Vector();
+		final Vector<String> ooo = new Vector<>();
 		
 		for (Pair<String, JComponent> p : list) {
 			x.add(p.second, p.first);
@@ -202,7 +149,7 @@ public class Display {
 		x.add(new JPanel(), "blank");
 		cl.show(x, "blank");
 		
-		final JList yyy = new JList(ooo);
+		final JList<String> yyy = new JList<>(ooo);
 		JPanel temp1 = new JPanel(new GridLayout(1,1));
 		temp1.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "Select:"));
 		JScrollPane yyy1 = new JScrollPane(yyy);
@@ -226,19 +173,15 @@ public class Display {
 		});
 		
 		FQLSplit px = new FQLSplit(.5, JSplitPane.HORIZONTAL_SPLIT);
-//		px.setLayout(new BoxLayout(px, BoxLayout.LINE_AXIS));
 		
 		frame = new JFrame("Viewer");
 		px.add(temp1);
 		px.add(x);
 		frame.setContentPane(px);
-//		frame.minimumSize();600, 600);
 		frame.setSize(850, 600);
-	//	frame.pack();
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 
-		//g.requestFocus();
 	}
 	
 	//TODO: add random auto schema matching form

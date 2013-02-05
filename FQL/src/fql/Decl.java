@@ -1,5 +1,11 @@
 package fql;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Superclass for declarations, like SCHEMA or MAPPING
+ */
 public class Decl {
 	
 	String name;

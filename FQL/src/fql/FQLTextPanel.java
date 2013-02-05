@@ -24,6 +24,10 @@ import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 
 @SuppressWarnings("serial")
+/**
+ * @author ryan
+ * A text editor.
+ */
 public class FQLTextPanel extends JPanel {
 	
 	JTextArea area = new JTextArea();
@@ -43,7 +47,6 @@ public class FQLTextPanel extends JPanel {
 	public FQLTextPanel(String title, String text) {
 		super(new GridLayout(1,1));
 		Border b = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), title);
-//		Border b = BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), title);
 
 		setBorder(b);
 		
@@ -60,8 +63,6 @@ public class FQLTextPanel extends JPanel {
 		doc.addUndoableEditListener(new UndoableEditListener() {
 		    @Override
 		    public void undoableEditHappened(UndoableEditEvent e) {
-
-		        //System.out.println("Add edit");
 		        m.addEdit(e.getEdit());
 
 		    }
@@ -98,8 +99,7 @@ public class FQLTextPanel extends JPanel {
 		    }
 		});
 		
-		//setWordWrap(true);
-		
+		//setWordWrap(true);		
 	}
 
 	public void setWordWrap(boolean b) {

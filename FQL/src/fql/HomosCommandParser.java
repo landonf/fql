@@ -9,6 +9,12 @@ import fql.parse.Partial;
 import fql.parse.StringParser;
 import fql.parse.Tokens;
 
+/**
+ * 
+ * @author ryan
+ *
+ * A parser for homomorphism commands.
+ */
 public class HomosCommandParser implements Parser<Command> {
 
 	@Override

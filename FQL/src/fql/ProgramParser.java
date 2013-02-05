@@ -9,6 +9,12 @@ import fql.parse.ParserUtils;
 import fql.parse.Partial;
 import fql.parse.Tokens;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Parser for programs.
+ */
 public class ProgramParser implements Parser<Program> {
 
 	@Override
