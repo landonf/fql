@@ -7,6 +7,9 @@ import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Stroke;
 import java.awt.event.MouseListener;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,7 +29,10 @@ import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.visualization.BasicVisualizationServer;
+import edu.uci.ics.jung.visualization.VisualizationViewer;
+import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
+import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
+import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 
 /**
@@ -161,6 +167,14 @@ public class Mapping implements Viewable<Mapping> {
 			arr[i][1] = eq.getValue();
 			i++;
 		}
+		Arrays.sort(arr,  new Comparator<Object[]>()
+                {
+            public int compare(Object[] f1, Object[] f2)
+            {
+                return f1[0].toString().compareTo(f2[0].toString());
+            }        
+        });
+		
 		JTable nmC = new JTable(arr, new Object[] { "Source node in " + source.name0 , "Target node in " + target.name0});
 		MouseListener[] listeners = nmC.getMouseListeners();
 		for (MouseListener l : listeners)
@@ -175,6 +189,14 @@ public class Mapping implements Viewable<Mapping> {
 			arr2[i2][1] = eq.getValue().toLong();
 			i2++;
 		}
+		Arrays.sort(arr2,  new Comparator<Object[]>()
+                {
+            public int compare(Object[] f1, Object[] f2)
+            {
+                return f1[0].toString().compareTo(f2[0].toString());
+            }        
+        });
+
 		JTable emC = new JTable(arr2, new Object[] { "Source edge in " + source.name0 , "Target path in " + target.name0});
 		listeners = emC.getMouseListeners();
 		for (MouseListener l : listeners)
@@ -515,8 +537,7 @@ public class Mapping implements Viewable<Mapping> {
 		//	Layout<String, String> layout = new ISOMLayout<String,String>(sgv);
 	//			Layout<String, String> layout = new CircleLayout(sgv);
 		layout.setSize(new Dimension(600, 400));
-		BasicVisualizationServer<String, String> vv = new BasicVisualizationServer<String, String>(
-				layout);
+		VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(layout);
 		vv.setPreferredSize(new Dimension(600, 400));
 		// Setup up a new vertex to paint transformer...
 		Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
@@ -534,6 +555,11 @@ public class Mapping implements Viewable<Mapping> {
 					return Environment.colors.get(target.name0);
 			}
 		};
+		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
+        gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+        vv.setGraphMouse(gm);
+        gm.setMode(Mode.PICKING);
+
 		// Set up a new stroke Transformer for the edges
 		float dash[] = { 10.0f };
 		final Stroke edgeStroke = new BasicStroke(1.0f, BasicStroke.CAP_BUTT,

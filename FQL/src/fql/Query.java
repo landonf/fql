@@ -25,7 +25,10 @@ import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.visualization.BasicVisualizationServer;
+import edu.uci.ics.jung.visualization.VisualizationViewer;
+import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
+import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
+import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import fql.Value.VALUETYPE;
 
@@ -330,8 +333,7 @@ public class Query implements Viewable<Query> {
 		//	Layout<String, String> layout = new ISOMLayout<String,String>(sgv);
 	//			Layout<String, String> layout = new CircleLayout(sgv);
 		layout.setSize(new Dimension(600, 400));
-		BasicVisualizationServer<String, String> vv = new BasicVisualizationServer<String, String>(
-				layout);
+		VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(layout);
 		vv.setPreferredSize(new Dimension(600, 400));
 		// Setup up a new vertex to paint transformer...
 		Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
@@ -354,6 +356,11 @@ public class Query implements Viewable<Query> {
 				}
 			}
 		};
+		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
+        gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+        vv.setGraphMouse(gm);
+        gm.setMode(Mode.PICKING);
+
 		// Set up a new stroke Transformer for the edges
 		float dash[] = { 10.0f };
 		final Stroke edgeStroke = new BasicStroke(1.0f, BasicStroke.CAP_BUTT,
