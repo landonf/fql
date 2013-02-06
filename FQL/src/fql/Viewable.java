@@ -29,6 +29,8 @@ public interface Viewable<X> {
 	public String homos(X view);
 
 	public String type();
+
+	public JPanel join() throws FQLException;
 	
 
 }

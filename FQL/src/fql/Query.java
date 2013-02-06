@@ -687,6 +687,11 @@ public class Query implements Viewable<Query> {
 		return new Query(name, newproj, join1.first, newunion);		
 
 	}
+
+	@Override
+	public JPanel join() {
+		return null;
+	}
 	
 	
 

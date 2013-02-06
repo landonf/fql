@@ -55,9 +55,12 @@ public class Display {
 				gp0.setSize(600, 600);
 
 				JPanel tp = view.view();
-
-
 				px.add("Tabular", tp);
+				
+				JPanel joined = view.join();
+				if (joined != null) {
+					px.add("Joined", joined);
+				}
 				
 				JPanel ta = view.text();
 

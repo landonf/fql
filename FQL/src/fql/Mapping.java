@@ -627,6 +627,11 @@ public class Mapping implements Viewable<Mapping> {
 		
 		return new Mapping(string, l.source, r.target, xxx, yyy);
 	}
+
+	@Override
+	public JPanel join() {
+		return null;
+	}
 	
 	
 }

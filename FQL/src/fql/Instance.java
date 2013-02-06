@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.event.MouseListener;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -328,6 +329,109 @@ public class Instance implements Viewable<Instance> {
 		return panel;
 	}
 
+	@Override
+	public JPanel join() throws FQLException {
+		// Map<String, Set<Pair<String,String>>> data;
+		
+		Map<String, Map<String, Set<Pair<String, String>>>> joined 
+		= new HashMap<>();
+		Map<String, Set<Pair<String, String>>> nd
+		= new HashMap<>();
+		
+		List<String> names = new LinkedList<>();
+		
+		for (Node n : thesig.nodes) {
+			nd.put(n.string, data.get(n.string));
+			joined.put(n.string, new HashMap<String, Set<Pair<String, String>>>());
+			names.add(n.string);
+		}
+		
+		for (Edge e : thesig.edges) {
+			joined.get(e.source.string).put(e.name, data.get(e.name));
+	//		names.add(e.name);
+		}
+		
+//		System.out.println(joined);
+	//	System.out.println(nd);
+		
+		Comparator<String> strcmp = new Comparator<String>()  {
+	        public int compare(String f1, String f2) {
+	                return f1.compareTo(f2);
+	            }        
+	        };
+		Collections.sort(names, strcmp);
+
+		List<JPanel> pans = new LinkedList<>();
+		for (String name : names) {
+//			System.out.println("Name " + name);
+			Map<String, Set<Pair<String, String>>> m = joined.get(name);
+	//		System.out.println("m " + m);
+			Set<Pair<String, String>> ids = nd.get(name);
+		//	System.out.println("ids " + ids);
+			String[][] arr = new String[ids.size()][m.size() + 1];
+			Set<String> cols = m.keySet();
+	//		System.out.println("cols " + cols);
+			List<String> cols2 = new LinkedList<>(cols);
+			Collections.sort(cols2, strcmp);
+			cols2.add(0, "ID");
+	//		System.out.println("cols2 " + cols2);
+			Object[] cols3 = cols2.toArray();
+	//		System.out.println("cols3 " + cols3);
+			
+			int i = 0;
+			for (Pair<String, String> id : ids) {
+//				System.out.println("id " + id);
+				arr[i][0] = id.first;
+//				System.out.println(" i " + i + " j " + 0 + " val " + arr[i][0]);
+
+				int j = 1;
+				for (String col : cols2) {
+					if (col.equals("ID")) {
+						continue;
+					}
+				//	System.out.println("col " + col);
+					Set<Pair<String, String>> coldata = m.get(col);
+					for (Pair<String, String> p : coldata) {
+				//		System.out.println("p " + p);
+						if (p.first.equals(id.first)) {
+							arr[i][j] = p.second;
+//							System.out.println(" i " + i + " j " + j + " val " + arr[i][j]);
+							break;
+						}
+					}
+					j++;
+				}
+				i++;
+			}
+			
+			Arrays.sort(arr, new Comparator<String[]>() {
+
+				@Override
+				public int compare(String[] o1, String[] o2) {
+					return o1[0].compareTo(o2[0]);
+				}
+				
+			});
+			
+			JTable t = new JTable(arr, cols3);
+			JPanel p = new JPanel(new GridLayout(1,1));
+			//p.add(t);
+			p.add(new JScrollPane(t));
+			p.setMaximumSize(new Dimension(200,200));
+			p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), name));
+			pans.add(p);
+		}
+	
+		int x = (int) Math.ceil(Math.sqrt(pans.size()));
+		JPanel panel = new JPanel(new GridLayout(x, x));
+		for (JPanel p : pans) {
+			panel.add(p);
+		}
+		panel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+		return panel;		
+	}
+
+	
 	@Override
 	public JPanel text() {
 		// String s = toString().replace('{', ' ').replace('}', ' ').trim();

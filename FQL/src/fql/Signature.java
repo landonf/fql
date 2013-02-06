@@ -691,6 +691,11 @@ public class Signature implements Viewable<Signature> {
 			throw new RuntimeException(e);
 		}
 	}
+
+	@Override
+	public JPanel join() {
+		return null;
+	}
 	
 
 }
