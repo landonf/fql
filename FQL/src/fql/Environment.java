@@ -18,6 +18,7 @@ import java.util.Set;
 public class Environment {
 
 	static Map<String, Color> colors;
+	static Map<String, Object> graphs;
 
 	public Environment(Program p) throws FQLException {
 		signatures = new HashMap<String, Signature>();

@@ -190,6 +190,7 @@ public class Instance implements Viewable<Instance> {
 		} else {
 			throw new FQLException("Unknown type " + type);
 		}
+	//	toFunctor().morphs(toFunctor(), toFunctor());
 	}
 
 	private boolean typeCheck(Signature thesig2) {
@@ -330,7 +331,50 @@ public class Instance implements Viewable<Instance> {
 	public JPanel join() throws FQLException {
 		// Map<String, Set<Pair<String,String>>> data;
 		
-		Map<String, Map<String, Set<Pair<String, String>>>> joined 
+		prejoin(); 
+		
+		List<JPanel> pans = makePanels();
+	
+		int x = (int) Math.ceil(Math.sqrt(pans.size()));
+		JPanel panel = new JPanel(new GridLayout(x, x));
+		for (JPanel p : pans) {
+			panel.add(p);
+		}
+		panel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+		return panel;		
+	}
+
+	private List<JPanel> makePanels() {
+		List<JPanel> ret = new LinkedList<>();
+		
+		Comparator<String> strcmp = new Comparator<String>()  {
+	        public int compare(String f1, String f2) {
+	                return f1.compareTo(f2);
+	            }        
+	        };
+	        
+	        List<String> xxx = new LinkedList<>(joined.keySet());
+	        Collections.sort(xxx, strcmp);
+	        
+		for (String name : xxx) {
+			JTable t = joined.get(name);
+			JPanel p = new JPanel(new GridLayout(1,1));
+			//p.add(t);
+			p.add(new JScrollPane(t));
+	//		p.setMaximumSize(new Dimension(200,200));
+			p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), name));
+			ret.add(p);
+		}
+		
+		
+		return ret;
+	}
+
+	private void prejoin() {
+		if (joined != null) {
+			return;
+		}
+		Map<String, Map<String, Set<Pair<String, String>>>> jnd 
 		= new HashMap<>();
 		Map<String, Set<Pair<String, String>>> nd
 		= new HashMap<>();
@@ -339,12 +383,12 @@ public class Instance implements Viewable<Instance> {
 		
 		for (Node n : thesig.nodes) {
 			nd.put(n.string, data.get(n.string));
-			joined.put(n.string, new HashMap<String, Set<Pair<String, String>>>());
+			jnd.put(n.string, new HashMap<String, Set<Pair<String, String>>>());
 			names.add(n.string);
 		}
 		
 		for (Edge e : thesig.edges) {
-			joined.get(e.source.string).put(e.name, data.get(e.name));
+			jnd.get(e.source.string).put(e.name, data.get(e.name));
 	//		names.add(e.name);
 		}
 		
@@ -358,7 +402,19 @@ public class Instance implements Viewable<Instance> {
 	        };
 		Collections.sort(names, strcmp);
 
-		List<JPanel> pans = new LinkedList<>();
+		joined = makejoined(jnd, nd, names);
+		
+	}
+
+	private Map<String, JTable> makejoined(
+			Map<String, Map<String, Set<Pair<String, String>>>> joined,
+			Map<String, Set<Pair<String, String>>> nd, List<String> names) {
+		Comparator<String> strcmp = new Comparator<String>()  {
+	        public int compare(String f1, String f2) {
+	                return f1.compareTo(f2);
+	            }        
+	        };
+	        Map<String, JTable> ret = new HashMap<>();
 		for (String name : names) {
 //			System.out.println("Name " + name);
 			Map<String, Set<Pair<String, String>>> m = joined.get(name);
@@ -410,22 +466,17 @@ public class Instance implements Viewable<Instance> {
 				
 			});
 			
-			JTable t = new JTable(arr, cols3);
-			JPanel p = new JPanel(new GridLayout(1,1));
-			//p.add(t);
-			p.add(new JScrollPane(t));
-			p.setMaximumSize(new Dimension(200,200));
-			p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), name));
-			pans.add(p);
+			JTable t = new JTable(arr, cols3) {
+				  public Dimension getPreferredScrollableViewportSize() {
+					  Dimension d = getPreferredSize();
+				  return new Dimension(d.width, d.height * 2);
+				  }
+				  };
+				  
+			ret.put(name, t);
 		}
-	
-		int x = (int) Math.ceil(Math.sqrt(pans.size()));
-		JPanel panel = new JPanel(new GridLayout(x, x));
-		for (JPanel p : pans) {
-			panel.add(p);
-		}
-		panel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-		return panel;		
+		
+		return ret;
 	}
 
 	
@@ -621,34 +672,25 @@ public class Instance implements Viewable<Instance> {
 				JComponent arg0, Object arg1, Font arg2, boolean arg3,
 				T arg4) {
 	    	if (arg3) {
+	    		prejoin();
+	    	//	Map<String, JPanel> panels = makejoined();
 //			    	 if (pi.isPicked((String) arg4)) {
-			    		 Vector<String> ld = new  Vector<>();
+	    		
+	    		JTable t = joined.get(arg4);
+	    		
+				JPanel p = new JPanel(new GridLayout(1,1));
+				//p.add(t);
+				p.add(new JScrollPane(t));
+		//		p.setMaximumSize(new Dimension(200,200));
+				p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), (String)arg4));
 
-			    		 Set<Pair<String, String>> table = data.get(arg4);
-			    		 
-
-			    		 boolean b = false;
-			    		 @SuppressWarnings("unused") 
-						String s = ((String) arg4) + " = ";
-			    		 for (Pair<String, String> x : table) {
-			    			 if (b) {
-			    				 s += ", ";
-			    			 }
-			    			 b = true;
-			    			 s += x.first;
-			    			 ld.add(x.first);
-			    		 }
-			    		 JList<String> jl = new JList<>(ld);
-			    		 JPanel p = new JPanel(new GridLayout(1,1));
-			    		 p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), (String) arg4));
-			    		 p.add(new JScrollPane(jl));
-			    		// p.add(jl);
-			    		 
-//					JLabel x = new JLabel(s);
-					// x.setFont(new Font("Arial", 8, Font.PLAIN));
-		//			return x;
-//					return new JTextArea(s);
-			    		 return p;
+	    		
+	   // 		JPanel p = new JPanel(new GridLayout(1,1));
+	    //		p.add(new JScrollPane(joined.get(arg4)));
+	    	//	p.setMaximumSize(new Dimension(100,100));
+	  //  		p.setPreferredSize(new Dimension(100,100));
+	    	//	p.setSize(new Dimension(100,100));
+			    	return p;
 		        }
 		        else {
 		          return new JLabel((String)arg4);
@@ -755,60 +797,7 @@ public class Instance implements Viewable<Instance> {
 //	}
 
 	
-	@SuppressWarnings("unchecked")
-	static <K, V> List<Map<K, V>> substitutions(List<K> a, List<V> b) {
-		// List<Map<String, String>> ret = new LinkedList<>();
-		//
-		// Map<String, Set<String>> x = new HashMap<>();
-		// for (String s : S) {
-		// Set<String> y = new HashSet<>();
-		// for (String t : T) {
-		// y.add(t);
-		// }
-		// x.put(s, y);
-		// }
-
-		List<V>[] x = new List[a.size()];
-
-		for (int ax = 0; ax < a.size(); ax++) {
-			x[ax] = new LinkedList<V>();
-			for (int bx = 0; bx < b.size(); bx++) {
-				x[ax].add(b.get(bx));
-			}
-			if (x[ax].size() == 0) {
-				return new LinkedList<Map<K, V>>();
-			}
-		}
-
-		int[] counters = new int[a.size() + 1];
-
-		List<Map<K, V>> ret = new LinkedList<>();
-		for (;;) {
-			Map<K, V> m = new HashMap<>();
-			for (int v = 0; v < a.size(); v++) {
-				K p = a.get(v);
-				// System.out.println("Trying to get " + counters[v] + " a is "
-				// + p + " from " + x[v] + " wlen " + x[v].size());
-				V q = x[v].get(counters[v]);
-				m.put(p, q);
-			}
-			ret.add(m);
-			counters[0]++;
-
-			for (int u = 0; u < a.size(); u++) {
-				if (counters[u] == x[u].size()) {
-					counters[u] = 0;
-					counters[u + 1]++;
-				}
-			}
-
-			if (counters[a.size()] >= 1) {
-				break;
-			}
-		}
-
-		return ret;
-	}
+	
 
 
 //	private static List<Pair<String,String>> dupl(Map<String, String> map) {
@@ -882,5 +871,7 @@ public class Instance implements Viewable<Instance> {
 		}
 		return ret;
 	}
+	
+	Map<String, JTable> joined;
 
 }

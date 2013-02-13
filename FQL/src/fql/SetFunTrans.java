@@ -16,27 +16,29 @@ public class SetFunTrans <Obj, Arrow, Y, X> {
 		
 		public SetFunTrans(Map<Obj, Map<Value<Y,X>, Value<Y,X>>> eta,
 				Inst<Obj, Arrow, Y, X> F,
-				Inst<Obj, Arrow, Y, X> G) {
+				Inst<Obj, Arrow, Y, X> G) throws FQLException {
 			this.eta = eta;
 			this.F = F;
 			this.G = G;
-			validate();
+			if (DEBUG.VALIDATE) {
+				validate();
+			}
 		}
 		
 		public Map<Value<Y,X>, Value<Y,X>> eta(Obj X) {
 			return eta.get(X);
 		}
 		
-		public void validate() {
+		public void validate() throws FQLException {
 			if (!F.cat.equals(G.cat)) {
-				throw new RuntimeException("SetFuntrans category mismath " + F.cat + " and " + G.cat);
+				throw new FQLException("SetFuntrans category mismath " + F.cat + " and " + G.cat);
 			}
 
 			for (Arr<Obj, Arrow> f : F.cat.arrows) {
 				Map<Value<Y,X>, Value<Y,X>> lhs = compose(F.applyA(f), eta(f.dst));
 				Map<Value<Y,X>, Value<Y,X>> rhs = compose(eta(f.src), G.applyA(f));
 				if (!lhs.equals(rhs)) {
-					throw new RuntimeException("Bad nat trans " + f + "\n in " + this + "\n\nlhs is " + lhs + "\n\nrhs is " + rhs
+					throw new FQLException("Bad nat trans " + f + "\n in " + this + "\n\nlhs is " + lhs + "\n\nrhs is " + rhs
 							+"\n\nF(f) is " + F.applyA(f) + "\n\neta(F(f)) is " + eta(f.dst) + "\n\neta(G(f)) is " + eta(f.src) + "\n\nG(f) is " + G.applyA(f));
 				}
 			}
