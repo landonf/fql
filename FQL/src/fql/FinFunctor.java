@@ -197,6 +197,30 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 	
 		return compose(compose(h, G), H);
 	}
+	
+	public static <ObjC,ArrowC,ObjD,ArrowD> boolean isDiscreteOpFib(FinFunctor<ObjC,ArrowC,ObjD,ArrowD> F) {
+		for (ObjC c : F.srcCat.objects) {
+			for (Arr<ObjD,ArrowD> g : F.dstCat.arrows) {
+				if (F.applyO(c).equals(g.src)) {
+					boolean found = false;
+					for (ObjC c0 : F.srcCat.objects) {
+						for (Arr<ObjC,ArrowC> g0 : F.srcCat.hom(c, c0)) {
+							if (F.applyA(g0).equals(g)) {
+								if (found) {
+									return false;
+								}
+								found = true;
+							}
+						}
+					}
+					if (!found) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
 
 }
 

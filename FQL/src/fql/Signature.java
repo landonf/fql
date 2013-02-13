@@ -288,11 +288,11 @@ public class Signature implements Viewable<Signature> {
 		
 //		first = true;
 		for (Node n : nodes) {
-			if (!first) {
-				sb.append(", ");
-			}
 			if (!disconnected(n)) {
 				continue;
+			}
+			if (!first) {
+				sb.append(", ");
 			}
 			first = false;
 			sb.append(n.string);
@@ -334,6 +334,10 @@ public class Signature implements Viewable<Signature> {
 			String ret = "";
 			for (String a : t) {
 			  ret += (a.trim() + ",\n\n");
+			}
+			ret = ret.trim();
+			if (ret.endsWith(",")) {
+				ret = ret.substring(0, ret.length() - 1);
 			}
 			
 			JTextArea ta = new JTextArea(ret);

@@ -21,7 +21,7 @@ import javax.swing.JTextArea;
 
 import org.apache.commons.collections15.Transformer;
 
-import edu.uci.ics.jung.algorithms.layout.FRLayout;
+import edu.uci.ics.jung.algorithms.layout.ISOMLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -326,11 +326,11 @@ public class Query implements Viewable<Query> {
 	
 	public  JPanel doView(Graph<String,String> sgv) {
 		// Layout<V, E>, BasicVisualizationServer<V,E>
-		Layout<String, String> layout = new FRLayout<>(sgv);
+		//Layout<String, String> layout = new FRLayout<>(sgv);
 		//Layout<String, String> layout = new KKLayout(sgv);
 		//Layout<String, String> layout = new SpringLayout(sgv);
 
-		//	Layout<String, String> layout = new ISOMLayout<String,String>(sgv);
+			Layout<String, String> layout = new ISOMLayout<String,String>(sgv);
 	//			Layout<String, String> layout = new CircleLayout(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(layout);

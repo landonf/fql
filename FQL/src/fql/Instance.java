@@ -1,6 +1,5 @@
 package fql;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -29,7 +28,7 @@ import javax.swing.JTextArea;
 
 import org.apache.commons.collections15.Transformer;
 
-import edu.uci.ics.jung.algorithms.layout.CircleLayout;
+import edu.uci.ics.jung.algorithms.layout.ISOMLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -37,8 +36,6 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
-import edu.uci.ics.jung.visualization.picking.PickedInfo;
-import edu.uci.ics.jung.visualization.renderers.DefaultEdgeLabelRenderer;
 import edu.uci.ics.jung.visualization.renderers.VertexLabelRenderer;
 
 public class Instance implements Viewable<Instance> {
@@ -72,9 +69,9 @@ public class Instance implements Viewable<Instance> {
 							+ s.name0 + " in " + s + " and " + this);
 				}
 				if (!contained(p1.second, data.get(e.target.string))) {
-					throw new FQLException("Range has non foreign key: "
-							+ p1.second + ", " + data.get(e.target.string)
-							+ ", " + s.name0 + " in " + s + " and " + this);
+					throw new FQLException("Range has non foreign key: \n"
+							+ p1.second + "\n\n " + data.get(e.target.string)
+							+ "\n\n " + s.name0 + " \n\n " + s + " \n\n " + this);
 				}
 			}
 		}
@@ -537,8 +534,8 @@ public class Instance implements Viewable<Instance> {
 		// Layout<String, String> layout = new KKLayout(sgv);
 
 		// Layout<String, String> layout = new FRLayout(sgv);
-		// Layout<String, String> layout = new ISOMLayout<String,String>(sgv);
-		Layout<String, String> layout = new CircleLayout<>(sgv);
+		 Layout<String, String> layout = new ISOMLayout<String,String>(sgv);
+		//Layout<String, String> layout = new CircleLayout<>(sgv);
 		layout.setSize(new Dimension(600, 450));
 		VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(layout);
 		vv.setPreferredSize(new Dimension(600, 450));
@@ -607,7 +604,7 @@ public class Instance implements Viewable<Instance> {
 		//vv.getRenderContext().setVertexLabelTransformer(new MyVertexT(vv.getPickedVertexState()));
 		// vv.getRenderer().getVertexRenderer().
 		vv.getRenderContext().setLabelOffset(20);
-		vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
+		vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller<String>());
 //		vv.getRenderContext().getEdgeLabelRenderer().
 		// vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
 
@@ -625,14 +622,14 @@ public class Instance implements Viewable<Instance> {
 				T arg4) {
 	    	if (arg3) {
 //			    	 if (pi.isPicked((String) arg4)) {
-			    		 Vector ld = new  Vector();
+			    		 Vector<String> ld = new  Vector<>();
 
 			    		 Set<Pair<String, String>> table = data.get(arg4);
 			    		 
 
-			    		 String s = (String) arg4;
 			    		 boolean b = false;
-			    		 s += " = ";
+			    		 @SuppressWarnings("unused") 
+						String s = ((String) arg4) + " = ";
 			    		 for (Pair<String, String> x : table) {
 			    			 if (b) {
 			    				 s += ", ";
@@ -641,7 +638,7 @@ public class Instance implements Viewable<Instance> {
 			    			 s += x.first;
 			    			 ld.add(x.first);
 			    		 }
-			    		 JList jl = new JList(ld);
+			    		 JList<String> jl = new JList<>(ld);
 			    		 JPanel p = new JPanel(new GridLayout(1,1));
 			    		 p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), (String) arg4));
 			    		 p.add(new JScrollPane(jl));
@@ -659,103 +656,103 @@ public class Instance implements Viewable<Instance> {
 		    }
 	    }
 	
-	private class MyEdgeT extends DefaultEdgeLabelRenderer {
-	   // private final PickedInfo<String> pi;
-
-	    public MyEdgeT(){
-	    	super(Color.GRAY, false);
-	      //  this.pi = pi;
-	    }
-
-	    @Override
-	    public <T> Component getEdgeLabelRendererComponent(
-				JComponent arg0, Object arg1, Font arg2, boolean arg3,
-				T arg4) {
-	    	if (true) throw new RuntimeException();
-	    	if (arg3) {
-//			    	 if (pi.isPicked((String) arg4)) {
-			    		 Vector ld = new  Vector();
-
-			    		 Set<Pair<String, String>> table = data.get(arg4);
-			    		 
-
-			    		 String s = (String) arg4;
-			    		 boolean b = false;
-			    		 s += " = ";
-			    		 for (Pair<String, String> x : table) {
-			    			 if (b) {
-			    				 s += ", ";
-			    			 }
-			    			 b = true;
-			    			 s += x.first;
-			    			 ld.add(x.first);
-			    		 }
-			    		 JList jl = new JList(ld);
-			    		 JPanel p = new JPanel(new GridLayout(1,1));
-			    		 p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), (String) arg4));
-			    		 p.add(new JScrollPane(jl));
-			    		// p.add(jl);
-			    		 
-//					JLabel x = new JLabel(s);
-					// x.setFont(new Font("Arial", 8, Font.PLAIN));
-		//			return x;
-//					return new JTextArea(s);
-			    		// return p;
-			    		 return new JLabel("ZZZZ");
-		        }
-		        else {
-		        	return new JLabel("HHHH");
-		         // return new JLabel("ZZZZZ" + (String)arg4);
-		        }
-		    }
-
-	    boolean b = false;
-		@Override
-		public boolean isRotateEdgeLabels() {
-			return b;
-		}
-
-		@Override
-		public void setRotateEdgeLabels(boolean arg0) {
-			this.b = arg0;
-		}
-	    }
-	
-	private  class MyEdgeT2 implements Transformer<String,String>{
-	    private final PickedInfo<String> pi;
-
-	    public MyEdgeT2( PickedInfo<String> pi ){
-	        this.pi = pi;
-	    }
-
-	    @Override
-	    public String transform(String t) {
-	        if (pi.isPicked(t)) {
-				Set<Pair<String, String>> table = data.get(t);
-
-				String s = t;
-				boolean b = false;
-				s += " = ";
-				for (Pair<String, String> x : table) {
-					if (b) {
-						s += ", ";
-					}
-					b = true;
-					s += x.first;
-					s += " -> ";
-					s += x.second;
-				}
-//				JLabel x = new JLabel(s);
-				// x.setFont(new Font("Arial", 8, Font.PLAIN));
-	//			return x;
-				return s;
-
-	        }
-	        else {
-	          return t;
-	        }
-	    }
-	}
+//	private class MyEdgeT extends DefaultEdgeLabelRenderer {
+//	   // private final PickedInfo<String> pi;
+//
+//	    public MyEdgeT(){
+//	    	super(Color.GRAY, false);
+//	      //  this.pi = pi;
+//	    }
+//
+//	    @Override
+//	    public <T> Component getEdgeLabelRendererComponent(
+//				JComponent arg0, Object arg1, Font arg2, boolean arg3,
+//				T arg4) {
+//	    //	if (true) throw new RuntimeException();
+//	    	if (arg3) {
+////			    	 if (pi.isPicked((String) arg4)) {
+//			    		 Vector<String> ld = new  Vector<>();
+//
+//			    		 Set<Pair<String, String>> table = data.get(arg4);
+//			    		 
+//
+//			    		 String s = (String) arg4;
+//			    		 boolean b = false;
+//			    		 s += " = ";
+//			    		 for (Pair<String, String> x : table) {
+//			    			 if (b) {
+//			    				 s += ", ";
+//			    			 }
+//			    			 b = true;
+//			    			 s += x.first;
+//			    			 ld.add(x.first);
+//			    		 }
+//			    		 JList<String> jl = new JList<>(ld);
+//			    		 JPanel p = new JPanel(new GridLayout(1,1));
+//			    		 p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), (String) arg4));
+//			    		 p.add(new JScrollPane(jl));
+//			    		// p.add(jl);
+//			    		 
+////					JLabel x = new JLabel(s);
+//					// x.setFont(new Font("Arial", 8, Font.PLAIN));
+//		//			return x;
+////					return new JTextArea(s);
+//			    		// return p;
+//			    		 return new JLabel("ZZZZ");
+//		        }
+//		        else {
+//		        	return new JLabel("HHHH");
+//		         // return new JLabel("ZZZZZ" + (String)arg4);
+//		        }
+//		    }
+//
+//	    boolean b = false;
+//		@Override
+//		public boolean isRotateEdgeLabels() {
+//			return b;
+//		}
+//
+//		@Override
+//		public void setRotateEdgeLabels(boolean arg0) {
+//			this.b = arg0;
+//		}
+//	    }
+//	
+//	private  class MyEdgeT2 implements Transformer<String,String>{
+//	    private final PickedInfo<String> pi;
+//
+//	    public MyEdgeT2( PickedInfo<String> pi ){
+//	        this.pi = pi;
+//	    }
+//
+//	    @Override
+//	    public String transform(String t) {
+//	        if (pi.isPicked(t)) {
+//				Set<Pair<String, String>> table = data.get(t);
+//
+//				String s = t;
+//				boolean b = false;
+//				s += " = ";
+//				for (Pair<String, String> x : table) {
+//					if (b) {
+//						s += ", ";
+//					}
+//					b = true;
+//					s += x.first;
+//					s += " -> ";
+//					s += x.second;
+//				}
+////				JLabel x = new JLabel(s);
+//				// x.setFont(new Font("Arial", 8, Font.PLAIN));
+//	//			return x;
+//				return s;
+//
+//	        }
+//	        else {
+//	          return t;
+//	        }
+//	    }
+//	}
 
 	
 	@SuppressWarnings("unchecked")

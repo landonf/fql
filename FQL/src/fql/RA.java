@@ -298,6 +298,10 @@ public abstract class RA {
 		Map<String, RA> ret = new HashMap<String, RA>();
 		Map<Node, List<String>> tags = new HashMap<Node, List<String>>();
 		
+		if (!FinFunctor.isDiscreteOpFib(F.toFunctor().first)) {
+			throw new FQLException("Not a discrete op-fibration: " + F.name);
+		}
+		
 		for (Node d : D.nodes) {
 			List<RA> tn = new LinkedList<RA>();
 			List<String> tj = new LinkedList<String>();
@@ -323,6 +327,7 @@ public abstract class RA {
 					RA q = compose(pc);
 					tn.add(q);
 					tx.add(c.string);
+					tx.add(pc.target.string);
 				}
 			}
 			ret.put(e.name, new DisjointUnion(tn, tx));

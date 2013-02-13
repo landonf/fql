@@ -8,7 +8,6 @@ import java.awt.Paint;
 import java.awt.Stroke;
 import java.awt.event.MouseListener;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -42,6 +41,17 @@ import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
  * Implementation of signature morphisms
  */
 public class Mapping implements Viewable<Mapping> {
+	
+	public void validate() throws FQLException {
+		Triple<FinFunctor<String, List<List<String>>, String, List<List<String>>>, Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>>, Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>>> s = toFunctor();
+		s.first.validate(); //check preserves identities, composition
+		//now check that path equivalences are respected
+		for (Eq x : source.eqs) {
+			if (!appy(x.lhs).equals(appy(x.rhs))) {
+				throw new FQLException("Equivalence Not Respected\n\n" + x + "\n\n" + appy(x.lhs) + "\n\n" + appy(x.rhs));
+			}
+		}
+	}
 	
 	Map<Node, Node> nm = new HashMap<Node, Node>();
 	Map<Edge, Path> em = new HashMap<Edge, Path>();
@@ -82,6 +92,7 @@ public class Mapping implements Viewable<Mapping> {
 			morphism(env.getSchema(md.source), env.getSchema(md.target), md.objs, md.arrows);
 			break;
 		}
+		validate();
 	}
 	
 	private Path expand(Path v, Map<Node, Node> nm2, Map<Edge, Path> em2) {
@@ -98,6 +109,7 @@ public class Mapping implements Viewable<Mapping> {
 
 	public Mapping(Environment env, Signature s) throws FQLException {
 		identity(env, s);
+		validate();
 	}
 	
 	/**
@@ -108,6 +120,7 @@ public class Mapping implements Viewable<Mapping> {
 			List<Pair<String, List<String>>> arrows) throws FQLException {
 		this.name = name;
 		morphism(source, target, objs, arrows);
+		validate();
 	}
 
 	/**
@@ -532,7 +545,6 @@ public class Mapping implements Viewable<Mapping> {
 		// Layout<V, E>, BasicVisualizationServer<V,E>
 		Layout<String, String> layout = new FRLayout<>(sgv);
 		//Layout<String, String> layout = new KKLayout(sgv);
-		//Layout<String, String> layout = new SpringLayout(sgv);
 
 		//	Layout<String, String> layout = new ISOMLayout<String,String>(sgv);
 	//			Layout<String, String> layout = new CircleLayout(sgv);
