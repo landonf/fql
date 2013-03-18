@@ -1,5 +1,6 @@
 package fql;
 
+import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -15,14 +16,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 
@@ -374,6 +374,9 @@ public class Instance implements Viewable<Instance> {
 		if (joined != null) {
 			return;
 		}
+		vwr.setLayout(cards);
+		vwr.add(new JPanel(), "");
+		cards.show(vwr, "");
 		Map<String, Map<String, Set<Pair<String, String>>>> jnd 
 		= new HashMap<>();
 		Map<String, Set<Pair<String, String>>> nd
@@ -473,6 +476,23 @@ public class Instance implements Viewable<Instance> {
 				  }
 				  };
 				  
+				//  cards.(name, t);
+				  
+				  JTable foo = new JTable(t.getModel()) {
+					  public Dimension getPreferredScrollableViewportSize() {
+						  Dimension d = getPreferredSize();
+					  return new Dimension(d.width, d.height * 2);
+					  }
+					  };
+			JPanel p = new JPanel(new GridLayout(1,1));
+			//p.add(t);
+			p.add(new JScrollPane(foo));
+	//		p.setMaximumSize(new Dimension(200,200));
+			p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), name));
+			vwr.add(p, name);
+			
+//			foo.setMaximumSize(new Dimension(600,200));
+			
 			ret.put(name, t);
 		}
 		
@@ -587,10 +607,10 @@ public class Instance implements Viewable<Instance> {
 		// Layout<String, String> layout = new FRLayout(sgv);
 		 Layout<String, String> layout = new ISOMLayout<String,String>(sgv);
 		//Layout<String, String> layout = new CircleLayout<>(sgv);
-		layout.setSize(new Dimension(600, 450));
+		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(layout);
-		vv.setPreferredSize(new Dimension(600, 450));
-		//vv.getRenderContext().setEdgeLabelRenderer(new MyEdgeT());
+		vv.setPreferredSize(new Dimension(600, 400));
+		//vv.getRenderContext().setEdgeLabelRerderer(new MyEdgeT());
 		// Setup up a new vertex to paint transformer...
 		Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
 			public Paint transform(String i) {
@@ -620,32 +640,7 @@ public class Instance implements Viewable<Instance> {
 		// };
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 		// vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
-		vv.getRenderContext().setVertexLabelRenderer(new MyVertexT()); // {
-//
-//			@Override
-//			public <T> Component getVertexLabelRendererComponent(
-//					JComponent arg0, Object arg1, Font arg2, boolean arg3,
-//					T arg4) {
-//				Set<Pair<String, String>> table = data.get(arg4);
-//
-//				String s = (String) arg4;
-//				//s += " = {";
-//				boolean b = false;
-//				for (Pair<String, String> x : table) {
-////					if (b) {
-////						s += "\n ";
-////					}
-//					s += "\n";
-//					s += x.first;
-//					b = true;
-//				}
-//				s += "}";
-//				JTextArea x = new JTextArea(s);
-//				// x.setFont(new Font("Arial", 8, Font.PLAIN));
-//				return x;
-//			}
-//
-//		});
+		vv.getRenderContext().setVertexLabelRenderer(new MyVertexT());
 		// vv.getRenderContext().setVertexLabelTransformer(new
 		// ToStringLabeller());
 		
@@ -659,12 +654,20 @@ public class Instance implements Viewable<Instance> {
 //		vv.getRenderContext().getEdgeLabelRenderer().
 		// vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
 
-		return vv;
+		JSplitPane newthing = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		newthing.setDividerLocation(.9d);
+		newthing.add(vv);
+		newthing.add(vwr);
+		JPanel xxx = new JPanel(new GridLayout(1,1));
+		xxx.add(newthing);
+//		xxx.setMaximumSize(new Dimension(400,400));
+		return xxx;
 	}
 	
 	private class MyVertexT implements VertexLabelRenderer{
 	  
-	    public MyVertexT(  ){
+		
+	    public MyVertexT(){
 	    }
 
 	    @Override
@@ -675,22 +678,27 @@ public class Instance implements Viewable<Instance> {
 	    		prejoin();
 	    	//	Map<String, JPanel> panels = makejoined();
 //			    	 if (pi.isPicked((String) arg4)) {
+
+	    		cards.show(vwr, (String)arg4);
 	    		
-	    		JTable t = joined.get(arg4);
-	    		
-				JPanel p = new JPanel(new GridLayout(1,1));
-				//p.add(t);
-				p.add(new JScrollPane(t));
-		//		p.setMaximumSize(new Dimension(200,200));
-				p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), (String)arg4));
+	            return new JLabel((String)arg4);
 
 	    		
-	   // 		JPanel p = new JPanel(new GridLayout(1,1));
-	    //		p.add(new JScrollPane(joined.get(arg4)));
-	    	//	p.setMaximumSize(new Dimension(100,100));
-	  //  		p.setPreferredSize(new Dimension(100,100));
-	    	//	p.setSize(new Dimension(100,100));
-			    	return p;
+//	    		JTable t = joined.get(arg4);
+//	    		
+//				JPanel p = new JPanel(new GridLayout(1,1));
+//				//p.add(t);
+//				p.add(new JScrollPane(t));
+//		//		p.setMaximumSize(new Dimension(200,200));
+//				p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), (String)arg4));
+//
+//	    		
+//	   // 		JPanel p = new JPanel(new GridLayout(1,1));
+//	    //		p.add(new JScrollPane(joined.get(arg4)));
+//	    	//	p.setMaximumSize(new Dimension(100,100));
+//	  //  		p.setPreferredSize(new Dimension(100,100));
+//	    	//	p.setSize(new Dimension(100,100));
+//			    	return p;
 		        }
 		        else {
 		          return new JLabel((String)arg4);
@@ -872,6 +880,8 @@ public class Instance implements Viewable<Instance> {
 		return ret;
 	}
 	
+	JPanel vwr = new JPanel();
+	CardLayout cards = new CardLayout();
 	Map<String, JTable> joined;
 
 }

@@ -9,5 +9,6 @@ package fql;
 public class DEBUG {
 
 	public static final boolean VALIDATE = false;
+	public static final int max = 5;
 
 }

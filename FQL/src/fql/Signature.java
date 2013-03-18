@@ -406,6 +406,59 @@ public class Signature implements Viewable<Signature> {
 		return all().contains(s);
 	}
 
+//	public int findSize() {
+//		for (int i = 0; i < DEBUG.max; i++) {
+//			int x = foo(i);
+//			int y = foo(i+1);
+//			System.out.println("x is " + x);
+//			System.out.println("y is " + y);
+//			
+//			if (x == -1) {
+//				continue;
+//			}
+//
+//			if (x == y) {
+//				System.out.println("size is " + i);
+//				return i;
+//			}
+//		}
+//		throw new RuntimeException("Category too big : " + this);
+//	}
+	
+//	public int foo(int max) {
+//		
+//		Set<List<String>> paths = new HashSet<>();
+//		
+//		for (Node n : nodes) {
+//			LinkedList<String> l = new LinkedList<String>();
+//			l.add(n.string);
+//			paths.add(l);
+//			Set<List<String>> ret0 = bfs2(l, n, 0, max);
+////			System.out.println("bfs2 returning " + ret0);
+//			paths.addAll(ret0);
+//		}
+//
+//		List<List<List<String>>> eqcs = new LinkedList<List<List<String>>>();
+//		for (List<String> path : paths) {
+//			List<List<String>> eqc = new LinkedList<List<String>>();
+//			eqc.add(path);
+//			eqcs.add(eqc);
+//		}
+//		System.out.println("eqcs " + eqcs);
+//		
+//		try {
+//			merge(eqcs);
+//		} catch (FQLException eee) {
+//			eee.printStackTrace();
+//			return -1;
+//		}
+//		//dups
+//		
+//		System.out.println("eqcs after " + eqcs);
+//
+//		return eqcs.size();
+//	}
+	
 	/**
 	 * Converts a signature to a category.
 	 * @return the category, and some isomorphisms
@@ -417,13 +470,16 @@ public class Signature implements Viewable<Signature> {
 			throw new FQLException("Not acyclic: " + this);
 		}
 		
-		List<List<String>> paths = new LinkedList<List<String>>();
+		Set<List<String>> paths = new HashSet<>();
 		
 		for (Node n : nodes) {
 			LinkedList<String> l = new LinkedList<String>();
 			l.add(n.string);
 			paths.add(l);
 			List<List<String>> ret0 = bfs(l, n);
+		//	Set<List<String>> ret0 = bfs2(l, n, 0, findSize());
+		//	System.out.println("ret0 " + ret0);
+			//System.out.println("ret1 " + ret1);
 			paths.addAll(ret0);
 		}
 
@@ -434,7 +490,10 @@ public class Signature implements Viewable<Signature> {
 			eqcs.add(eqc);
 		}
 		
-		merge(eqcs);
+		Set<Eq> eqs0 = addConsequences(paths, eqs);
+		//eqs0.addAll(eqs);
+		
+		merge(eqs0, eqcs);
 		
 		List<String> objects = new LinkedList<String>();
 		for (Node n : nodes) {
@@ -501,6 +560,52 @@ public class Signature implements Viewable<Signature> {
 		return new Pair<>(ret, ret2);
 	}
 
+	private Set<Eq> addConsequences(Set<List<String>> paths, Set<Eq> eqs) throws FQLException {	
+		Set<Eq> ret = new HashSet<>();
+		for (Eq eq : eqs) {
+			Set<Path> pres = prefixes(paths, eq.lhs.source);
+			for (Path pre : pres) {
+				Eq e = new Eq(compose0(pre, eq.lhs), compose0(pre, eq.rhs));
+				ret.add(eq);
+			}
+			Set<Path> suff = suffixes(paths, eq.lhs.target);
+			for (Path suf : suff) {
+				Eq e = new Eq(compose0(eq.lhs, suf), compose0(eq.rhs, suf));
+				ret.add(eq);
+			}
+		}
+		return ret;
+	}
+
+	private Set<Path> suffixes(Set<List<String>> paths, Node t) throws FQLException  {
+		Set<Path> ret = new HashSet<>();
+		for (List<String> path : paths) {
+			String src = path.get(0);
+			if (src.equals(t.string)) {
+				ret.add(new Path(this, path));
+			}
+		}
+		return ret;
+	}
+
+	private Set<Path> prefixes(Set<List<String>> paths, Node t) throws FQLException {
+		Set<Path> ret = new HashSet<>();
+		for (List<String> path : paths) {
+			String dst = new Path(this, path).target.string;
+			if (dst.equals(t.string)) {
+				ret.add(new Path(this, path));
+			}
+		}
+		return ret;
+	}
+
+	private Path compose0(Path a, Path b) {
+		List<Edge> r = new LinkedList<>();
+		r.addAll(a.path);
+		r.addAll(b.path);
+		return new Path(a.source, a.target, r);
+	}
+
 	private String dstOf(List<List<String>> eqc) throws FQLException {
 		List<String> x = eqc.get(0);
 		return new Path(this, x).target.string;
@@ -530,8 +635,9 @@ public class Signature implements Viewable<Signature> {
 		return true;
 	}
 
-	private void merge(List<List<List<String>>> eqcs) {
-		for (Eq eq : eqs) {
+	private void merge(Set<Eq> eqs0, List<List<List<String>>> eqcs) throws FQLException {
+		for (Eq eq : eqs0) {
+		//	System.out.println("on merge for " + eq);
 			List<List<String>> lhs = null, rhs = null;
 			for (List<List<String>> eqc : eqcs) {
 				if (eqc.contains(pathToList(eq.lhs))) {
@@ -542,21 +648,27 @@ public class Signature implements Viewable<Signature> {
 				}
 			}
 			if (lhs == null) {
-				throw new RuntimeException("Missing lhs equiv class " + eq);
+		//		continue;
+				throw new FQLException("Missing lhs equiv class " + eq + " in " + eqcs);
 			}
 			if (rhs == null) {
-				throw new RuntimeException("Missing rhs equiv class " + eq);
+		//		continue;
+				throw new FQLException("Missing rhs equiv class " + eq + " in " + eqcs);
 			}
+			
 			if (!lhs.equals(rhs)) {
+		//		System.out.println("unequal : " + lhs + " and " + rhs);
 				eqcs.remove(lhs);
 				eqcs.remove(rhs);
 				List<List<String>> n = new LinkedList<List<String>>();
 				n.addAll(lhs);
 				n.addAll(rhs);
 				eqcs.add(n);
-				merge(eqcs);
+		//		System.out.println("result " + eqcs);
+				merge(eqs0, eqcs);
 				return;
 			}
+	//		System.out.println("lhs and rhs are equal");
 		}
 	}
 
@@ -586,9 +698,25 @@ public class Signature implements Viewable<Signature> {
 		return ret;
 	}
 
+	private Set<List<String>> bfs2(LinkedList<String> l, Node n, int cur, int max) {
+		Set<Edge> outs = outEdges(n);
+		Set<List<String>> ret = new HashSet<>();
+		if (cur == max) {
+			ret.add(l);
+			return ret;
+		}
+		for (Edge e : outs) {
+			LinkedList<String> r = new LinkedList<String>(l);
+			r.add(e.name);
+			ret.add(r);
+			ret.addAll(bfs2(new LinkedList<String>(r), e.target, cur + 1, max));
+		}
+		return ret;
+	}
 	private List<List<String>> bfs(LinkedList<String> l, Node n) {
 		Set<Edge> outs = outEdges(n);
 		List<List<String>> ret = new LinkedList<List<String>>();
+	
 		for (Edge e : outs) {
 			LinkedList<String> r = new LinkedList<String>(l);
 			r.add(e.name);
@@ -699,6 +827,13 @@ public class Signature implements Viewable<Signature> {
 	@Override
 	public JPanel join() {
 		return null;
+	}
+	
+	public String tojson() {
+		String ns = PrettyPrinter.sep(",", "[", "]", nodes);
+		String es = PrettyPrinter.sep(",", "[", "]", edges);
+		String rs = PrettyPrinter.sep(",", "[", "]", new LinkedList<>(eqs));
+		return "{" + ns + " , " + es + " , " + rs + "}";
 	}
 	
 

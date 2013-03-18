@@ -40,7 +40,7 @@ import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
  *
  * Implementation of signature morphisms
  */
-public class Mapping implements Viewable<Mapping> {
+public class Mapping implements Viewable<Mapping>, Jsonable {
 	
 	public void validate() throws FQLException {
 		Triple<FinFunctor<String, List<List<String>>, String, List<List<String>>>, Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>>, Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>>> s = toFunctor();
@@ -643,6 +643,45 @@ public class Mapping implements Viewable<Mapping> {
 	@Override
 	public JPanel join() {
 		return null;
+	}
+
+	@Override
+	public String tojson() {
+		return "{" +
+		"\"source\" : " + source.tojson() + "," +
+		"\"target\" : " + target.tojson() + "," +
+		"\"onObjects\" : " + jsonNodes() + "," +
+		"\"onGenerators\" : " + jsonEdges() +
+		"}";
+	}
+
+	private String jsonEdges() {
+		String s = "[";
+		
+		boolean first = true;
+		for (Entry<Edge,Path> e : em.entrySet()) {
+			if (!first) {
+				s += ","; 
+			}
+			s +=  "{" + "\"arrow\" : " + (e.getKey().tojson() + " , \"path\" : " + e.getValue()) + "}";
+		}
+		
+		return s + "]";
+
+	}
+
+	private String jsonNodes() {
+		String s = "{";
+		
+		boolean first = true;
+		for (Entry<Node,Node> e : nm.entrySet()) {
+			if (!first) {
+				s += ","; 
+			}
+			s += (e.getKey().tojson() + " : " + e.getValue());
+		}
+		
+		return s + "}";
 	}
 	
 	

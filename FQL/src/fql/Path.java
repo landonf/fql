@@ -9,7 +9,7 @@ import java.util.List;
  *
  * Paths
  */
-public class Path {
+public class Path implements Jsonable {
 
 	Node source;
 	Node target;
@@ -122,5 +122,10 @@ public class Path {
 
 	public String toLong() {
 		return toString() + " : " + source.string + " -> " + target.string;
+	}
+
+	@Override
+	public String tojson() {
+		return PrettyPrinter.sep(",","[","]", path);
 	}
 }

@@ -6,7 +6,7 @@ package fql;
  *
  * Syntax for equality of paths.
  */
-public class Eq {
+public class Eq implements Jsonable {
 
 	Path lhs, rhs;
 	
@@ -17,6 +17,13 @@ public class Eq {
 	
 	public String toString() {
 		return lhs + " = " + rhs;
+	}
+
+	@Override
+	public String tojson() {
+		String s = "\"left\" : " + lhs.tojson();
+		String r = "\"right\" : " + rhs.tojson();
+		return s + " , " + r;
 	}
 
 }

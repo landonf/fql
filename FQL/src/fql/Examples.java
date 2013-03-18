@@ -1,6 +1,5 @@
 package fql;
 
-import java.util.Date;
 
 /**
  * 
@@ -9,6 +8,8 @@ import java.util.Date;
  * This class contains the text of the hard-coded demo examples and help dialog.
  */
 public class Examples {
+	
+	static String BUILTAT = "Feb 27";
 	
 	
 	public static final String employeesDefinitions = 
@@ -74,14 +75,14 @@ public class Examples {
 	public static final String employeesCommands = "show S  show I";
 
 	public static final String helpString = "Available definitions (quasi-BNF): \n\n"
-			+ "schema S = { [E : N -> N | N], ; [[E]. = [E].], }"
+			+ "schema S = { [E : N -> N | N], ; [N[.E] = N[.E]], }"
 			+ "\n\nmapping F : S -> S = { [(N,N)], ; [(E, [E].)], }"
 			+ "\nmapping F = id S"
 			+ "\nmapping F = F o F"
 			+ "\n\nquery Q = id S"
 			+ "\nquery Q = Q o Q"
 			+ "\nquery Q = project Q join Q union Q"
-			+ "\n\ninstance I : S = { [V = { [(C,C) | C], }]; }"
+			+ "\n\ninstance I : S = { [V = { [(C,C)], }]; }"
 			+ "\ninstance I = eval Q I"
 			+ "\ninstance I = delta F I"
 			+ "\ninstance I = sigma F I"
@@ -92,9 +93,13 @@ public class Examples {
 			+ "\n\nnew, open, save, and exit are available in the file menu"
 			+ "\ncontrol-Z and control-Y work for redo and undo"
 			+ "\ncontrol-C and control-V and control-X and contol-Q work for Copy, Paste, Cut, and Quit"
-			+ "\nFor sigma/pi query generation, signatures must be acyclic"
-			+ "\nMapping well-formedness and discrete op-fibrations not checked"
-			+ "\n\nBuilt at " + new Date().toString();
+			+ "\nFor sigma/pi query generation, signatures must be acyclic."
+			+ "\nThe \"employees, pi, etc\" buttons are example FQL programs."
+			+ "\n\nparsing note: FQL needs spaces around \"->\" or other 2-char tokens"
+			+ "\n\ninstnaces values must be single words"
+			+ "\n\nin applets, copy and paste do not work outside the browser, and no open/save"
+			+ "\n\nBuilt at " 
+			+ BUILTAT;
 	
 	public static final String piDefinitions = 
 			"schema C = { c : C1 -> C2 ; }\n" +

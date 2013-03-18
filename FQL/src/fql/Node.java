@@ -6,7 +6,7 @@ package fql;
  *
  * Nodes in a signature.
  */
-public class Node {
+public class Node implements Jsonable {
 	
 	public String toString() {
 		return string;
@@ -43,6 +43,10 @@ public class Node {
 		} else if (!string.equals(other.string))
 			return false;
 		return true;
+	}
+	
+	public String tojson() {
+		return "\"" + string + "\"";
 	}
 	
 	

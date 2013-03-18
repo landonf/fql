@@ -6,7 +6,7 @@ package fql;
  *
  * Class for edges in a signature.
  */
-public class Edge {
+public class Edge implements Jsonable {
 	
 	public String toString() {
 		return name + " : " + source + " -> " + target;
@@ -62,5 +62,12 @@ public class Edge {
 		return true;
 	}
 
+	public String tojson() {
+		String s = "{";
+		s += "\"source\" : " + source.tojson();
+		s += ", \"target\" : " + target.tojson();
+		s += ", \"label\" : \"" + name + "\"}";  
+		return s;
+	}
 
 }
