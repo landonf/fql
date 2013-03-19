@@ -38,7 +38,7 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.VertexLabelRenderer;
 
-public class Instance implements Viewable<Instance> {
+public class Instance implements Viewable<Instance>, Jsonable {
 
 	public void conformsTo(Signature s) throws FQLException {
 		for (Node n : s.nodes) {
@@ -883,5 +883,64 @@ public class Instance implements Viewable<Instance> {
 	JPanel vwr = new JPanel();
 	CardLayout cards = new CardLayout();
 	Map<String, JTable> joined;
+
+	@Override
+	public String tojson() {
+		List<String> l = new LinkedList<String>();
+		for (Node kk : thesig.nodes) {
+			String k = kk.string;
+			Set<Pair<String, String>> v = data.get(k);
+			boolean first = true;
+			String s = "\"" + k + "\" : [";
+			for (Pair<String, String> tuple : v) {
+				if (!first) {
+					s += ",";
+				}
+				first = false;
+				
+				s += "\"" + tuple.first + "\"";
+			}
+			s += "]";
+			l.add(s);
+		}
+		
+		String s = PrettyPrinter.sep0(",\n", l);
+		
+		String onobjects = "\"onObjects\" : {\n" + s + "\n}";
+		
+		l = new LinkedList<String>();
+		for (Edge kk : thesig.edges) {
+			String k = kk.name;
+			Set<Pair<String, String>> v = data.get(k);
+			boolean first = true;
+			for (Pair<String, String> tuple : v) {
+				if (!first) {
+					s += ",";
+				}
+				s = "{\"arrow\":" + kk.tojson() + ",\n\"map\" : {";
+				s += "\"input\":\"" + tuple.first + "\",\"output\":\"" + tuple.second + "\"";
+				first = false;
+			}
+			s += "}}\n";
+			l.add(s); 
+		}
+		
+		String onmorphisms = "\"onMorphisms\":[\n" + PrettyPrinter.sep0(",", l) + "]\n}\n";
+		
+		return "{\n\"ontology\":" + thesig.tojson() + ",\n" + onobjects + ",\n" + onmorphisms;
+		
+	}
+
+	@Override
+	public JPanel json() {
+		JTextArea q = new JTextArea(tojson());		
+		q.setWrapStyleWord(true);
+		q.setLineWrap(true);
+		JPanel p = new JPanel(new GridLayout(1,1));
+		JScrollPane jsc = new JScrollPane(q);
+	//	jsc.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		p.add(jsc);
+		return p;
+	}
 
 }

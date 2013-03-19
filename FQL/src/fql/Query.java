@@ -692,6 +692,11 @@ public class Query implements Viewable<Query> {
 	public JPanel join() {
 		return null;
 	}
+
+	@Override
+	public JPanel json() {
+		return null;
+	}
 	
 	
 

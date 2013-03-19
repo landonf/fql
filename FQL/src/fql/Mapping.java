@@ -647,12 +647,12 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 
 	@Override
 	public String tojson() {
-		return "{" +
-		"\"source\" : " + source.tojson() + "," +
-		"\"target\" : " + target.tojson() + "," +
-		"\"onObjects\" : " + jsonNodes() + "," +
+		return "{\n" +
+		"\"source\" : " + source.tojson() + ",\n" +
+		"\"target\" : " + target.tojson() + ",\n" +
+		"\"onObjects\" : " + jsonNodes() + ",\n" +
 		"\"onGenerators\" : " + jsonEdges() +
-		"}";
+		"\n}\n";
 	}
 
 	private String jsonEdges() {
@@ -663,10 +663,11 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			if (!first) {
 				s += ","; 
 			}
-			s +=  "{" + "\"arrow\" : " + (e.getKey().tojson() + " , \"path\" : " + e.getValue()) + "}";
+			first = false;
+			s +=  "\n{" + "\"arrow\" : " + (e.getKey().tojson() + ",\n\"path\" : " + e.getValue().tojson()) + "}";
 		}
 		
-		return s + "]";
+		return s + "\n]";
 
 	}
 
@@ -678,10 +679,23 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			if (!first) {
 				s += ","; 
 			}
-			s += (e.getKey().tojson() + " : " + e.getValue());
+			first = false;
+			s += (e.getKey().tojson() + " : " + e.getValue().tojson());
 		}
 		
 		return s + "}";
+	}
+
+	@Override
+	public JPanel json() {
+		JTextArea q = new JTextArea(tojson());		
+		q.setWrapStyleWord(true);
+		q.setLineWrap(true);
+		JPanel p = new JPanel(new GridLayout(1,1));
+		JScrollPane jsc = new JScrollPane(q);
+	//	jsc.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		p.add(jsc);
+		return p;
 	}
 	
 	

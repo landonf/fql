@@ -66,7 +66,11 @@ public class Display {
 
 				px.add("Textual", ta);
 				
-				
+				JPanel ja = view.json();
+				if (ja != null) {
+					px.add("JSON", ja);
+				}
+					
 				JPanel top = new JPanel(new GridLayout(1,1));
 				top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 				top.add(px);

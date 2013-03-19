@@ -38,6 +38,8 @@ public class GUI extends JPanel {
 		
 		MenuBar menuBar = new MenuBar();
 		
+//		MenuItem m = new MenuItem()
+		
 		Menu fileMenu = new Menu("File");
 		MenuItem newItem = new MenuItem("New");
 		MenuItem openItem = new MenuItem("Open");

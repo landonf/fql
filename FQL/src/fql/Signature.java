@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
 
 import org.apache.commons.collections15.Transformer;
 
@@ -831,9 +832,21 @@ public class Signature implements Viewable<Signature> {
 	
 	public String tojson() {
 		String ns = PrettyPrinter.sep(",", "[", "]", nodes);
-		String es = PrettyPrinter.sep(",", "[", "]", edges);
+		String es = PrettyPrinter.sep(",\n", "[", "]", edges);
 		String rs = PrettyPrinter.sep(",", "[", "]", new LinkedList<>(eqs));
-		return "{" + ns + " , " + es + " , " + rs + "}";
+		return "{\n\"objects\": " + ns + " , \n\"arrows\": " + es + " ,\n\"relations\": " + rs + "\n}";
+	}
+
+	@Override
+	public JPanel json() {
+		JTextArea q = new JTextArea(tojson());		
+		//q.setWrapStyleWord(true);
+		//q.setLineWrap(true);
+		JPanel p = new JPanel(new GridLayout(1,1));
+		JScrollPane jsc = new JScrollPane(q);
+	//	jsc.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		p.add(jsc);
+		return p;
 	}
 	
 
