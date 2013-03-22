@@ -19,7 +19,7 @@ public class FQLApplet extends JApplet {
         try {
             SwingUtilities.invokeAndWait(new Runnable() {
                 public void run() {
-                    JPanel lbl = GUI.makeGUI();
+                    JPanel lbl = GUI.makeGUI().first;
                     add(lbl);
                 }
             });

@@ -10,4 +10,9 @@ public class Partial<T> {
 		value = v;
 	}
 
+	@Override
+	public String toString() {
+		return "Partial [tokens=" + tokens + "\n value=" + value + "]";
+	}
+
 }

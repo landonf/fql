@@ -21,8 +21,8 @@ public class Eq implements Jsonable {
 
 	@Override
 	public String tojson() {
-		String s = "\"left\" : " + lhs.tojson();
-		String r = "\"right\" : " + rhs.tojson();
+		String s = "{\"left\" : " + lhs.tojson();
+		String r = "\"right\" : " + rhs.tojson() + "}";
 		return s + " , " + r;
 	}
 

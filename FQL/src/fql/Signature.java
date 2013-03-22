@@ -19,7 +19,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.ScrollPaneConstants;
 
 import org.apache.commons.collections15.Transformer;
 
@@ -32,6 +31,10 @@ import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
+import fql.parse.JSONParsers;
+import fql.parse.Partial;
+import fql.parse.Tokens;
+import fql.parse.Unit;
 
 /**
  * 
@@ -104,6 +107,79 @@ public class Signature implements Viewable<Signature> {
 		
 	}
 	
+	//for json
+	public Signature(
+			List<String> obs,
+			List<Pair<Pair<String, String>, String>> arrows,
+			List<Pair<List<Pair<Pair<String, String>, String>>, 
+	          List<Pair<Pair<String, String>, String>>>>  equivs) throws FQLException {
+		Set<Node> nodesA = new HashSet<Node>();
+		Set<Edge> edgesA = new HashSet<Edge>();
+//		name0 = n;
+
+		Set<String> seen_obs = new HashSet<String>();
+		for (String o : obs) {
+			if (seen_obs.contains(o)) {
+				throw new FQLException("Duplicate object : " + o);
+			}
+			seen_obs.add(o);
+			nodesA.add(new Node(o));
+		}
+		
+		Set<String> seen = new HashSet<>();
+		for (Pair<Pair<String, String>, String> arrow : arrows) {
+			String name = arrow.second;
+			String source = arrow.first.first;
+			String target = arrow.first.second;
+			
+			if (seen.contains(name)) {
+				throw new FQLException("Duplicate edge: " + name);	
+			} 
+			seen.add(name);
+			
+			Node source_node = lookup(source, nodesA);
+			Node target_node = lookup(target, nodesA);
+			
+			Edge e = new Edge(name, source_node, target_node);
+			edgesA.add(e);		
+		}
+		
+		nodes = new LinkedList<Node>(nodesA);
+		edges = new LinkedList<Edge>(edgesA);
+		
+		eqs = new HashSet<Eq>();
+		for (Pair<List<Pair<Pair<String, String>, String>>, List<Pair<Pair<String, String>, String>>> equiv : equivs) {
+			if (equiv.first.size() == 0 && equiv.second.size() == 0) {
+				throw new FQLException("empty eq " + equiv);
+			}
+			Path lhs, rhs;
+			List<String> temp = new LinkedList<>();
+			if (equiv.first.size() == 0) {
+				rhs = new Path(new Unit(), this, equiv.second);
+				temp.add(rhs.source.string);
+				lhs = new Path(this, temp);
+			} else  if (equiv.second.size() == 0) {
+				lhs = new Path(new Unit(), this, equiv.first);			
+				temp.add(lhs.source.string);
+				rhs = new Path(this, temp);
+			} else {
+				lhs = new Path(new Unit(), this, equiv.first);
+				rhs = new Path(new Unit(), this, equiv.second);
+			}
+			
+			if (!lhs.source.equals(rhs.source)) {
+				throw new FQLException("source object mismatch " + lhs + " and " + rhs);
+			}
+			if (!lhs.target.equals(rhs.target)) {
+				throw new FQLException("target object mismatch " + lhs + " and " + rhs);
+			}
+			Eq eq = new Eq(lhs, rhs);
+			eqs.add(eq);
+		}
+		
+		
+	}
+
 	public boolean acyclic() {
 		for (Node n : nodes) { 	
 			Set<Node> r = reachable(n);
@@ -834,7 +910,16 @@ public class Signature implements Viewable<Signature> {
 		String ns = PrettyPrinter.sep(",", "[", "]", nodes);
 		String es = PrettyPrinter.sep(",\n", "[", "]", edges);
 		String rs = PrettyPrinter.sep(",", "[", "]", new LinkedList<>(eqs));
-		return "{\n\"objects\": " + ns + " , \n\"arrows\": " + es + " ,\n\"relations\": " + rs + "\n}";
+		String ret = "{\n\"objects\": " + ns + " , \n\"arrows\": " + es + " ,\n\"relations\": " + rs + "\n}";
+		
+//		try {
+//			Partial<Signature> out = new JSONParsers.JSONSigParser(true).parse(new Tokens(ret));
+//			System.out.println(out.value);
+//		} catch(Exception e) {
+//			e.printStackTrace();
+//		}
+			
+		return ret;
 	}
 
 	@Override

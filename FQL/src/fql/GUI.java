@@ -23,6 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 @SuppressWarnings("serial")
 public class GUI extends JPanel {
@@ -32,7 +33,8 @@ public class GUI extends JPanel {
 	
 	static boolean dirty = false;
 
-	public static JPanel makeGUI() {
+	
+	public static Pair<JPanel, MenuBar> makeGUI() {
 		JPanel pan = new JPanel();
 		//super("FQL IDE");
 		
@@ -50,6 +52,15 @@ public class GUI extends JPanel {
 		fileMenu.add(saveItem);
 		fileMenu.add(exitItem);
 		//respArea.setWrapStyleWord();
+		
+		Menu webMenu = new Menu("Web");
+		MenuItem serverItem = new MenuItem("Start Local Server");
+		webMenu.add(serverItem);
+		serverItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				serverAction();
+			}
+		});
 		
 		newItem.addActionListener(
 				new	ActionListener() {
@@ -82,6 +93,7 @@ public class GUI extends JPanel {
 		
 				
 		menuBar.add(fileMenu);
+		menuBar.add(webMenu);
 				
 		
 		//JSplitPane p = new FQLSplit(.8, JSplitPane.HORIZONTAL_SPLIT);
@@ -233,14 +245,27 @@ public class GUI extends JPanel {
 	  //   this.
 	     
 	//	setContentPane(pan);
-	//	setMenuBar(menuBar);
+	//	pan.setMenuBar(menuBar);
 	
 		//pack();
 		//setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		
-	     return pan;
+	     return new Pair<>(pan, menuBar);
 	}
 	
+	protected static void serverAction() {
+		String r = JOptionPane.showInputDialog("Local port:", 8085);
+		if (r == null) {
+			return;
+		}
+		try {
+			int rr = Integer.parseInt(r);
+			Web.serve(rr);
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, e);
+		}
+	}
+
 	protected static void piAction() {
 		if (abortBecauseDirty()) {
 			return;

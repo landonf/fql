@@ -1,5 +1,7 @@
 package fql;
 
+import java.awt.MenuBar;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -12,9 +14,10 @@ import javax.swing.JPanel;
 public class FQL  {
 
 	public static void main(String[] args) {
-		JPanel gui = GUI.makeGUI();
+		Pair<JPanel, MenuBar> gui = GUI.makeGUI();
 		JFrame f = new JFrame("FQL IDE");
-		f.setContentPane(gui);
+		f.setContentPane(gui.first);
+		f.setMenuBar(gui.second);
 		f.pack();
 		f.setSize(800, 600);
 		

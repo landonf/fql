@@ -33,6 +33,8 @@ import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
+import fql.parse.JSONParsers.JSONMappingParser;
+import fql.parse.Tokens;
 
 /**
  * 
@@ -120,6 +122,38 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			List<Pair<String, List<String>>> arrows) throws FQLException {
 		this.name = name;
 		morphism(source, target, objs, arrows);
+		validate();
+	}
+
+	public Mapping(
+			Signature source,
+			Signature target,
+			List<Pair<String, String>> objs,
+			List<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>> arrows) throws FQLException {
+		this.source = source;
+		this.target = target;
+		for (Pair<String, String> p : objs) {
+			Node sn = this.source.getNode(p.first);
+			Node tn = this.target.getNode(p.second);
+			nm.put(sn, tn);
+		}
+		for (Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>> arrow : arrows) {
+			Edge e = this.source.getEdge(arrow.first.second);
+			Node n = nm.get(e.source);
+			Path p = new Path(this.target, arrow.second, n);
+			em.put(e, p);
+		}
+		for (Node n : this.source.nodes) {
+			if (nm.get(n) == null) {
+				throw new FQLException("Missing node mapping from " + n + " in " + name + "\n" + this);
+			}
+		}
+		for (Edge e : this.source.edges) {
+			if (em.get(e) == null) {
+				throw new FQLException("Missing edge mapping from " + e + " in " + name);
+			}
+		}
+
 		validate();
 	}
 
@@ -647,12 +681,19 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 
 	@Override
 	public String tojson() {
-		return "{\n" +
+		String ret = "{\n" +
 		"\"source\" : " + source.tojson() + ",\n" +
 		"\"target\" : " + target.tojson() + ",\n" +
 		"\"onObjects\" : " + jsonNodes() + ",\n" +
 		"\"onGenerators\" : " + jsonEdges() +
 		"\n}\n";
+		
+//		try {
+//			System.out.println(new JSONMappingParser().parse(new Tokens(ret)));
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+		return ret;
 	}
 
 	private String jsonEdges() {
@@ -696,6 +737,10 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	//	jsc.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		p.add(jsc);
 		return p;
+	}
+
+	public static Mapping fromjson(String mapping) throws Exception {
+		return new JSONMappingParser().parse(new Tokens(mapping)).value;
 	}
 	
 	

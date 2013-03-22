@@ -37,6 +37,8 @@ import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.VertexLabelRenderer;
+import fql.parse.JSONParsers;
+import fql.parse.Tokens;
 
 public class Instance implements Viewable<Instance>, Jsonable {
 
@@ -130,6 +132,20 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	Map<String, Set<Pair<String, String>>> data;
 
 	Signature thesig;
+	
+	public Instance(String n, Signature thesig,
+			Map<String, Set<Pair<String, String>>> data)
+			throws FQLException {
+		this.data = new HashMap<String, Set<Pair<String, String>>>();
+		for (String p : data.keySet()) {
+			this.data.put(p, new HashSet<Pair<String, String>>(data.get(p)));
+		}
+		this.thesig = thesig;
+		if (!typeCheck(thesig)) {
+			throw new FQLException("Type-checking failure " + n);
+		}
+		conformsTo(thesig);
+	}
 
 	public Instance(String n, Signature thesig,
 			List<Pair<String, List<Pair<String, String>>>> data)
@@ -191,6 +207,43 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			throw new FQLException("Unknown type " + type);
 		}
 	//	toFunctor().morphs(toFunctor(), toFunctor());
+	}
+
+	public Instance(
+			Signature sig,
+			List<Pair<String, List<String>>> ob,
+			List<Pair<Pair<Pair<String, String>, String>, Pair<String, String>>> mo) 
+	throws FQLException
+	{
+		
+		this(null, sig, jsonmap(ob, mo));		
+	}
+
+	private static Map<String, Set<Pair<String, String>>> jsonmap(
+			List<Pair<String, List<String>>> ob,
+			List<Pair<Pair<Pair<String, String>, String>, Pair<String, String>>> mo) {
+		Map<String, Set<Pair<String, String>>> map = new HashMap<>();
+		for (Pair<String, List<String>> o : ob) {
+			map.put(o.first, dupl(o.second));
+		}
+		for (Pair<Pair<Pair<String, String>, String>, Pair<String, String>> o : mo) {
+			String arr = o.first.second;
+			Set<Pair<String, String>> set = map.get(arr);
+			if (set == null) {
+				set = new HashSet<>();
+				map.put(arr,  set);
+			}
+			set.add(o.second);
+		}
+		return map;
+	}
+
+	private static Set<Pair<String, String>> dupl(List<String> x) {
+		Set<Pair<String, String>> ret = new HashSet<>();
+		for (String s : x) {
+			ret.add(new Pair<>(s, s));
+		}
+		return ret;
 	}
 
 	private boolean typeCheck(Signature thesig2) {
@@ -927,7 +980,14 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		
 		String onmorphisms = "\"onMorphisms\":[\n" + PrettyPrinter.sep0(",", l) + "]\n}\n";
 		
-		return "{\n\"ontology\":" + thesig.tojson() + ",\n" + onobjects + ",\n" + onmorphisms;
+		String ret = "{\n\"ontology\":" + thesig.tojson() + ",\n" + onobjects + ",\n" + onmorphisms;
+		
+//		try {
+//			System.out.println(new JSONParsers.JSONInstParser().parse(new Tokens(ret)));
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+		return ret;
 		
 	}
 
@@ -941,6 +1001,10 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	//	jsc.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		p.add(jsc);
 		return p;
+	}
+
+	public static Instance fromjson(String instance) throws Exception {
+		return new JSONParsers.JSONInstParser().parse(new Tokens(instance)).value;
 	}
 
 }

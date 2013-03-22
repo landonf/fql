@@ -3,6 +3,8 @@ package fql;
 import java.util.LinkedList;
 import java.util.List;
 
+import fql.parse.Unit;
+
 /**
  * 
  * @author ryan
@@ -56,6 +58,52 @@ public class Path implements Jsonable {
 
 	public Path(Signature s, Edge e) throws FQLException {
 		this(s, doStuff(s,e));
+	}
+
+	public Path(Unit n, Signature schema,
+			List<Pair<Pair<String, String>, String>> strings)  throws FQLException {
+		if (strings.isEmpty()) {
+			throw new FQLException("Empty path");
+		}
+		
+		path = new LinkedList<Edge>();
+		
+		source = schema.getNode(strings.get(0).first.first);
+
+		for (int i = 0; i < strings.size(); i++) {
+			String string = strings.get(i).second;
+			Edge e = schema.getEdge(string);
+			path.add(e);
+			target = e.target;
+		}
+
+	}
+
+	public Path(Signature schema,
+			List<Pair<Pair<String, String>, String>> strings, Node node) throws FQLException {
+		path = new LinkedList<Edge>();
+		
+		if (node == null) {
+			throw new RuntimeException();
+		}
+		source = node;
+
+		target = source;
+		for (int i = 0; i < strings.size(); i++) {
+			String string = strings.get(i).second;
+			Edge e = schema.getEdge(string);
+			path.add(e);
+			target = e.target;
+		}
+	}
+
+	private static List<String> convert(
+			List<Pair<Pair<String, String>, String>> l) {
+		List<String> ret = new LinkedList<>();
+		for (Pair<Pair<String, String>, String> x : l) {
+			ret.add(x.second);
+		}
+		return ret;
 	}
 
 	private static List<String> doStuff(Signature s, Edge e) {

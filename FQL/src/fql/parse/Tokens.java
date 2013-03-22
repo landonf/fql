@@ -9,7 +9,7 @@ public class Tokens {
 	private List<String> words;
 
 	private String[] symbols = new String[] { ",", ":", ";",
-			"->", ".", "%", "{", "}", "(", ")", "="};
+			"->", ".", "%", "{", "}", "(", ")", "=", "\"", "[", "]" };
 
 	private Tokens(List<String> s) {
 		words = s;
