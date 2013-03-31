@@ -10,8 +10,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.categoricaldata.api.BackEnd;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
+
 
 public class Web extends HttpServlet {
 
@@ -109,7 +112,7 @@ public class Web extends HttpServlet {
 				+ "\n<title>FDM - Generic Web/JSON Interface</title>"
 				+ "\n</head>"
 				+ "\n<body>"
-				+ "\n<p>Use this page to compute pullbacks and pushforwards, and to check isomorphism."
+				+ "\n<p>Use this page to compute pullbacks and pushforwards.<br>To check isomorphism, put instances in both input boxes."
 				+ "\n</p>"
 				+ "\n<form action=\".\" enctype=\"multipart/form-data\" method=\"post\">"
 				+ "\nInput dataset:" + "\n<br>"

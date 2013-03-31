@@ -51,7 +51,7 @@ public class JSONParsers {
 			Partial<Pair<Pair<Signature, Signature>, Pair<List<Pair<String, String>>, List<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>>>>> 
 			zzz = xxx.parse(s);
 			
-			System.out.println(zzz);
+			//System.out.println(zzz);
 			Mapping m = null;
 			try {
 				m = new Mapping(zzz.value.first.first, zzz.value.first.second, zzz.value.second.first, zzz.value.second.second);

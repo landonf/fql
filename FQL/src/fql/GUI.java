@@ -18,12 +18,15 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+
+import net.categoricaldata.api.BackEnd;
 
 @SuppressWarnings("serial")
 public class GUI extends JPanel {
@@ -61,6 +64,15 @@ public class GUI extends JPanel {
 				serverAction();
 			}
 		});
+		
+		MenuItem localItem = new MenuItem("JSON Input Panel");
+		localItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JsonPanel.showPanel(new FQLBackEnd());
+			}
+		});
+		webMenu.add(localItem);
+		
 		
 		newItem.addActionListener(
 				new	ActionListener() {
@@ -252,7 +264,8 @@ public class GUI extends JPanel {
 		
 	     return new Pair<>(pan, menuBar);
 	}
-	
+
+
 	protected static void serverAction() {
 		String r = JOptionPane.showInputDialog("Local port:", 8085);
 		if (r == null) {

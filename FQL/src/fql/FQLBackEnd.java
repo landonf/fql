@@ -1,5 +1,7 @@
 package fql;
 
+import net.categoricaldata.api.BackEnd;
+
 
 public class FQLBackEnd implements BackEnd {
 
@@ -12,18 +14,26 @@ public class FQLBackEnd implements BackEnd {
 	}
 
 	@Override
-	public String sigma(String instance, String mapping) {
-		return instance;
+	public String sigma(String instance, String mapping) throws Exception {
+		Mapping m = Mapping.fromjson(mapping);
+		Instance i = Instance.fromjson(instance);		
+		Instance j = new Instance("", m.target, m.evalSigma(i));
+		return j.tojson();
 	}
 
 	@Override
-	public String pi(String instance, String mapping) {
-		return "todo";
+	public String pi(String instance, String mapping) throws Exception {
+		Mapping m = Mapping.fromjson(mapping);
+		Instance i = Instance.fromjson(instance);		
+		Instance j = new Instance("", m.target, m.evalPi(i));
+		return j.tojson();
 	}
 
 	@Override
-	public String iso(String instance1, String instance2) {
-		 throw new RuntimeException("can't iso yet");
+	public String iso(String instance1, String instance2) throws Exception {
+		Instance i = Instance.fromjson(instance1);
+		Instance j = Instance.fromjson(instance2);
+		return Boolean.toString(i.iso(j));
 	}
 
 	@Override
@@ -33,7 +43,7 @@ public class FQLBackEnd implements BackEnd {
 	
 	@Override
 	public String readme() {
-		return "Note: data values cannot contain spaces.";
+		return "Note: in FQL, data values cannot contain spaces, and provenance tags are not allowed.";
 	}
 
 }

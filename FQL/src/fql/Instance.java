@@ -578,11 +578,6 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		return tap;
 	}
 
-	@Override
-	public String plan() {
-		// TODO plan for instance
-		return "todo";
-	}
 
 	@Override
 	public boolean equals0(Instance view2) {
@@ -591,19 +586,172 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 	@Override
 	public boolean iso(Instance i) {
-		return false;
-		// TODO iso instances
-		// if (data.size() != i.data.size()) {
-		// return false;
-		// }
-		// Map<String, Pair<String, String>> sub
-		// for (String table : data.keySet()) {
-		// if (!i.data.containsKey(table)) {
-		// return false;
-		// }
-		//
-		//
-		// }
+		return iso(this, i);
+	}
+
+	public static boolean iso(Instance i1, Instance i2) {
+		sameNodes(i1, i2);
+		sameEdges(i1, i2);
+
+		Signature sig = i1.thesig;
+		
+		Map<String, List<Map<String, String>>> subs1 = new HashMap<>();
+		Map<String, List<Map<String, String>>> subs2 = new HashMap<>();
+		for (Node n : sig.nodes) {
+			String k = n.string;
+			
+			List<Map<String, String>> i1i2 = Inst.bijections(dedupl(i1.data.get(k)),
+									                         dedupl(i2.data.get(k)));
+			List<Map<String, String>> i2i1 = Inst.bijections(dedupl(i2.data.get(k)),
+															dedupl(i1.data.get(k)));
+			
+			subs1.put(k, i1i2);
+			subs2.put(k, i2i1);		 
+		}
+		
+		List<Map<String, Map<String, String>>> subs1X = makesubs(subs1);
+		List<Map<String, Map<String, String>>> subs2X = makesubs(subs2);
+		
+		boolean flag = false;
+		for (Map<String, Map<String, String>> sub : subs1X) {
+			try {
+				Instance iX = i1.apply(sub);
+				if (iX.equals(i2)) {
+					flag = true;
+					break;
+				}
+			} catch (Exception e) { }
+		}
+		if (!flag) {
+			return false;
+		}
+		
+		for (Map<String, Map<String, String>> sub : subs2X) {
+			try {
+				Instance iX = i2.apply(sub);
+				if (iX.equals(i1)) {
+					flag = true;
+					break;
+				}
+			} catch (Exception e) { }
+		}
+		if (!flag) {
+			return false;
+		}
+		return true;
+	}
+
+	private static List<Map<String, Map<String, String>>> 
+	makesubs(Map<String, List<Map<String, String>>> sub) {
+
+		List<String> keys = new LinkedList<>(sub.keySet());
+		int[] counters = makeCounters(keys.size() + 1);
+		int[] sizes = makeSizes(keys, sub);
+
+		List<Map<String, Map<String, String>>> ret = new LinkedList<>();		
+		for (;;) {
+			
+			Map<String, Map<String, String>> s = new HashMap<>();
+			for (String k : keys) {
+				s.put(k, sub.get(k).get(counters[keys.indexOf(k)]));
+			}
+			ret.add(s);
+			
+			inc5(counters, sizes);
+			
+			if (counters[sub.size()] == 1) {
+				break;
+			}
+		}
+		
+		return ret;
+	}
+
+	private static int[] makeSizes(List<String> keys,
+			Map<String, List<Map<String, String>>> sub) {
+		int[] ret = new int[keys.size()];
+		int i = 0;
+		for (String k : keys) {
+			ret[i++] = sub.get(k).size();
+		}
+		return ret;
+	}
+
+	private static void inc5(int[] counters, int[] sizes) {
+		counters[0]++;
+		for (int i = 0; i < counters.length - 1; i++) {
+			if (counters[i] == sizes[i]) {
+				counters[i] = 0;
+				counters[i + 1]++;
+			}
+		}
+	}
+
+
+	private static int[] makeCounters(int size) {
+		int[] ret = new int[size];
+		for (int i = 0; i < size; i++) {
+			ret[i++] = 0;
+		}
+		return ret;
+	}
+
+	private Instance apply(Map<String, Map<String, String>> sub) throws FQLException {
+		List<Pair<String, List<Pair<String, String>>>> ret = new LinkedList<>();
+		
+		for (Node n : thesig.nodes) {
+			ret.add(new Pair<>(n.string, apply(data.get(n.string), sub.get(n.string), sub.get(n.string))));
+		}
+		for (Edge e : thesig.edges) {
+			ret.add(new Pair<>(e.name, apply(data.get(e.name), sub.get(e.source.string), sub.get(e.target.string))));
+		}
+		
+		return new Instance(null, thesig, ret);
+	}
+
+	private static List<Pair<String, String>> apply(Set<Pair<String, String>> set,
+			Map<String, String> s1, Map<String, String> s2) {
+		List<Pair<String, String>> ret = new LinkedList<>();
+		
+		for (Pair<String, String> p : set) {
+			ret.add(new Pair<>(s1.get(p.first), s2.get(p.second)));
+		}
+		
+		return ret;
+	}
+
+	private static List<String> dedupl(Set<Pair<String, String>> set) {
+		List<String> ret = new LinkedList<>();
+		for (Pair<String, String> p : set) {
+			ret.add(p.first);
+		}
+		return ret;
+	}
+
+	private static void sameEdges(Instance i1, Instance i2) {
+		for (Edge e1 : i1.thesig.edges) {
+			if (!i2.thesig.edges.contains(e1)) {
+				throw new RuntimeException("Missing " + e1 + " in " + i2 + ")");
+			}
+		}
+		for (Edge e2 : i2.thesig.edges) {
+			if (!i1.thesig.edges.contains(e2)) {
+				throw new RuntimeException("Missing " + e2 + " in " + i1 + ")");
+			}
+		}
+	}
+
+	private static void sameNodes(Instance i1, Instance i2) {
+		for (Node n1 : i1.thesig.nodes) {
+			if (!i2.thesig.nodes.contains(n1)) {
+				throw new RuntimeException("Missing " + n1 + " in " + i2 + ")");
+			}
+		}
+		for (Node n2 : i2.thesig.nodes) {
+			if (!i1.thesig.nodes.contains(n2)) {
+				throw new RuntimeException("Missing " + n2 + " in " + i1 + ")");
+			}
+		}
 	}
 
 	// TODO isHomo
@@ -966,6 +1114,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			String k = kk.name;
 			Set<Pair<String, String>> v = data.get(k);
 			boolean first = true;
+			s = "";
 			for (Pair<String, String> tuple : v) {
 				if (!first) {
 					s += ",";
@@ -973,9 +1122,9 @@ public class Instance implements Viewable<Instance>, Jsonable {
 				s = "{\"arrow\":" + kk.tojson() + ",\n\"map\" : {";
 				s += "\"input\":\"" + tuple.first + "\",\"output\":\"" + tuple.second + "\"";
 				first = false;
+				s += "}}\n";
+				l.add(s); 
 			}
-			s += "}}\n";
-			l.add(s); 
 		}
 		
 		String onmorphisms = "\"onMorphisms\":[\n" + PrettyPrinter.sep0(",", l) + "]\n}\n";
@@ -1005,6 +1154,12 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 	public static Instance fromjson(String instance) throws Exception {
 		return new JSONParsers.JSONInstParser().parse(new Tokens(instance)).value;
+	}
+
+	@Override
+	public String plan() throws FQLException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

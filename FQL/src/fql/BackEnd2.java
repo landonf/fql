@@ -1,6 +1,6 @@
 package fql;
 
-public interface BackEnd {
+public interface BackEnd2 {
 
 	public String delta(String instance, String mapping) throws Exception;
 	
@@ -10,8 +10,8 @@ public interface BackEnd {
 	
 	public String iso(String instance1, String instance2) throws Exception;
 	
-	public String version();
+	public String version(); // e.g., "FQL" or "Metaphor"
 
-	public String readme();
+	public String readme(); // e.g., "Don't use spaces in values"
 	
 }

@@ -9,7 +9,7 @@ package fql;
  */
 public class Examples {
 	
-	static String BUILTAT = "March 18 2013";
+	static String BUILTAT = "March 21 2013";
 	
 	
 	public static final String employeesDefinitions = 
@@ -98,6 +98,7 @@ public class Examples {
 			+ "\n\nparsing note: FQL needs spaces around \"->\" or other 2-char tokens"
 			+ "\n\ninstnaces values must be single words"
 			+ "\n\nin applets, copy and paste do not work outside the browser, and no open/save"
+			+ "\n\nOpen your browser to localhost:8085 to view the web/json interface"
 			+ "\n\nBuilt at " 
 			+ BUILTAT;
 	

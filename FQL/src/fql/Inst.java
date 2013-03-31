@@ -32,10 +32,12 @@ public class Inst<Obj, Arrow, Y, X> {
 		A.add("a");
 		A.add("b");
 		A.add("c");
+	//	A.add("d");
 		B.add("x");
 		B.add("y");
 		B.add("z");
-		System.out.println(morphs(A, B));
+		System.out.println("bijections " + bijections(A, B));
+		System.out.println("morphisms "  + homomorphs(A, B));
 	}
 
 	public static <Obj, Arrow, Y, X> List<Map<Obj, Map<Value<Y, X>, Value<Y, X>>>> morphsX(
@@ -92,7 +94,7 @@ public class Inst<Obj, Arrow, Y, X> {
 
 		for (Obj o : i1.cat.objects) {
 
-			List<Map<Value<Y, X>, Value<Y, X>>> morphs3 = morphs(
+			List<Map<Value<Y, X>, Value<Y, X>>> morphs3 = bijections(
 					new LinkedList<>(i1.applyO(o)),
 					new LinkedList<>(i2.applyO(o)));
 
@@ -102,7 +104,7 @@ public class Inst<Obj, Arrow, Y, X> {
 		return ret;
 	}
 
-	public static <X> List<Map<X, X>> isomorphs(List<X> A, List<X> B) {
+	public static <X> List<Map<X, X>> homomorphs(List<X> A, List<X> B) {
 		List<Map<X, X>> ret = new LinkedList<>();
 
 		System.out.println("Expecting " + Math.pow(B.size(), A.size())
@@ -141,7 +143,7 @@ public class Inst<Obj, Arrow, Y, X> {
 
 	//
 
-	public static <X> List<Map<X, X>> morphs(List<X> A, List<X> B) {
+	public static <X> List<Map<X, X>> bijections(List<X> A, List<X> B) {
 		List<Map<X, X>> ret = new LinkedList<>();
 
 		// System.out.println("Expecting " + Math. + " morphs " + B.size() +
