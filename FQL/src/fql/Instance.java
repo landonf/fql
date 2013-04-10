@@ -209,10 +209,11 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	//	toFunctor().morphs(toFunctor(), toFunctor());
 	}
 
+	//this is the json one
 	public Instance(
 			Signature sig,
 			List<Pair<String, List<String>>> ob,
-			List<Pair<Pair<Pair<String, String>, String>, Pair<String, String>>> mo) 
+			List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>> mo) 
 	throws FQLException
 	{
 		
@@ -221,19 +222,21 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 	private static Map<String, Set<Pair<String, String>>> jsonmap(
 			List<Pair<String, List<String>>> ob,
-			List<Pair<Pair<Pair<String, String>, String>, Pair<String, String>>> mo) {
+			List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>> mo) {
 		Map<String, Set<Pair<String, String>>> map = new HashMap<>();
 		for (Pair<String, List<String>> o : ob) {
 			map.put(o.first, dupl(o.second));
 		}
-		for (Pair<Pair<Pair<String, String>, String>, Pair<String, String>> o : mo) {
+		for (Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>> o : mo) {
 			String arr = o.first.second;
 			Set<Pair<String, String>> set = map.get(arr);
 			if (set == null) {
 				set = new HashSet<>();
 				map.put(arr,  set);
 			}
-			set.add(o.second);
+			for (Pair<String, String> oo : o.second) {
+				set.add(oo);
+			}
 		}
 		return map;
 	}
@@ -1114,17 +1117,16 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			String k = kk.name;
 			Set<Pair<String, String>> v = data.get(k);
 			boolean first = true;
-			s = "";
+			s = "{\"arrow\":" + kk.tojson() + ",\n\"map\" : {";
 			for (Pair<String, String> tuple : v) {
 				if (!first) {
 					s += ",";
 				}
-				s = "{\"arrow\":" + kk.tojson() + ",\n\"map\" : {";
-				s += "\"input\":\"" + tuple.first + "\",\"output\":\"" + tuple.second + "\"";
+				s += "\"" + tuple.first + "\":" +  "\"" + tuple.second + "\"";
 				first = false;
-				s += "}}\n";
-				l.add(s); 
 			}
+			s += "}}\n";
+			l.add(s); 
 		}
 		
 		String onmorphisms = "\"onMorphisms\":[\n" + PrettyPrinter.sep0(",", l) + "]\n}\n";

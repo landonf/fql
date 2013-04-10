@@ -84,17 +84,17 @@ public class JSONParsers {
 		@Override
 		public Partial<Instance> parse(Tokens s) throws BadSyntax, IllTyped {
 
-			Parser<Pair<List<Pair<String, List<String>>>, List<Pair<Pair<Pair<String, String>, String>, Pair<String, String>>>>> 
+			Parser<Pair<List<Pair<String, List<String>>>, List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>>> 
 			r = ParserUtils.inside(new instanceObjParser(), new KeywordParser(","),
-							new onMorphismsParser());
+							new onMorphismsParser2());
 
-			Parser<Pair<Signature, Pair<List<Pair<String, List<String>>>, List<Pair<Pair<Pair<String, String>, String>, Pair<String, String>>>>>> 
+			Parser<Pair<Signature, Pair<List<Pair<String, List<String>>>, List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>>>> 
 			u = ParserUtils.inside(ParserUtils.seq(new QuotedKeywordParser("ontology"), ParserUtils.seq(new KeywordParser(":"), new JSONSigParser(false))), new KeywordParser(","), r);
 
-			Parser<Pair<Signature, Pair<List<Pair<String, List<String>>>, List<Pair<Pair<Pair<String, String>, String>, Pair<String, String>>>>>> ret = ParserUtils
+			Parser<Pair<Signature, Pair<List<Pair<String, List<String>>>, List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>>>> ret = ParserUtils
 					.outside(new KeywordParser("{"), u, new KeywordParser("}"));
 
-			Partial<Pair<Signature, Pair<List<Pair<String, List<String>>>, List<Pair<Pair<Pair<String, String>, String>, Pair<String, String>>>>>>
+			Partial<Pair<Signature, Pair<List<Pair<String, List<String>>>, List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>>>>
 			xxx = ret.parse(s);
 
 			// xxx.value
@@ -131,40 +131,70 @@ public class JSONParsers {
 			return x.parse(s);
 		}
 	}
-
-	public static class onMorphismsParser
-			implements
-			Parser<List<Pair<Pair<Pair<String, String>, String>, Pair<String, String>>>> {
+	
+	// { arrow : -, map : { } }
+	public static class onMorphismsParser2
+	 implements Parser<List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>> {
 
 		@Override
-		public Partial<List<Pair<Pair<Pair<String, String>, String>, Pair<String, String>>>> parse(
+		public Partial<List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>> parse(
 				Tokens s) throws BadSyntax, IllTyped {
-
-			Parser<Pair<String, String>> b = ParserUtils.seq(
-					new QuotedKeywordParser("map"), ParserUtils.seq(new KeywordParser(":"), new MapParser()));
-
-			Parser<Pair<Pair<String, String>, String>> a = ParserUtils.seq(
-					new QuotedKeywordParser("arrow"), ParserUtils.seq(new KeywordParser(":"), new ArrowParser()));
-
-			Parser<Pair<Pair<Pair<String, String>, String>, Pair<String, String>>> h = ParserUtils
-					.inside(a, new KeywordParser(","), b);
-
-			Parser<Pair<Pair<Pair<String, String>, String>, Pair<String, String>>> p = ParserUtils
-					.outside(new KeywordParser("{"), h, new KeywordParser("}"));
-
-			Parser<List<Pair<Pair<Pair<String, String>, String>, Pair<String, String>>>> u = 
-					ParserUtils.manySep(p, new KeywordParser(","));
-
-			Parser<List<Pair<Pair<Pair<String, String>, String>, Pair<String, String>>>> x = ParserUtils
-					.seq(new QuotedKeywordParser("onMorphisms"), ParserUtils
-							.seq(new KeywordParser(":"), ParserUtils.outside(
-									new KeywordParser("["), u,
-									new KeywordParser("]"))));
+			
+			Parser<Pair<Pair<String, String>, String>> arrP = ParserUtils.seq(new QuotedKeywordParser("arrow"), ParserUtils.seq(new KeywordParser(":"), new ArrowParser()));
+			
+			Parser<Pair<String, String>> foo = ParserUtils.inside(new QuotedParser(), new KeywordParser(":"), new QuotedParser());
+			
+			Parser<List<Pair<String, String>>> mP = ParserUtils.seq(new QuotedKeywordParser("map"), ParserUtils.seq(new KeywordParser(":"), ParserUtils.outside(new KeywordParser("{"), ParserUtils.manySep(foo, new KeywordParser(",")), new KeywordParser("}"))));
+	
+			Parser<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>> xxx = ParserUtils.outside(new KeywordParser("{"), ParserUtils.inside(arrP, new KeywordParser(","), mP), new KeywordParser("}"));
+			
+			Parser<List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>> u = ParserUtils.manySep(xxx, new KeywordParser(","));
+			
+			Parser<List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>> x = ParserUtils
+			.seq(new QuotedKeywordParser("onMorphisms"), ParserUtils
+					.seq(new KeywordParser(":"), ParserUtils.outside(
+							new KeywordParser("["), u,
+							new KeywordParser("]"))));
 
 			return x.parse(s);
-
+			
 		}
+		
 	}
+
+//	public static class onMorphismsParser
+//			implements
+//			Parser<List<Pair<Pair<Pair<String, String>, String>, Pair<String, String>>>> {
+//
+//		@Override
+//		public Partial<List<Pair<Pair<Pair<String, String>, String>, Pair<String, String>>>> parse(
+//				Tokens s) throws BadSyntax, IllTyped {
+//
+//			Parser<Pair<String, String>> b = ParserUtils.seq(
+//					new QuotedKeywordParser("map"), ParserUtils.seq(new KeywordParser(":"), new MapParser()));
+//
+//			Parser<Pair<Pair<String, String>, String>> a = ParserUtils.seq(
+//					new QuotedKeywordParser("arrow"), ParserUtils.seq(new KeywordParser(":"), new ArrowParser()));
+//
+//			Parser<Pair<Pair<Pair<String, String>, String>, Pair<String, String>>> h = ParserUtils
+//					.inside(a, new KeywordParser(","), b);
+//
+//			Parser<Pair<Pair<Pair<String, String>, String>, Pair<String, String>>> p = ParserUtils
+//					.outside(new KeywordParser("{"), h, new KeywordParser("}"));
+//
+//			Parser<List<Pair<Pair<Pair<String, String>, String>, Pair<String, String>>>> u = 
+//					ParserUtils.manySep(p, new KeywordParser(","));
+//
+//			Parser<List<Pair<Pair<Pair<String, String>, String>, Pair<String, String>>>> x = ParserUtils
+//					.seq(new QuotedKeywordParser("onMorphisms"), ParserUtils
+//							.seq(new KeywordParser(":"), ParserUtils.outside(
+//									new KeywordParser("["), u,
+//									new KeywordParser("]"))));
+//
+//			return x.parse(s);
+//
+//		}
+//	}
 
 	public static class MapParser implements Parser<Pair<String, String>> {
 
