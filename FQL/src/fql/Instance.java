@@ -612,11 +612,12 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			subs2.put(k, i2i1);		 
 		}
 		
-		List<Map<String, Map<String, String>>> subs1X = makesubs(subs1);
-		List<Map<String, Map<String, String>>> subs2X = makesubs(subs2);
-		
+		Subs subs1X = new Subs(subs1);
+		Subs subs2X = new Subs(subs2);
+		Map<String, Map<String, String>> sub;
+
 		boolean flag = false;
-		for (Map<String, Map<String, String>> sub : subs1X) {
+		while ((sub = subs1X.next()) != null) {
 			try {
 				Instance iX = i1.apply(sub);
 				if (iX.equals(i2)) {
@@ -629,7 +630,8 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			return false;
 		}
 		
-		for (Map<String, Map<String, String>> sub : subs2X) {
+		flag = false;
+		while ((sub = subs2X.next()) != null) {
 			try {
 				Instance iX = i2.apply(sub);
 				if (iX.equals(i1)) {
@@ -641,35 +643,49 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		if (!flag) {
 			return false;
 		}
+
 		return true;
 	}
 
-	private static List<Map<String, Map<String, String>>> 
-	makesubs(Map<String, List<Map<String, String>>> sub) {
+	static class Subs {
+		private Map<String, List<Map<String, String>>> sub;
+		private LinkedList<String> keys;
+		private int[] counters;
+		private int[] sizes;
 
-		List<String> keys = new LinkedList<>(sub.keySet());
-		int[] counters = makeCounters(keys.size() + 1);
-		int[] sizes = makeSizes(keys, sub);
+		public Subs(Map<String, List<Map<String, String>>> subs0) {
+			this.sub = subs0;
+			this.keys = new LinkedList<>(sub.keySet());
 
-		List<Map<String, Map<String, String>>> ret = new LinkedList<>();		
-		for (;;) {
-			
+			this.counters = makeCounters(keys.size() + 1);
+			this.sizes = makeSizes(keys, sub);
+		}
+		
+		public Map<String, Map<String, String>> next() {
+			if (counters[keys.size()] == 1) {
+				return null;
+			}
+
 			Map<String, Map<String, String>> s = new HashMap<>();
 			for (String k : keys) {
 				s.put(k, sub.get(k).get(counters[keys.indexOf(k)]));
 			}
-			ret.add(s);
 			
 			inc5(counters, sizes);
 			
-			if (counters[sub.size()] == 1) {
-				break;
-			}
+			return s;
 		}
-		
-		return ret;
 	}
+	
 
+	public static void printnice(int[] x) {
+		for (int i = 0; i < x.length; i++) {
+			System.out.print(x[i]);
+			System.out.print(" ");
+		}
+		System.out.println();
+	}
+	
 	private static int[] makeSizes(List<String> keys,
 			Map<String, List<Map<String, String>>> sub) {
 		int[] ret = new int[keys.size()];

@@ -1,6 +1,7 @@
 package fql.parse;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -36,8 +37,50 @@ public class Tokens {
 		for (String word : words0) {
 			expandWord(words, word);
 		}
+		
+		words = squashQuoted(words);
+	}
+	
+	private List<String> squashQuoted(List<String> w) {
+		Iterator<String> it = w.iterator();
+		boolean looking = false;
+		List<String> found = null;
+		List<String> ret = new LinkedList<>();
+		while (it.hasNext()) {
+			String s = it.next();
+			if (s.equalsIgnoreCase("\"")) {
+				if (!looking) {
+					found = new LinkedList<>();
+				} else {
+					ret.add("\"");
+					ret.add(concat(found));
+					ret.add("\"");
+					found = null;
+				}
+				looking = !looking;
+			} else {
+				if (looking) {
+					found.add(s);
+				} else {
+					ret.add(s);
+				}
+			}
+					
+		}
+				
+		return ret;
 	}
 
+	private String concat(List<String> s) {
+		String ret = "";
+		for (String a : s) {
+	//		ret += " ";
+			ret += a;
+		//	ret += " ";
+		}
+		return ret;
+	}
+	
 	public void expandWord(List<String> l, String word) {
 		if (word.equals("")) {
 			return;
