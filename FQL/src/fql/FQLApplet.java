@@ -4,6 +4,8 @@ import javax.swing.JApplet;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import fql.gui.GUI;
+
 /**
  * @author ryan
  * Entry point for the applet.
@@ -11,7 +13,7 @@ import javax.swing.SwingUtilities;
 public class FQLApplet extends JApplet {
 	
 	private static final long serialVersionUID = 1L;
-	static boolean isapplet = false;
+	public static boolean isapplet = false;
 
 	public void init() {
 		isapplet = true;

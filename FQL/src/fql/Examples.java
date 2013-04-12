@@ -80,25 +80,26 @@ public class Examples {
 			+ "\nmapping F = F o F"
 			+ "\n\nquery Q = id S"
 			+ "\nquery Q = Q o Q"
-			+ "\nquery Q = project Q join Q union Q"
+			+ "\nquery Q = delta Q sigma Q pi Q"
 			+ "\n\ninstance I : S = { [V = { [(C,C)], }]; }"
 			+ "\ninstance I = eval Q I"
 			+ "\ninstance I = delta F I"
 			+ "\ninstance I = sigma F I"
 			+ "\ninstance I = pi F I"
-//			+ "\n   plan V"
-			+ "\n\ncomment lines begin with \"% \""
-			+ "and end with \" %\" (note the spaces)"
+			+ "\n\ncomments begin with /* and end with */ "
 			+ "\n\nnew, open, save, and exit are available in the file menu"
 			+ "\ncontrol-Z and control-Y work for redo and undo"
 			+ "\ncontrol-C and control-V and control-X and contol-Q work for Copy, Paste, Cut, and Quit"
+			+ "\n"
 			+ "\nFor sigma/pi query generation, signatures must be acyclic."
+			+ "\n"
 			+ "\nThe \"employees, pi, etc\" buttons are example FQL programs."
-			+ "\n\nparsing note: FQL needs spaces around \"->\" or other 2-char tokens"
-			+ "\n\ninstnaces values must be single words"
-			+ "\n\nin applets, copy and paste do not work outside the browser, and no open/save"
-			+ "\n\nOpen your browser to localhost:8085 to view the web/json interface"
-			+ "\n\nBuilt at " ;
+			+ "\n"
+			+ "\nInstance values must be single words, unless they are quoted"
+			+ "\n"
+			+ "\nIn applets, copy and paste do not work outside the browser, and no open/save"
+			+ "\n"
+			+ "\nThe web menu offers json input options";
 	
 	public static final String piDefinitions = 
 			"schema C = { c : C1 -> C2 ; }\n" +
@@ -126,10 +127,9 @@ public class Examples {
 		+ "\n" + "show F"
 		+ "\n";
 
-	//TODO: display instances in categorical normal form
 	
 	public static final String initialDefinitions = 
-			"% note: this is not a discrete op-fibration %\n\n"
+			"/* note: this is not a discrete op-fibration */\n\n"
 			 + "schema C = {" 
 					+ "\n" + "    t1_ssn : T1 -> SSN"
 					+ "\n" + "  , t1_first : T1 -> First"

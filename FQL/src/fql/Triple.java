@@ -51,7 +51,7 @@ public class Triple<S1, S2, S3> {
 		return "(" + first + ", " + second + ", "
 				+ third + ")";
 	}
-	S1 first;
-	S2 second;
-	S3 third;
+	public S1 first;
+	public S2 second;
+	public S3 third;
 }

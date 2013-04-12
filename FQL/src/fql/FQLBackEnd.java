@@ -1,6 +1,8 @@
 package fql;
 
 import net.categoricaldata.api.BackEnd;
+import fql.decl.Instance;
+import fql.decl.Mapping;
 
 
 public class FQLBackEnd implements BackEnd {
@@ -33,7 +35,7 @@ public class FQLBackEnd implements BackEnd {
 	public String iso(String instance1, String instance2) throws Exception {
 		Instance i = Instance.fromjson(instance1);
 		Instance j = Instance.fromjson(instance2);
-		return Boolean.toString(i.iso(j));
+		return Boolean.toString(Instance.iso(i,j));
 	}
 
 	@Override
@@ -43,7 +45,7 @@ public class FQLBackEnd implements BackEnd {
 	
 	@Override
 	public String readme() {
-		return "Note: in FQL, data values cannot contain spaces, and provenance tags are not allowed.";
+		return "Note: provenance tags are not handled.";
 	}
 
 }

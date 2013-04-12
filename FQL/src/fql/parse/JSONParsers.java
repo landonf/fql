@@ -5,17 +5,17 @@ import java.util.List;
 import javax.swing.JOptionPane;
 
 import fql.FQLException;
-import fql.Instance;
-import fql.Mapping;
 import fql.Pair;
-import fql.Signature;
+import fql.decl.Instance;
+import fql.decl.Mapping;
+import fql.decl.Signature;
 
 public class JSONParsers {
 
 	public static void main(String[] args) {
 		try {
 			String s = JOptionPane.showInputDialog(" foo ");
-			Partial p = new JSONMappingParser().parse(new Tokens(s));
+			Partial<Mapping> p = new JSONMappingParser().parse(new FqlTokenizer(s));
 			System.out.println(p);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -270,7 +270,6 @@ public class JSONParsers {
 
 		@Override
 		public Partial<Signature> parse(Tokens s) throws BadSyntax, IllTyped {
-			String name;
 			List<Pair<Pair<String, String>, String>> arrows;
 			List<Pair<List<Pair<Pair<String, String>, String>>, List<Pair<Pair<String, String>, String>>>> eqs;
 			List<String> obs;

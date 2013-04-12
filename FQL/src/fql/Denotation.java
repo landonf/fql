@@ -9,6 +9,10 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
+import fql.decl.Node;
+import fql.decl.Path;
+import fql.decl.Signature;
+
 public class Denotation {
 	
 	Signature sig;
@@ -42,7 +46,6 @@ public class Denotation {
 	}
 	
 	private void inc() {
-		// TODO Auto-generated method stub
 		
 	}
 

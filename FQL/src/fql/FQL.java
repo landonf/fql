@@ -5,6 +5,8 @@ import java.awt.MenuBar;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import fql.gui.GUI;
+
 /**
  * 
  * @author ryan

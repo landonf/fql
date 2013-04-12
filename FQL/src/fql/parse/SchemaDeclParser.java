@@ -2,10 +2,11 @@ package fql.parse;
 
 import java.util.List;
 
-import fql.Decl;
 import fql.Pair;
-import fql.SignatureDecl;
 import fql.Triple;
+import fql.Unit;
+import fql.decl.Decl;
+import fql.decl.SignatureDecl;
 
 public class SchemaDeclParser implements Parser<Decl> {
 
