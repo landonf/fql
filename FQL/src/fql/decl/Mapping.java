@@ -34,6 +34,7 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import fql.FQLException;
+import fql.Fn;
 import fql.Pair;
 import fql.Triple;
 import fql.cat.Arr;
@@ -54,8 +55,9 @@ import fql.sql.RA;
 public class Mapping implements Viewable<Mapping>, Jsonable {
 	
 	public void validate() throws FQLException {
-		Triple<FinFunctor<String, List<List<String>>, String, List<List<String>>>, Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>>, Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>>> s = toFunctor();
-		s.first.validate(); //check preserves identities, composition
+		//TODO: check preserve identities, composition
+		//Triple<FinFunctor<String, List<List<String>>, String, List<List<String>>>, Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>>, Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>>> s = toFunctor();
+		//s.first.validate(); //check preserves identities, composition
 		//now check that path equivalences are respected
 		for (Eq x : source.eqs) {
 			if (!appy(x.lhs).equals(appy(x.rhs))) {
@@ -416,30 +418,54 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	 * Converts a mapping to a functor.
 	 * @return the functor, and some isomorphisms
 	 */
-	public Triple<FinFunctor<String, List<List<String>>, String, List<List<String>>>, Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>>, Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>>> toFunctor() throws FQLException {
-		HashMap<String, String> objMapping = new HashMap<String, String>();
-		HashMap<Arr<String,List<List<String>>>, Arr<String,List<List<String>>>> arrowMapping = new HashMap<>();
-		
-		for (Entry<Node, Node> e : nm.entrySet()) {
-			objMapping.put(e.getKey().string, e.getValue().string);
-		}
-		
-		Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>> srcCat0 = source.toCategory();
-		Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>> dstCat0 = target.toCategory();
-		
-		FinCat<String, List<List<String>>> srcCat = srcCat0.first;
-		FinCat<String, List<List<String>>> dstCat = dstCat0.first;
-		
-		for (Arr<String, List<List<String>>> arroweqc : srcCat.arrows) {
-			List<String> arrow = arroweqc.arr.get(0);
-			
-			List<String> mapped = apply(arrow);
-			Arr<String, List<List<String>>> mappedeqc = findeqc(dstCat, mapped);
-			arrowMapping.put(arroweqc, mappedeqc);
-		}
-		
-		return new Triple<>(new FinFunctor<>(objMapping, arrowMapping, srcCat, dstCat), srcCat0, dstCat0);
+//	public Triple<FinFunctor<String, List<List<String>>, String, List<List<String>>>, Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>>, Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>>> toFunctor() throws FQLException {
+//		HashMap<String, String> objMapping = new HashMap<String, String>();
+//		HashMap<Arr<String,List<List<String>>>, Arr<String,List<List<String>>>> arrowMapping = new HashMap<>();
+//		
+//		for (Entry<Node, Node> e : nm.entrySet()) {
+//			objMapping.put(e.getKey().string, e.getValue().string);
+//		}
+//		
+//		Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>> srcCat0 = source.toCategory();
+//		Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>> dstCat0 = target.toCategory();
+//		
+//		FinCat<String, List<List<String>>> srcCat = srcCat0.first;
+//		FinCat<String, List<List<String>>> dstCat = dstCat0.first;
+//		
+//		for (Arr<String, List<List<String>>> arroweqc : srcCat.arrows) {
+//			List<String> arrow = arroweqc.arr.get(0);
+//			
+//			List<String> mapped = apply(arrow);
+//			Arr<String, List<List<String>>> mappedeqc = findeqc(dstCat, mapped);
+//			arrowMapping.put(arroweqc, mappedeqc);
+//		}
+//		
+//		return new Triple<>(new FinFunctor<>(objMapping, arrowMapping, srcCat, dstCat), srcCat0, dstCat0);
+//	}
+	
+	public Triple<FinFunctor<Node, Path, Node, Path>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>> toFunctor2() throws FQLException {
+	HashMap<Node, Node> objMapping = new HashMap<>();
+	HashMap<Arr<Node,Path>, Arr<Node, Path>> arrowMapping = new HashMap<>();
+	
+	for (Entry<Node, Node> e : nm.entrySet()) {
+		objMapping.put(e.getKey(), e.getValue());
 	}
+	
+	Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> srcCat0 = source.toCategory2();
+	Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> dstCat0 = target.toCategory2();
+	
+	FinCat<Node, Path> srcCat = srcCat0.first;
+	FinCat<Node, Path> dstCat = dstCat0.first;
+	
+	for (Arr<Node, Path> arroweqc : srcCat.arrows) {
+		Path arrow = arroweqc.arr;
+		
+		Path mapped = appy(arrow);
+		arrowMapping.put(new Arr<>(arrow, arrow.source, arrow.target), new Arr<>(mapped, mapped.source, mapped.target));
+	}
+	
+	return new Triple<>(new FinFunctor<>(objMapping, arrowMapping, srcCat, dstCat), srcCat0, dstCat0);
+}
 
 	/**
 	 * Finds the equivalence class a path is in.
@@ -721,6 +747,12 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 
 	public static Mapping fromjson(String mapping) throws Exception {
 		return new JSONMappingParser().parse(new FqlTokenizer(mapping)).value;
+	}
+
+	@Override
+	public JPanel denotation() throws FQLException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	

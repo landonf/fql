@@ -110,6 +110,27 @@ public class Path implements Jsonable {
 //		return ret;
 //	}
 
+	public Path(Signature a, Node a2) throws FQLException {
+		this(a, foo(a2));
+	}
+	
+	public static Path append(Signature s, Path arr, Path arr2) throws FQLException {
+		if (!arr.target.equals(arr2.source)) {
+			throw new RuntimeException("bad path append");
+		}
+		List<String> x = new LinkedList<>(arr.asList());
+		List<String> y = new LinkedList<>(arr2.asList());
+		y.remove(0);
+		x.addAll(y);
+		return new Path(s, x);
+	}
+
+	private static List<String> foo(Node a) {
+		List<String> ret = new LinkedList<>();
+		ret.add(a.string);
+		return ret;
+	}
+
 	private static List<String> doStuff(Signature s, Edge e) {
 		List<String> ret = new LinkedList<String>();
 		ret.add(e.source.string);

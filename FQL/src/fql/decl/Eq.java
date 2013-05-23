@@ -10,7 +10,8 @@ import fql.parse.Jsonable;
  */
 public class Eq implements Jsonable {
 
-	Path lhs, rhs;
+	public Path lhs;
+	public Path rhs;
 	
 	public Eq(Path lhs, Path rhs) {
 		this.lhs = lhs;

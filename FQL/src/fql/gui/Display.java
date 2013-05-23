@@ -70,6 +70,11 @@ public class Display {
 				if (ja != null) {
 					px.add("JSON", ja);
 				}
+				
+				JPanel den = view.denotation();
+				if (den != null) {
+					px.add("Denotation", den);
+				}
 					
 				JPanel top = new JPanel(new GridLayout(1,1));
 				top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));

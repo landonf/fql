@@ -32,6 +32,7 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import fql.DEBUG;
 import fql.FQLException;
+import fql.Fn;
 import fql.Pair;
 import fql.Triple;
 import fql.cat.Arr;
@@ -574,83 +575,86 @@ public class Query implements Viewable<Query> {
 		
 		//System.out.println("name is " + name);
 		
-		Triple<FinFunctor<String, List<List<String>>, String, List<List<String>>>, Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>>, Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>>> 
-		isoS = s0.toFunctor();
-		Triple<FinFunctor<String, List<List<String>>, String, List<List<String>>>, Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>>, Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>>> 
-		isoT = v0.toFunctor();
+		Triple<FinFunctor<Node, Path, Node, Path>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>> 
+		isoS = s0.toFunctor2();
+		Triple<FinFunctor<Node, Path, Node, Path>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>> 
+		isoT = v0.toFunctor2();
 		
 //		env, name, isoS.second.second.first.first, isoS.second.second.second.first,
 		
-		SemQuery<Triple<Triple<String, Triple<String, String, String>, Arr<String, List<List<String>>>>, Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>, Arr<Triple<String, String, String>, Triple<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>>>, Pair<Arr<Triple<String, Triple<String, String, String>, Arr<String, List<List<String>>>>, Pair<Arr<String, List<List<String>>>, Arr<Triple<String, String, String>, Triple<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>>>>, Arr<Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>, Arr<String, List<List<String>>>>>, String, List<List<String>>, Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>, Arr<String, List<List<String>>>, String, List<List<String>>> 
-		ret = doComposition(env, isoS.first,f0.toFunctor().first,t0.toFunctor().first,u0.toFunctor().first,g0.toFunctor().first,isoT.first);
+		SemQuery<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, Pair<Arr<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>, Node, Path, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>, Node, Path> 
+		ret = doComposition(env, isoS.first,f0.toFunctor2().first,t0.toFunctor2().first,u0.toFunctor2().first,g0.toFunctor2().first,isoT.first);
 
-		Triple<Mapping, Triple<Signature, Pair<Map<Triple<Triple<String, Triple<String, String, String>, Arr<String, List<List<String>>>>, Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>, Arr<Triple<String, String, String>, Triple<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>>>, String>, Map<String, Triple<Triple<String, Triple<String, String, String>, Arr<String, List<List<String>>>>, Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>, Arr<Triple<String, String, String>, Triple<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>>>>>, Pair<Map<Arr<Triple<Triple<String, Triple<String, String, String>, Arr<String, List<List<String>>>>, Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>, Arr<Triple<String, String, String>, Triple<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>>>, Pair<Arr<Triple<String, Triple<String, String, String>, Arr<String, List<List<String>>>>, Pair<Arr<String, List<List<String>>>, Arr<Triple<String, String, String>, Triple<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>>>>, Arr<Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>, Arr<String, List<List<String>>>>>>, String>, Map<String, Arr<Triple<Triple<String, Triple<String, String, String>, Arr<String, List<List<String>>>>, Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>, Arr<Triple<String, String, String>, Triple<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>>>, Pair<Arr<Triple<String, Triple<String, String, String>, Arr<String, List<List<String>>>>, Pair<Arr<String, List<List<String>>>, Arr<Triple<String, String, String>, Triple<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>>>>, Arr<Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>, Arr<String, List<List<String>>>>>>>>>, Triple<Signature, Pair<Map<String, String>, Map<String, String>>, Pair<Map<Arr<String, List<List<String>>>, String>, Map<String, Arr<String, List<List<String>>>>>>> 
+		Triple<Mapping, Triple<Signature, Pair<Map<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, String>, Map<String, Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>>, Pair<Map<Arr<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, Pair<Arr<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>, String>, Map<String, Arr<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, Pair<Arr<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>>>>, Triple<Signature, Pair<Map<Node, String>, Map<String, Node>>, Pair<Map<Arr<Node, Path>, String>, Map<String, Arr<Node, Path>>>>> 
 		proj1 = ret.project.toMapping(name + "_delta", name + "_B", name + "_S");
-		Triple<Mapping, Triple<Signature, Pair<Map<Triple<Triple<String, Triple<String, String, String>, Arr<String, List<List<String>>>>, Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>, Arr<Triple<String, String, String>, Triple<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>>>, String>, Map<String, Triple<Triple<String, Triple<String, String, String>, Arr<String, List<List<String>>>>, Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>, Arr<Triple<String, String, String>, Triple<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>>>>>, Pair<Map<Arr<Triple<Triple<String, Triple<String, String, String>, Arr<String, List<List<String>>>>, Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>, Arr<Triple<String, String, String>, Triple<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>>>, Pair<Arr<Triple<String, Triple<String, String, String>, Arr<String, List<List<String>>>>, Pair<Arr<String, List<List<String>>>, Arr<Triple<String, String, String>, Triple<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>>>>, Arr<Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>, Arr<String, List<List<String>>>>>>, String>, Map<String, Arr<Triple<Triple<String, Triple<String, String, String>, Arr<String, List<List<String>>>>, Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>, Arr<Triple<String, String, String>, Triple<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>>>, Pair<Arr<Triple<String, Triple<String, String, String>, Arr<String, List<List<String>>>>, Pair<Arr<String, List<List<String>>>, Arr<Triple<String, String, String>, Triple<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>>>>, Arr<Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>, Arr<String, List<List<String>>>>>>>>>, Triple<Signature, Pair<Map<Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>, String>, Map<String, Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>>>, Pair<Map<Arr<Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>, Arr<String, List<List<String>>>>, String>, Map<String, Arr<Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>, Arr<String, List<List<String>>>>>>>> 
+		Triple<Mapping, Triple<Signature, Pair<Map<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, String>, Map<String, Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>>, Pair<Map<Arr<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, Pair<Arr<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>, String>, Map<String, Arr<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, Pair<Arr<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>>>>, Triple<Signature, Pair<Map<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, String>, Map<String, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>>, Pair<Map<Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>, String>, Map<String, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>>> 
 		join1 = ret.join.toMapping(name + "_pi", name + "_B", name + "_A" );
-		Triple<Mapping, Triple<Signature, Pair<Map<Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>, String>, Map<String, Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>>>, Pair<Map<Arr<Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>, Arr<String, List<List<String>>>>, String>, Map<String, Arr<Pair<String, Value<Triple<String, String, String>, Triple<String, String, String>>>, Arr<String, List<List<String>>>>>>>, Triple<Signature, Pair<Map<String, String>, Map<String, String>>, Pair<Map<Arr<String, List<List<String>>>, String>, Map<String, Arr<String, List<List<String>>>>>>> 
+		Triple<Mapping, Triple<Signature, Pair<Map<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, String>, Map<String, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>>, Pair<Map<Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>, String>, Map<String, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>>, Triple<Signature, Pair<Map<Node, String>, Map<String, Node>>, Pair<Map<Arr<Node, Path>, String>, Map<String, Arr<Node, Path>>>>> 
 		union1 = ret.union.toMapping(name + "_sigma", name + "_A", name + "_T");
 		
 		env.signatures.put(name + "_B", proj1.second.first);
 		env.signatures.put(name + "_A", join1.third.first);
 		env.mappings.put(name + "_pi", join1.first);
 		
-		Map<String, String> map1 =  proj1.third.second.second;
-		Map<String, String> map2 = isoS.third.second.first.first;
+		Map<String, Node> map1 =  proj1.third.second.second;
+		Fn<Path, Arr<Node, Path>> map2 = isoS.third.second;
 		List<Pair<String,String>> xxx = new LinkedList<>();
 		List<Pair<String, List<String>>> yyy = new LinkedList<>();
 		for (Node n : proj1.first.target.nodes) {
-			String x1 = map1.get(n.string);
-			String x2 =  map2.get(x1);
-			xxx.add(new Pair<>(n.string, x2));
+			Node x1 = map1.get(n.string);
+			xxx.add(new Pair<>(n.string, x1.string));
 		}
 
-		Map<String, Arr<String, List<List<String>>>> mapA =  proj1.third.third.second;
-		Map<Arr<String, List<List<String>>>, String> mapB = isoS.third.second.second.second;
+		Map<String, Arr<Node, Path>> mapA =  proj1.third.third.second;
+		Fn<Path, Arr<Node, Path>> mapB = isoS.third.second; //.second.second;
 		for (Edge e : proj1.first.target.edges) {
-			Arr<String, List<List<String>>> x1 = mapA.get(e.name);
-			String x2 =  mapB.get(x1);
-			List<String> yyy2 = new LinkedList<>();
-			yyy2.add(x1.src);
-			if (!isoS.second.first.isId(x1)) {
-				yyy2.add(x2);				
-			}
-			yyy.add(new Pair<>(e.name, yyy2));
+			Arr<Node, Path> x1 = mapA.get(e.name);
+			Arr<Node, Path> x2 =  mapB.of(x1.arr);
+			//List<String> yyy2 = new LinkedList<>();
+		//	yyy2.add(x1.src);
+			//if (!isoS.second.first.isId(x1)) {
+			//	yyy2.addAll(x2.arr.path);				
+		//	}
+			yyy.add(new Pair<>(e.name, x2.arr.asList()));
 		}
 		
+		System.out.println(xxx);
+		System.out.println(yyy);
+		System.out.println(proj1.first.target);
+		System.out.println(q1.getSource());
 		Mapping xyz = new Mapping(name + "iso1",proj1.first.target, q1.getSource(),  xxx, yyy);
 		
 		Mapping newproj = Mapping.compose(name + "_delta", proj1.first, xyz);
 		env.mappings.put(name + "_delta", newproj);
 
 		map1 =  union1.third.second.second;
-		map2 = isoT.third.second.first.first;
+		map2 = isoT.third.second;
 		xxx = new LinkedList<>();
 		yyy = new LinkedList<>();
 		for (Node n : union1.first.target.nodes) {
-			String x1 = map1.get(n.string);
-			String x2 =  map2.get(x1);
-			xxx.add(new Pair<>(n.string, x2));
+			Node x1 = map1.get(n.string);
+//			String x2 =  map2.of(x1);
+			xxx.add(new Pair<>(n.string, x1.string));
 		}
 		
 		mapA =  union1.third.third.second;
-		mapB = isoT.third.second.second.second;
+		mapB = isoT.third.second;
 		for (Edge e : union1.first.target.edges) {
-			Arr<String, List<List<String>>> x1 = mapA.get(e.name);
-			String x2 =  mapB.get(x1);
-			List<String> yyy2 = new LinkedList<>();
-			yyy2.add(x1.src);
-			if (!isoS.second.first.isId(x1)) {
-				yyy2.add(x2);				
-			}
-			yyy.add(new Pair<>(e.name, yyy2));
+			Arr<Node, Path> x1 = mapA.get(e.name);
+			Arr<Node, Path> x2 =  mapB.of(x1.arr);
+//			List<String> yyy2 = new LinkedList<>();
+//			yyy2.add(x1.src);
+//			if (!isoS.second.first.isId(x1)) {
+//				yyy2.add(x2);				
+//			}
+			yyy.add(new Pair<>(e.name, x2.arr.asList()));
 		}
 		xyz = new Mapping(name + "iso2",union1.first.target, q2.getTarget(),  xxx, yyy);
 		
 		Mapping newunion = Mapping.compose(name + "_sigma", union1.first, xyz);
 		env.mappings.put(name + "_sigma", newunion);
-		
-		return new Query(name, newproj, join1.first, newunion);		
+	
+	return new Query(name, newproj, join1.first, newunion);		
 
 	}
 
@@ -661,6 +665,11 @@ public class Query implements Viewable<Query> {
 
 	@Override
 	public JPanel json() {
+		return null;
+	}
+
+	@Override
+	public JPanel denotation() throws FQLException {
 		return null;
 	}
 	

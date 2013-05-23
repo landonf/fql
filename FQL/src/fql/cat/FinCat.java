@@ -227,8 +227,8 @@ public class FinCat<Obj, Arrow>  {
 
 	@Override
 	public String toString() {
-		return "FinCat [objects=" + objects + "\n\narrows=" + arrows + "\n\ncomposition=" + composition
-				+ "\n\nidentities=" + identities + "]";
+		return "objects = " + objects + "\n\narrows = " + arrows + "\n\ncomposition = " + composition
+				+ "\n\nidentities = " + identities;
 	}
 
 

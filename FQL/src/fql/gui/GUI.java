@@ -17,20 +17,23 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 
-import fql.Examples;
 import fql.FQLApplet;
 import fql.FQLBackEnd;
 import fql.FQLServlet;
 import fql.Pair;
 import fql.decl.Environment;
 import fql.decl.Program;
+import fql.examples.Example;
+import fql.examples.Examples;
 
 @SuppressWarnings("serial")
 public class GUI extends JPanel {
@@ -61,7 +64,7 @@ public class GUI extends JPanel {
 		respArea.setWordWrap(true);
 //		respArea.setWrapStyleWord();
 		
-		Menu webMenu = new Menu("Web/JSON");
+		Menu webMenu = new Menu("Web");
 		MenuItem serverItem = new MenuItem("Start Local Server");
 		webMenu.add(serverItem);
 		serverItem.addActionListener(new ActionListener() {
@@ -70,13 +73,6 @@ public class GUI extends JPanel {
 			}
 		});
 		
-		MenuItem localItem = new MenuItem("JSON Input Panel");
-		localItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JsonPanel.showPanel(new FQLBackEnd());
-			}
-		});
-		webMenu.add(localItem);
 		
 		
 		newItem.addActionListener(
@@ -129,11 +125,11 @@ public class GUI extends JPanel {
 		 pan.setLayout(new BorderLayout());
 		 
 		 
-	     JPanel toolBar = new JPanel(new GridLayout(2,5));
+	     JPanel toolBar = new JPanel(new GridLayout(1,7));
 	    // toolBar.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 	     
-	     JButton button = new JButton("Compile");
-	     button.addActionListener(new ActionListener() {
+	     JButton compileB = new JButton("Compile");
+	     compileB.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -141,65 +137,15 @@ public class GUI extends JPanel {
 			}
 	    	 
 	     });
-	     
-	     JButton reset_button = new JButton("Delta");
-	     reset_button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				restAction();
-			}
-	    	 
-	     });
-	     
-	     JButton pi_button = new JButton("Pi");
-	     pi_button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				piAction();
-			}
-
-	     });
-	     
-	     JButton mig_button = new JButton("Sigma");
-	     mig_button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				migAction();
-			}
-	    	 
-	     });
-	     
-	     JButton emps_button = new JButton("Employees");
-	     emps_button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				empsAction();
-			}
-	    	 
-	     });
-	     
-	     JButton comp_button = new JButton("Composition");
-	     comp_button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				compAction();
-			}
-	    	 
-	     });
-	     
 	     	     
-	     JButton button2 = new JButton("Help");
-	     button2.addActionListener(new ActionListener() {
+	     JButton helpB = new JButton("Help");
+	     helpB.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				helpAction();
-			}
-
-	    	 
+			}	    	 
 	     });
-	     
-	     
 	     
 	     JButton new_button = new JButton("New");
 	     new_button.addActionListener(new ActionListener() {
@@ -207,6 +153,7 @@ public class GUI extends JPanel {
 	    		newAction();
 	    	}
 	     });
+	     
 	     JButton save_button = new JButton("Save");
 	     save_button.addActionListener(new ActionListener() {
 		    	public void actionPerformed(ActionEvent e) {
@@ -226,7 +173,21 @@ public class GUI extends JPanel {
 	    	 open_button.setEnabled(false);
 	     }
 
-	     toolBar.add(button);
+	  //   toolBar temp1 = new JPanel();
+	     JLabel l = new JLabel("Load Example:", JLabel.RIGHT);
+	     final JComboBox<Example> box = new JComboBox<>(Examples.examples);
+	     box.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				doExample((Example)box.getSelectedItem());
+			}
+	    	 
+	     });
+	     
+	     toolBar.add(compileB);
+
+
 //	     button.setFont(new Font("Arial", 12, Font.PLAIN));
 	//toolBar.setFont(new Font("Arial", 12, Font.PLAIN));
 	  //   toolBar.addSeparator();
@@ -237,17 +198,39 @@ public class GUI extends JPanel {
 	     toolBar.add(save_button);
 	     //toolBar.add(all_button);
 	    // toolBar.addSeparator();
-	     toolBar.add(button2);
+	     
+	     toolBar.add(helpB);
+	     
+	     JButton jsonb = new JButton("JSON Input");
+	     toolBar.add(jsonb);
+			jsonb.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					JsonPanel.showPanel(new FQLBackEnd());
+				}
+			});
 
-	     toolBar.add(reset_button);
+	     
+	     //JPanel temp2 = new JPanel();
+	     //temp2.add(l);
+	     //temp2.add(box);
+	     
+	     //toolBar.add(temp2);
+	     toolBar.add(l);
+	     toolBar.add(box);
+
+
+
+	     //toolBar.add(temp1);
+	     
+//	     toolBar.add(reset_button);
 	    // toolBar.addSeparator();
-	     toolBar.add(pi_button);
+	//     toolBar.add(pi_button);
 	    // toolBar.addSeparator();
-	     toolBar.add(mig_button);
+	  //   toolBar.add(mig_button);
 	    // toolBar.addSeparator();
-	     toolBar.add(emps_button);
+	   //  toolBar.add(emps_button);
 	     //toolBar.addSeparator();
-	     toolBar.add(comp_button);
+	    // toolBar.add(comp_button);
 	     //toolBar.addSeparator();
 
 //	     toolBar.addSeparator();
@@ -284,41 +267,15 @@ public class GUI extends JPanel {
 		}
 	}
 
-	protected static void piAction() {
-		if (abortBecauseDirty()) {
-			return;
-		}		
-		program = Examples.piDefinitions;
-		topArea.setText(program);
-		bottomArea.setText(Examples.piCommands);
-		respArea.setText("");
-		dirty = false;
-		if (display != null) {
-			display.close();
-		}
-		display = null;
-	}
-
-	protected static  void restAction() {
-		if (abortBecauseDirty()) {
-			return;
-		}		
-		program = Examples.initialDefinitions;
-		topArea.setText(program);
-		bottomArea.setText(Examples.initialCommands);
-		respArea.setText("");
-		dirty = false;
-		if (display != null) {
-			display.close();
-		}
-		display = null;
-	}
 	
-	protected static void compAction() {
+
+	
+	
+	protected static void doExample(Example e) {
 		if (abortBecauseDirty()) {
 			return;
 		}		
-		program = Examples.compDefinitions;
+		program = e.getText();
 		topArea.setText(program);
 //		bottomArea.setText(Examples.employeesCommands);
 		respArea.setText("");
@@ -326,38 +283,10 @@ public class GUI extends JPanel {
 		if (display != null) {
 			display.close();
 		}
-		display = null;
+		display = null;		
 	}
 	
-	protected static void empsAction() {
-		if (abortBecauseDirty()) {
-			return;
-		}		
-		program = Examples.employeesDefinitions;
-		topArea.setText(program);
-		bottomArea.setText(Examples.employeesCommands);
-		respArea.setText("");
-		dirty = false;
-		if (display != null) {
-			display.close();
-		}
-		display = null;
-	}
 	
-	 static void migAction() {
-		if (abortBecauseDirty()) {
-			return;
-		}		
-		program = Examples.migrationDefinitions;
-		topArea.setText(program);
-		bottomArea.setText(Examples.migrationCommands);
-		respArea.setText("");
-		dirty = false;
-		if (display != null) {
-			display.close();
-		}
-		display = null;
-	}
 
 	 static void helpAction() {
 		 JTextArea jta = new JTextArea(Examples.helpString);
@@ -456,7 +385,7 @@ public class GUI extends JPanel {
 			return;
 		}
 		topArea.setText("");
-		bottomArea.setText("");
+//		bottomArea.setText("");
 		dirty = false;
 		program = "";
 		if (display != null) {
@@ -476,8 +405,8 @@ public class GUI extends JPanel {
 		return false;
 	}
 
-	static FQLTextPanel topArea = new FQLTextPanel("FQL Program", Examples.initialDefinitions);
-	static FQLTextPanel bottomArea = new FQLTextPanel("Commands", Examples.initialCommands);
+	static FQLTextPanel topArea = new FQLTextPanel("FQL Program", Examples.delta.getText());
+//	static FQLTextPanel bottomArea = new FQLTextPanel("Commands", Examples.initialCommands);
 	static FQLTextPanel respArea = new FQLTextPanel("Compiler response", "");
 	
 	static private String readFile( String file ) throws IOException {
@@ -495,6 +424,6 @@ public class GUI extends JPanel {
 	    return stringBuilder.toString();
 	}
 	
-	static String program = Examples.initialDefinitions;
+	static String program = Examples.delta.getText();
 
 }

@@ -21,7 +21,7 @@ public class FQL  {
 		f.setContentPane(gui.first);
 		f.setMenuBar(gui.second);
 		f.pack();
-		f.setSize(800, 600);
+		f.setSize(840, 630);
 		
 		f.setLocationRelativeTo(null);
 		f.setVisible(true);

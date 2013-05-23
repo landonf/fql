@@ -19,6 +19,8 @@ public interface Viewable<X> {
 	public JPanel pretty() throws FQLException;
 	
 	public JPanel view() throws FQLException;
+	
+	public JPanel denotation() throws FQLException;
 
 //	public boolean equals0(X view);
 

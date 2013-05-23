@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import fql.FQLException;
+import fql.Fn;
 import fql.Pair;
 import fql.Triple;
 import fql.cat.Arr;
@@ -206,8 +207,9 @@ public abstract class RA {
 	 * Limit as join all.  Compare to FDM.lim
 	 */
 	public static  <Arrow> Pair<RA, String[]> 
-	lim(CommaCat<String, List<List<String>>, String, List<List<String>>, String, List<List<String>>> b,
-			Map<Triple<String, String, Arr<String, List<List<String>>>>, RA> q1, Map<Pair<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>, RA> map) throws FQLException {
+	lim(CommaCat<Node, Path, Node, Path, Node, Path> b,
+			Map<Triple<Node, Node, Arr<Node, Path>>, RA> map,
+			Map<Pair<Arr<Node, Path>, Arr<Node, Path>>, RA> map2) throws FQLException {
 		// System.out.println("Taking limit for " + B);
 		RA x0 = null;
 		int m = b.objects.size();
@@ -217,13 +219,13 @@ public abstract class RA {
 		if (m == 0) {
 			x0 = new SingletonRA();
 		} else {
-			for (Triple<String, String, Arr<String, List<List<String>>>> n : b.objects) {
+			for (Triple<Node, Node, Arr<Node, Path>> n : b.objects) {
 				if (x0 == null) {
-					x0 = q1.get(n);
+					x0 = map.get(n);
 				} else {
-					x0 = new Product(x0, q1.get(n));
+					x0 = new Product(x0, map.get(n));
 				}
-				cnames[temp] = n.second;
+				cnames[temp] = n.second.string;
 				temp++;
 			}
 			x0 = new Project(x0, makeCols(temp));
@@ -239,22 +241,22 @@ public abstract class RA {
 			cols[i] = i;
 		}
 
-		for (Arr<Triple<String, String, Arr<String, List<List<String>>>>, Pair<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>> e : b.arrows) {
+		for (Arr<Triple<Node, Node, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Node, Path>>> e : b.arrows) {
 //			 System.out.println("Doing arrow " + e);
 //			 System.out.println("map is " + map);
 //			 System.out.println("one " + map.get(e.arr));
 //			 System.out.println("two " + map.get(e.arr.first));
 //			 System.out.println("three " + map.get(e.arr.second));
 
-			x0 = new Product(x0, map.get(e.arr));
+			x0 = new Product(x0, map2.get(e.arr));
 //			 System.out.println("Query is " + x0);
 //			 printNicely(eval(x0, test0()));
 //			 System.out.println("end test");
-			x0 = new Select(x0, m, cnamelkp(cnames, e.src.second));
+			x0 = new Select(x0, m, cnamelkp(cnames, e.src.second.string));
 //			 System.out.println("Query is " + x0);
 //			 printNicely(eval(x0, test0()));
 //			 System.out.println("end test");
-			x0 = new Select(x0, m + 1, cnamelkp(cnames, e.dst.second));
+			x0 = new Select(x0, m + 1, cnamelkp(cnames, e.dst.second.string));
 //			 System.out.println("Query is " + x0);
 //			 printNicely(eval(x0, test0()));
 //			 System.out.println("end test");
@@ -311,7 +313,7 @@ public abstract class RA {
 		Map<String, RA> ret = new HashMap<String, RA>();
 		Map<Node, List<String>> tags = new HashMap<Node, List<String>>();
 		
-		if (!FinFunctor.isDiscreteOpFib(F.toFunctor().first)) {
+		if (!FinFunctor.isDiscreteOpFib(F.toFunctor2().first)) {
 			throw new FQLException("Not a discrete op-fibration: " + F.name);
 		}
 		
@@ -355,15 +357,16 @@ public abstract class RA {
 		if (!C.acyclic()) {
 			throw new FQLException("Sigma must be acyclic " + C);
 		}
-		FinCat<String, List<List<String>>> C0 = C.toCategory().first;
-		for (Arr<String, List<List<String>>> peqc : C0.arrows) {
-			List<String> p = peqc.arr.get(0);
-			Path path = new Path(f.source, p);
+		FinCat<Node, Path> C0 = C.toCategory2().first;
+		for (Arr<Node, Path> peqc : C0.arrows) {
+			Path path = peqc.arr;
+			//Path path = new Path(f.source, p);
 			if (!path.source.equals(c)) {
 				continue;
 			}
 			Path path_f = f.appy(path);
-			if (eqpath(D.toCategory().first, path_f, new Path(D, e))) {
+			Fn<Path, Arr<Node, Path>> F = D.toCategory2().second;
+			if (F.of(path_f).equals(F.of(new Path(D, e)))) {
 				return path;
 			}
 		}
@@ -388,32 +391,26 @@ public abstract class RA {
 	public static Map<String, RA> pi(Mapping F0) throws FQLException {
 		Signature D0 = F0.target;
 		Signature C0 = F0.source;
-		FinCat<String, List<List<String>>> D = D0.toCategory().first;
-		FinCat<String, List<List<String>>> C = C0.toCategory().first;
-		FinFunctor<String, List<List<String>>, String, List<List<String>>> F = F0
-				.toFunctor().first;
+		FinCat<Node, Path> D = D0.toCategory2().first;
+		FinCat<Node, Path> C = C0.toCategory2().first;
+		FinFunctor<Node, Path, Node, Path> F = F0.toFunctor2().first;
 		Map<String, RA> ret = new HashMap<String, RA>();
 
-		for (String d0 : D.objects) {
-			CommaCat<String, List<List<String>>, String, List<List<String>>, String, List<List<String>>> B = doComma(
-					D, C, F, d0);
+		for (Node d0 : D.objects) {
+			CommaCat<Node, Path, Node, Path, Node, Path> B = doComma(D, C, F, d0, D0);
 
 			RA r = lim(B, deltaObj(B.projB), deltaArr(B.projB)).first;
-			ret.put(d0, squish(r));
+			ret.put(d0.string, squish(r));
 		}
 
 		for (Edge s : F0.target.edges) {
-			String dA = s.source.string;
-			CommaCat<String, List<List<String>>, String, List<List<String>>, String, List<List<String>>> BA = doComma(
-					D, C, F, dA);
-			Pair<RA, String[]> q1 = lim(BA,
-					deltaObj(BA.projB), deltaArr(BA.projB));
+			Node dA = s.source;
+			CommaCat<Node, Path, Node, Path, Node, Path> BA = doComma(D, C, F, dA, D0);
+			Pair<RA, String[]> q1 = lim(BA, deltaObj(BA.projB), deltaArr(BA.projB));
 
-			String dB = s.target.string;
-			CommaCat<String, List<List<String>>, String, List<List<String>>, String, List<List<String>>> BB = doComma(
-					D, C, F, dB);
-			Pair<RA, String[]> q2 = lim(BB,
-					deltaObj(BB.projB), deltaArr(BB.projB));
+			Node dB = s.target;
+			CommaCat<Node, Path, Node, Path, Node, Path> BB = doComma(D, C, F, dB, D0);
+			Pair<RA, String[]> q2 = lim(BB,deltaObj(BB.projB), deltaArr(BB.projB));
 			
 			RA rau = chop1(q2.second.length, q2.first);
 			RA rav = chop1(q1.second.length, q1.first);
@@ -453,6 +450,7 @@ public abstract class RA {
 
 
 	private static RA subset(String[] q1cols, String[] q2cols, RA q1q2) {
+	//	System.out.println("trying subset " + print(q1cols) + " in " + print(q2cols));
 		a: for (int i = 0; i < q1cols.length; i++) {
 			for (int j = 0; j < q2cols.length; j++) {
 				if (q1cols[i].equals(q2cols[j])) {
@@ -460,9 +458,17 @@ public abstract class RA {
 					continue a;
 				}
 			}
-			throw new RuntimeException("No col " + q1cols[i] + " in " + q2cols);
+			throw new RuntimeException("No col " + q1cols[i] + " in " + print(q2cols));
 		}
 		return q1q2;
+	}
+
+	private static String print(String[] q2cols) {
+		String s = "";
+				for (String a : q2cols) {
+					s += " " + a;
+				}
+		return s;
 	}
 
 	@SuppressWarnings("unused")
@@ -493,19 +499,20 @@ public abstract class RA {
 	/**
 	 * wrapper for comma categories
 	 */
-	private static CommaCat<String, List<List<String>>, String, List<List<String>>, String, List<List<String>>> doComma(
-			FinCat<String, List<List<String>>> D,
-			FinCat<String, List<List<String>>> C,
-			FinFunctor<String, List<List<String>>, String, List<List<String>>> F,
-			String d0) {
-		List<String> x = new LinkedList<String>();
-		x.add(d0);
-		List<List<String>> y = new LinkedList<List<String>>();
-		y.add(x);
-		FinFunctor<String, List<List<String>>, String, List<List<String>>> d = FinFunctor
-				.singleton(D, d0, new Arr<>(y,d0,d0));
-		CommaCat<String, List<List<String>>, String, List<List<String>>, String, List<List<String>>> B = new CommaCat<String, List<List<String>>, String, List<List<String>>, String, List<List<String>>>(
-				d.srcCat, C, D, d, F);
+	private static CommaCat<Node, Path, Node, Path, Node, Path> doComma(
+			FinCat<Node, Path> d2,
+			FinCat<Node, Path> c,
+			FinFunctor<Node, Path, Node, Path> f,
+			Node d0, Signature S) throws FQLException {
+//		List<String> x = new LinkedList<String>();
+//		x.add(d0);
+//		List<List<String>> y = new LinkedList<List<String>>();
+//		y.add(x);
+
+		FinFunctor<Node, Path, Node, Path> d = FinFunctor
+				.singleton(d2, d0, new Arr<>(d2.identities.get(d0).arr,d0,d0));
+		CommaCat<Node, Path, Node, Path, Node, Path>
+		B = new CommaCat<>(d.srcCat, c, d2, d, f);
 		return B;
 	}
 
@@ -525,23 +532,23 @@ public abstract class RA {
 
 	/** these bastardized versions of delta only works in support of pi
 	 */
-	private static Map<Triple<String, String, Arr<String, List<List<String>>>>, RA> deltaObj(
-			FinFunctor<Triple<String, String, Arr<String, List<List<String>>>>, Pair<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>, String, List<List<String>>> finFunctor) {
-		Map<Triple<String, String, Arr<String, List<List<String>>>>, RA> ret = new HashMap<>();
-		for (Entry<Triple<String, String, Arr<String, List<List<String>>>>, String> p : finFunctor.objMapping
+	private static Map<Triple<Node, Node, Arr<Node, Path>>, RA> deltaObj(
+			FinFunctor<Triple<Node, Node, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Node, Path>>, Node, Path> projB) {
+		Map<Triple<Node, Node, Arr<Node, Path>>, RA> ret = new HashMap<>();
+		for (Entry<Triple<Node, Node, Arr<Node, Path>>, Node> p : projB.objMapping
 				.entrySet()) {
-			ret.put(p.getKey(), new Relvar(p.getKey().second));
+			ret.put(p.getKey(), new Relvar(p.getKey().second.string));
 		}
 		return ret;
 	}
 
 	/** these bastardized versions of delta only works in support of pi
 	 */
-	private static Map<Pair<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>, RA> deltaArr(
-			FinFunctor<Triple<String, String, Arr<String, List<List<String>>>>, Pair<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>, String, List<List<String>>> finFunctor) {
-		Map<Pair<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>, RA> ret = new HashMap<>();
-		for (Entry<Arr<Triple<String, String, Arr<String, List<List<String>>>>, Pair<Arr<String, List<List<String>>>, Arr<String, List<List<String>>>>>, Arr<String, List<List<String>>>> p : finFunctor.arrowMapping.entrySet()) {
-			List<String> x = p.getKey().arr.second.arr.get(0);
+	private static Map<Pair<Arr<Node, Path>, Arr<Node, Path>>, RA> deltaArr(
+			FinFunctor<Triple<Node, Node, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Node, Path>>, Node, Path> projB) {
+		Map<Pair<Arr<Node, Path>, Arr<Node, Path>>, RA> ret = new HashMap<>();
+		for (Entry<Arr<Triple<Node, Node, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Node, Path>>>, Arr<Node, Path>> p : projB.arrowMapping.entrySet()) {
+			Path x = p.getKey().arr.second.arr;
 			ret.put(p.getKey().arr, compose(x)); 
 		}
 

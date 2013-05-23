@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
@@ -52,6 +53,10 @@ import fql.parse.PrettyPrinter;
 
 public class Instance implements Viewable<Instance>, Jsonable {
 
+	public static String data(String s) {
+		return s + " data";
+	}
+	
 	public void conformsTo(Signature s) throws FQLException {
 		for (Node n : s.nodes) {
 			Set<Pair<String, String>> i = data.get(n.string);
@@ -61,6 +66,20 @@ public class Instance implements Viewable<Instance>, Jsonable {
 							+ s + " and " + this);
 				}
 			}
+//			Set<Pair<String, String>> j = data.get(data(n.string));
+//			if (j == null) {
+//				throw new FQLException("Missing data table for " + n.string + " in " + this);
+//			}
+//			for (Pair<String, String> ss : j) {
+//				if (!contained(ss.first, data.get(n.string))) {
+//					throw new FQLException("Data table for " + n.string + " has non-domain value " + ss.first);
+//				}
+//			}
+//			for (Pair<String, String> ss : data.get(n.string)) {
+//				if (!contained(ss.first, data.get(data(n.string)))) {
+//					throw new FQLException("Data table for " + n.string + " does not map " + ss.first);
+//				}
+//			}
 			// identity
 		}
 		for (Edge e : s.edges) {
@@ -139,16 +158,35 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		return false;
 	}
 
-	Map<String, Set<Pair<String, String>>> data;
+	public Map<String, Set<Pair<String, String>>> data;
 
 	public Signature thesig;
 	
 	public Instance(String n, Signature thesig,
 			Map<String, Set<Pair<String, String>>> data)
 			throws FQLException {
+		this(n, thesig, degraph(data));
+	}
+
+	private static List<Pair<String, List<Pair<String, String>>>>  degraph(
+			Map<String, Set<Pair<String, String>>> data2) {
+		List<Pair<String, List<Pair<String, String>>>> ret = new LinkedList<>();
+		for (Entry<String, Set<Pair<String, String>>> e : data2.entrySet()) {
+			ret.add(new Pair<String, List<Pair<String, String>>>(e.getKey(), new LinkedList<>(e.getValue())));
+		}
+		return ret;
+	}
+
+	public Instance(String n, Signature thesig,
+			List<Pair<String, List<Pair<String, String>>>> data)
+			throws FQLException {
 		this.data = new HashMap<String, Set<Pair<String, String>>>();
-		for (String p : data.keySet()) {
-			this.data.put(p, new HashSet<Pair<String, String>>(data.get(p)));
+		for (Node node : thesig.nodes) {
+			this.data.put(node.string, makeFirst(node.string, data));
+//			this.data.put(data(node.string), lookup(node.string, data));
+		}
+		for (Edge e : thesig.edges) {
+			this.data.put(e.name, lookup(e.name, data));
 		}
 		this.thesig = thesig;
 		if (!typeCheck(thesig)) {
@@ -157,18 +195,32 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		conformsTo(thesig);
 	}
 
-	public Instance(String n, Signature thesig,
-			List<Pair<String, List<Pair<String, String>>>> data)
-			throws FQLException {
-		this.data = new HashMap<String, Set<Pair<String, String>>>();
-		for (Pair<String, List<Pair<String, String>>> p : data) {
-			this.data.put(p.first, new HashSet<Pair<String, String>>(p.second));
+	private Set<Pair<String, String>> makeFirst(String string,
+			List<Pair<String, List<Pair<String, String>>>> data2) {
+		for (Pair<String, List<Pair<String, String>>> p : data2) {
+			if (string.equals(p.first)) {
+				return secol(p.second);
+			}
 		}
-		this.thesig = thesig;
-		if (!typeCheck(thesig)) {
-			throw new FQLException("Type-checking failure " + n);
+		throw new RuntimeException("cannot find " + string + " in " + data2);
+	}
+
+	private Set<Pair<String, String>> secol(List<Pair<String, String>> second) {
+		Set<Pair<String, String>> ret = new HashSet<>();
+		for (Pair<String, String> p : second) {
+			ret.add(new Pair<>(p.first, p.first));
 		}
-		conformsTo(thesig);
+		return ret;
+	}
+
+	private Set<Pair<String, String>> lookup(String name,
+			List<Pair<String, List<Pair<String, String>>>> data2) {
+		for (Pair<String, List<Pair<String, String>>> p : data2) {
+			if (name.equals(p.first)) {
+				return new HashSet<Pair<String, String>>(p.second);
+			}
+		}
+		throw new RuntimeException("cannot find " + name + " in " + data2);
 	}
 
 	public Instance(String name, Query thequery, Instance theinstance)
@@ -261,7 +313,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 	private boolean typeCheck(Signature thesig2) {
 		for (String s : data.keySet()) {
-			if (!thesig2.contains(s)) {
+			if (!thesig2.contains(s) && !s.contains(" ")) {
 				return false;
 			}
 		}
@@ -1036,14 +1088,18 @@ public class Instance implements Viewable<Instance>, Jsonable {
 //		return ret;		
 //	}
 
-	public static Instance terminal(Signature s) throws FQLException {
+	public static Instance terminal(Signature s, String g) throws FQLException {
 		List<Pair<String, List<Pair<String, String>>>> ret = new LinkedList<>();
 
 		int i = 0;
 		Map<Node, String> map = new HashMap<>();
 		for (Node node : s.nodes) {
 			List<Pair<String, String>> tuples = new LinkedList<>();
-			String g = Integer.toString(i);
+			
+			if (g == null) {
+				g = Integer.toString(i);
+			} 
+				
 			tuples.add(new Pair<>(g, g));
 			ret.add(new Pair<>(node.string, tuples));
 			map.put(node, g);
@@ -1059,18 +1115,18 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 		return new Instance(s.name0 + "_terminal", s, ret);
 	}
-
-	public Inst<String, List<List<String>>, String, String> toFunctor() throws FQLException {
-		FinCat<String, List<List<String>>> cat = thesig.toCategory().first;
+	
+	public Inst<Node, Path, String, String> toFunctor2() throws FQLException {
+		FinCat<Node, Path> cat = thesig.toCategory2().first;
 		
-		Map<String, Set<Value<String, String>>> objM = new HashMap<>();
-		for (String obj : cat.objects) {
+		Map<Node, Set<Value<String,String>>> objM = new HashMap<>();
+		for (Node obj : cat.objects) {
 			objM.put(obj, conv(data.get(obj)));
 		}
 		
-		Map<Arr<String, List<List<String>>>, Map<Value<String, String>, Value<String, String>>> arrM = new HashMap<>();
-		for (Arr<String, List<List<String>>> arr : cat.arrows) {
-			List<String> es = arr.arr.get(0);
+		Map<Arr<Node, Path>, Map<Value<String, String>, Value<String, String>>> arrM = new HashMap<>();
+		for (Arr<Node, Path> arr : cat.arrows) {
+			List<String> es = arr.arr.asList();
 			
 			String h = es.get(0);
 			Set<Pair<String, String>> h0 = data.get(h);
@@ -1081,8 +1137,32 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			arrM.put(arr, xxx);
 		}
 		
-		return new Inst<String, List<List<String>>, String, String>(objM, arrM, cat);
+		return new Inst<Node, Path, String, String>(objM, arrM, cat);
 	}
+
+//	public Inst<String, List<List<String>>, String, String> toFunctor() throws FQLException {
+//		FinCat<String, List<List<String>>> cat = thesig.toCategory().first;
+//		
+//		Map<String, Set<Value<String, String>>> objM = new HashMap<>();
+//		for (String obj : cat.objects) {
+//			objM.put(obj, conv(data.get(obj)));
+//		}
+//		
+//		Map<Arr<String, List<List<String>>>, Map<Value<String, String>, Value<String, String>>> arrM = new HashMap<>();
+//		for (Arr<String, List<List<String>>> arr : cat.arrows) {
+//			List<String> es = arr.arr.get(0);
+//			
+//			String h = es.get(0);
+//			Set<Pair<String, String>> h0 = data.get(h);
+//			for (int i = 1; i < es.size(); i++) {
+//				h0 = compose(h0, data.get(es.get(i)));
+//			}
+//			Map<Value<String, String>, Value<String, String>> xxx = FDM.degraph(h0);
+//			arrM.put(arr, xxx);
+//		}
+//		
+//		return new Inst<String, List<List<String>>, String, String>(objM, arrM, cat);
+//	}
 
 	private Set<Value<String,String>> conv(Set<Pair<String, String>> set) {
 		Set<Value<String,String>> ret = new HashSet<>();
@@ -1164,6 +1244,11 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 	public static Instance fromjson(String instance) throws Exception {
 		return new JSONParsers.JSONInstParser().parse(new FqlTokenizer(instance)).value;
+	}
+
+	@Override
+	public JPanel denotation() throws FQLException {
+		return null;
 	}
 
 
