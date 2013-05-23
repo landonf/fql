@@ -597,7 +597,6 @@ public class Query implements Viewable<Query> {
 		env.mappings.put(name + "_pi", join1.first);
 		
 		Map<String, Node> map1 =  proj1.third.second.second;
-		Fn<Path, Arr<Node, Path>> map2 = isoS.third.second;
 		List<Pair<String,String>> xxx = new LinkedList<>();
 		List<Pair<String, List<String>>> yyy = new LinkedList<>();
 		for (Node n : proj1.first.target.nodes) {
@@ -628,7 +627,7 @@ public class Query implements Viewable<Query> {
 		env.mappings.put(name + "_delta", newproj);
 
 		map1 =  union1.third.second.second;
-		map2 = isoT.third.second;
+		//Fn<Path, Arr<Node, Path>> map2 = isoT.third.second;
 		xxx = new LinkedList<>();
 		yyy = new LinkedList<>();
 		for (Node n : union1.first.target.nodes) {

@@ -374,16 +374,16 @@ public abstract class RA {
 				+ " under " + f);
 	}
 
-	private static boolean eqpath(FinCat<String, List<List<String>>> c,
-			Path p1, Path p2) {
-		for (Arr<String, List<List<String>>> peqc : c.arrows) {
-			if (peqc.arr.contains(Signature.pathToList(p1))) {
-				return peqc.arr.contains(Signature.pathToList(p2));
-			}
-		}
-		throw new RuntimeException("eqpath cannot find " + p1 + " and " + p2
-				+ " in " + c);
-	}
+//	private static boolean eqpath(FinCat<String, List<List<String>>> c,
+//			Path p1, Path p2) {
+//		for (Arr<String, List<List<String>>> peqc : c.arrows) {
+//			if (peqc.arr.contains(Signature.pathToList(p1))) {
+//				return peqc.arr.contains(Signature.pathToList(p2));
+//			}
+//		}
+//		throw new RuntimeException("eqpath cannot find " + p1 + " and " + p2
+//				+ " in " + c);
+//	}
 
 	/**
 	 * Query generation for pi
@@ -555,13 +555,13 @@ public abstract class RA {
 		return ret;
 	}
 
-	private static RA compose(List<String> p) {
-		RA r = new Relvar(p.get(0));
-		for (int i = 1; i < p.size(); i++) {
-			r = compose(r, new Relvar(p.get(i)));
-		}
-		return r;
-	}
+//	private static RA compose(List<String> p) {
+//		RA r = new Relvar(p.get(0));
+//		for (int i = 1; i < p.size(); i++) {
+//			r = compose(r, new Relvar(p.get(i)));
+//		}
+//		return r;
+//	}
 
 	private static RA compose(RA a, RA b) {
 		RA c = new Product(a, b);

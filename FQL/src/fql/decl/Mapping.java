@@ -467,43 +467,38 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	return new Triple<>(new FinFunctor<>(objMapping, arrowMapping, srcCat, dstCat), srcCat0, dstCat0);
 }
 
-	/**
-	 * Finds the equivalence class a path is in.
-	 * @param cat
-	 * @param path
-	 * @return
-	 */
-	private Arr<String, List<List<String>>> findeqc(
-			FinCat<String, List<List<String>>> cat, List<String> path) {
-		for (Arr<String, List<List<String>>> eqc : cat.arrows) {
-			if (eqc.arr.contains(path)) {
-				return eqc;
-			}
-		}
-		throw new RuntimeException("No equivalence class for " + path + " in " + cat);
-	}
+	
+//	private Arr<String, List<List<String>>> findeqc(
+//			FinCat<String, List<List<String>>> cat, List<String> path) {
+//		for (Arr<String, List<List<String>>> eqc : cat.arrows) {
+//			if (eqc.arr.contains(path)) {
+//				return eqc;
+//			}
+//		}
+//		throw new RuntimeException("No equivalence class for " + path + " in " + cat);
+//	}
 
-	private List<String> apply(List<String> arrow) {
-		List<String> ret = new LinkedList<String>();
-		for (Entry<Node, Node> e : nm.entrySet()) {
-			if (e.getKey().string.equals(arrow.get(0))) {
-				ret.add(e.getValue().string);
-				break;
-			}
-		}
-		
-		for (int i = 1; i < arrow.size(); i++) {
-			String s = arrow.get(i);
-			for (Entry<Edge, Path> e : em.entrySet()) {
-				if (e.getKey().name.equals(s)) {
-					List<String> x = e.getValue().asList();
-					x.remove(0);
-					ret.addAll(x);
-				}
-			}
-		}
-		return ret;
-	}
+//	private List<String> apply(List<String> arrow) {
+//		List<String> ret = new LinkedList<String>();
+//		for (Entry<Node, Node> e : nm.entrySet()) {
+//			if (e.getKey().string.equals(arrow.get(0))) {
+//				ret.add(e.getValue().string);
+//				break;
+//			}
+//		}
+//		
+//		for (int i = 1; i < arrow.size(); i++) {
+//			String s = arrow.get(i);
+//			for (Entry<Edge, Path> e : em.entrySet()) {
+//				if (e.getKey().name.equals(s)) {
+//					List<String> x = e.getValue().asList();
+//					x.remove(0);
+//					ret.addAll(x);
+//				}
+//			}
+//		}
+//		return ret;
+//	}
 	
 	
 	

@@ -12,6 +12,6 @@ public class DEBUG {
 	
 	public static final int MAX_PATH_LENGTH = 8;
 
-	public static final int MAX_DENOTE_ITERATIONS = 32;
+	public static final int MAX_DENOTE_ITERATIONS = 64;
 
 }

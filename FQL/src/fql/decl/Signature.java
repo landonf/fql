@@ -7,11 +7,9 @@ import java.awt.event.MouseListener;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
@@ -655,124 +653,124 @@ public class Signature implements Viewable<Signature> {
 //		return new Pair<>(ret, ret2);
 //	}
 
-	private Set<Eq> addConsequences(Set<List<String>> paths, Set<Eq> eqs)
-			throws FQLException {
-		Set<Eq> ret = new HashSet<>();
-		for (Eq eq : eqs) {
-			Set<Path> pres = prefixes(paths, eq.lhs.source);
-			for (Path pre : pres) {
-				Eq e = new Eq(compose0(pre, eq.lhs), compose0(pre, eq.rhs));
-				ret.add(e);
-			}
-			Set<Path> suff = suffixes(paths, eq.lhs.target);
-			for (Path suf : suff) {
-				Eq e = new Eq(compose0(eq.lhs, suf), compose0(eq.rhs, suf));
-				ret.add(e);
-			}
-		}
-		return ret;
-	}
+//	private Set<Eq> addConsequences(Set<List<String>> paths, Set<Eq> eqs)
+//			throws FQLException {
+//		Set<Eq> ret = new HashSet<>();
+//		for (Eq eq : eqs) {
+//			Set<Path> pres = prefixes(paths, eq.lhs.source);
+//			for (Path pre : pres) {
+//				Eq e = new Eq(compose0(pre, eq.lhs), compose0(pre, eq.rhs));
+//				ret.add(e);
+//			}
+//			Set<Path> suff = suffixes(paths, eq.lhs.target);
+//			for (Path suf : suff) {
+//				Eq e = new Eq(compose0(eq.lhs, suf), compose0(eq.rhs, suf));
+//				ret.add(e);
+//			}
+//		}
+//		return ret;
+//	}
 
-	private Set<Path> suffixes(Set<List<String>> paths, Node t)
-			throws FQLException {
-		Set<Path> ret = new HashSet<>();
-		for (List<String> path : paths) {
-			String src = path.get(0);
-			if (src.equals(t.string)) {
-				ret.add(new Path(this, path));
-			}
-		}
-		return ret;
-	}
+//	private Set<Path> suffixes(Set<List<String>> paths, Node t)
+//			throws FQLException {
+//		Set<Path> ret = new HashSet<>();
+//		for (List<String> path : paths) {
+//			String src = path.get(0);
+//			if (src.equals(t.string)) {
+//				ret.add(new Path(this, path));
+//			}
+//		}
+//		return ret;
+//	}
 
-	private Set<Path> prefixes(Set<List<String>> paths, Node t)
-			throws FQLException {
-		Set<Path> ret = new HashSet<>();
-		for (List<String> path : paths) {
-			String dst = new Path(this, path).target.string;
-			if (dst.equals(t.string)) {
-				ret.add(new Path(this, path));
-			}
-		}
-		return ret;
-	}
+//	private Set<Path> prefixes(Set<List<String>> paths, Node t)
+//			throws FQLException {
+//		Set<Path> ret = new HashSet<>();
+//		for (List<String> path : paths) {
+//			String dst = new Path(this, path).target.string;
+//			if (dst.equals(t.string)) {
+//				ret.add(new Path(this, path));
+//			}
+//		}
+//		return ret;
+//	}
 
-	private Path compose0(Path a, Path b) {
-		List<Edge> r = new LinkedList<>();
-		r.addAll(a.path);
-		r.addAll(b.path);
-		return new Path(a.source, a.target, r);
-	}
+//	private Path compose0(Path a, Path b) {
+//		List<Edge> r = new LinkedList<>();
+//		r.addAll(a.path);
+//		r.addAll(b.path);
+//		return new Path(a.source, a.target, r);
+//	}
+//
+//	private String dstOf(List<List<String>> eqc) throws FQLException {
+//		List<String> x = eqc.get(0);
+//		return new Path(this, x).target.string;
+//	}
+//
+//	private String srcOf(List<List<String>> eqc) throws FQLException {
+//		List<String> x = eqc.get(0);
+//		return new Path(this, x).source.string;
+//	}
+//
+//	private List<List<String>> subsetLookup(List<List<String>> c,
+//			List<List<List<String>>> eqcs) {
+//		for (List<List<String>> eqc : eqcs) {
+//			if (subset(c, eqc)) {
+//				return eqc;
+//			}
+//		}
+//		throw new RuntimeException("Cannot find " + c
+//				+ " inside any equiv class " + eqcs);
+//	}
 
-	private String dstOf(List<List<String>> eqc) throws FQLException {
-		List<String> x = eqc.get(0);
-		return new Path(this, x).target.string;
-	}
+//	private boolean subset(List<List<String>> c, List<List<String>> eqc) {
+//		for (List<String> c0 : c) {
+//			if (!eqc.contains(c0)) {
+//				return false;
+//			}
+//		}
+//		return true;
+//	}
 
-	private String srcOf(List<List<String>> eqc) throws FQLException {
-		List<String> x = eqc.get(0);
-		return new Path(this, x).source.string;
-	}
-
-	private List<List<String>> subsetLookup(List<List<String>> c,
-			List<List<List<String>>> eqcs) {
-		for (List<List<String>> eqc : eqcs) {
-			if (subset(c, eqc)) {
-				return eqc;
-			}
-		}
-		throw new RuntimeException("Cannot find " + c
-				+ " inside any equiv class " + eqcs);
-	}
-
-	private boolean subset(List<List<String>> c, List<List<String>> eqc) {
-		for (List<String> c0 : c) {
-			if (!eqc.contains(c0)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private void merge(Set<Eq> eqs0, List<List<List<String>>> eqcs)
-			throws FQLException {
-		for (Eq eq : eqs0) {
-			// System.out.println("on merge for " + eq);
-			List<List<String>> lhs = null, rhs = null;
-			for (List<List<String>> eqc : eqcs) {
-				if (eqc.contains(pathToList(eq.lhs))) {
-					lhs = eqc;
-				}
-				if (eqc.contains(pathToList(eq.rhs))) {
-					rhs = eqc;
-				}
-			}
-			if (lhs == null) {
-				// continue;
-				throw new FQLException("Missing lhs equiv class " + eq + " in "
-						+ eqcs);
-			}
-			if (rhs == null) {
-				// continue;
-				throw new FQLException("Missing rhs equiv class " + eq + " in "
-						+ eqcs);
-			}
-
-			if (!lhs.equals(rhs)) {
-				// System.out.println("unequal : " + lhs + " and " + rhs);
-				eqcs.remove(lhs);
-				eqcs.remove(rhs);
-				List<List<String>> n = new LinkedList<List<String>>();
-				n.addAll(lhs);
-				n.addAll(rhs);
-				eqcs.add(n);
-				// System.out.println("result " + eqcs);
-				merge(eqs0, eqcs);
-				return;
-			}
-			// System.out.println("lhs and rhs are equal");
-		}
-	}
+//	private void merge(Set<Eq> eqs0, List<List<List<String>>> eqcs)
+//			throws FQLException {
+//		for (Eq eq : eqs0) {
+//			// System.out.println("on merge for " + eq);
+//			List<List<String>> lhs = null, rhs = null;
+//			for (List<List<String>> eqc : eqcs) {
+//				if (eqc.contains(pathToList(eq.lhs))) {
+//					lhs = eqc;
+//				}
+//				if (eqc.contains(pathToList(eq.rhs))) {
+//					rhs = eqc;
+//				}
+//			}
+//			if (lhs == null) {
+//				// continue;
+//				throw new FQLException("Missing lhs equiv class " + eq + " in "
+//						+ eqcs);
+//			}
+//			if (rhs == null) {
+//				// continue;
+//				throw new FQLException("Missing rhs equiv class " + eq + " in "
+//						+ eqcs);
+//			}
+//
+//			if (!lhs.equals(rhs)) {
+//				// System.out.println("unequal : " + lhs + " and " + rhs);
+//				eqcs.remove(lhs);
+//				eqcs.remove(rhs);
+//				List<List<String>> n = new LinkedList<List<String>>();
+//				n.addAll(lhs);
+//				n.addAll(rhs);
+//				eqcs.add(n);
+//				// System.out.println("result " + eqcs);
+//				merge(eqs0, eqcs);
+//				return;
+//			}
+//			// System.out.println("lhs and rhs are equal");
+//		}
+//	}
 
 	public static List<String> pathToList(Path p) {
 		List<String> ret = new LinkedList<String>();
@@ -783,22 +781,22 @@ public class Signature implements Viewable<Signature> {
 		return ret;
 	}
 
-	private List<List<String>> compose(List<List<String>> a,
-			List<List<String>> b) {
-		List<List<String>> ret = new LinkedList<List<String>>();
-
-		for (List<String> path1 : a) {
-			for (List<String> path2 : b) {
-				List<String> path3 = new LinkedList<String>();
-				path3.addAll(path1);
-				List<String> path2X = new LinkedList<String>(path2);
-				path2X.remove(0);
-				path3.addAll(path2X);
-				ret.add(path3);
-			}
-		}
-		return ret;
-	}
+//	private List<List<String>> compose(List<List<String>> a,
+//			List<List<String>> b) {
+//		List<List<String>> ret = new LinkedList<List<String>>();
+//
+//		for (List<String> path1 : a) {
+//			for (List<String> path2 : b) {
+//				List<String> path3 = new LinkedList<String>();
+//				path3.addAll(path1);
+//				List<String> path2X = new LinkedList<String>(path2);
+//				path2X.remove(0);
+//				path3.addAll(path2X);
+//				ret.add(path3);
+//			}
+//		}
+//		return ret;
+//	}
 
 	// private Set<List<String>> bfs2(LinkedList<String> l, Node n, int cur, int
 	// max) {

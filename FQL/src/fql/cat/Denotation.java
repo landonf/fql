@@ -1,7 +1,6 @@
 package fql.cat;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.GridLayout;
 import java.util.Collections;
 import java.util.Comparator;
@@ -64,13 +63,14 @@ public class Denotation {
 		final Map<Integer, Path> fn2 = new HashMap<>();
 		for (Path p : paths) {
 			Integer i = fn.of(p);
-			if (fn2.get(i) == null) {
+			if (fn2.get(i) == null || fn2.get(i).path.size() > p.path.size()) {
 				fn2.put(i, p);
 			}
 		}
 		if (fn2.size() < numarrs()) {
 			throw new FQLException("Basis paths too long");
 		}
+		
 
 		for (Integer i : fn2.keySet()) {
 			Path p = fn2.get(i);
@@ -223,7 +223,7 @@ public class Denotation {
 			deriveConsequences();
 		//	checkRtables() ;
 			Node a;
-			int x = 0;
+			//int x = 0;
 			while ((a = findNonemptySa()) != null) {
 				Pair<Integer,Integer> uv = take(SA.get(a));
 			//	checkRtables() ;
@@ -308,9 +308,15 @@ public class Denotation {
 	}
 
 
+	List<Node> ekeys;
+	List<Edge> lkeys;
+	
 	//check columns headed by n for undefined elements
+	//needs to use all possible orders for the nodes and edges
 	private Integer hasUndefined(Node n) throws FQLException {
-		for (Node n0 : etables.keySet()) {
+		ekeys = shift(ekeys);
+
+		for (Node n0 : ekeys) {
 			if (!etables1.get(n0).equals(n)) {
 				continue;
 			}
@@ -332,8 +338,9 @@ public class Denotation {
 			}
 		}
 		
-		
-		for (Edge e0 : Ltables.keySet()) {
+		lkeys = shift(lkeys);
+
+		for (Edge e0 : lkeys) {
 			if (e0.target.equals(n)) {
 				Map<Integer, Integer> x = Ltables.get(e0);
 				if (x == null) {
@@ -360,6 +367,13 @@ public class Denotation {
 
 
 
+
+	private <X> List<X> shift(List<X> l) {
+		List<X> ret = new LinkedList<>(l);
+		X x = ret.remove(0);
+		ret.add(x);
+		return ret;
+	}
 
 	private void deriveConsequences() {
 		fillInPartial();
@@ -577,6 +591,7 @@ public class Denotation {
 			m.get(n).remove(vw);
 			Pair<Integer, Integer> uw = new Pair<>(uv.first, vw.second);
 			m.get(n).add(uw);
+		//	System.out.println("crazy remove 1");
 		}
 		for (Edge e : Ltables.keySet()) {
 			if (Ltables1.get(e).first.equals(n)) {
@@ -584,8 +599,10 @@ public class Denotation {
 				Integer gv = Ltables.get(e).get(uv.second);
 				if (gu != null && gv != null && !gu.equals(gv)) {
 					if (gu < gv) {
+				//		System.out.println("crazy remove 2 with " + gu + and  );
 						m.get(n).add(new Pair<>(gu, gv));
 					} else {
+				//		System.out.println("crazy remove 2");
 						m.get(n).add(new Pair<>(gv, gu));
 					}
 				}
@@ -666,6 +683,7 @@ public class Denotation {
 			
 			SA.put(a, new HashSet<Pair<Integer,Integer>>());
 		}
+		ekeys = new LinkedList<>(A.nodes);
 		for (Edge g : B.edges) {
 			Ltables.put(g, new HashMap<Integer, Integer>());
 			String[] cnames = new String[2];
@@ -674,6 +692,7 @@ public class Denotation {
 			Ltables0.put(g, cnames);
 			Ltables1.put(g, new Pair<>(g.source, g.target));
 		}
+		lkeys = new LinkedList<>(B.edges);
 		for (Eq eq : R) {
 			List<String> c = new LinkedList<>();
 			List<Node> cc = new LinkedList<>();

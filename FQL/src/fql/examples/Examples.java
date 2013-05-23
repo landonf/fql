@@ -1,5 +1,7 @@
 package fql.examples;
 
+import fql.cat.DihedralExample;
+
 
 /**
  * 
@@ -17,8 +19,9 @@ public class Examples {
 	public static Example triangle = new TriangleExample();
 	public static Example cyclicgroup = new CyclicGroupExample();
 	public static Example employess = new EmployeesExample();
+	public static Example dihedral = new DihedralExample();
 	
-	public static Example[] examples = { delta, pi, sigma, employess, composition, iso, triangle, cyclicgroup };
+	public static Example[] examples = { delta, pi, sigma, employess, composition, iso, triangle, cyclicgroup, dihedral };
 	
 	public static final String helpString = "Available definitions (quasi-BNF): \n\n"
 			+ "schema S = { [E : N -> N | N], ; [N[.E] = N[.E]], }"
