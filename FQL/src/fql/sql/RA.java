@@ -313,8 +313,15 @@ public abstract class RA {
 		Map<String, RA> ret = new HashMap<String, RA>();
 		Map<Node, List<String>> tags = new HashMap<Node, List<String>>();
 		
-		if (!FinFunctor.isDiscreteOpFib(F.toFunctor2().first)) {
-			throw new FQLException("Not a discrete op-fibration: " + F.name);
+		try {
+			Triple<FinFunctor<Node, Path, Node, Path>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>> func = F.toFunctor2();
+			if (!FinFunctor.isDiscreteOpFib(func.first)) {
+				throw new FQLException("Not a discrete op-fibration: " + F.name);
+			}
+
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			throw e;
 		}
 		
 		for (Node d : D.nodes) {

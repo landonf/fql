@@ -12,8 +12,12 @@ public class Arr<Obj,Arrow> {
 
 		@Override
 	public String toString() {
-		return arr.toString(); //"(" + arr + " : " + src + " -> " + dst + ")";
+		return arr.toString();
 	}
+		
+		public String toString2() {
+			 return arr + " : " + src + " -> " + dst;
+		}
 		
 		public Arrow arr;
 		public Obj src;

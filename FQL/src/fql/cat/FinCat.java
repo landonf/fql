@@ -14,9 +14,9 @@ import fql.Triple;
 import fql.decl.Signature;
 
 /**
- * @author ryan
  *
  * Implementation of finite categories.
+ * @author ryan
  * 
  * @param <Obj> type of objects
  * @param <Arrow> type of arrows
@@ -227,8 +227,34 @@ public class FinCat<Obj, Arrow>  {
 
 	@Override
 	public String toString() {
-		return "objects = " + objects + "\n\narrows = " + arrows + "\n\ncomposition = " + composition
-				+ "\n\nidentities = " + identities;
+
+		String o = "";
+		for (Obj oo : objects) {
+			o += "\t" + oo + "\n";
+		}
+		
+		String a = "";
+		for (Arr<Obj, Arrow> aa : arrows) {
+			a += "\t" + aa.toString2() + "\n";
+		}
+		
+		String c = "";
+		for (Arr<Obj, Arrow> a1 : arrows) {
+			for (Arr<Obj, Arrow> a2 : arrows) {
+				Arr<Obj, Arrow> a3 = compose(a1, a2);
+				if (a3 != null) {
+					c += "\t" + a1 + " ; " + a2 + " = " + a3 + "\n";
+				}
+			}
+		}
+		
+		String j = "";
+		for (Obj oo : objects) {
+			j += "\t" + "id_" + oo + " = " + identities.get(oo) + "\n";
+		}
+		
+	return "objects:\n" + o + "\n\narrows:\n" + a + "\n\ncomposition:\n" + c
+				+ "\n\nidentities:\n" + j;
 	}
 
 

@@ -1,6 +1,5 @@
 package fql.examples;
 
-import fql.cat.DihedralExample;
 
 
 /**
@@ -17,11 +16,12 @@ public class Examples {
 	public static Example composition = new CompositionExample();
 	public static Example iso = new IsoExample();
 	public static Example triangle = new TriangleExample();
-	public static Example cyclicgroup = new CyclicGroupExample();
+	public static Example cyclicgroup = new CyclicExample();
 	public static Example employess = new EmployeesExample();
 	public static Example dihedral = new DihedralExample();
+	public static Example one = new OneExample();
 	
-	public static Example[] examples = { delta, pi, sigma, employess, composition, iso, triangle, cyclicgroup, dihedral };
+	public static Example[] examples = { delta, pi, sigma, employess, composition, iso, triangle, cyclicgroup, dihedral, one };
 	
 	public static final String helpString = "Available definitions (quasi-BNF): \n\n"
 			+ "schema S = { [E : N -> N | N], ; [N[.E] = N[.E]], }"
@@ -36,18 +36,18 @@ public class Examples {
 			+ "\ninstance I = delta F I"
 			+ "\ninstance I = sigma F I"
 			+ "\ninstance I = pi F I"
-			+ "\n\ncomments begin with /* and end with */ "
-			+ "\n\nnew, open, save, and exit are available in the file menu"
-			+ "\ncontrol-Z and control-Y work for redo and undo"
-			+ "\ncontrol-C and control-V and control-X and contol-Q work for Copy, Paste, Cut, and Quit"
+			+ "\n\nComments begin with /* and end with */ "
 			+ "\n"
 			+ "\nFor sigma/pi query generation, signatures must be finite."
+			+ "\n\nMapping well-formedness is not checked."
+			+ "\n\nKeyboard shotcuts should work."
 			+ "\n"
-			+ "\nInstance values must be single words, unless they are quoted"
+			+ "\nFQL is not case-sensitive, but many SQL systems are."
 			+ "\n"
-			+ "\nIn applets, copy and paste do not work outside the browser, and no open/save"
+			+ "\nInstance values must be single words, unless they are quoted."
 			+ "\n"
-			+ "\nThe web menu offers a local web server input option"
+			+ "\nMany features are disabled in applets, such as copy/paste,save,all menu items."
+			+ "\n"
 			+ "\nProject webpage: wisnesky.net/fql.html\n"
 			;
 	

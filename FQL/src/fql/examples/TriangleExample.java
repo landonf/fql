@@ -12,7 +12,7 @@ public class TriangleExample extends Example {
 		return def;
 	}
 
-	String def = "schema C = { a : A -> B, b : B -> C, c : C -> A ; " + "\n"
-			+ "\nA.a.b.c = A," + "\nB.b.c.a = B," + "\nC.c.a.b = C\n } \n";
+	String def = "schema C = {\na : A -> B, b : B -> C, c : C -> A ; " + "\n"
+			+ "\nA.a.b.c = A," + "\nB.b.c.a = B," + "\nC.c.a.b = C\n}\n";
 
 }

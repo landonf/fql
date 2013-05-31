@@ -101,7 +101,7 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 				Arr<ObjB,ArrowB> b0 = arrowMapping.get(b);
 				Arr<ObjB,ArrowB> c0 = arrowMapping.get(c);
 				if (!c0.equals(dstCat.compose(a0, b0))) {
-					throw new RuntimeException("Func does not preserve " + a + b + c + a0 + b0 + c0 + dstCat.compose(a0, b0) + srcCat + dstCat);
+					throw new RuntimeException("Func does not preserve:\na is " + a + "\nb is " + b + "\nc is " + c + "\na0 is " +  a0 + "\nb0 is " + b0 + "\nc0 is " + c0 + "\ncomp is " + dstCat.compose(a0, b0) + "\nsrcCat:\n" + srcCat + "\ndstcat:\n" + dstCat);
 				}
 			}	
 		}

@@ -26,6 +26,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 
+import fql.DEBUG;
 import fql.FQLApplet;
 import fql.FQLBackEnd;
 import fql.FQLServlet;
@@ -34,6 +35,9 @@ import fql.decl.Environment;
 import fql.decl.Program;
 import fql.examples.Example;
 import fql.examples.Examples;
+import fql.sql.PSM;
+import fql.sql.PSMGen;
+import fql.sql.PSMInterp;
 
 @SuppressWarnings("serial")
 public class GUI extends JPanel {
@@ -73,7 +77,14 @@ public class GUI extends JPanel {
 			}
 		});
 		
-		
+		Menu optionsMenu = new Menu("Options");
+		MenuItem optionsItem = new MenuItem("Show Options");
+		optionsMenu.add(optionsItem);
+		optionsItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				DEBUG.showOptions();
+			}
+		});
 		
 		newItem.addActionListener(
 				new	ActionListener() {
@@ -107,6 +118,7 @@ public class GUI extends JPanel {
 				
 		menuBar.add(fileMenu);
 		menuBar.add(webMenu);
+		menuBar.add(optionsMenu);
 				
 		
 		//JSplitPane p = new FQLSplit(.8, JSplitPane.HORIZONTAL_SPLIT);
@@ -120,6 +132,7 @@ public class GUI extends JPanel {
 		JSplitPane xx1 = new FQLSplit(.8, JSplitPane.VERTICAL_SPLIT);
 		p.setPreferredSize(new Dimension(600,400));
 		xx1.add(p);
+		xx1.setDividerSize(6);
 		xx1.add(respArea);
 		
 		 pan.setLayout(new BorderLayout());
@@ -323,7 +336,15 @@ public class GUI extends JPanel {
 			}
 			display = new Display(cp, commands);
 			display.display();
-			respArea.setText("");
+			
+			String psm = PSMGen.compile(cp, parsed_program);
+			respArea.setText(psm);
+						
+			List<PSM> psm0 = PSMGen.compile0(cp, parsed_program);
+			String output0 = PSMInterp.interp0(psm0);
+			System.out.println(output0);
+		//	respArea.setText(output0 + "\n\n---------------\n\n" + psm);
+			
 		} catch (Exception e) {
 			respArea.setText(e.toString());
 			e.printStackTrace();

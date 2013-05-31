@@ -33,6 +33,7 @@ import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
+import fql.DEBUG;
 import fql.FQLException;
 import fql.Fn;
 import fql.Pair;
@@ -55,15 +56,25 @@ import fql.sql.RA;
 public class Mapping implements Viewable<Mapping>, Jsonable {
 	
 	public void validate() throws FQLException {
-		//TODO: check preserve identities, composition
-		//Triple<FinFunctor<String, List<List<String>>, String, List<List<String>>>, Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>>, Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>, String>>>>> s = toFunctor();
-		//s.first.validate(); //check preserves identities, composition
-		//now check that path equivalences are respected
-		for (Eq x : source.eqs) {
-			if (!appy(x.lhs).equals(appy(x.rhs))) {
-				throw new FQLException("Equivalence Not Respected\n\n" + x + "\n\n" + appy(x.lhs) + "\n\n" + appy(x.rhs));
-			}
-		}
+		
+		//should be check by knuth-bendix
+		
+//		if (DEBUG.CHECK_MAPPINGS) {
+//			
+//			Triple<FinFunctor<Node, Path, Node, Path>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>> zzz = toFunctor2();
+//	
+//			for (Eq x : source.eqs) {
+//				appy(x.lhs);
+//				
+//				if (!zzz.third.second.of(appy(x.lhs)).equals(zzz.third.second.of(appy(x.rhs)))) {
+//					throw new FQLException("On " + name + ", equivalence " + x + 
+//							" not respected on \n\n" + x + "\n and \n" + appy(x.lhs) + "\n\n" + appy(x.rhs)
+//							);
+//							
+//				}
+//			}			
+//		}
+		 
 	}
 	
 	public Map<Node, Node> nm = new HashMap<Node, Node>();
@@ -461,10 +472,11 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		Path arrow = arroweqc.arr;
 		
 		Path mapped = appy(arrow);
-		arrowMapping.put(new Arr<>(arrow, arrow.source, arrow.target), new Arr<>(mapped, mapped.source, mapped.target));
+		arrowMapping.put(new Arr<>(arrow, arrow.source, arrow.target), dstCat0.second.of(mapped));
 	}
 	
-	return new Triple<>(new FinFunctor<>(objMapping, arrowMapping, srcCat, dstCat), srcCat0, dstCat0);
+		return new Triple<>(new FinFunctor<>(objMapping, arrowMapping, srcCat,
+				dstCat), srcCat0, dstCat0);
 }
 
 	

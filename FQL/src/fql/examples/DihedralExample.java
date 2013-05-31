@@ -1,4 +1,4 @@
-package fql.cat;
+package fql.examples;
 
 import fql.examples.Example;
 

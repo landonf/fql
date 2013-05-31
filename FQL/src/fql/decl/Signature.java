@@ -29,6 +29,7 @@ import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
+import fql.DEBUG;
 import fql.FQLException;
 import fql.Fn;
 import fql.Pair;
@@ -111,7 +112,9 @@ public class Signature implements Viewable<Signature> {
 			Eq eq = new Eq(lhs, rhs);
 			eqs.add(eq);
 		}
-
+		if (!DEBUG.ALLOW_INFINITES) {
+			toCategory2();
+		}
 	}
 
 	// for json

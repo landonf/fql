@@ -2,6 +2,8 @@ package fql.cat;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -13,6 +15,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
@@ -34,6 +37,7 @@ import fql.decl.Mapping;
 import fql.decl.Node;
 import fql.decl.Path;
 import fql.decl.Signature;
+import fql.gui.FQLTextPanel;
 
 public class Denotation {
 	
@@ -49,7 +53,7 @@ public class Denotation {
 	public Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> toCategory() throws FQLException {
 			
 		if (!enumerate(DEBUG.MAX_DENOTE_ITERATIONS)) {
-			throw new FQLException("Category denotation taking too long");
+			throw new FQLException("Category size exceeds allowed limit");
 		}
 		
 		List<Node> objects = B.nodes;
@@ -68,7 +72,7 @@ public class Denotation {
 			}
 		}
 		if (fn2.size() < numarrs()) {
-			throw new FQLException("Basis paths too long");
+			throw new FQLException("Basis path lengths exceed allowed limit");
 		}
 		
 
@@ -369,6 +373,9 @@ public class Denotation {
 
 
 	private <X> List<X> shift(List<X> l) {
+		if (l.size() == 0) {
+			return l;
+		}
 		List<X> ret = new LinkedList<>(l);
 		X x = ret.remove(0);
 		ret.add(x);
@@ -827,6 +834,10 @@ public class Denotation {
 		enumerate(l);
 		JTabbedPane t = new JTabbedPane();
 		
+		Pair<JPanel, JPanel> xxx = toCat();
+		t.addTab("Category", xxx.first);
+		t.addTab("Normalizer", xxx.second);
+		
 		Map<String, JTable> m = new HashMap<>();
 		for (Node n : etables0.keySet()) {
 			m.put("e_" + n.string, new JTable(et.get(n)));
@@ -845,7 +856,6 @@ public class Denotation {
 		}
 		t.addTab("Relation Tables", makePanels(m));
 		
-		t.addTab("Category", toCat());
 		
 //		m = new HashMap<>();
 //		for (Edge e : ntables.keySet()) {
@@ -856,16 +866,53 @@ public class Denotation {
 		return t;
 	}
 	
-	private JPanel toCat() {
+	private Pair<JPanel, JPanel> toCat() {
 		JPanel p = new JPanel(new GridLayout(1,1));
 		JTextArea a = new JTextArea();
+		JPanel q = null;
 		try {
-			a.setText(toCategory().first.toString());
+			
+			Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> xxx = toCategory();
+			
+			a.setText(xxx.first.toString());
+			
+			q = makeNormalizer(xxx.second);
+			
 		} catch (Throwable e) {
 			a.setText(e.getMessage());
 		}
 		p.add(new JScrollPane(a));
-		return p;
+		
+		return new Pair<>(p, q);
+	}
+
+	private JPanel makeNormalizer(final Fn<Path, Arr<Node, Path>> f) {
+		final JPanel ret = new JPanel(new BorderLayout());
+		
+		JPanel p = new JPanel(new GridLayout(2,1));
+		final FQLTextPanel p1 = new FQLTextPanel("Input path", "");
+		final FQLTextPanel p2 = new FQLTextPanel("Normalized path", "");
+		p.add(p1);
+		p.add(p2);
+		
+		JButton b = new JButton("Normalize");
+		b.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String s = p1.getText();
+				try {
+					Path path = Path.parsePath(sig, s);
+					Path ap = f.of(path).arr;
+					p2.setText(ap.toString());
+				} catch (FQLException ex) {
+					p2.setText(ex.toString());
+				}
+			}
+		});
+		
+		ret.add(p, BorderLayout.CENTER);
+		ret.add(b, BorderLayout.PAGE_END);
+
+		return ret;
 	}
 
 	public JPanel view() throws FQLException {

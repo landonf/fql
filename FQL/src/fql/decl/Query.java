@@ -617,10 +617,10 @@ public class Query implements Viewable<Query> {
 			yyy.add(new Pair<>(e.name, x2.arr.asList()));
 		}
 		
-		System.out.println(xxx);
-		System.out.println(yyy);
-		System.out.println(proj1.first.target);
-		System.out.println(q1.getSource());
+//		System.out.println(xxx);
+//		System.out.println(yyy);
+//		System.out.println(proj1.first.target);
+//		System.out.println(q1.getSource());
 		Mapping xyz = new Mapping(name + "iso1",proj1.first.target, q1.getSource(),  xxx, yyy);
 		
 		Mapping newproj = Mapping.compose(name + "_delta", proj1.first, xyz);

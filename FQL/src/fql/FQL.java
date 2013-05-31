@@ -4,6 +4,7 @@ import java.awt.MenuBar;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
 
 import fql.gui.GUI;
 
@@ -16,6 +17,9 @@ import fql.gui.GUI;
 public class FQL  {
 
 	public static void main(String[] args) {
+	//	System.setProperty("awt.useSystemAAFontSettings","on");
+		//  System.setProperty("swing.aatext", "true");
+		
 		Pair<JPanel, MenuBar> gui = GUI.makeGUI();
 		JFrame f = new JFrame("FQL IDE");
 		f.setContentPane(gui.first);
@@ -28,15 +32,12 @@ public class FQL  {
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 	
-//	static {
-//	try {
-//		for (Object o : UIManager.getInstalledLookAndFeels()) {
-//			System.out.println(o.toString());
-//		}
-//      UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
-//	    } catch(Exception e) {
-//	      System.out.println("Error setting native LAF: " + e);
-//	    }
-//	}
+	static {
+		try {
+		    UIManager.setLookAndFeel(
+		            UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception ee) { }
+	}
+	
 
 }

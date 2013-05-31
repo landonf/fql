@@ -111,7 +111,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			Set<Pair<String, String>> rhs = evaluate(eq.rhs);
 			if (!lhs.equals(rhs)) {
 				throw new FQLException("Violates constraints: " + s.name0
-						+ " in " + s + " and " + this);
+						+ " in " + s + " and " + this + "\n\n eq is " + eq + "\nlhs is " + lhs + "\n\nrhs is " + rhs);
 			}
 		}
 		
@@ -214,13 +214,13 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	}
 
 	private Set<Pair<String, String>> lookup(String name,
-			List<Pair<String, List<Pair<String, String>>>> data2) {
+			List<Pair<String, List<Pair<String, String>>>> data2) throws FQLException {
 		for (Pair<String, List<Pair<String, String>>> p : data2) {
 			if (name.equals(p.first)) {
 				return new HashSet<Pair<String, String>>(p.second);
 			}
 		}
-		throw new RuntimeException("cannot find " + name + " in " + data2);
+		throw new FQLException("cannot find " + name + " in " + data2);
 	}
 
 	public Instance(String name, Query thequery, Instance theinstance)

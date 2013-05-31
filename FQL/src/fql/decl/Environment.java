@@ -48,8 +48,8 @@ public class Environment {
 				addQuery((QueryDecl) d);
 			} else if (d instanceof EvalInstanceDecl) {
 				addInstance((EvalInstanceDecl) d);
-			} else if (d instanceof DirectInstanceDecl) {
-				addInstance((DirectInstanceDecl) d);
+			} else if (d instanceof EvalDSPInstanceDecl) {
+				addInstance((EvalDSPInstanceDecl) d);
 			}
 			
 			else {
@@ -74,7 +74,7 @@ public class Environment {
 		return colors0[index++];
 	}
 
-	private void addInstance(DirectInstanceDecl e) throws FQLException {
+	private void addInstance(EvalDSPInstanceDecl e) throws FQLException {
 		Mapping m = mappings.get(e.mapping);
 		Instance i = instances.get(e.inst);
 		if (m == null) {

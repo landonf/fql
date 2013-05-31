@@ -6,8 +6,13 @@ import java.util.List;
 import fql.FQLException;
 import fql.Pair;
 import fql.Unit;
+import fql.parse.BadSyntax;
+import fql.parse.FqlTokenizer;
 import fql.parse.Jsonable;
+import fql.parse.Partial;
+import fql.parse.PathParser;
 import fql.parse.PrettyPrinter;
+import fql.parse.Tokens;
 
 /**
  * 
@@ -109,6 +114,23 @@ public class Path implements Jsonable {
 //		}
 //		return ret;
 //	}
+	
+	
+	public static Path parsePath(Signature a, String s) throws FQLException {
+		try {
+			Tokens t = new FqlTokenizer(s);
+			PathParser pp = new PathParser();
+			Partial<List<String>> r = pp.parse(t);
+			if (r.tokens.toString().trim().length() != 0) {
+				throw new FQLException("Invalid path: " + s); 
+			}
+			return new Path(a, r.value);
+			
+		} catch (Exception e) {
+			throw new FQLException("Invalid path: " + s); 
+		}		
+		
+	}
 
 	public Path(Signature a, Node a2) throws FQLException {
 		this(a, foo(a2));

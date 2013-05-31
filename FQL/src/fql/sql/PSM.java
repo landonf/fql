@@ -12,4 +12,8 @@ public abstract class PSM {
 	
 	public  abstract String toPSM(); 
 
+	@Override
+	public String toString() {
+		return toPSM();
+	}
 }

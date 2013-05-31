@@ -31,35 +31,33 @@ public class InsertValues extends PSM {
 			attrsStr += attrs.get(i);
 		}
 		
-		int i = 0;
-		String valuesStr = "";
+		String pre = "INSERT INTO " + name + "(" + attrsStr + ") VALUES ";
+
+		String ret = "";
 		for (Map<String, Object> row : values) {
 			String rowStr = "";
 			for (int j = 0; j < attrs.size(); j++) {
 				if (j > 0) {
 					rowStr += ", ";
 				}
-				rowStr += row.get(attrs.get(j));
+				rowStr += "'" + row.get(attrs.get(j)) + "'";
 			}
-			if (i++ > 0) {
-				valuesStr += ", ";
-			}
-			valuesStr += "(" + rowStr + ")";
-		}
-		for (i = 0; i < attrs.size(); i++) {
-			if (i > 0) {
-				attrsStr += ", ";
-			}
-			attrsStr += "'" + attrs.get(i) + "'";
+			ret += pre + "(" + rowStr + ");\n";
 		}
 		
+//		for (i = 0; i < attrs.size(); i++) {
+//			if (i > 0) {
+//				attrsStr += ", ";
+//			}
+//			attrsStr += "'" + attrs.get(i) + "'";
+//		}
 		
-		return "INSERT INTO " + name + "(" + attrsStr + ") VALUES " + valuesStr + ";";
+		return ret.trim();
 	}
 
 	@Override
 	public void exec(Map<String, Set<Map<String, Object>>> state) {
-		if (state.get(name).size() != 0) {
+		if (state.get(name).size() > 0) {
 			throw new RuntimeException("table not empty: " + name);
 		}
 		state.put(name,  values);

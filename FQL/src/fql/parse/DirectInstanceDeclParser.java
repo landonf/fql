@@ -1,7 +1,7 @@
 package fql.parse;
 
 import fql.decl.Decl;
-import fql.decl.DirectInstanceDecl;
+import fql.decl.EvalDSPInstanceDecl;
 
 /**
  * 
@@ -41,7 +41,7 @@ public class DirectInstanceDeclParser implements Parser<Decl> {
 			s3 = y.value;
 			
 			
-			return new Partial<Decl>(s, new DirectInstanceDecl(s1,"delta",s2,s3));
+			return new Partial<Decl>(s, new EvalDSPInstanceDecl(s1,"delta",s2,s3));
 		} catch (Exception e) { }
 		try {
 			Tokens s = s0;
@@ -71,7 +71,7 @@ public class DirectInstanceDeclParser implements Parser<Decl> {
 			s3 = y.value;
 			
 			
-			return new Partial<Decl>(s, new DirectInstanceDecl(s1,"sigma",s2,s3));
+			return new Partial<Decl>(s, new EvalDSPInstanceDecl(s1,"sigma",s2,s3));
 		} catch (Exception e) { }
 		try {
 			Tokens s = s0;
@@ -101,7 +101,7 @@ public class DirectInstanceDeclParser implements Parser<Decl> {
 			s3 = y.value;
 			
 			
-			return new Partial<Decl>(s, new DirectInstanceDecl(s1,"pi",s2,s3));
+			return new Partial<Decl>(s, new EvalDSPInstanceDecl(s1,"pi",s2,s3));
 		} catch (Exception e) { }
 		
 		throw new BadSyntax("Could not parse direct instance decl from " + s0);
