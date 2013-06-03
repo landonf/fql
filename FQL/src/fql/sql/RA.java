@@ -16,6 +16,7 @@ import fql.cat.Arr;
 import fql.cat.CommaCat;
 import fql.cat.FinCat;
 import fql.cat.FinFunctor;
+import fql.decl.Attribute;
 import fql.decl.Edge;
 import fql.decl.Mapping;
 import fql.decl.Node;
@@ -533,6 +534,9 @@ public abstract class RA {
 		}
 		for (Entry<Edge, Path> e : m.em.entrySet()) {
 			ret.put(e.getKey().name, compose(e.getValue()));
+		}
+		for (Entry<Attribute, Attribute> a : m.am.entrySet()) {
+			ret.put(a.getKey().name, new Relvar(a.getValue().name));
 		}
 		return ret;
 	}

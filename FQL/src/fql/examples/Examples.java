@@ -10,6 +10,7 @@ package fql.examples;
  */
 public class Examples {
 	
+	public static Example typeddelta = new TypedDeltaExample();
 	public static Example delta = new DeltaExample();
 	public static Example pi = new PiExample();
 	public static Example sigma = new SigmaExample();
@@ -20,8 +21,12 @@ public class Examples {
 	public static Example employess = new EmployeesExample();
 	public static Example dihedral = new DihedralExample();
 	public static Example one = new OneExample();
+	public static Example typedemployees = new TypedEmployeesExample();
+	public static Example typedsigma = new TypedSigmaExample();
 	
-	public static Example[] examples = { delta, pi, sigma, employess, composition, iso, triangle, cyclicgroup, dihedral, one };
+	public static Example[] examples = { typeddelta, delta, pi, typedsigma, sigma, employess, typedemployees, composition, iso, triangle, cyclicgroup, dihedral, one };
+	
+	public static final Example INIT_EXAMPLE = typeddelta;
 	
 	public static final String helpString = "Available definitions (quasi-BNF): \n\n"
 			+ "schema S = { [E : N -> N | N], ; [N[.E] = N[.E]], }"
@@ -50,6 +55,8 @@ public class Examples {
 			+ "\n"
 			+ "\nProject webpage: wisnesky.net/fql.html\n"
 			;
+	
+
 	
 	
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import fql.DEBUG;
 import fql.Pair;
 
 public class Flower extends SQL {
@@ -61,33 +62,34 @@ public class Flower extends SQL {
 					+ p.second.first + "." + p.second.second;
 		}
 
-		return "SELECT " + as0 + " FROM " + from0 + " " + where0;
+		return "SELECT DISTINCT " + as0 + " FROM " + from0 + " " + where0;
 	}
 
 	@Override
 	public Set<Map<String, Object>> eval(
 			Map<String, Set<Map<String, Object>>> state) {
 		
-//		System.out.println("********");
-//		System.out.println("Evaluating " + this);
-//		System.out.println("state " + state);
+		System.out.println("********");
+		System.out.println("Evaluating " + this);
+		System.out.println("state " + state);
+		
 
 		Set<Map<Pair<String, String>, Object>> tableau = evalFrom(state);
 
-	//	System.out.println("tableau " + tableau);
+		System.out.println("tableau " + tableau);
 		
-		Set<Map<Pair<String, String>, Object>> filtered = evalWhere(tableau);
+		//Set<Map<Pair<String, String>, Object>> filtered = evalWhere(tableau);
 
-	//	System.out.println("tableau " + filtered);
+		//System.out.println("tableau " + filtered);
 		
-		Set<Map<String, Object>> projected = evalSelect(filtered);
+		Set<Map<String, Object>> projected = evalSelect(tableau);
 		
-	//	System.out.println("tableau " + projected);
+		System.out.println("tableau " + projected);
 
 		return projected;
 	}
 
-	private Set<Map<Pair<String, String>, Object>> evalWhere(
+	private Set<Map<Pair<String, String>, Object>> evalWhere2(
 			Set<Map<Pair<String, String>, Object>> tableau) {
 		Set<Map<Pair<String, String>, Object>> ret = new HashSet<>();
 		a: for (Map<Pair<String, String>, Object> row : tableau) {
@@ -96,9 +98,11 @@ public class Flower extends SQL {
 //				System.out.println("condition " + eq);
 //				System.out.println(row.get(eq.first));
 //				System.out.println(row.get(eq.second));
-				if (!row.get(eq.first).equals(row.get(eq.second))) {
+				if (row.get(eq.first) != null & row.get(eq.second) != null) {
+					if (!row.get(eq.first).equals(row.get(eq.second))) {
 			//		System.out.println("failed");
-					continue a;
+						continue a;
+					}
 				}
 			}
 //			System.out.println("added " + row);
@@ -106,6 +110,26 @@ public class Flower extends SQL {
 		}
 		return ret;
 	}
+	
+//	private Set<Map<Pair<String, String>, Object>> evalWhere(
+//			Set<Map<Pair<String, String>, Object>> tableau) {
+//		Set<Map<Pair<String, String>, Object>> ret = new HashSet<>();
+//		a: for (Map<Pair<String, String>, Object> row : tableau) {
+//			for (Pair<Pair<String, String>, Pair<String, String>> eq : where) {
+////				System.out.println("****" + row);
+////				System.out.println("condition " + eq);
+////				System.out.println(row.get(eq.first));
+////				System.out.println(row.get(eq.second));
+//				if (!row.get(eq.first).equals(row.get(eq.second))) {
+//			//		System.out.println("failed");
+//					continue a;
+//				}
+//			}
+////			System.out.println("added " + row);
+//			ret.add(row);
+//		}
+//		return ret;
+//	}
 
 
 	private Set<Map<String, Object>> evalSelect(
@@ -124,17 +148,30 @@ public class Flower extends SQL {
 	private Set<Map<Pair<String, String>, Object>> evalFrom(
 			Map<String, Set<Map<String, Object>>> state) {
 		Set<Map<Pair<String, String>, Object>> ret = null; //ok
+		
+//		int sz = 1;
+//		for (String k : from.keySet()) {
+//			System.out.println(state.get(from.get(k)).size());
+//			sz *= state.get(from.get(k)).size();
+//		}
+//		if (sz > DEBUG.MAX_JOIN_SIZE) {
+//			throw new RuntimeException("Maximum of " + sz + " tuples exceeds limit on " + this);
+//		}
+		
 		for (String k : from.keySet()) {
 			if (ret == null) {
 				if (state.get(from.get(k)) == null) {
 					throw new RuntimeException("cannot find " + from.get(k) + " in " + state);
 				}
 				ret = unit(k, state.get(from.get(k)), from.get(k));
+				ret = evalWhere2(ret);
 			} else {
 				if (state.get(from.get(k)) == null) {
 					throw new RuntimeException("cannot find " + from.get(k) + " in " + state);
 				}
-				ret = cartProd(k, ret, state.get(from.get(k)), from.get(k));
+				ret = cartProd(k, new HashSet<>(ret), state.get(from.get(k)), from.get(k));
+				
+				ret = evalWhere2(ret);
 			}
 
 		}

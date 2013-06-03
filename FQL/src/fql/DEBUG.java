@@ -22,6 +22,8 @@ public class DEBUG {
 
 	public static  int MAX_DENOTE_ITERATIONS = 64;
 	
+	//public static int MAX_JOIN_SIZE = 1024;
+	
 	public static  boolean ALLOW_INFINITES = true; 
 	
 	//public static boolean CHECK_MAPPINGS = false;
@@ -56,13 +58,19 @@ public class DEBUG {
 		p.add(iter);
 		//p.add(p2);
 		
+//		JTextField sz = new JTextField(Integer.toString(MAX_JOIN_SIZE));
+//		p.add(new JLabel("Maximum potential join size:"));
+//		p.add(iter);
+		
 		int ret = JOptionPane.showConfirmDialog(null, p, "Options", JOptionPane.OK_CANCEL_OPTION);
 		if (ret == JOptionPane.YES_OPTION) {
 			int a = MAX_PATH_LENGTH;
 			int b = MAX_DENOTE_ITERATIONS;
+			//int c = MAX_JOIN_SIZE;
 			try {
 				a = Integer.parseInt(plen.getText());
 				b = Integer.parseInt(iter.getText());
+		//		c = Integer.parseInt(sz.getText());
 			} catch (NumberFormatException nfe) {
 				return;
 			}
@@ -71,6 +79,7 @@ public class DEBUG {
 	//		CHECK_MAPPINGS = jcb1.isSelected();
 			MAX_PATH_LENGTH = a;
 			MAX_DENOTE_ITERATIONS = b;
+			//MAX_JOIN_SIZE = c;
 		}
 	}
 

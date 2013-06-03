@@ -3,6 +3,7 @@ package fql.decl;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,6 +12,9 @@ import fql.FQLException;
 import fql.Pair;
 import fql.Triple;
 import fql.gui.Viewable;
+import fql.sql.PSM;
+import fql.sql.PSMGen;
+import fql.sql.PSMInterp;
 
 /**
  * 
@@ -32,6 +36,8 @@ public class Environment {
 		instances = new HashMap<String, Instance>();		
 		Set<String> names = new HashSet<String>();
 		colors =  new HashMap<String, Color>();
+		
+		Map<String, Signature> it = new HashMap<>();
 		for (Decl d : p.decls) {
 			if (names.contains(d.name)) {
 				throw new FQLException("Duplicate schema: " + d.name);
@@ -40,16 +46,16 @@ public class Environment {
 
 			if (d instanceof SignatureDecl) {
 				addSchema((SignatureDecl) d);
-			} else if (d instanceof GivenInstanceDecl) {
-				addInstance((GivenInstanceDecl) d);
 			} else if (d instanceof MappingDecl) {
 				addMapping((MappingDecl) d);
 			} else if (d instanceof QueryDecl) {
 				addQuery((QueryDecl) d);
 			} else if (d instanceof EvalInstanceDecl) {
-				addInstance((EvalInstanceDecl) d);
+		//		addInstance((EvalInstanceDecl) d);
 			} else if (d instanceof EvalDSPInstanceDecl) {
-				addInstance((EvalDSPInstanceDecl) d);
+		//		addInstance((EvalDSPInstanceDecl) d);
+			} else if (d instanceof ConstantInstanceDecl) {
+		//		addInstance((GivenInstanceDecl) d);
 			}
 			
 			else {
@@ -57,12 +63,54 @@ public class Environment {
 			}
 		}
 		
+		List<PSM> psm = PSMGen.compile0(this, p);
+		Map<String, Set<Map<String, Object>>> output0 = PSMInterp.interp(psm);
+
+		for (Decl d : p.decls) {
+			if (d instanceof InstanceDecl) {
+				InstanceDecl d0 = (InstanceDecl) d;
+				addInstance(new ConstantInstanceDecl(d.name, d0.type, gather(d.name, getSchema(d0.type), output0)));
+			}
+		}
+			
+		//go through instance decls, looking up in output as necessary
+		
 		for (String s : signatures.keySet()) {
 			colors.put(s, nextColor());
 		}
 		
 	}
 	
+	private List<Pair<String, List<Pair<String, String>>>> gather(String pre,
+			Signature sig, Map<String, Set<Map<String, Object>>> state) {
+		List<Pair<String, List<Pair<String, String>>>> ret = new LinkedList<>();
+		
+		for (Node n : sig.nodes) {
+			Set<Map<String, Object>> v = state.get(pre + "_" + n.string);
+			ret.add(new Pair<>(n.string, gather0(v)));
+		}
+		for (Edge e : sig.edges) {
+			Set<Map<String, Object>> v = state.get(pre + "_" + e.name);
+			ret.add(new Pair<>(e.name, gather0(v)));
+		}
+		for (Attribute a : sig.attrs) {
+			Set<Map<String, Object>> v = state.get(pre + "_" + a.name);
+			ret.add(new Pair<>(a.name, gather0(v)));
+		}
+		
+		return ret;
+	}
+
+	private List<Pair<String, String>> gather0(Set<Map<String, Object>> v) {
+		List<Pair<String, String>> ret = new LinkedList<>();
+		
+		for (Map<String, Object> o : v) {
+			ret.add(new Pair<>(o.get("c0").toString(), o.get("c1").toString()));
+		}
+		
+		return ret;
+	}
+
 	int index = 0;
 	static Color[] colors0 = new Color[] { Color.YELLOW, Color.GREEN, Color.BLUE, Color.RED, Color.GRAY, Color.ORANGE, Color.PINK, Color.WHITE
 		, Color.DARK_GRAY, Color.CYAN, Color.MAGENTA, Color.PINK
@@ -74,30 +122,7 @@ public class Environment {
 		return colors0[index++];
 	}
 
-	private void addInstance(EvalDSPInstanceDecl e) throws FQLException {
-		Mapping m = mappings.get(e.mapping);
-		Instance i = instances.get(e.inst);
-		if (m == null) {
-			throw new FQLException("Cannot find mapping " + e.mapping);
-		}
-		if (i == null) {
-			throw new FQLException("Cannot find instance " + e.inst);
-		}
-		instances.put(e.name, new Instance(e.name, m, i, e.type));
-	}
 
-	private void addInstance(EvalInstanceDecl d) throws FQLException {
-		//instance x = eval q I
-		Query thequery = queries.get(d.query);
-		Instance theinstance = instances.get(d.inst);
-		if (thequery == null) {
-			throw new FQLException("Cannot find query " + d.query);
-		}
-		if (theinstance == null) {
-			throw new FQLException("Cannot find instance " + d.inst);
-		}
-		instances.put(d.name, new Instance(d.name, thequery, theinstance));
-	}
 
 	private void addSchema(SignatureDecl schemaDecl) throws FQLException {
 		List<Triple<String, String, String>> arrows = schemaDecl.arrows;
@@ -118,7 +143,7 @@ public class Environment {
 		mappings.put(mappingDecl.name, m);
 	}
 
-	private void addInstance(GivenInstanceDecl instanceDecl) throws FQLException {
+	private void addInstance(ConstantInstanceDecl instanceDecl) throws FQLException {
 		Signature thesig = signatures.get(instanceDecl.type);
 		instances.put(instanceDecl.name, new Instance(instanceDecl.name, thesig, instanceDecl.data));
 	}

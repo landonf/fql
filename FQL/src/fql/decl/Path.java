@@ -6,7 +6,6 @@ import java.util.List;
 import fql.FQLException;
 import fql.Pair;
 import fql.Unit;
-import fql.parse.BadSyntax;
 import fql.parse.FqlTokenizer;
 import fql.parse.Jsonable;
 import fql.parse.Partial;

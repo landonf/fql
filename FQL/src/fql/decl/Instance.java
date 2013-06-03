@@ -1,11 +1,13 @@
 package fql.decl;
 
+import java.awt.BasicStroke;
 import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Paint;
+import java.awt.Stroke;
 import java.awt.event.MouseListener;
 import java.util.Arrays;
 import java.util.Collections;
@@ -60,30 +62,50 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	public void conformsTo(Signature s) throws FQLException {
 		for (Node n : s.nodes) {
 			Set<Pair<String, String>> i = data.get(n.string);
+			if (i == null) {
+				throw new FQLException("Missing node table " + n.string + " in " + this);
+			}
 			for (Pair<String, String> p : i) {
 				if (!p.first.equals(p.second)) {
 					throw new FQLException("Not reflexive: " + s.name0 + " in "
 							+ s + " and " + this);
 				}
 			}
-//			Set<Pair<String, String>> j = data.get(data(n.string));
-//			if (j == null) {
-//				throw new FQLException("Missing data table for " + n.string + " in " + this);
-//			}
-//			for (Pair<String, String> ss : j) {
-//				if (!contained(ss.first, data.get(n.string))) {
-//					throw new FQLException("Data table for " + n.string + " has non-domain value " + ss.first);
-//				}
-//			}
-//			for (Pair<String, String> ss : data.get(n.string)) {
-//				if (!contained(ss.first, data.get(data(n.string)))) {
-//					throw new FQLException("Data table for " + n.string + " does not map " + ss.first);
-//				}
-//			}
-			// identity
+		}
+		for (Attribute a : s.attrs) {
+			Set<Pair<String, String>> i = data.get(a.name);
+			if (i == null) {
+				throw new FQLException("Missing attribute table " + a.name + " in " + this);
+			}
+			for (Pair<String, String> p1 : i) {
+				for (Pair<String, String> p2 : i) {
+					if (p1.first.equals(p2.first)) {
+						if (!p2.second.equals(p2.second)) {
+							throw new FQLException("Not functional: " + s.name0
+									+ " in " + s + " and " + this);
+						}
+					}
+				}
+				// functional
+
+				if (!contained(p1.first, data.get(a.source.string))) {
+					throw new FQLException("Domain has non foreign key: "
+							+ s.name0 + " in " + s + " and " + this);
+				}
+				if (a.target instanceof Int) {
+					try {
+						Integer.parseInt(p1.second);
+					} catch (NumberFormatException nfe) {
+						throw new FQLException("Not an int: " + p1.second);
+					}
+				}
+			}
 		}
 		for (Edge e : s.edges) {
 			Set<Pair<String, String>> i = data.get(e.name);
+			if (i == null) {
+				throw new FQLException("Missing edge table " + e.name + " in " + this);
+			}
 			for (Pair<String, String> p1 : i) {
 				for (Pair<String, String> p2 : i) {
 					if (p1.first.equals(p2.first)) {
@@ -187,6 +209,9 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		}
 		for (Edge e : thesig.edges) {
 			this.data.put(e.name, lookup(e.name, data));
+		}
+		for (Attribute a : thesig.attrs) {
+			this.data.put(a.name, lookup(a.name, data));
 		}
 		this.thesig = thesig;
 		if (!typeCheck(thesig)) {
@@ -518,6 +543,10 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		for (Edge e : thesig.edges) {
 			jnd.get(e.source.string).put(e.name, data.get(e.name));
 	//		names.add(e.name);
+		}
+		
+		for (Attribute a : thesig.attrs) {
+			jnd.get(a.source.string).put(a.name, data.get(a.name));
 		}
 		
 //		System.out.println(joined);
@@ -855,6 +884,11 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		for (Edge e : thesig.edges) {
 			g2.addEdge(e.name, e.source.string, e.target.string);
 		}
+		
+		for (Attribute a : thesig.attrs) {
+			g2.addVertex(a.name);
+			g2.addEdge(a.name, a.source.string, a.name);
+		}
 
 		return g2;
 	}
@@ -911,13 +945,38 @@ public class Instance implements Viewable<Instance>, Jsonable {
 //				new MyEdgeT()); // {
 
 //		vv.getRenderContext().setEdgeLabelTransformer(new MyEdgeT2(vv.getPickedEdgeState()));
-		//vv.getRenderContext().setVertexLabelTransformer(new MyVertexT(vv.getPickedVertexState()));
+	//	vv.getRenderContext().setVertexLabelTransformer(new MyVertexT(vv.getPickedVertexState()));
 		// vv.getRenderer().getVertexRenderer().
 		vv.getRenderContext().setLabelOffset(20);
 		vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller<String>());
 //		vv.getRenderContext().getEdgeLabelRenderer().
 		// vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
 
+		 float dash[] = { 1.0f };
+		 final Stroke edgeStroke = new BasicStroke(0.5f, BasicStroke.CAP_BUTT,
+		BasicStroke.JOIN_MITER, 10.0f, dash, 10.0f );
+		// Transformer<String, Stroke> edgeStrokeTransformer = new
+		// Transformer<String, Stroke>() {
+		// public Stroke transform(String s) {
+		// return edgeStroke;
+		// }
+		// };
+		 final Stroke bs = new BasicStroke();
+		Transformer<String, Stroke> edgeStrokeTransformer = new Transformer<String, Stroke>() {
+			public Stroke transform(String s) {
+				if (thesig.isAttribute(s)) {
+					return edgeStroke;
+				} 
+				return bs;
+			}
+		};
+		
+			vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+			 vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
+			vv.getRenderContext().setVertexLabelTransformer(
+					new ToStringLabeller<String>());
+			vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller<String>()); 
+			
 		JSplitPane newthing = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		newthing.setDividerLocation(.9d);
 		newthing.add(vv);
@@ -925,7 +984,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		JPanel xxx = new JPanel(new GridLayout(1,1));
 		xxx.add(newthing);
 //		xxx.setMaximumSize(new Dimension(400,400));
-		return xxx;
+		return xxx; 
 	}
 	
 	private class MyVertexT implements VertexLabelRenderer{
@@ -945,7 +1004,11 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 	    		cards.show(vwr, (String)arg4);
 	    		
-	            return new JLabel((String)arg4);
+	    		  String s = (String) arg4;	
+			        if (thesig.isAttribute(s)) {
+						s = thesig.getTypeLabel(s);
+					}
+	            return new JLabel(s);
 
 	    		
 //	    		JTable t = joined.get(arg4);
@@ -965,7 +1028,11 @@ public class Instance implements Viewable<Instance>, Jsonable {
 //			    	return p;
 		        }
 		        else {
-		          return new JLabel((String)arg4);
+		        String s = (String) arg4;	
+		        if (thesig.isAttribute(s)) {
+					s = thesig.getTypeLabel(s);
+				}
+		          return new JLabel(s);
 		        }
 		    }
 	    }

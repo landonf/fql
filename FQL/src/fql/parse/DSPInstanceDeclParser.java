@@ -9,7 +9,7 @@ import fql.decl.EvalDSPInstanceDecl;
  *
  * Parser for instances given by delta, sigma, pi
  */
-public class DirectInstanceDeclParser implements Parser<Decl> {
+public class DSPInstanceDeclParser implements Parser<Decl> {
 
 	@Override
 	public Partial<Decl> parse(Tokens s0) throws BadSyntax, IllTyped {
@@ -29,6 +29,14 @@ public class DirectInstanceDeclParser implements Parser<Decl> {
 			Partial<String> y = p1.parse(s);
 			s = y.tokens;
 			s1 = y.value;
+			
+			String type;
+			Parser<String> typ = new StringParser();
+			Parser<String> typ0 = ParserUtils.seq(new KeywordParser(":"), typ);
+			y = typ0.parse(s);
+			s = y.tokens;
+			type = y.value;
+			
 			x = e.parse(s);
 			s = x.tokens;
 			x = ev.parse(s);
@@ -40,8 +48,9 @@ public class DirectInstanceDeclParser implements Parser<Decl> {
 			s = y.tokens;
 			s3 = y.value;
 			
+			System.out.println("type is " + type);
 			
-			return new Partial<Decl>(s, new EvalDSPInstanceDecl(s1,"delta",s2,s3));
+			return new Partial<Decl>(s, new EvalDSPInstanceDecl(s1,"delta",s2,s3, type));
 		} catch (Exception e) { }
 		try {
 			Tokens s = s0;
@@ -59,6 +68,14 @@ public class DirectInstanceDeclParser implements Parser<Decl> {
 			Partial<String> y = p1.parse(s);
 			s = y.tokens;
 			s1 = y.value;
+			
+			String type;
+			Parser<String> typ = new StringParser();
+			Parser<String> typ0 = ParserUtils.seq(new KeywordParser(":"), typ);
+			y = typ0.parse(s);
+			s = y.tokens;
+			type = y.value;
+			
 			x = e.parse(s);
 			s = x.tokens;
 			x = ev.parse(s);
@@ -71,7 +88,7 @@ public class DirectInstanceDeclParser implements Parser<Decl> {
 			s3 = y.value;
 			
 			
-			return new Partial<Decl>(s, new EvalDSPInstanceDecl(s1,"sigma",s2,s3));
+			return new Partial<Decl>(s, new EvalDSPInstanceDecl(s1,"sigma",s2,s3, type));
 		} catch (Exception e) { }
 		try {
 			Tokens s = s0;
@@ -89,6 +106,14 @@ public class DirectInstanceDeclParser implements Parser<Decl> {
 			Partial<String> y = p1.parse(s);
 			s = y.tokens;
 			s1 = y.value;
+			
+			String type;
+			Parser<String> typ = new StringParser();
+			Parser<String> typ0 = ParserUtils.seq(new KeywordParser(":"), typ);
+			y = typ0.parse(s);
+			s = y.tokens;
+			type = y.value;
+			
 			x = e.parse(s);
 			s = x.tokens;
 			x = ev.parse(s);
@@ -100,11 +125,12 @@ public class DirectInstanceDeclParser implements Parser<Decl> {
 			s = y.tokens;
 			s3 = y.value;
 			
+
 			
-			return new Partial<Decl>(s, new EvalDSPInstanceDecl(s1,"pi",s2,s3));
+			return new Partial<Decl>(s, new EvalDSPInstanceDecl(s1,"pi",s2,s3, type));
 		} catch (Exception e) { }
 		
-		throw new BadSyntax("Could not parse direct instance decl from " + s0);
+		throw new BadSyntax("Could not parse delta/sigma/pi instance decl from " + s0);
 	}
 
 }

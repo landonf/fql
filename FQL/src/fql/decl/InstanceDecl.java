@@ -8,9 +8,10 @@ package fql.decl;
  */
 public class InstanceDecl extends Decl {
 
-	String type;
+	public String type;
 
-	public InstanceDecl(String name) {
+	public InstanceDecl(String name, String type) {
 		super(name);
+		this.type = type;
 	}
 }

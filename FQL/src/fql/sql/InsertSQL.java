@@ -21,7 +21,7 @@ public class InsertSQL extends PSM {
 	@Override
 	public void exec(Map<String, Set<Map<String, Object>>> state) {
 		if (!state.containsKey(name)) {
-			throw new RuntimeException(this.toString());
+			throw new RuntimeException(this.toString() + " and " + state);
 		}
 		if (state.get(name).size() > 0) {
 			throw new RuntimeException();

@@ -85,8 +85,8 @@ public class MappingDeclParser implements Parser<Decl> {
 			Parser<String> name = new StringParser();
 			Parser<?> arr = new KeywordParser("->");
 			Parser<?> comma = new KeywordParser(",");
-			Parser<?> lparen = new KeywordParser("(");
-			Parser<?> rparen = new KeywordParser(")");
+		//	Parser<?> lparen = new KeywordParser("(");
+		//	Parser<?> rparen = new KeywordParser(")");
 			Parser<?> semi = new KeywordParser(";");
 			Parser<?> lbracket = new KeywordParser("{");
 			Parser<?> rbracket = new KeywordParser("}");
@@ -98,15 +98,15 @@ public class MappingDeclParser implements Parser<Decl> {
 			
 			Parser<List<Pair<String, String>>> nm = 
 					ParserUtils.manySep(
-					ParserUtils.outside(lparen, 
-						ParserUtils.inside(name, comma, name), 
-						rparen), comma);
+				/*	ParserUtils.outside(lparen, 
+				*/		ParserUtils.inside(name, arr, name), 
+					/*	rparen) , */ comma);
 		
 			Parser<List<Pair<String, List<String>>>> em = 
 					ParserUtils.manySep(
-					ParserUtils.outside(lparen, 
-						ParserUtils.inside(name, comma, path), 
-						rparen), comma);
+				/*	ParserUtils.outside(lparen, 
+					*/	ParserUtils.inside(name, arr, path), 
+				/*		rparen), */ comma);
 
 
 Partial<Pair<String, Pair<Pair<String, String>, Pair<List<Pair<String, String>>, List<Pair<String, List<String>>>>>>>  

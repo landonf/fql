@@ -23,7 +23,7 @@ public class PiExample extends Example {
 					"\n"+
 					"mapping idC = id C\n" +
 					"\n" + 
-					"instance J = pi idC I\n\n"
+					"instance J : C = pi idC I\n\n"
 					+ "\n\n\n/*"
 					+ "\nExpected output:"
 					+ "\n"

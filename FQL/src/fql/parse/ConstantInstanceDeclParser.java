@@ -4,7 +4,7 @@ import java.util.List;
 
 import fql.Pair;
 import fql.decl.Decl;
-import fql.decl.GivenInstanceDecl;
+import fql.decl.ConstantInstanceDecl;
 
 /**
  * 
@@ -12,7 +12,7 @@ import fql.decl.GivenInstanceDecl;
  * 
  * Parser for explicit instances.
  */
-public class GivenInstanceDeclParser implements Parser<Decl> {
+public class ConstantInstanceDeclParser implements Parser<Decl> {
 
 	@Override
 	public Partial<Decl> parse(Tokens s) throws BadSyntax, IllTyped {
@@ -50,7 +50,7 @@ public class GivenInstanceDeclParser implements Parser<Decl> {
 		
 		Partial<List<Pair<String, List<Pair<String, String>>>>> aaa = u0.parse(s);
 		
-		GivenInstanceDecl d = new GivenInstanceDecl(name, type, aaa.value);
+		ConstantInstanceDecl d = new ConstantInstanceDecl(name, type, aaa.value);
 		
 		return new Partial<Decl>(aaa.tokens, d);
 	}

@@ -2,26 +2,39 @@ package fql.sql;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class InsertKeygen extends PSM {
 
-	public static int guid = 0;
 	
 	String name;
 	String col;
 	String r;
+	List<String> attrs;
 	
-	public InsertKeygen(String name, String col, String r) {
+	public InsertKeygen(String name, String col, String r, List<String> attrs) {
 		this.col = col;
 		this.r = r;
 		this.name = name;
+		this.attrs = attrs;
 	}
 
 	@Override
 	public String toPSM() {
-		return "INSERT INTO " + name + "(c0,c1,guid) SELECT *, @guid:=@guid+1 AS " + col + " FROM " + r + ";"; 
+		String a = "";
+		int i = 0;
+		for (String attr : attrs) {
+			if (i++ > 0) {
+				a += ",";
+			}
+			a += attr;
+		}
+		
+	
+		return "INSERT INTO " + name + "(" + a + ", guid) SELECT " + a + ", @guid:=@guid+1 AS " + col + " FROM " + r + ";"; 
+		
 	}
 
 	@Override
@@ -39,7 +52,7 @@ public class InsertKeygen extends PSM {
 			for (String s : row.keySet()) {
 				row0.put(s, row.get(s));
 			}
-			row0.put(col, guid++);
+			row0.put(col, ++PSMInterp.guid);
 			ret.add(row0);
 		}
 		state.put(name, ret);

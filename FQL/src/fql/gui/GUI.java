@@ -417,16 +417,20 @@ public class GUI extends JPanel {
 
 	static private boolean abortBecauseDirty() {
 		if (program.trim().equals(topArea.getText().trim())) {
+			
 			return false;
 		}
+		
 		int choice = JOptionPane.showConfirmDialog(null, "Unsaved Changes - Continue?", "Continue?", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null);
 		if (choice == JOptionPane.NO_OPTION) {
 			return true;
 		}
 		return false;
 	}
+	
 
-	static FQLTextPanel topArea = new FQLTextPanel("FQL Program", Examples.delta.getText());
+	static String program = Examples.INIT_EXAMPLE.getText();
+	static FQLTextPanel topArea = new FQLTextPanel("FQL Program",program);
 //	static FQLTextPanel bottomArea = new FQLTextPanel("Commands", Examples.initialCommands);
 	static FQLTextPanel respArea = new FQLTextPanel("Compiler response", "");
 	
@@ -445,6 +449,5 @@ public class GUI extends JPanel {
 	    return stringBuilder.toString();
 	}
 	
-	static String program = Examples.delta.getText();
 
 }

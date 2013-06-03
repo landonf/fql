@@ -21,11 +21,20 @@ public class EvalInstanceDeclParser implements Parser<Decl> {
 		Parser<String> p3 = new StringParser();
 		String s1, s2, s3;
 		
+		String type;
+		Parser<String> typ = new StringParser();
+		Parser<String> typ0 = ParserUtils.seq(new KeywordParser(":"), typ);
+		
 		Partial<?> x = pre.parse(s);
 		s = x.tokens;
 		Partial<String> y = p1.parse(s);
 		s = y.tokens;
 		s1 = y.value;
+		
+		y = typ0.parse(s);
+		s = y.tokens;
+		type = y.value;
+		
 		x = e.parse(s);
 		s = x.tokens;
 		x = ev.parse(s);
@@ -37,8 +46,10 @@ public class EvalInstanceDeclParser implements Parser<Decl> {
 		s = y.tokens;
 		s3 = y.value;
 		
+		System.out.println("Type is " + type);
 		
-		return new Partial<Decl>(s, new EvalInstanceDecl(s1,s2,s3));
+		
+		return new Partial<Decl>(s, new EvalInstanceDecl(s1,s2,s3,type));
 	}
 
 }

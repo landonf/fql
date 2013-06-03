@@ -14,7 +14,7 @@ public class InstanceDeclParser implements Parser<Decl> {
 	public Partial<Decl> parse(Tokens s) throws BadSyntax, IllTyped {
 		Parser<Decl> p;
 		try {
-			p = new GivenInstanceDeclParser();
+			p = new ConstantInstanceDeclParser();
 			return p.parse(s);
 		} catch (Exception e) {
 			
@@ -27,7 +27,7 @@ public class InstanceDeclParser implements Parser<Decl> {
 		}
 		
 		try {
-			p = new DirectInstanceDeclParser();
+			p = new DSPInstanceDeclParser();
 			return p.parse(s);
 		} catch (Exception e) {
 			

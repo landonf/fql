@@ -34,7 +34,7 @@ public class CreateTable extends PSM {
 	@Override
 	public void exec(Map<String, Set<Map<String, Object>>> state) {
 		if (state.get(name) != null) {
-			throw new RuntimeException("table already exists: " + name);
+			throw new RuntimeException("table already exists: " + name + " in " + state);
 		}
 		state.put(name, new HashSet<Map<String, Object>>());
 	}

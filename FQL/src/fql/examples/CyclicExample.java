@@ -25,9 +25,9 @@ public class CyclicExample extends Example {
 			+ "\n}"
 			+ "\n"
 			+ "\nmapping F : CM53 -> CM33 = {"
-			+ "\n  (M,J)" 
+			+ "\n  M -> J" 
 			+ "\n ;"
-			+ "\n  (arr,J.a)"
+			+ "\n  arr -> J.a"
 			+ "\n}"
 	+ "\n\ninstance A53 : CM53 = {"
 	+ "\n M = { (mm1,mm1),(mm2,mm2),(mmm,mmm),(m,m)};"
@@ -38,7 +38,7 @@ public class CyclicExample extends Example {
 	+ "\n J = { (m1,m1), (m2,m2), (m3,m3)};"
 	+ "\n a = { (m1,m2), (m2,m3), (m3,m1)}"
 	+ "\n}"
-	+ "\n\ninstance Inst1 = delta F A33"
+	//+ "\n\ninstance Inst1 = delta F A33"
 	+ "\n"
-	+ "\ninstance Inst2 = pi F A53";
+	+ "\ninstance Inst2 : CM33 = pi F A53";
 }

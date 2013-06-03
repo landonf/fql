@@ -18,9 +18,9 @@ public class OneExample extends Example {
 	"schema C = { arr : A -> A ;  }" +
 	"\n" + 
 	"\nmapping F : C -> C = {" + 
-	"\n (A,A)" +
+	"\n A -> A" +
 	"\n;" +
-	"\n (arr,A.arr)" +
+	"\n arr -> A.arr" +
 	"\n}" + 
 	"\n" + 
 	"\ninstance I : C = {" +

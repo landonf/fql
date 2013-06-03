@@ -23,12 +23,12 @@ public class SigmaExample extends Example {
 			"\n}" +
 			"\n" +
 			"\nmapping F : C -> D = {" +
-			"\n  (a1,A), (a2,A), (a3,A)," +
-			"\n  (b1,B), (b2,B), " +
-			"\n  (c1,C), (c2,C), (c3,C), (c4,C)" +
+			"\n  a1 -> A, a2 -> A, a3 -> A," +
+			"\n  b1 -> B, b2 -> B, " +
+			"\n  c1 -> C, c2 -> C, c3 -> C, c4 -> C" +
 			"\n ; " +
-			"\n  (g1,A.G), (g2,A.G), (g3,A.G)," +
-			"\n  (h1,A.H), (h2,A.H), (h3,A.H)" +
+			"\n  g1 -> A.G, g2 -> A.G, g3 -> A.G," +
+			"\n  h1 -> A.H, h2 -> A.H, h3 -> A.H" +
 			"\n}\n\n" + 
 			"\ninstance I : C = {"+
 			"\n b2 = {(a,a),(b,b),(c,c)};"+
@@ -52,7 +52,7 @@ public class SigmaExample extends Example {
 			"\n h1 = {(6,k)}"+
 			"\n}\n\n" 
 		//	+ "mapping idC = id C\nquery q = project idC join idC union F\n"
-			+ "instance J = sigma F I\n"
+			+ "instance J : D = sigma F I\n"
 	+ "\n\n\n/*\nExpected output:"
 	+ "\nJ = {"
 	+ "\n  G = { (a3_2,b2_b), (a2_4,b2_b), (a3_1,b2_a), (a2_5,b2_c), (a1_6,b1_d), (a2_3,b2_a) };"

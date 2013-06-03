@@ -10,13 +10,13 @@ public class EvalDSPInstanceDecl extends InstanceDecl {
 	
 	public String mapping;
 	public String inst;
-	public String type;
+	public String kind;
 
-	public EvalDSPInstanceDecl(String name, String type, String mapping, String inst) {
-		super(name);
+	public EvalDSPInstanceDecl(String name, String kind, String mapping, String inst, String type) {
+		super(name, type);
 		this.mapping = mapping;
 		this.inst = inst;
-		this.type = type;
+		this.kind = kind;
 	}
 
 }
