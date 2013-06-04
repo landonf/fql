@@ -4,6 +4,7 @@ import java.awt.MenuBar;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import fql.gui.GUI;
@@ -19,7 +20,9 @@ public class FQL  {
 	public static void main(String[] args) {
 	//	System.setProperty("awt.useSystemAAFontSettings","on");
 		//  System.setProperty("swing.aatext", "true");
-		
+		 SwingUtilities.invokeLater(new Runnable() {
+			 public void run() {
+		 
 		Pair<JPanel, MenuBar> gui = GUI.makeGUI();
 		JFrame f = new JFrame("FQL IDE");
 		f.setContentPane(gui.first);
@@ -30,6 +33,8 @@ public class FQL  {
 		f.setLocationRelativeTo(null);
 		f.setVisible(true);
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			 }
+		 });
 	}
 	
 	static {

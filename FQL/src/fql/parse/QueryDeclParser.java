@@ -44,7 +44,7 @@ public class QueryDeclParser implements Parser<Decl> {
 			s = olds;
 			Parser<?> p1 = new KeywordParser("query");
 			Parser<?> p2 = new KeywordParser("=");
-			Parser<?> p3 = new KeywordParser("o");
+			Parser<?> p3 = new KeywordParser("then");
 			Parser<String> p4 = new StringParser();
 			Parser<String> p5 = new StringParser();
 			Parser<String> p6 = new StringParser();

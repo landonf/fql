@@ -15,6 +15,7 @@ public class SchemaDeclParser implements Parser<Decl> {
 	
 	@Override
 	public Partial<Decl> parse(Tokens s) throws BadSyntax, IllTyped {
+		
 		Parser<Unit> sp = new KeywordParser("schema");
 		Partial<Unit> p1 = sp.parse(s);
 		

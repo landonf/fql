@@ -22,10 +22,13 @@ public class Flower extends SQL {
 		this.select = select;
 		this.from = from;
 		this.where = where;
+		if (from.size() == 0) {
+			throw new RuntimeException("Empty flower " + this);
+		}
 	}
 
 	public Flower() {
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	@Override
@@ -69,14 +72,14 @@ public class Flower extends SQL {
 	public Set<Map<String, Object>> eval(
 			Map<String, Set<Map<String, Object>>> state) {
 		
-		System.out.println("********");
-		System.out.println("Evaluating " + this);
-		System.out.println("state " + state);
-		
+//		System.out.println("********");
+//		System.out.println("Evaluating " + this);
+//		System.out.println("state " + state);
+//		
 
 		Set<Map<Pair<String, String>, Object>> tableau = evalFrom(state);
 
-		System.out.println("tableau " + tableau);
+		//System.out.println("tableau " + tableau);
 		
 		//Set<Map<Pair<String, String>, Object>> filtered = evalWhere(tableau);
 
@@ -84,7 +87,7 @@ public class Flower extends SQL {
 		
 		Set<Map<String, Object>> projected = evalSelect(tableau);
 		
-		System.out.println("tableau " + projected);
+		//System.out.println("tableau " + projected);
 
 		return projected;
 	}

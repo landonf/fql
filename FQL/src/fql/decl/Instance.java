@@ -77,6 +77,15 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			if (i == null) {
 				throw new FQLException("Missing attribute table " + a.name + " in " + this);
 			}
+			
+			HashSet<String> x = new HashSet<>(); 
+			for (Pair<String, String> p : i) {
+				x.add(p.first);
+			}
+			if (data.get(a.source.string).size() != x.size()) {
+				throw new RuntimeException("Instance does not map all domain values in " + a.name);
+			}
+			
 			for (Pair<String, String> p1 : i) {
 				for (Pair<String, String> p2 : i) {
 					if (p1.first.equals(p2.first)) {
@@ -106,6 +115,15 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			if (i == null) {
 				throw new FQLException("Missing edge table " + e.name + " in " + this);
 			}
+			
+			HashSet<String> x = new HashSet<>(); 
+			for (Pair<String, String> p : i) {
+				x.add(p.first);
+			}
+			if (data.get(e.source.string).size() != x.size()) {
+				throw new RuntimeException("Instance does not map all domain values in " + e.name);
+			}
+			
 			for (Pair<String, String> p1 : i) {
 				for (Pair<String, String> p2 : i) {
 					if (p1.first.equals(p2.first)) {
@@ -116,7 +134,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 					}
 				}
 				// functional
-
+				
 				if (!contained(p1.first, data.get(e.source.string))) {
 					throw new FQLException("Domain has non foreign key: "
 							+ s.name0 + " in " + s + " and " + this);
@@ -469,6 +487,9 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		}
 
 		int x = (int) Math.ceil(Math.sqrt(panels.size()));
+		if (x == 0) {
+			return new JPanel();
+		}
 		JPanel panel = new JPanel(new GridLayout(x, x));
 		for (JPanel p : panels) {
 			panel.add(p);
@@ -486,7 +507,12 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		List<JPanel> pans = makePanels();
 	
 		int x = (int) Math.ceil(Math.sqrt(pans.size()));
-		JPanel panel = new JPanel(new GridLayout(x, x));
+		JPanel panel;
+		if (x == 0) {
+			panel =  new JPanel();
+		} else {
+		 panel = new JPanel(new GridLayout(x, x));
+		}
 		for (JPanel p : pans) {
 			panel.add(p);
 		}
@@ -895,6 +921,9 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 	public JPanel makeViewer() {
 		Graph<String, String> g = build();
+		if (g.getVertexCount() == 0) {
+			return new JPanel();
+		}
 		return doView(g);
 	}
 
@@ -912,7 +941,10 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		// Setup up a new vertex to paint transformer...
 		Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
 			public Paint transform(String i) {
-				return Environment.colors.get(thesig.name0);
+				if (!thesig.isAttribute(i)) {
+					return Environment.colors.get(thesig.name0);
+				}
+				return null;
 			}
 		};
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
@@ -1188,7 +1220,10 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		
 		Map<Node, Set<Value<String,String>>> objM = new HashMap<>();
 		for (Node obj : cat.objects) {
-			objM.put(obj, conv(data.get(obj)));
+			if (data.get(obj.string) == null) {
+				System.out.println("No data for " + obj + " in " + data);
+			}
+			objM.put(obj, conv(data.get(obj.string)));
 		}
 		
 		Map<Arr<Node, Path>, Map<Value<String, String>, Value<String, String>>> arrM = new HashMap<>();

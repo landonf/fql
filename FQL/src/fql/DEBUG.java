@@ -28,12 +28,20 @@ public class DEBUG {
 	
 	//public static boolean CHECK_MAPPINGS = false;
 	
+	public static boolean DO_NOT_GUIDIFY = false;
+	
+	
 	public static void showOptions() {
 		JPanel p = new JPanel(new GridLayout(5, 2));
 		
 	//	JCheckBox jcb1 = new JCheckBox("", CHECK_MAPPINGS);
 	//	p.add(new JLabel("Require mapping well-formedness:"));
 	//	p.add(jcb1);
+		
+		JCheckBox jcbX = new JCheckBox("", DO_NOT_GUIDIFY);
+		//	JPanel p0 = new JPanel();
+			p.add(new JLabel("Do not GUID-ify (dangerous):"));
+			p.add(jcbX);
 		
 		JCheckBox jcb0 = new JCheckBox("", ALLOW_INFINITES);
 	//	JPanel p0 = new JPanel();
@@ -76,6 +84,7 @@ public class DEBUG {
 			}
 			ALLOW_INFINITES = jcb0.isSelected();
 			VALIDATE = jcb.isSelected();
+			DO_NOT_GUIDIFY = jcbX.isSelected();
 	//		CHECK_MAPPINGS = jcb1.isSelected();
 			MAX_PATH_LENGTH = a;
 			MAX_DENOTE_ITERATIONS = b;

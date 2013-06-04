@@ -14,11 +14,18 @@ public class InsertKeygen extends PSM {
 	String r;
 	List<String> attrs;
 	
+	public InsertKeygen() {
+		
+	}
+	
 	public InsertKeygen(String name, String col, String r, List<String> attrs) {
 		this.col = col;
 		this.r = r;
 		this.name = name;
 		this.attrs = attrs;
+		if (attrs.size() == 0) {
+			throw new RuntimeException();
+		}
 	}
 
 	@Override

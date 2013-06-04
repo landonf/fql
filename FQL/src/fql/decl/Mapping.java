@@ -621,6 +621,9 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	@Override
 	public JPanel pretty() throws FQLException {
 			Graph<String, String> g = build();
+			if (g.getVertexCount() == 0) {
+				return new JPanel();
+			}
 			return doView(g);
 	}
 
@@ -672,21 +675,25 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	}
 
 	
-	Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
-		public Paint transform(String i) {
-			return which(i);
-		}
-
-		private Color which(String t) {
-			int i = t.indexOf(".");
-			//String j = t.substring(i+1);
-			String p = t.substring(0, i);
-			if (p.equals("@source")) {
-				return Environment.colors.get(source.name0);
-			} 
-				return Environment.colors.get(target.name0);
-		}
-	};
+//	Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
+//		public Paint transform(String i) {
+//			return which(i);
+//		}
+//
+//		private Color which(String t) {
+//			int i = t.indexOf(".");
+//			String j = t.substring(i+1);
+//			String p = t.substring(0, i);
+//			System.out.println("%%%%%%%%%%%%%%%%%% " + j);
+//			if (source.isAttribute(j) || target.isAttribute(j)) {
+//				return null;
+//			}
+//			if (p.equals("@source")) {
+//				return Environment.colors.get(source.name0);
+//			} 
+//				return Environment.colors.get(target.name0);
+//		}
+//	};
 	
 	public  JPanel doView(Graph<String,String> sgv) {
 		// Layout<V, E>, BasicVisualizationServer<V,E>
@@ -706,8 +713,11 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 
 			private Color which(String t) {
 				int i = t.indexOf(".");
-				//String j = t.substring(i+1);
+				String j = t.substring(i+1);
 				String p = t.substring(0, i);
+				if (source.isAttribute(j) || target.isAttribute(j)) {
+					return null;
+				}
 				if (p.equals("@source")) {
 					return Environment.colors.get(source.name0);
 				} 

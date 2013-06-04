@@ -1,13 +1,18 @@
 package fql.gui;
 
+
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
+import java.awt.MenuShortcut;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -25,6 +30,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 
 import fql.DEBUG;
 import fql.FQLApplet;
@@ -67,6 +74,35 @@ public class GUI extends JPanel {
 		fileMenu.add(exitItem);
 		respArea.setWordWrap(true);
 //		respArea.setWrapStyleWord();
+		KeyStroke ctrlS = KeyStroke.getKeyStroke(KeyEvent.VK_S,
+		        InputEvent.CTRL_MASK);
+		MenuShortcut s = new MenuShortcut(ctrlS.getKeyCode());
+		saveItem.setShortcut(s);
+		KeyStroke ctrlN = KeyStroke.getKeyStroke(KeyEvent.VK_N,
+		        InputEvent.CTRL_MASK);
+		MenuShortcut n = new MenuShortcut(ctrlN.getKeyCode());
+		newItem.setShortcut(n);
+		KeyStroke ctrlO = KeyStroke.getKeyStroke(KeyEvent.VK_O,
+		        InputEvent.CTRL_MASK);
+		MenuShortcut o = new MenuShortcut(ctrlO.getKeyCode());
+		openItem.setShortcut(o);
+		
+		final Menu editMenu = new Menu("Edit");
+		MenuItem findItem = new MenuItem("Find");
+		editMenu.add(findItem);
+		
+		
+		KeyStroke ctrlF = KeyStroke.getKeyStroke(KeyEvent.VK_F,
+		        InputEvent.CTRL_MASK);
+		MenuShortcut f = new MenuShortcut(ctrlF.getKeyCode());
+		findItem.setShortcut(f);
+		
+		
+//		KeyStroke ctrlQ = KeyStroke.getKeyStroke(KeyEvent.VK_Q,
+//		        InputEvent.CTRL_MASK);
+//		MenuShortcut q = new MenuShortcut(ctrlQ.getKeyCode());
+//		exitItem.setShortcut(q);
+		
 		
 		Menu webMenu = new Menu("Web");
 		MenuItem serverItem = new MenuItem("Start Local Server");
@@ -107,6 +143,7 @@ public class GUI extends JPanel {
 					}
 				}
 		);
+		
 		exitItem.addActionListener(
 				new	ActionListener() {
 					public void actionPerformed(ActionEvent e) {
@@ -115,10 +152,20 @@ public class GUI extends JPanel {
 				}
 		);
 		
+		findItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				findAction();
+//				findItem.
+//				editMenu.setEnabled(false);
+//				editMenu.setEnabled(true);
+			}
+		});
 				
 		menuBar.add(fileMenu);
-		menuBar.add(webMenu);
+		menuBar.add(editMenu);
 		menuBar.add(optionsMenu);
+		
+		menuBar.add(webMenu);
 				
 		
 		//JSplitPane p = new FQLSplit(.8, JSplitPane.HORIZONTAL_SPLIT);
@@ -176,6 +223,7 @@ public class GUI extends JPanel {
 	     if (FQLApplet.isapplet) {
 	    	 save_button.setEnabled(false);
 	     }
+	     
 	     JButton open_button = new JButton("Open");
 	     open_button.addActionListener(new ActionListener() {
 		    	public void actionPerformed(ActionEvent e) {
@@ -264,6 +312,13 @@ public class GUI extends JPanel {
 		//setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		
 	     return new Pair<>(pan, menuBar);
+	}
+
+
+	protected static void findAction() {
+		
+						topArea.makeSearchVisible();
+				
 	}
 
 
@@ -360,6 +415,7 @@ public class GUI extends JPanel {
 	}
 
 	static protected void saveAction() {
+		delay();
 		JFileChooser jfc = new JFileChooser();
 		jfc.showSaveDialog(null);
 		File f = jfc.getSelectedFile();
@@ -378,6 +434,7 @@ public class GUI extends JPanel {
 	}
 
 	static protected void openAction() {
+		delay();
 		if (abortBecauseDirty()) {
 			return;
 		}
@@ -430,7 +487,9 @@ public class GUI extends JPanel {
 	
 
 	static String program = Examples.INIT_EXAMPLE.getText();
-	static FQLTextPanel topArea = new FQLTextPanel("FQL Program",program);
+	static CodeEditor topArea = new CodeEditor("FQL Program",program);
+
+	//static FQLTextPanel topArea = new FQLTextPanel("FQL Program",program);
 //	static FQLTextPanel bottomArea = new FQLTextPanel("Commands", Examples.initialCommands);
 	static FQLTextPanel respArea = new FQLTextPanel("Compiler response", "");
 	
@@ -449,5 +508,13 @@ public class GUI extends JPanel {
 	    return stringBuilder.toString();
 	}
 	
+	private static void delay() {
+	try {
+		//Thread.currentThread();
+		Thread.sleep(100); //hack for enough time to unhighlight menu
+	} catch (Exception e) {
+		e.printStackTrace();
+		return;
+	}}
 
 }

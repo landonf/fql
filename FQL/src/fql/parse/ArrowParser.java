@@ -1,5 +1,7 @@
 package fql.parse;
 
+import java.util.regex.Pattern;
+
 import fql.Triple;
 
 public class ArrowParser implements Parser<Triple<String, String, String>> {
@@ -34,6 +36,10 @@ public class ArrowParser implements Parser<Triple<String, String, String>> {
 			Parser<String> p = new StringParser();
 			
 			Partial<String> x = p.parse(s);	
+			
+			if (!Pattern.matches("[a-zA-Z]+", x.value))  {
+				throw new BadSyntax("Could not parse node from " + s);
+			}
 			
 			return new Partial<Triple<String,String,String>>(x.tokens, new Triple<String,String,String>(x.value, null, null));
 		} catch (Exception e) {

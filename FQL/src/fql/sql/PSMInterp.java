@@ -18,15 +18,15 @@ public class PSMInterp {
 	
 	public static Map<String, Set<Map<String, Object>>> interpX(List<PSM> prog, Map<String, Set<Map<String, Object>>> state ) {
 		for (PSM cmd : prog) {
-				System.out.println("Executing ");
-				System.out.println(cmd);
-				System.out.println(state);
+			//	System.out.println("Executing ");
+			//	System.out.println(cmd);
+			//	System.out.println(state);
 				cmd.exec(state);
-				System.out.println("RESULT " + state);
-				System.out.println("DONE EXECUTING");
+				//System.out.println("RESULT " + state);
+				//System.out.println("DONE EXECUTING");
 				checkFunctions(state);
 			}
-			
+		System.out.println("RESULT " + state);
 			return state;
 	}
 	

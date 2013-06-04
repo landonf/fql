@@ -23,7 +23,7 @@ public class ConstantInstanceDeclParser implements Parser<Decl> {
 		Parser<?> q = new KeywordParser(":");
 		Parser<?> e = new KeywordParser("=");
 		
-		Parser<?> sep = new KeywordParser(";");
+		Parser<?> sep = new KeywordParser(",");
 		Parser<Pair<String, List<Pair<String, String>>>> p1 = new TableDeclParser();
 		Parser<List<Pair<String, List<Pair<String, String>>>>> u = ParserUtils.manySep(p1, sep);
 		

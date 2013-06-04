@@ -11,6 +11,9 @@ import java.util.Set;
 import fql.FQLException;
 import fql.Pair;
 import fql.Triple;
+import fql.cat.FDM;
+import fql.cat.FinFunctor;
+import fql.cat.Inst;
 import fql.gui.Viewable;
 import fql.sql.PSM;
 import fql.sql.PSMGen;
@@ -72,6 +75,27 @@ public class Environment {
 				addInstance(new ConstantInstanceDecl(d.name, d0.type, gather(d.name, getSchema(d0.type), output0)));
 			}
 		}
+		
+		try {
+		for (Decl d : p.decls) {
+			if (d instanceof EvalDSPInstanceDecl) {
+				EvalDSPInstanceDecl x = (EvalDSPInstanceDecl) d;
+				if (x.kind.equals("pi")) {
+					Mapping m = mappings.get(x.mapping);
+					Instance i = instances.get(x.inst);
+					
+				//	FinFunctor<Object, Object, Object, Object> F;
+					//Inst<Object, Object, Object, Object> inst;
+						
+					Inst<Node, Path, String, String> res = FDM.pi(m.toFunctor2().first, i.toFunctor2());
+				
+					System.out.println("**********" + d.name);
+					System.out.println(res);
+				}
+			}
+		} } catch (Throwable e) {
+			e.printStackTrace();
+		}
 			
 		//go through instance decls, looking up in output as necessary
 		
@@ -87,10 +111,15 @@ public class Environment {
 		
 		for (Node n : sig.nodes) {
 			Set<Map<String, Object>> v = state.get(pre + "_" + n.string);
+			if (v == null) {
+				throw new RuntimeException("Missing: " + pre + "_" + n.string + " in " + state);
+			}
 			ret.add(new Pair<>(n.string, gather0(v)));
 		}
 		for (Edge e : sig.edges) {
+			
 			Set<Map<String, Object>> v = state.get(pre + "_" + e.name);
+			
 			ret.add(new Pair<>(e.name, gather0(v)));
 		}
 		for (Attribute a : sig.attrs) {

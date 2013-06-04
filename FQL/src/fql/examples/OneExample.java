@@ -24,7 +24,7 @@ public class OneExample extends Example {
 	"\n}" + 
 	"\n" + 
 	"\ninstance I : C = {" +
-	"\n A = {(x,x),(y,y)};" +
+	"\n A = {(x,x),(y,y)}," +
 	"\n arr = {(x,y),(y,x)}" +
 	"}\n";
 }

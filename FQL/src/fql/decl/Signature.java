@@ -636,6 +636,9 @@ public class Signature implements Viewable<Signature> {
 
 	public JPanel makeViewer() {
 		Graph<String, String> g = build();
+		if (g.getVertexCount() == 0) {
+			return new JPanel();
+		}
 		return doView(g);
 	}
 
@@ -654,11 +657,11 @@ public class Signature implements Viewable<Signature> {
 		// Setup up a new vertex to paint transformer...
 		Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
 			public Paint transform(String i) {
-		//		if (!isAttribute(i)) {
+				if (!isAttribute(i)) {
 					return Environment.colors.get(name0);
-			//	} else {
-				//	return Environment.
-				//}
+			} else {
+				return null;
+				}
 			}
 		};
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();

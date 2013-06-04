@@ -283,6 +283,9 @@ public class Query implements Viewable<Query> {
 	@Override
 	public JPanel pretty() throws FQLException {
 			Graph<String,String> g = build();
+			if (g.getVertexCount() == 0) {
+				return new JPanel();
+			}
 			return doView(g);
 	}
 	

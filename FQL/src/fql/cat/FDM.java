@@ -11,6 +11,8 @@ import java.util.Set;
 import fql.FQLException;
 import fql.Pair;
 import fql.Triple;
+import fql.decl.Node;
+import fql.decl.Path;
 
 /**
  * 
@@ -54,26 +56,33 @@ public class FDM {
 	/**
 	 * Limit as join all
 	 */
-	public static <Obj, Arrow, Y, X> Set<Value<Y,X>[]> lim2(FinCat<Obj, Arrow> B,
-			Inst<Obj, Arrow, Y, X> I) throws FQLException {
-
+	public static <ObjC, ObjD, ArrowC, ArrowD, Y, X> Set<Value<Y,X>[]> lim2
+	(
+			CommaCat<ObjD, ArrowD, ObjC, ArrowC, ObjD, ArrowD> B,
+			Inst<Triple<ObjD, ObjC, Arr<ObjD, ArrowD>>, Pair<Arr<ObjD,ArrowD>,Arr<ObjC,ArrowC>>, Y, X> I) throws FQLException {
+	
+		if (B.objects.size() == 0) {
+			return null;
+		}
+		
 		Set<Value<Y, X>[]> x0 = productN(I.objM, B.objects);
-
-		Map<Obj, Integer> cnames = new HashMap<>();
+		int m = B.objects.size();
+		Triple<ObjD, ObjC, Arr<ObjD, ArrowD>>[] cnames = new Triple[m];
 		int i = 0;
-		for (Obj o : B.objects) {
-			cnames.put(o, i++);
+//		
+		for (Triple<ObjD, ObjC, Arr<ObjD, ArrowD>> o : B.objects) {
+			cnames[i++] = o; 
 		}
 
-		int m = B.objects.size();
-		for (Arr<Obj, Arrow> e : B.arrows) {
+		
+		for (Arr<Triple<ObjD, ObjC, Arr<ObjD, ArrowD>>, Pair<Arr<ObjD, ArrowD>, Arr<ObjC, ArrowC>>> e : B.arrows) {
 			x0 = product(x0, graph(I.applyA(e)));
 			// System.out.println("after prod " + pn(x0));
 			// System.out.println("selecting col " + m + " and " +
 			// cnames.get(B.src(e)));
-			x0 = select(x0, m, cnames.get(e.src));
+			x0 = select(x0, m, cnamelkp(cnames, e.src));
 			// System.out.println("after select1 " + pn(x0));
-			x0 = select(x0, m + 1, cnames.get(e.dst));
+			x0 = select(x0, m + 1, cnamelkp(cnames, e.dst));
 			// System.out.println("after select2 " + pn(x0));
 			x0 = firstM(x0, B.objects.size());
 			// System.out.println("after firstM " + pn(x0));
@@ -140,6 +149,16 @@ public class FDM {
 		}
 		return ret;
 	}
+	
+	private static <Obj> int cnamelkp(Obj[] cnames, Obj s) throws FQLException {
+		for (int i = 0; i < cnames.length; i++) {
+			if (s.equals(cnames[i])) {
+				return i;
+			}
+		}
+		throw new FQLException("Cannot lookup position of " + s + " in "
+				+ cnames.toString());
+	}
 
 	@SuppressWarnings("unchecked")
 	private static <Y,X> Set<Value<Y,X>[]> graph(Map<Value<Y,X>, Value<Y,X>> m) {
@@ -181,12 +200,29 @@ public class FDM {
 		for (ObjD d0 : D.objects) {
 			CommaCat<ObjD, ArrowD, ObjC, ArrowC, ObjD, ArrowD> B = doComma2(D,
 					C, F, d0);
+			
 
+			//Inst<Triple<ObjD, ObjC, Arr<ObjD, ArrowD>>, Pair<Arr<ObjD, ArrowD>, Arr<ObjC, ArrowC>>, Y, X> s = delta(B.projB, inst);
 			Set<Value<Y, X>[]> r = lim2(B, delta(B.projB, inst));
 
-			ret1.put(d0, squish(r));
+			if (r == null) {
+				Set<Value<Y,X>> xxx = new HashSet<>();
+				Value<Y,X> arr = (Value<Y, X>) new Value<>("*");
+				
+				Value<Y,X>[] arr0 = new Value[1];
+				arr0[0] = arr;
+				Set<Value<Y,X>[]> yyy = new HashSet<>();
+				yyy.add(arr0);
+				xxx.add(arr);
+				ret1.put(d0, xxx);
+				nodetables.put(d0, yyy);
+				
+			} else {
+				ret1.put(d0, squish(r));
+				nodetables.put(d0, r);
+			}
 			nodecats.put(d0, B);
-			nodetables.put(d0, r);
+			
 		}
 
 		for (Arr<ObjD, ArrowD> s : D.arrows) {
@@ -194,12 +230,13 @@ public class FDM {
 			ObjD dA = s.src;
 			CommaCat<ObjD, ArrowD, ObjC, ArrowC, ObjD, ArrowD> 
 			BA = nodecats.get(dA);
+			
 
 			Set<Value<Y, X>[]> q1 = nodetables.get(dA);
-			Map<ObjC, Integer> cnames1 = new HashMap<>();
+			Triple<ObjD, ObjC, Arr<ObjD, ArrowD>> cnames1[] = new Triple[BA.objects.size()];
 			int i = 0;
 			for (Triple<ObjD, ObjC, Arr<ObjD, ArrowD>> o : BA.objects) {
-				cnames1.put(o.second, i++);
+				cnames1[i++] = o;
 			}
 
 			ObjD dB = s.dst;
@@ -207,18 +244,25 @@ public class FDM {
 			BB = nodecats.get(dB); 
 			Set<Value<Y, X>[]> q2 = nodetables.get(dB); 
 			
-			Map<ObjC, Integer> cnames2 = new HashMap<>();
+			Triple<ObjD, ObjC, Arr<ObjD, ArrowD>> cnames2[] = new Triple[BB.objects.size()];
 			i = 0;
 			for (Triple<ObjD, ObjC, Arr<ObjD, ArrowD>> o : BB.objects) {
-				cnames2.put(o.second, i++);
+				cnames2[i++] = o;
 			}
 
 			Set<Value<Y, X>[]> raw = product(q2, q1);
-			Set<Value<Y, X>[]> rax = subset(cnames2, cnames1, raw);
-			Map<Value<Y, X>, Value<Y, X>> ray = project(rax, cnames2.size() + 1, 0);
+			Set<Value<Y, X>[]> rax = subset2(D, s, cnames2, cnames1, raw);
+			Map<Value<Y, X>, Value<Y, X>> ray = project(rax, cnames2.length + 1, 0);
 
 			ret2.put(s, ray);
+			
+		//	List<Pair<Pair<String, String>, Pair<String, String>>> where = subset(
+			//		D, kkk.second.of(new Path(D0, s)), dst, q2cols, q1cols, q2,
+			//		q1);
 		}
+		
+		System.out.println(ret1);
+		System.out.println(ret2);
 
 		return new Inst<>(ret1, ret2, D);
 	}
@@ -227,14 +271,64 @@ public class FDM {
 	/**
 	 * The "subset portion" of pi
 	 */
-	private static <ObjC,Y,X> Set<Value<Y,X>[]> subset(Map<ObjC, Integer> q1cols,
-			Map<ObjC, Integer> q2cols, Set<Value<Y,X>[]> q1q2) {
-		for (ObjC x : q1cols.keySet()) {
-			int i = q1cols.get(x);
-			int j = q2cols.get(x);
-			q1q2 = select(q1q2, i + 1, j + 2 + q1cols.size());
+	private static <ObjC, ObjD,Y, X> Set<Value<Y,X>[]> subset(
+			FinCat<ObjD, Y> d,
+			Arr<ObjD, Y> s,
+			Map<ObjC, Integer> cnames2,
+			Map<ObjC, Integer> cnames1, Set<Value<Y, X>[]> raw) {
+		for (ObjC  x : cnames2.keySet()) {
+			int i = cnames2.get(x);
+			int j = cnames1.get(x);
+			raw = select(raw, i + 1, j + 2 + cnames2.size());
 		}
-		return q1q2;
+		return raw;
+	}
+	
+	private static <ObjC, ArrowC, ObjD, ArrowD, Y, X> Set<Value<Y,X>[]> subset2(
+			FinCat<ObjD, ArrowD> cat,
+			Arr<ObjD, ArrowD> e,
+			Triple<ObjD, ObjC, Arr<ObjD, ArrowD>>[] q2cols,
+			Triple<ObjD, ObjC, Arr<ObjD, ArrowD>>[] q1cols, Set<Value<Y, X>[]> raw) {
+	// System.out.println("trying subset " + print(q1cols) + " in " +
+	// print(q2cols));
+	List<Pair<Pair<String, String>, Pair<String, String>>> ret = new LinkedList<>();
+	//System.out.println("Arr" + e);
+	//System.out.println("Cat" + cat);
+	// turn e into arrow e', compute e' ; q2col, look for that
+	
+	a: for (int i = 0; i < q2cols.length; i++) {
+		for (int j = 0; j < q1cols.length; j++) {
+			Triple<ObjD, ObjC, Arr<ObjD, ArrowD>> q2c = q2cols[i];
+			Triple<ObjD, ObjC, Arr<ObjD, ArrowD>> q1c = q1cols[j];
+//			System.out.println("^^^" + q1c);
+//			System.out.println("^^^" + q2c);
+//			System.out.println("compose " + cat.compose(e, q2c.third));
+//			System.out.println("compose " + cat.compose(q2c.third, e));
+//			System.out.println("compose " + cat.compose(e, q1c.third));
+//			System.out.println("compose " + cat.compose(q1c.third, e));
+//			// if (q1c.equals(q2c)) {
+			if (q1c.third.equals(cat.compose(e, q2c.third))) {
+			//	System.out.println("hit on " + q2c.third);
+//				Pair<Pair<String, String>, Pair<String, String>> retadd = new Pair<>(new Pair<>(
+//						pre + "_" + q1name + "_limit", "c" + j),
+//						new Pair<String, String>(pre + "_" + q2name + "_limit", "c" + i));
+//			//	ret.add(retadd);
+				
+				raw = select(raw, i + 1, j + 2 + q2cols.length);
+				//System.out.println("added to where: " +  retadd);
+				continue a;
+			}
+		}
+		String xxx = "";
+		for (Triple<ObjD, ObjC, Arr<ObjD, ArrowD>> yyy : q1cols) {
+			xxx += ", " + yyy;
+		}
+		throw new RuntimeException("No col " + q2cols[i] + " in " + xxx
+				);
+
+	}
+	//System.out.println("where is " + ret);
+	return raw;
 	}
 
 	/**
