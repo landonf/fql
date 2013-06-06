@@ -34,6 +34,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
 import fql.DEBUG;
+import fql.DEBUG.Intermediate;
 import fql.FQLApplet;
 import fql.FQLBackEnd;
 import fql.FQLServlet;
@@ -377,12 +378,18 @@ public class GUI extends JPanel {
 				commands.add(s);
 			}
 			for (String s : cp.mappings.keySet()) {
+				if (!parsed_program.hasKey(s) && DEBUG.INTERMEDIATE == Intermediate.NONE) {
+					continue;
+				}
 				commands.add(s);	
 			}
 			for (String s : cp.queries.keySet()) {
 				commands.add(s);
 			}
 			for (String s : cp.signatures.keySet()) {
+				if (!parsed_program.hasKey(s) && DEBUG.INTERMEDIATE == Intermediate.NONE) {
+					continue;
+				}
 				commands.add(s);
 			}
 //			Commands parsed_view = Commands.parse(view);
@@ -397,7 +404,7 @@ public class GUI extends JPanel {
 						
 			List<PSM> psm0 = PSMGen.compile0(cp, parsed_program);
 			String output0 = PSMInterp.interp0(psm0);
-			System.out.println(output0);
+		//	System.out.println(output0);
 		//	respArea.setText(output0 + "\n\n---------------\n\n" + psm);
 			
 		} catch (Exception e) {

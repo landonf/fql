@@ -31,6 +31,7 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import fql.DEBUG;
+import fql.DEBUG.Intermediate;
 import fql.FQLException;
 import fql.Fn;
 import fql.Pair;
@@ -96,10 +97,15 @@ public class Query implements Viewable<Query> {
 		case COMPOSE : 
 			Query m1 = env.getQuery(d.source);
 			Query m2 = env.getQuery(d.target);
+//			System.out.println("composing " + m1 + " and " + m2);
+//			System.out.println("m1src " + m1.getSource() + " and " + m2.getTarget());
+//			System.out.println(m2.getTarget().equals(m1.getSource()));
 			if (!m2.getTarget().equals(m1.getSource())) {
 				throw new FQLException("Ill-typed: " + d.name);
 			}
 			Query q = Query.compose(env, name, m1, m2);
+		//	System.out.println("result " + q);
+
 			if (!q.getSource().equals(m2.getSource())) {
 				throw new FQLException("Ill-typed: " + d.name + " " + q.getSource() + " and " + m2.getSource());				
 			}
@@ -130,6 +136,9 @@ public class Query implements Viewable<Query> {
 				throw new FQLException("Ill-typed: " + d);
 			}
 			break;
+			
+		 default:
+			throw new RuntimeException("d.kind");
 		}
 	}
 
@@ -231,51 +240,51 @@ public class Query implements Viewable<Query> {
 	/**
 	 * Evaluates a query on an instance
 	 */
-	public Map<String, Set<Pair<String, String>>> eval(Instance theinstance) throws FQLException {
-		Map<String, RA> delta = RA.delta(project);
-		Map<String, RA> sigma = RA.sigma(union);
-		Map<String, RA> pi = RA.pi(join);
-		
-		Map<String, Set<String[]>> i0 = convert0(theinstance);
-		
-		Map<String, Set<String[]>> i1 = RA.eval0(delta, i0);
-		Map<String, Set<String[]>> i2 = RA.eval0(sigma, i1);
-		Map<String, Set<String[]>> i3 = RA.eval0(pi, i2);
-		
-		return convert(i3);
-	}
+//	public Map<String, Set<Pair<String, String>>> eval(Instance theinstance) throws FQLException {
+//		Map<String, RA> delta = RA.delta(project);
+//		Map<String, RA> sigma = RA.sigma(union);
+//		Map<String, RA> pi = RA.pi(join);
+//		
+//		Map<String, Set<Object[]>> i0 = convert0(theinstance);
+//		
+//		Map<String, Set<Object[]>> i1 = RA.eval0(delta, i0);
+//		Map<String, Set<String[]>> i2 = RA.eval0(sigma, i1);
+//		Map<String, Set<String[]>> i3 = RA.eval0(pi, i2);
+//		
+//		return convert(i3);
+//	}
 	
 	
-	public static Map<String, Set<String[]>> convert0(Instance theinstance) {
-		Map<String, Set<String[]>> ret = new HashMap<String, Set<String[]>>();
-		for (Entry<String, Set<Pair<String, String>>> k : theinstance.data.entrySet()) {
+	public static Map<String, Set<Object[]>> convert0(Instance theinstance) {
+		Map<String, Set<Object[]>> ret = new HashMap<String, Set<Object[]>>();
+		for (Entry<String, Set<Pair<Object, Object>>> k : theinstance.data.entrySet()) {
 			ret.put(k.getKey(), conv(k.getValue()));
 		}
 		return ret;
 	}
 
-	private static Set<String[]> conv(Set<Pair<String, String>> value) {
-		Set<String[]> ret = new HashSet<String[]>();
-		for (Pair<String, String> p : value) {
-			String[] s = new String[] { p.first, p.second };
+	private static Set<Object[]> conv(Set<Pair<Object, Object>> set) {
+		Set<Object[]> ret = new HashSet<Object[]>();
+		for (Pair<Object, Object> p : set) {
+			Object[] s = new Object[] { p.first, p.second };
 			ret.add(s);
 		}
 		return ret;
 	}
 
-	public static Map<String, Set<Pair<String, String>>> convert(
-			Map<String, Set<String[]>> i3) {
-		Map<String, Set<Pair<String, String>>> ret = new HashMap<String, Set<Pair<String, String>>>();
-		for (Entry<String, Set<String[]>> s : i3.entrySet()) {
+	public static Map<String, Set<Pair<Object, Object>>> convert(
+			Map<String, Set<Object[]>> i1) {
+		Map<String, Set<Pair<Object, Object>>> ret = new HashMap<>();
+		for (Entry<String, Set<Object[]>> s : i1.entrySet()) {
 			ret.put(s.getKey(), convX(s.getValue()));
 		}
 		return ret;
 	}
 
-	private static Set<Pair<String, String>> convX(Set<String[]> value) {
-		Set<Pair<String, String>> ret = new HashSet<Pair<String, String>>();
-		for (String[] s : value) {
-			ret.add(new Pair<String, String>(s[0], s[1]));
+	private static Set<Pair<Object, Object>> convX(Set<Object[]> set) {
+		Set<Pair<Object, Object>> ret = new HashSet<>();
+		for (Object[] s : set) {
+			ret.add(new Pair<>(s[0], s[1]));
 		}
 		return ret;
 	}
@@ -543,7 +552,7 @@ public class Query implements Viewable<Query> {
 				
 		SemQuery<Triple<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, Pair<Arr<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>>, Arr<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>>>, ObjS, ArrowS, Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjC, ArrowC>, ObjU, ArrowU> ret = new SemQuery<>(project, join, union);
 
-		if (DEBUG.VALIDATE) {
+		if (DEBUG.INTERMEDIATE == Intermediate.ALL) {
 			env.signatures.put("Aprime", Aprime.toSig("Aprime").first);
 			env.signatures.put("Bprime", Bprime.toSig("Bprime").first);
 			env.signatures.put("N", N.toSig("Nprime").first);

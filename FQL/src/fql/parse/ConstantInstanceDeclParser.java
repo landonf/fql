@@ -1,10 +1,11 @@
 package fql.parse;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import fql.Pair;
-import fql.decl.Decl;
 import fql.decl.ConstantInstanceDecl;
+import fql.decl.Decl;
 
 /**
  * 
@@ -49,8 +50,23 @@ public class ConstantInstanceDeclParser implements Parser<Decl> {
 		s = x.tokens;
 		
 		Partial<List<Pair<String, List<Pair<String, String>>>>> aaa = u0.parse(s);
+		List<Pair<String, List<Pair<Object, Object>>>> ooo  = 
+				new LinkedList<>();
+				
+		for (Pair<String, List<Pair<String, String>>> k : aaa.value) {
+			
+			List<Pair<Object, Object>> v = new LinkedList<>();
+			for (Pair<String,String> vvv : k.second) {
+				v.add(new Pair<Object, Object>(vvv.first, vvv.second));
+			}
+			
+			ooo.add(new Pair<String, List<Pair<Object, Object>>>(k.first, v));
+			
+		}
+				
 		
-		ConstantInstanceDecl d = new ConstantInstanceDecl(name, type, aaa.value);
+///		
+		ConstantInstanceDecl d = new ConstantInstanceDecl(name, type, ooo);
 		
 		return new Partial<Decl>(aaa.tokens, d);
 	}

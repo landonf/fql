@@ -10,6 +10,10 @@ package fql.examples;
  */
 public class Examples {
 	
+	public static Example typedFoil = new TypedFoilExample();
+	public static Example typedPi = new TypedPiExample();
+	public static Example typedWeird = new TypedWeirdExample();
+	public static Example weird = new WeirdExample();
 	public static Example sql2fql = new SqlToFqlExample();
 	public static Example foil = new FoilExample();
 	public static Example empty = new EmptyExample();
@@ -28,7 +32,7 @@ public class Examples {
 	public static Example typedemployees = new TypedEmployeesExample();
 	public static Example typedsigma = new TypedSigmaExample();
 	
-	public static Example[] examples = { typeddelta, delta, pi, pi2, typedsigma, sigma, employess, typedemployees, composition, iso, triangle, cyclicgroup, dihedral, one, empty, foil, sql2fql };
+	public static Example[] examples = { typeddelta, delta, pi, pi2, typedPi, typedsigma, sigma, employess, typedemployees, composition, iso, triangle, cyclicgroup, dihedral, one, empty, foil, typedFoil, sql2fql, weird, typedWeird };
 	
 	public static final Example INIT_EXAMPLE = typeddelta;
 	

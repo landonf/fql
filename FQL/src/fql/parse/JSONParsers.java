@@ -1,5 +1,6 @@
 package fql.parse;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JOptionPane;
@@ -16,7 +17,7 @@ public class JSONParsers {
 		try {
 			String s = JOptionPane.showInputDialog(" foo ");
 			Partial<Mapping> p = new JSONMappingParser().parse(new FqlTokenizer(s));
-			System.out.println(p);
+			//System.out.println(p);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -98,9 +99,35 @@ public class JSONParsers {
 			xxx = ret.parse(s);
 
 			// xxx.value
+			
+			Signature u1 = xxx.value.first;
+			List<Pair<String, List<String>>> u2 = xxx.value.second.first;
+			List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>> u3 = xxx.value.second.second;
+			
+			List<Pair<String, List<Object>>> v2 = new LinkedList<>();
+			for (Pair<String, List<String>> v2X : u2) {
+				List<Object> ddd = new LinkedList<>();
+				ddd.addAll(v2X.second);
+				v2.add(new Pair<>(v2X.first, ddd));
+			}
+			List<Pair<Pair<Pair<Object, Object>, String>, List<Pair<Object, Object>>>> 
+			v3 = new LinkedList<>();
+			for (Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>> g : u3) {
+				
+				List<Pair<Object, Object>> l = new LinkedList<>();
+				for (Pair<String, String> p : g.second) {
+					l.add(new Pair<Object, Object>(p.first, p.second));
+				}
+				
+				v3.add(new Pair<Pair<Pair<Object, Object>, String>, List<Pair<Object, Object>>>
+				(new Pair<>(new Pair<Object, Object>(g.first.first.first, g.first.first.second), 
+						    g.first.second), 
+						l));
+			}
+	
 			try {
-				return new Partial<>(xxx.tokens, new Instance(xxx.value.first,
-						xxx.value.second.first, xxx.value.second.second));
+				return new Partial<>(xxx.tokens, new Instance(u1,
+						v2, v3));
 			} catch (Exception eee) {
 				eee.printStackTrace();
 				throw new RuntimeException(eee);

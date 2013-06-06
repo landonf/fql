@@ -163,7 +163,7 @@ public class Denotation {
 		for (Node n : a.nodes) {
 			obm.add(new Pair<>(n.string, n.string));
 		}
-		return new Mapping(null, a, b, obm, new LinkedList<Pair<String, List<String>>>());
+		return new Mapping("", a, b, obm, new LinkedList<Pair<String, List<String>>>());
 	}
 
 
@@ -677,8 +677,8 @@ public class Denotation {
 	public void initTables() throws FQLException {
 		for (Node a : A.nodes) {
 			Map<Integer, Integer> etable = new HashMap<>();
-			for (Pair<String, String> p : X.data.get(a.string)) {
-				etable.put(Integer.parseInt(p.first), null);
+			for (Pair<Object, Object> p : X.data.get(a.string)) {
+				etable.put(Integer.parseInt((String)p.first), null);
 			}
 			String[] cnames = new String[2];
 			cnames[0] = "X(" + a.string + ")";
@@ -747,11 +747,11 @@ public class Denotation {
 			ntables1.put(f, cc.toArray(new Node[] { }));
 			
 			List<Integer[]> l = new LinkedList<>();
-			for (Pair<String, String> x : X.data.get(f.source.string)) {
+			for (Pair<Object, Object> x : X.data.get(f.source.string)) {
 				Integer[] r = new Integer[4 + 1 + g.path.size()];
-				r[0] = Integer.parseInt(x.first);
-				r[1] = Integer.parseInt(x.second);
-				r[3] = Integer.parseInt(x.first);
+				r[0] = Integer.parseInt((String)x.first);
+				r[1] = Integer.parseInt((String)x.second);
+				r[3] = Integer.parseInt((String)x.first);
 				l.add(r);
 			}
 			

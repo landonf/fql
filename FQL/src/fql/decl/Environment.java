@@ -54,6 +54,7 @@ public class Environment {
 			} else if (d instanceof QueryDecl) {
 				addQuery((QueryDecl) d);
 			} else if (d instanceof EvalInstanceDecl) {
+				
 		//		addInstance((EvalInstanceDecl) d);
 			} else if (d instanceof EvalDSPInstanceDecl) {
 		//		addInstance((EvalDSPInstanceDecl) d);
@@ -77,7 +78,7 @@ public class Environment {
 		}
 		
 		try {
-		for (Decl d : p.decls) {
+		for (Decl d : p.decls) { //double check pi
 			if (d instanceof EvalDSPInstanceDecl) {
 				EvalDSPInstanceDecl x = (EvalDSPInstanceDecl) d;
 				if (x.kind.equals("pi")) {
@@ -87,10 +88,10 @@ public class Environment {
 				//	FinFunctor<Object, Object, Object, Object> F;
 					//Inst<Object, Object, Object, Object> inst;
 						
-					Inst<Node, Path, String, String> res = FDM.pi(m.toFunctor2().first, i.toFunctor2());
+					Inst<Node, Path, Object, Object> res = FDM.pi(m.toFunctor2().first, i.toFunctor2());
 				
-					System.out.println("**********" + d.name);
-					System.out.println(res);
+					//System.out.println("**********" + d.name);
+					//System.out.println(res);
 				}
 			}
 		} } catch (Throwable e) {
@@ -105,9 +106,9 @@ public class Environment {
 		
 	}
 	
-	private List<Pair<String, List<Pair<String, String>>>> gather(String pre,
+	public static List<Pair<String, List<Pair<Object, Object>>>> gather(String pre,
 			Signature sig, Map<String, Set<Map<String, Object>>> state) {
-		List<Pair<String, List<Pair<String, String>>>> ret = new LinkedList<>();
+		List<Pair<String, List<Pair<Object, Object>>>> ret = new LinkedList<>();
 		
 		for (Node n : sig.nodes) {
 			Set<Map<String, Object>> v = state.get(pre + "_" + n.string);
@@ -130,11 +131,11 @@ public class Environment {
 		return ret;
 	}
 
-	private List<Pair<String, String>> gather0(Set<Map<String, Object>> v) {
-		List<Pair<String, String>> ret = new LinkedList<>();
+	private static List<Pair<Object, Object>> gather0(Set<Map<String, Object>> v) {
+		List<Pair<Object, Object>> ret = new LinkedList<>();
 		
 		for (Map<String, Object> o : v) {
-			ret.add(new Pair<>(o.get("c0").toString(), o.get("c1").toString()));
+			ret.add(new Pair<>(o.get("c0"), o.get("c1")));
 		}
 		
 		return ret;
@@ -174,7 +175,7 @@ public class Environment {
 
 	private void addInstance(ConstantInstanceDecl instanceDecl) throws FQLException {
 		Signature thesig = signatures.get(instanceDecl.type);
-		instances.put(instanceDecl.name, new Instance(instanceDecl.name, thesig, instanceDecl.data));
+		instances.put(instanceDecl.name, new Instance(instanceDecl.name, thesig,  instanceDecl.data));
 	}
 
 
@@ -220,7 +221,7 @@ public class Environment {
 	public Mapping getMapping(String s0) throws FQLException {
 		Mapping s = mappings.get(s0);
 		if (s == null) {
-			throw new FQLException("Cannot find mapping " + s0);
+			throw new FQLException("Cannot find mapping " + s0 + " in " + mappings);
 		}
 		return s;
 	}

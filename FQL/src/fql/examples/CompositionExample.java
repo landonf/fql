@@ -33,7 +33,7 @@ public class CompositionExample extends Example {
 			"\nmapping v : C -> U = { c -> u ; }\n" +
 			"\n" + 
 			"query q2 = delta u pi g sigma v" +
-			"\nquery q = q2 then q1";
+			"\nquery q = q1 then q2";
 
 
 }

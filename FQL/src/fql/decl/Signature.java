@@ -50,6 +50,7 @@ import fql.parse.PrettyPrinter;
  */
 public class Signature implements Viewable<Signature> {
 
+	
 	public List<Node> nodes;
 	public List<Edge> edges;
 	public List<Attribute> attrs;
@@ -145,6 +146,7 @@ public class Signature implements Viewable<Signature> {
 			throws FQLException {
 		Set<Node> nodesA = new HashSet<Node>();
 		Set<Edge> edgesA = new HashSet<Edge>();
+		attrs = new LinkedList<Attribute>();
 
 		// name0 = n;
 
@@ -767,7 +769,7 @@ public class Signature implements Viewable<Signature> {
 			return false;
 		}
 		Signature s = (Signature) o;
-		return (s.name0.equals(s.name0));
+		return (s.name0.equals(name0));
 	}
 
 	@Override
@@ -830,6 +832,16 @@ public class Signature implements Viewable<Signature> {
 		} catch (FQLException fql) {
 			return false;
 		}
+	}
+
+	public List<Attribute> attrsFor(Node n) {
+		List<Attribute> a = new LinkedList<>();
+		for (Attribute x : attrs) {
+			if (x.source.equals(n)) {
+				a.add(x);
+			}
+		}
+		return a;
 	}
 
 }

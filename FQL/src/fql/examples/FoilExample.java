@@ -36,5 +36,10 @@ public class FoilExample extends Example {
 			+ "\n/*(1+2)*(2+3)=15*/"
 			+ "\n"
 			+ "\ninstance J:Added = sigma F I"
-			+ "\ninstance K:Multiplied =pi G J ";
+			+ "\ninstance K:Multiplied =pi G J "
+			+ "\nquery p = delta idB pi idB sigma F"
+			+ "\nquery q = delta idA pi G sigma idM "
+			+ "\nquery res = p then q"
+			+ "\n5instance resinst : Multiplied = eval res I"
+			;
 }

@@ -30,6 +30,7 @@ import fql.decl.Mapping;
 import fql.decl.Node;
 import fql.decl.Path;
 import fql.decl.Program;
+import fql.decl.Query;
 import fql.decl.Signature;
 import fql.decl.Type;
 import fql.decl.Varchar;
@@ -222,7 +223,9 @@ public class PSMGen {
 			if (d instanceof ConstantInstanceDecl) {
 				ret.addAll(addInstance(env, (ConstantInstanceDecl) d));
 			} else if (d instanceof EvalInstanceDecl) {
-				ret.addAll(addInstance(env, (EvalInstanceDecl) d));
+				List<PSM> xxx = addInstance(env, (EvalInstanceDecl) d);
+			//	System.out.println("xxxxxxxxx" + xxx);
+				ret.addAll(xxx);
 			} else if (d instanceof EvalDSPInstanceDecl) {
 				ret.addAll(addInstance(env, (EvalDSPInstanceDecl) d));
 			}
@@ -243,8 +246,53 @@ public class PSMGen {
 		return ret;
 	}
 
-	private static List<PSM> addInstance(Environment env, EvalInstanceDecl d) {
+	private static List<PSM> addInstance(Environment env, EvalInstanceDecl d) throws FQLException {
 		List<PSM> ret = new LinkedList<>();
+
+		String inst = d.inst;
+		String name = d.name;
+		Query q = env.queries.get(d.query);
+		//Signature t = env.signatures.get(d.type);
+		
+		Mapping proj = q.project;
+		Mapping join = q.join;
+		Mapping un = q.union;
+		
+		//System.out.println(q);
+		
+		EvalDSPInstanceDecl delta = new EvalDSPInstanceDecl(name + "_tempdelta", "delta", proj.name, inst, proj.source.name0);
+		EvalDSPInstanceDecl pi = new EvalDSPInstanceDecl(name + "_temppi", "pi", join.name, name + "_tempdelta", join.target.name0);
+		EvalDSPInstanceDecl sigma = new EvalDSPInstanceDecl(name, "sigma", un.name, name + "_temppi", un.target.name0);
+		
+		
+//		System.out.println(delta);
+//		System.out.println(pi);
+//		System.out.println(sigma);
+//		//ret.addAll(makeTables(name + "_tempdelta", proj.source));
+		ret.addAll(addInstance(env, delta));
+		//ret.addAll(makeTables(name + "_temppi", join.target));
+		ret.addAll(addInstance(env, pi));
+		//ret.addAll(makeTables(name, un.target));
+		ret.addAll(addInstance(env, sigma));
+		//ret.addAll(dropTables(name + "_tempdelta", proj.source));
+		//ret.addAll(dropTables(name + "_temppi", join.target));
+		//ret.addAll(dropTables(name + "_tempsigma", un.target));
+		//System.out.println("zzzzzzz" + ret);
+		return ret;
+	}
+
+	private static List<PSM> dropTables(String name, Signature sig) {
+		List<PSM> ret = new LinkedList<>();
+
+		for (Node n : sig.nodes) {		
+			ret.add(new DropTable(name + "_" + n.string));
+		}
+		for (Edge e : sig.edges) {
+			ret.add(new DropTable(name + "_" + e.name));
+		}
+		for (Attribute a : sig.attrs) {
+			ret.add(new DropTable(name + "_" + a.name));
+		}
 
 		return ret;
 	}
@@ -302,14 +350,14 @@ public class PSMGen {
 	}
 
 	private static PSM populateTable(String iname, String tname,
-			Set<Pair<String, String>> data) {
+			Set<Pair<Object, Object>> data) {
 
 		List<String> attrs = new LinkedList<>();
 		attrs.add("c0");
 		attrs.add("c1");
 		Set<Map<String, Object>> values = new HashSet<>();
 
-		for (Pair<String, String> row : data) {
+		for (Pair<Object, Object> row : data) {
 			Map<String, Object> m = new HashMap<>();
 			m.put("c0", row.first);
 			m.put("c1", row.second);
@@ -356,6 +404,7 @@ public class PSMGen {
 	static String preamble = "DROP DATABASE FQL; CREATE DATABASE FQL; USE FQL; SET @guid := 0;\n\n";
 
 	public static List<PSM> delta(Mapping m, String src, String dst) {
+		//System.out.println("doing delta for " + m + " and " + src + " and " + dst + " and "+ m.name);
 		Map<String, SQL> ret = new HashMap<>();
 		for (Entry<Node, Node> n : m.nm.entrySet()) {
 			ret.put(dst + "_" + n.getKey().string,
@@ -373,6 +422,7 @@ public class PSMGen {
 			SQL v = ret.get(k);
 			ret0.add(new InsertSQL(k, v));
 		}
+		//System.out.println("result " + ret0);
 		return ret0;
 	}
 
@@ -436,6 +486,9 @@ public class PSMGen {
 				}
 			}
 
+			if (tn.size() == 0) {
+				continue;
+			}
 			SQL y = foldUnion(tn);
 			ret.add(new InsertSQL(pre + "_" + d.string, y));
 		}
@@ -477,7 +530,7 @@ public class PSMGen {
 
 	private static SQL foldUnion(List<Flower> tn) {
 		if (tn.size() == 0) {
-			throw new RuntimeException();
+			throw new RuntimeException("Empty Union");
 		}
 		if (tn.size() == 1) {
 			return tn.get(0);
@@ -536,26 +589,28 @@ public class PSMGen {
 		List<PSM> ret = new LinkedList<>();
 
 		Map<String, Triple<Node, Node, Arr<Node, Path>>[]> colmap = new HashMap<>();
+		Map<String, Attribute[]> amap = new HashMap<>();
 		// Map<Node, CommCat>
 		for (Node d0 : D.objects) {
 			CommaCat<Node, Path, Node, Path, Node, Path> B = doComma(D, C, F,
 					d0, D0);
 
+		//	System.out.println("Comma cat is " + B);
 			
-
 			Map<Triple<Node, Node, Arr<Node, Path>>, String> xxx1 = new HashMap<>();
 			Map<Pair<Arr<Node, Path>, Arr<Node, Path>>, String> xxx2 = new HashMap<>();
 			List<PSM> xxx3 = deltaX(src, xxx1, xxx2, B.projB);
 			ret.addAll(xxx3);
 
-		//	System.out.println("doing limit for " + d0);
-			Pair<Flower, Triple<Node, Node, Arr<Node, Path>>[]> xxx = lim(B,
-					xxx1, xxx2);
+			//System.out.println("doing limit for " + d0);
+			Triple<Flower, Triple<Node, Node, Arr<Node, Path>>[], Attribute[]> 
+			xxx = lim(src, C0, D, B, xxx1, xxx2);
 			
 			//comma cat is empty, need unit for product
 			if (xxx == null) {
 				Map<String, String> attrs2 = new HashMap<>();
 				attrs2.put("guid", PSM.VARCHAR);
+				
 				ret.add(new CreateTable(dst + "_" + d0.string + "_limit", attrs2));
 				ret.add(new InsertEmptyKeygen(dst + "_" + d0.string + "_limit"));
 				ret.add(new InsertSQL(dst + "_" + d0.string, new SquishFlower(dst
@@ -564,29 +619,33 @@ public class PSMGen {
 			}
 			
 			Triple<Node, Node, Arr<Node, Path>>[] cols = xxx.second;
-//			String ggg = "";
-//			for (Triple<Node, Node, Arr<Node, Path>> t : cols) {
-//				ggg += " " + t;
-//			}
+			String ggg = "";
+			for (Triple<Node, Node, Arr<Node, Path>> t : cols) {
+				ggg += " " + t;
+			}
 			//System.out.println("Cols are " + ggg);
 
 	//		System.out.println("done with limit");
 			Flower r = xxx.first;
 
 			colmap.put(d0.string, cols);
+			//System.out.println("adding amap " + d0.string + " and ");
+//			for (Attribute x : xxx.third) {
+//				System.out.println("zzz" + x);
+//			}
+			amap.put(d0.string, xxx.third);
 
 			Map<String, String> attrs1 = new HashMap<>();
-			int iii = 0;
-			for (Triple<Node, Node, Arr<Node, Path>> s : cols) {
-				attrs1.put("c" + iii++, PSM.VARCHAR);
+			for (int i = 0; i < xxx.second.length; i++) {
+				attrs1.put("c" + i, PSM.VARCHAR);
+			}
+			for (int j = 0; j < xxx.third.length; j++) {
+				attrs1.put("c" + (xxx.second.length + j), typeTrans(xxx.third[j].target));
 			}
 			Map<String, String> attrs2 = new HashMap<>(attrs1);
 			attrs2.put("guid", PSM.VARCHAR);
 
-			List<String> attcs = new LinkedList<String>();
-			for (int i = 0; i < cols.length; i++) {
-				attcs.add("c" + i);
-			}
+			List<String> attcs = new LinkedList<>(attrs1.keySet());
 
 			ret.add(new CreateTable(dst + "_" + d0.string + "_limnoguid",
 					attrs1));
@@ -601,8 +660,7 @@ public class PSMGen {
 			ret.add(new InsertSQL(dst + "_" + d0.string, new SquishFlower(dst
 					+ "_" + d0.string + "_limit")));
 
-			// drop all tables that are the values in xxx2 but not xxx1
-			// drop limnoguid
+			
 		}
 
 		for (Edge s : F0.target.edges) {
@@ -627,24 +685,67 @@ public class PSMGen {
 					D, kkk.second.of(new Path(D0, s)), dst, q2cols, q1cols, q2,
 					q1);
 			Map<String, String> from = new HashMap<>();
-			from.put(dst + "_" + q1 + "_limit", dst + "_" + q1 + "_limit");
-			from.put(dst + "_" + q2 + "_limit", dst + "_" + q2 + "_limit");
+			from.put(dst + "_" + q1 + "_limit_1", dst + "_" + q1 + "_limit");
+			from.put(dst + "_" + q2 + "_limit_2", dst + "_" + q2 + "_limit");
 
 			Map<String, Pair<String, String>> select = new HashMap<>();
-			select.put("c0", new Pair<>(dst + "_" + q1 + "_limit", "guid"));
-			select.put("c1", new Pair<>(dst + "_" + q2 + "_limit", "guid"));
+			select.put("c0", new Pair<>(dst + "_" + q1 + "_limit_1", "guid"));
+			select.put("c1", new Pair<>(dst + "_" + q2 + "_limit_2", "guid"));
 
 			Flower f = new Flower(select, from, where);
 
-			System.out.println("flower is " + f);
+		//	System.out.println("flower is " + f);
 
 			ret.add(new InsertSQL(dst + "_" + s.name, f));
 
 		}
 		
+		for (Attribute a : F0.target.attrs) {
+			int i = colmap.get(a.source.string).length;
+			Attribute[] y = amap.get(a.source.string);
+			//System.out.println("&&&& doing attr " + a);
+			//System.out.println("amap is ");
+//			for (Attribute z : y) {
+//				System.out.println(z);
+//			}
+			boolean found = false;
+			int u = 0;
+			int j = -1;
+			for (Attribute b : y) {
+				if (!F0.am.get(b).equals(a)) {
+					u++;
+					continue;
+				}
+				if (found) {
+					throw new RuntimeException("Attribute mapping not bijection " + a);
+				}
+				found = true;
+				j = u;
+				u++;
+			}
+			if (!found) {
+				throw new RuntimeException("Attribute mapping not found " + a);
+			}
+			//System.out.println("i is " + i);
+			//System.out.println("u is " + u);
+			Map<String, Pair<String, String>> select = new HashMap<>();
+			Map<String, String> from = new HashMap<>();
+			from.put(dst + "_" + a.source + "_limit", dst + "_" + a.source + "_limit");
+			select.put("c0", new Pair<>(dst + "_" + a.source + "_limit", "guid"));
+			select.put("c1", new Pair<>(dst + "_" + a.source + "_limit", "c" + (j+i)));
+			List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
+			Flower f = new Flower(select, from, where);
+
+			//System.out.println("attr flower is " + f);
+			//System.out.println("inserting into " + dst + "_" + a.name);
+
+			ret.add(new InsertSQL(dst + "_" + a.name, f));
+			//project guid and u+i
+		}
+		
 		for (Node d0 : D.objects) {
 			ret.add(new DropTable(dst + "_" + d0.string + "_limnoguid")); 
-			ret.add(new DropTable(dst + "_" + d0.string + "_limit"));
+	//		ret.add(new DropTable(dst + "_" + d0.string + "_limit"));
 		}
 		
 		for (int ii = 0; ii < tempTables; ii++) {
@@ -658,14 +759,15 @@ public class PSMGen {
 			FinCat<Node, Path> cat, Arr<Node, Path> e, String pre,
 			Triple<Node, Node, Arr<Node, Path>>[] q2cols,
 			Triple<Node, Node, Arr<Node, Path>>[] q1cols, String q2name,
-			String q1name) {
-		// System.out.println("trying subset " + print(q1cols) + " in " +
-		// print(q2cols));
+			String q1name) throws FQLException {
+//		 System.out.println("trying subset " + print(q1cols) + " in " +
+//		 print(q2cols));
 		List<Pair<Pair<String, String>, Pair<String, String>>> ret = new LinkedList<>();
-		//System.out.println("Arr" + e);
+		//System.out.println("Arr " + e);
 		//System.out.println("Cat" + cat);
 		// turn e into arrow e', compute e' ; q2col, look for that
 		a: for (int i = 0; i < q2cols.length; i++) {
+			boolean b = false;
 			for (int j = 0; j < q1cols.length; j++) {
 				Triple<Node, Node, Arr<Node, Path>> q2c = q2cols[i];
 				Triple<Node, Node, Arr<Node, Path>> q1c = q1cols[j];
@@ -676,18 +778,22 @@ public class PSMGen {
 //				System.out.println("compose " + cat.compose(e, q1c.third));
 //				System.out.println("compose " + cat.compose(q1c.third, e));
 //				// if (q1c.equals(q2c)) {
-				if (q1c.third.equals(cat.compose(e, q2c.third))) {
+				//TODO add also match on second component
+				if (q1c.third.equals(cat.compose(e, q2c.third)) && q1c.second.equals(q2c.second)) {
 				//	System.out.println("hit on " + q2c.third);
 					Pair<Pair<String, String>, Pair<String, String>> retadd = new Pair<>(new Pair<>(
-							pre + "_" + q1name + "_limit", "c" + j),
-							new Pair<String, String>(pre + "_" + q2name + "_limit", "c" + i));
+							pre + "_" + q1name + "_limit_1", "c" + j),
+							new Pair<String, String>(pre + "_" + q2name + "_limit_2", "c" + i));
 					ret.add(retadd);
+				//	if (b) throw new FQLException("not uniq: " + "lookup for " + q2c + " and " + q1c);
 					
+					b = true;
 					
 					//System.out.println("added to where: " +  retadd);
-					continue a;
+					//continue a;
 				}
 			}
+			if (b) continue;
 			String xxx = "";
 			for (Triple<Node, Node, Arr<Node, Path>> yyy : q1cols) {
 				xxx += ", " + yyy;
@@ -735,7 +841,10 @@ public class PSMGen {
 		return new SquishFlower(s);
 	}
 
-	public static <Arrow> Pair<Flower, Triple<Node, Node, Arr<Node, Path>>[]> lim(
+	public static <Arrow> Triple<Flower, Triple<Node, Node, Arr<Node, Path>>[], Attribute[]> lim(
+			String pre,
+			Signature sig,
+			FinCat<Node, Path> cat,
 			CommaCat<Node, Path, Node, Path, Node, Path> b,
 			Map<Triple<Node, Node, Arr<Node, Path>>, String> map,
 			Map<Pair<Arr<Node, Path>, Arr<Node, Path>>, String> map2)
@@ -757,6 +866,8 @@ public class PSMGen {
 		@SuppressWarnings("unchecked")
 		Triple<Node, Node, Arr<Node, Path>>[] cnames = new Triple[m];
 
+		List<Attribute> anames0 = new LinkedList<>();
+		
 		for (Triple<Node, Node, Arr<Node, Path>> n : b.objects) {
 			from.put("t" + temp, map.get(n));
 			// cnames[temp] = n.second.string;
@@ -765,6 +876,31 @@ public class PSMGen {
 			select.put("c" + temp, new Pair<>("t" + temp, "c0"));
 			temp++;
 			//System.out.println("&&&" + n);
+			//TODO add column for attribute like on board
+			//do not filter on attributes
+			//DO NOT USE NEW ATTRIBUTE STUFF FOR EDGES
+			//to materialize attribute, look up in limit table
+			//should have bijection columns in limit table with attributes
+		}
+		
+		for (Triple<Node, Node, Arr<Node, Path>> n : b.objects) {
+			//System.out.println("doing triple " + n);
+			if (cat.isId(n.third)) {
+//				System.out.println("is id " + n);
+//				System.out.println("attrs for " + n.second + " are " + sig.attrsFor(n.second) + " sig " + sig);
+				for (Attribute a : sig.attrsFor(n.second)) {
+					anames0.add(a);
+				//	System.out.println("adding " + a);
+					from.put("t" + temp, pre + "_" + a.name);
+				// cnames[temp] = n.second.string;
+
+					select.put("c" + temp, new Pair<>("t" + temp, "c1"));
+				
+					where.add(new Pair<>(new Pair<>("t" + cnamelkp(cnames, n), "c0"),
+							new Pair<>("t" + temp,                    "c0")));
+					temp++;
+				}
+			}
 		}
 
 		// Set<String> cnames_set = new HashSet<>();
@@ -797,7 +933,7 @@ public class PSMGen {
 		Flower f = new Flower(select, from, where);
 		// System.out.println("flower is " + f);
 
-		return new Pair<>(f, cnames);
+		return new Triple<>(f, cnames, anames0.toArray(new Attribute[] { }));
 
 	
 	}

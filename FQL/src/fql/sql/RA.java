@@ -39,16 +39,16 @@ public abstract class RA {
 	/**
 	 * Evaluates an RA expression on an instance.
 	 */
-	public static Set<String[]> eval(RA e, Map<String, Set<String[]>> inst)
+	public static Set<Object[]> eval(RA e, Map<String, Set<Object[]>> i0)
 			throws FQLException {
 		if (e instanceof Keygen) {
 			Keygen k = (Keygen) e;
-			Set<String[]> i = eval(k.e, inst);
-			Set<String[]> ret = new HashSet<String[]>();
+			Set<Object[]> i = eval(k.e, i0);
+			Set<Object[]> ret = new HashSet<Object[]>();
 
 			//int count = 0;
-			for (String[] tuple : i) {
-				String[] newtuple = new String[tuple.length + 2];
+			for (Object[] tuple : i) {
+				Object[] newtuple = new Object[tuple.length + 2];
 				newtuple[0] = makeKey(tuple); 
 				newtuple[1] = newtuple[0];
 				for (int j = 1; j <= tuple.length; j++) {
@@ -60,10 +60,10 @@ public abstract class RA {
 		}
 		if (e instanceof Select) {
 			Select s = (Select) e;
-			Set<String[]> ret = new HashSet<String[]>();
-			Set<String[]> i = eval(s.e, inst);
+			Set<Object[]> ret = new HashSet<Object[]>();
+			Set<Object[]> i = eval(s.e, i0);
 
-			for (String[] tuple : i) {
+			for (Object[] tuple : i) {
 				if (tuple[s.i].equals(tuple[s.j])) {
 					ret.add(tuple);
 				}
@@ -72,11 +72,11 @@ public abstract class RA {
 		}
 		if (e instanceof Project) {
 			Project p = (Project) e;
-			Set<String[]> ret = new HashSet<String[]>();
-			Set<String[]> i = eval(p.e, inst);
+			Set<Object[]> ret = new HashSet<Object[]>();
+			Set<Object[]> i = eval(p.e, i0);
 
-			for (String[] tuple : i) {
-				String[] t = new String[p.cols.length];
+			for (Object[] tuple : i) {
+				Object[] t = new Object[p.cols.length];
 				int f = 0;
 				for (int x : p.cols) {
 					t[f] = tuple[x];
@@ -88,12 +88,12 @@ public abstract class RA {
 		}
 		if (e instanceof Product) {
 			Product p = (Product) e;
-			Set<String[]> ret = new HashSet<String[]>();
-			Set<String[]> i1 = eval(p.e1, inst);
-			Set<String[]> i2 = eval(p.e2, inst);
+			Set<Object[]> ret = new HashSet<Object[]>();
+			Set<Object[]> i1 = eval(p.e1, i0);
+			Set<Object[]> i2 = eval(p.e2, i0);
 
-			for (String[] t1 : i1) {
-				for (String[] t2 : i2) {
+			for (Object[] t1 : i1) {
+				for (Object[] t2 : i2) {
 					ret.add(mergeTuple(t1, t2));
 				}
 			}
@@ -101,7 +101,7 @@ public abstract class RA {
 		}
 		if (e instanceof DisjointUnion) {
 			DisjointUnion u = (DisjointUnion) e;
-			Set<String[]> ret = new HashSet<String[]>();
+			Set<Object[]> ret = new HashSet<Object[]>();
 			if (u.e.size() == 0) {
 				return ret;
 			}
@@ -110,8 +110,8 @@ public abstract class RA {
 //			}
 			int i = 0;
 			for (RA r : u.e) {
-				Set<String[]> ix = eval(r, inst);
-				Set<String[]> iy = tag(ix, u.tags.get(i++), u.tags.get(i++));
+				Set<Object[]> ix = eval(r, i0);
+				Set<Object[]> iy = tag(ix, u.tags.get(i++), u.tags.get(i++));
 				ret.addAll(iy);
 			}
 			return ret;
@@ -119,17 +119,17 @@ public abstract class RA {
 
 		if (e instanceof Relvar) {
 			Relvar r = (Relvar) e;
-			Set<String[]> ret = inst.get(r.r);
+			Set<Object[]> ret = i0.get(r.r);
 			if (ret == null) {
-				throw new RuntimeException("Cannot find " + r.r + " in " + inst);
+				throw new RuntimeException("Cannot find " + r.r + " in " + i0);
 			}
 			return ret;
 		}
 		if (e instanceof EmptyRA) {
-			return new HashSet<String[]>();
+			return new HashSet<Object[]>();
 		}
 		if (e instanceof SingletonRA) {
-			Set<String[]> ret = new HashSet<String[]>();
+			Set<Object[]> ret = new HashSet<Object[]>();
 			String[] x = new String[] { "!" };
 			ret.add(x);
 			return ret;
@@ -138,12 +138,12 @@ public abstract class RA {
 		throw new FQLException("Unknown RA " + e);
 	}
 
-	private static String makeKey(String[] tuple) {
+	private static Object makeKey(Object[] tuple) {
 		if (tuple.length == 1) {
 			return tuple[0];
 		}
-		String ret = tuple[0];
-		for (String i : tuple) {
+		Object ret = tuple[0];
+		for (Object i : tuple) {
 			ret += ("^" + i);
 		}
 		return ret;
@@ -152,13 +152,13 @@ public abstract class RA {
 	/**
 	 * Adds tags to the tuples in a binary relation
 	 */
-	private static Set<String[]> tag(Set<String[]> ix, String i, String k) throws FQLException {
-		Set<String[]> ret = new HashSet<String[]>();
-		for (String[] s : ix) {
+	private static Set<Object[]> tag(Set<Object[]> ix, Object i, Object k) throws FQLException {
+		Set<Object[]> ret = new HashSet<Object[]>();
+		for (Object[] s : ix) {
 			if (s.length != 2) {
 				throw new FQLException("disjoint union over non-binary " + ix + " tuple is " + s);
 			}
-			String[] s0 = new String[2];
+			Object[] s0 = new String[2];
 			s0[0] = i + "_" + s[0];
 			s0[1] = k + "_" + s[1];
 			ret.add(s0);
@@ -166,8 +166,8 @@ public abstract class RA {
 		return ret;
 	}
 
-	private static String[] mergeTuple(String[] t1, String[] t2) {
-		String[] ret = new String[t1.length + t2.length];
+	private static Object[] mergeTuple(Object[] t1, Object[] t2) {
+		Object[] ret = new Object[t1.length + t2.length];
 		for (int i = 0; i < t1.length; i++) {
 			ret[i] = t1[i];
 		}
@@ -178,43 +178,43 @@ public abstract class RA {
 		return ret;
 	}
 
-	/**
-	 * A private test instances for pi
-	 * @return
-	 */
-	@SuppressWarnings("unused")
-	private static Map<String, Set<String[]>> test0() {
-		Map<String, Set<String[]>> ret = new HashMap<String, Set<String[]>>();
-
-		Set<String[]> C1 = new HashSet<String[]>();
-		C1.add(new String[] { "c1A", "c1A" });
-		C1.add(new String[] { "c1B", "c1B" });
-
-		Set<String[]> C2 = new HashSet<String[]>();
-		C2.add(new String[] { "c2", "c2" });
-		//C2.add(new String[] { "x", "x" });
-
-		Set<String[]> c = new HashSet<String[]>();
-		c.add(new String[] { "c1A", "c2" });
-		c.add(new String[] { "c1B", "c2" });
-
-		ret.put("C1", C1);
-		ret.put("C2", C2);
-		ret.put("c", c);
-		return ret;
-	}
-	
+//	/**
+//	 * A private test instances for pi
+//	 * @return
+//	 */
+//	@SuppressWarnings("unused")
+//	private static Map<String, Set<String[]>> test0() {
+//		Map<String, Set<String[]>> ret = new HashMap<String, Set<String[]>>();
+//
+//		Set<String[]> C1 = new HashSet<String[]>();
+//		C1.add(new String[] { "c1A", "c1A" });
+//		C1.add(new String[] { "c1B", "c1B" });
+//
+//		Set<String[]> C2 = new HashSet<String[]>();
+//		C2.add(new String[] { "c2", "c2" });
+//		//C2.add(new String[] { "x", "x" });
+//
+//		Set<String[]> c = new HashSet<String[]>();
+//		c.add(new String[] { "c1A", "c2" });
+//		c.add(new String[] { "c1B", "c2" });
+//
+//		ret.put("C1", C1);
+//		ret.put("C2", C2);
+//		ret.put("c", c);
+//		return ret;
+//	}
+//	
 	/**
 	 * Limit as join all.  Compare to FDM.lim
 	 */
-	public static  <Arrow> Pair<RA, String[]> 
+	public static  <Arrow> Pair<RA, Triple<Node, Node, Arr<Node, Path>>[]> 
 	lim(CommaCat<Node, Path, Node, Path, Node, Path> b,
 			Map<Triple<Node, Node, Arr<Node, Path>>, RA> map,
 			Map<Pair<Arr<Node, Path>, Arr<Node, Path>>, RA> map2) throws FQLException {
 		// System.out.println("Taking limit for " + B);
 		RA x0 = null;
 		int m = b.objects.size();
-		String[] cnames = new String[m];
+		Triple<Node, Node, Arr<Node, Path>>[] cnames = new Triple[m];
 		int temp = 0;
 
 		if (m == 0) {
@@ -226,7 +226,7 @@ public abstract class RA {
 				} else {
 					x0 = new Product(x0, map.get(n));
 				}
-				cnames[temp] = n.second.string;
+				cnames[temp] = n;
 				temp++;
 			}
 			x0 = new Project(x0, makeCols(temp));
@@ -253,11 +253,11 @@ public abstract class RA {
 //			 System.out.println("Query is " + x0);
 //			 printNicely(eval(x0, test0()));
 //			 System.out.println("end test");
-			x0 = new Select(x0, m, cnamelkp(cnames, e.src.second.string));
+			x0 = new Select(x0, m, cnamelkp(cnames, e.src));
 //			 System.out.println("Query is " + x0);
 //			 printNicely(eval(x0, test0()));
 //			 System.out.println("end test");
-			x0 = new Select(x0, m + 1, cnamelkp(cnames, e.dst.second.string));
+			x0 = new Select(x0, m + 1, cnamelkp(cnames, e.dst));
 //			 System.out.println("Query is " + x0);
 //			 printNicely(eval(x0, test0()));
 //			 System.out.println("end test");
@@ -272,7 +272,7 @@ public abstract class RA {
 //		 printNicely(eval(ret, test0()));
 //		 System.out.println("Query was " + ret);
 //		 System.out.println("end test");
-		return new Pair<RA, String[]>(ret, cnames);
+		return new Pair<RA, Triple<Node, Node, Arr<Node, Path>>[]>(ret, cnames);
 	}
 
 	private static int[] makeCols(int n) {
@@ -399,26 +399,27 @@ public abstract class RA {
 	public static Map<String, RA> pi(Mapping F0) throws FQLException {
 		Signature D0 = F0.target;
 		Signature C0 = F0.source;
-		FinCat<Node, Path> D = D0.toCategory2().first;
+		Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> DD = D0.toCategory2();
+		FinCat<Node, Path> D = DD.first;
 		FinCat<Node, Path> C = C0.toCategory2().first;
 		FinFunctor<Node, Path, Node, Path> F = F0.toFunctor2().first;
 		Map<String, RA> ret = new HashMap<String, RA>();
-
+		
 		for (Node d0 : D.objects) {
 			CommaCat<Node, Path, Node, Path, Node, Path> B = doComma(D, C, F, d0, D0);
 
-			RA r = lim(B, deltaObj(B.projB), deltaArr(B.projB)).first;
-			ret.put(d0.string, squish(r));
+			Pair<RA, Triple<Node, Node, Arr<Node, Path>>[]> rr = lim(B, deltaObj(B.projB), deltaArr(B.projB));
+			ret.put(d0.string, squish(rr.first));
 		}
 
 		for (Edge s : F0.target.edges) {
 			Node dA = s.source;
 			CommaCat<Node, Path, Node, Path, Node, Path> BA = doComma(D, C, F, dA, D0);
-			Pair<RA, String[]> q1 = lim(BA, deltaObj(BA.projB), deltaArr(BA.projB));
+			Pair<RA, Triple<Node, Node, Arr<Node, Path>>[]> q1 = lim(BA, deltaObj(BA.projB), deltaArr(BA.projB));
 
 			Node dB = s.target;
 			CommaCat<Node, Path, Node, Path, Node, Path> BB = doComma(D, C, F, dB, D0);
-			Pair<RA, String[]> q2 = lim(BB,deltaObj(BB.projB), deltaArr(BB.projB));
+			Pair<RA, Triple<Node, Node, Arr<Node, Path>>[]> q2 = lim(BB,deltaObj(BB.projB), deltaArr(BB.projB));
 			
 			RA rau = chop1(q2.second.length, q2.first);
 			RA rav = chop1(q1.second.length, q1.first);
@@ -440,7 +441,7 @@ public abstract class RA {
 //			System.out.println("end test");
 //
 			
-			RA rax = subset(q2.second, q1.second, raw);
+			RA rax = subset(D, DD.second.of(new Path(D0, s)), q2.second, q1.second, raw);
 			
 //			System.out.println("Testing rax ");
 //			System.out.println("Query is " + rax);
@@ -457,19 +458,91 @@ public abstract class RA {
 	}
 
 
-	private static RA subset(String[] q1cols, String[] q2cols, RA q1q2) {
-	//	System.out.println("trying subset " + print(q1cols) + " in " + print(q2cols));
-		a: for (int i = 0; i < q1cols.length; i++) {
-			for (int j = 0; j < q2cols.length; j++) {
-				if (q1cols[i].equals(q2cols[j])) {
-					q1q2 = new Select(q1q2, i+1, j+2+q1cols.length);
-					continue a;
+	private static RA subset(
+			FinCat<Node, Path> cat, Arr<Node, Path> e, 
+			Triple<Node, Node, Arr<Node, Path>>[] q2cols,
+			Triple<Node, Node, Arr<Node, Path>>[] q1cols, RA raw) throws FQLException {
+//		 System.out.println("trying subset " + print(q1cols) + " in " +
+//		 print(q2cols));
+		List<Pair<Pair<String, String>, Pair<String, String>>> ret = new LinkedList<>();
+		//System.out.println("Arr " + e);
+		//System.out.println("Cat" + cat);
+		// turn e into arrow e', compute e' ; q2col, look for that
+		a: for (int i = 0; i < q2cols.length; i++) {
+			boolean b = false;
+			for (int j = 0; j < q1cols.length; j++) {
+				Triple<Node, Node, Arr<Node, Path>> q2c = q2cols[i];
+				Triple<Node, Node, Arr<Node, Path>> q1c = q1cols[j];
+//				System.out.println("^^^" + q1c);
+//				System.out.println("^^^" + q2c);
+//				System.out.println("compose " + cat.compose(e, q2c.third));
+//				System.out.println("compose " + cat.compose(q2c.third, e));
+//				System.out.println("compose " + cat.compose(e, q1c.third));
+//				System.out.println("compose " + cat.compose(q1c.third, e));
+//				// if (q1c.equals(q2c)) {
+				//TODO add also match on second component
+				if (q1c.third.equals(cat.compose(e, q2c.third)) && q1c.second.equals(q2c.second)) {
+			//		System.out.println("hit on " + q2c.third);
+					//System.out.println("raw is " + printSetOfArrays(raw));
+					//1,2
+			//		System.out.println("equating colums " + (j + 1) + " and " + (i + 2 + q1cols.length));
+					
+					raw = new Select(raw, i + 1, j + 2 + q2cols.length);
+				//	System.out.println("raw now " + printSetOfArrays(raw));
+					//System.out.println("added to where: " +  retadd);
+					if (b) {
+						throw new RuntimeException();
+					}
+				//	ret.add(retadd);
+				//	if (b) throw new FQLException("not uniq: " + "lookup for " + q2c + " and " + q1c);
+					
+					b = true;
+					
+					//System.out.println("added to where: " +  retadd);
+					//continue a;
 				}
 			}
-			throw new RuntimeException("No col " + q1cols[i] + " in " + print(q2cols));
+			if (b) continue;
+			String xxx = "";
+			for (Triple<Node, Node, Arr<Node, Path>> yyy : q1cols) {
+				xxx += ", " + yyy;
+			}
+			throw new RuntimeException("No col " + q2cols[i] + " in " + xxx
+					);
+
 		}
-		return q1q2;
+		//System.out.println("where is " + ret);
+		return raw;
+
+		// a: for (int i = 0; i < q1cols.length; i++) {
+		// for (int j = 0; j < q2cols.length; j++) {
+		// if (q1cols[i].equals(q2cols[j])) {
+		// int col1 = i+1;
+		// int col2 = j+
+		// // int col2 = j+2+q1cols.length;
+		// ret.add(new Pair<>(new Pair<>(),new Pair<>()));
+		// q1q2 = new Select(q1q2, i+1, j+2+q1cols.length);
+		// continue a;
+		// }
+		// }
+		// throw new RuntimeException("No col " + q1cols[i] + " in " + q2cols);
+		// }
+		// return ret;
 	}
+
+//	private static RA subset(String[] q1cols, String[] q2cols, RA q1q2) {
+//	//	System.out.println("trying subset " + print(q1cols) + " in " + print(q2cols));
+//		a: for (int i = 0; i < q1cols.length; i++) {
+//			for (int j = 0; j < q2cols.length; j++) {
+//				if (q1cols[i].equals(q2cols[j])) {
+//					q1q2 = new Select(q1q2, i+1, j+2+q1cols.length);
+//					continue a;
+//				}
+//			}
+//			throw new RuntimeException("No col " + q1cols[i] + " in " + print(q2cols));
+//		}
+//		return q1q2;
+//	}
 
 	private static String print(String[] q2cols) {
 		String s = "";
@@ -591,12 +664,12 @@ public abstract class RA {
 	/**
 	 * Wrapper for evaluation.
 	 */
-	public static Map<String, Set<String[]>> eval0(Map<String, RA> ras,
-			Map<String, Set<String[]>> i) throws FQLException {
-		Map<String, Set<String[]>> ret = new HashMap<String, Set<String[]>>();
+	public static Map<String, Set<Object[]>> eval0(Map<String, RA> ras,
+			Map<String, Set<Object[]>> i0) throws FQLException {
+		Map<String, Set<Object[]>> ret = new HashMap<String, Set<Object[]>>();
 		for (String k : ras.keySet()) {
 			RA v = ras.get(k);
-			ret.put(k, RA.eval(v, i));
+			ret.put(k, RA.eval(v, i0));
 		}
 
 		return ret;

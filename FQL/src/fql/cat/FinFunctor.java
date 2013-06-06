@@ -169,7 +169,7 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 			}
 		}
 				
-		Mapping m = new Mapping(n + "_m", srcSig, dstSig, nm, em);
+		Mapping m = new Mapping(n, srcSig, dstSig, nm, em);
 		return new Triple<>(m, src, dst);
 	}
 	

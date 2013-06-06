@@ -71,7 +71,7 @@ public class QueryDeclParser implements Parser<Decl> {
 			s = q.tokens;
 			ret3 = q.value;
 
-			return new Partial<Decl>(s, new QueryDecl(ret1, ret2, ret3));
+			return new Partial<Decl>(s, new QueryDecl(ret1, ret3, ret2));
 		} catch (BadSyntax e) {
 		} catch (IllTyped e) {
 		}

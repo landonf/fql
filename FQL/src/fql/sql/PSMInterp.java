@@ -17,6 +17,7 @@ public class PSMInterp {
 	}
 	
 	public static Map<String, Set<Map<String, Object>>> interpX(List<PSM> prog, Map<String, Set<Map<String, Object>>> state ) {
+		//System.out.println(prog);
 		for (PSM cmd : prog) {
 			//	System.out.println("Executing ");
 			//	System.out.println(cmd);
@@ -26,7 +27,7 @@ public class PSMInterp {
 				//System.out.println("DONE EXECUTING");
 				checkFunctions(state);
 			}
-		System.out.println("RESULT " + state);
+		//System.out.println("RESULT " + state);
 			return state;
 	}
 	

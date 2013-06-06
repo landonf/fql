@@ -46,7 +46,7 @@ public class EvalInstanceDeclParser implements Parser<Decl> {
 		s = y.tokens;
 		s3 = y.value;
 		
-		System.out.println("Type is " + type);
+		//System.out.println("Type is " + type);
 		
 		
 		return new Partial<Decl>(s, new EvalInstanceDecl(s1,s2,s3,type));

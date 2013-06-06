@@ -2,10 +2,12 @@ package fql;
 
 import java.awt.GridLayout;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 /**
@@ -15,6 +17,8 @@ import javax.swing.JTextField;
  * Contains global constants for debugging.
  */
 public class DEBUG {
+
+	public static  Intermediate INTERMEDIATE = Intermediate.NONE;
 
 	public static  boolean VALIDATE = true;
 	
@@ -30,13 +34,39 @@ public class DEBUG {
 	
 	public static boolean DO_NOT_GUIDIFY = false;
 	
+	public enum Intermediate { SOME, NONE, ALL };
+	
 	
 	public static void showOptions() {
-		JPanel p = new JPanel(new GridLayout(5, 2));
+		JPanel p = new JPanel(new GridLayout(6, 2));
 		
 	//	JCheckBox jcb1 = new JCheckBox("", CHECK_MAPPINGS);
 	//	p.add(new JLabel("Require mapping well-formedness:"));
 	//	p.add(jcb1);
+		JRadioButton noneb = new JRadioButton("none");
+		JRadioButton somb = new JRadioButton("some");
+		JRadioButton allb = new JRadioButton("all");
+		ButtonGroup bg = new ButtonGroup();
+		bg.add(noneb);
+		bg.add(somb);
+		bg.add(allb);
+		if (INTERMEDIATE == Intermediate.SOME) {
+			somb.setSelected(true);
+		} else if (INTERMEDIATE == Intermediate.NONE) {
+			noneb.setSelected(true);
+		} else if (INTERMEDIATE == Intermediate.ALL) {
+			allb.setSelected(true);
+		} else {
+			throw new RuntimeException();
+		}
+		
+		//	JPanel p0 = new JPanel();
+			p.add(new JLabel("Show intermediate schemas:"));
+			JPanel xxx = new JPanel();
+			xxx.add(noneb);
+			xxx.add(somb);
+			xxx.add(allb);
+			p.add(xxx);
 		
 		JCheckBox jcbX = new JCheckBox("", DO_NOT_GUIDIFY);
 		//	JPanel p0 = new JPanel();
@@ -45,7 +75,7 @@ public class DEBUG {
 		
 		JCheckBox jcb0 = new JCheckBox("", ALLOW_INFINITES);
 	//	JPanel p0 = new JPanel();
-		p.add(new JLabel("Allow some infinite categories:"));
+		p.add(new JLabel("Do not validate mappings:"));
 		p.add(jcb0);
 		
 		JCheckBox jcb = new JCheckBox("", VALIDATE);
@@ -85,6 +115,16 @@ public class DEBUG {
 			ALLOW_INFINITES = jcb0.isSelected();
 			VALIDATE = jcb.isSelected();
 			DO_NOT_GUIDIFY = jcbX.isSelected();
+			if (somb.isSelected()) {
+				INTERMEDIATE = Intermediate.SOME;
+			} else if (noneb.isSelected()) {
+				INTERMEDIATE = Intermediate.NONE;
+			} else if (allb.isSelected()) {
+				INTERMEDIATE = Intermediate.ALL;
+			} else {
+				throw new RuntimeException();
+			}
+			
 	//		CHECK_MAPPINGS = jcb1.isSelected();
 			MAX_PATH_LENGTH = a;
 			MAX_DENOTE_ITERATIONS = b;

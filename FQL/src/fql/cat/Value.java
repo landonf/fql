@@ -56,7 +56,7 @@ public class Value<Y, X> {
 		Value that = (Value) o;
 		if (this.which == VALUETYPE.ATOM && that.which == VALUETYPE.ATOM) {
 			return (this.x.equals(that.x));
-		}
+		} else
 		if (this.which == VALUETYPE.RECORD && that.which == VALUETYPE.RECORD) {
 			if (this.tuple.length != that.tuple.length) {
 				return false;
@@ -67,11 +67,11 @@ public class Value<Y, X> {
 				}
 			}
 			return true;
-		}
+		} else
 		if (this.which == VALUETYPE.CHOICE && that.which == VALUETYPE.CHOICE) {
 			return (this.tag.equals(that.tag) && this.tagCargo.equals(that.tagCargo));
 		}
-		return false;
+		throw new RuntimeException();
 	}
 	
 	public static enum VALUETYPE { ATOM, RECORD, CHOICE };

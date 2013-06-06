@@ -37,7 +37,7 @@ public class ArrowParser implements Parser<Triple<String, String, String>> {
 			
 			Partial<String> x = p.parse(s);	
 			
-			if (!Pattern.matches("[a-zA-Z]+", x.value))  {
+			if (!Pattern.matches("[a-zA-Z0-9]+", x.value))  {
 				throw new BadSyntax("Could not parse node from " + s);
 			}
 			

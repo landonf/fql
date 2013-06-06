@@ -11,8 +11,15 @@ import java.util.Set;
 import fql.FQLException;
 import fql.Pair;
 import fql.Triple;
+import fql.decl.Environment;
+import fql.decl.Instance;
+import fql.decl.Mapping;
 import fql.decl.Node;
 import fql.decl.Path;
+import fql.decl.Signature;
+import fql.sql.PSM;
+import fql.sql.PSMGen;
+import fql.sql.PSMInterp;
 
 /**
  * 
@@ -110,6 +117,12 @@ public class FDM {
 	private static <X> Set<X[]> select(Set<X[]> i, int m, int n) {
 		Set<X[]> ret = new HashSet<>();
 		for (X[] tuple : i) {
+			if (tuple[m] instanceof Value) {
+			//	System.out.println("here");
+				if (((Value)(tuple[m])).which != ((Value)(tuple[n])).which) {
+					throw new RuntimeException();
+				}
+			}
 			if (tuple[m].equals(tuple[n])) {
 				ret.add(tuple);
 			}
@@ -176,6 +189,31 @@ public class FDM {
 		}
 		return ret;
 	}
+	
+	public static <Obj,Arrow,X,Y> Inst<Obj, Arrow, X, Y> 
+	pi2(FinFunctor<Obj,Arrow,X,Y> F, Inst<Obj,Arrow,X,Y> inst)
+			throws FQLException {
+		
+//		Triple<Mapping, Triple<Signature, Pair<Map<Obj, String>, Map<String, Obj>>, Pair<Map<Arr<Obj, Arrow>, String>, Map<String, Arr<Obj, Arrow>>>>, Triple<Signature, Pair<Map<X, String>, Map<String, X>>, Pair<Map<Arr<X, Y>, String>, Map<String, Arr<X, Y>>>>>
+//		tr = F.toMapping("F", "SRC", "DST");
+//		
+//		Instance inp = fromInst(inst);
+//		
+//		Mapping f1 = tr.first;
+//		Triple<Signature, Pair<Map<Obj, String>, Map<String, Obj>>, Pair<Map<Arr<Obj, Arrow>, String>, Map<String, Arr<Obj, Arrow>>>> f2 = tr.second;
+//		Triple<Signature, Pair<Map<X, String>, Map<String, X>>, Pair<Map<Arr<X, Y>, String>, Map<String, Arr<X, Y>>>> f3 = tr.third;
+//		
+//		Map<String, Set<Map<String, Object>>> state = shred(inp);
+//		
+//		List<PSM> l = PSMGen.pi(tr.first, "SRC", "DST");
+//		Map<String, Set<Map<String, Object>>> res = PSMInterp.interpX(l, state);
+//		
+//		List<Pair<String, List<Pair<Object, Object>>>> gr = Environment.gather("DST", tr.third.first, state);
+//		
+//		Inst<Node, Path, Object, Object> v = new Instance(null, tr.third.first, gr).toFunctor2();
+//	
+		return null;
+	}
 
 	/**
 	 * Pi 
@@ -188,6 +226,13 @@ public class FDM {
 	pi(
 			FinFunctor<ObjC, ArrowC, ObjD, ArrowD> F, Inst<ObjC, ArrowC, Y, X> inst)
 			throws FQLException {
+		
+//		System.out.println("problematic pi");
+//		System.out.println("src cat " + F.srcCat);
+//		System.out.println("src cat " + F.dstCat);
+//		System.out.println(F);
+//		System.out.println(inst);
+//		
 		FinCat<ObjD, ArrowD> D = F.dstCat;
 		FinCat<ObjC, ArrowC> C = F.srcCat;
 
@@ -206,16 +251,17 @@ public class FDM {
 			Set<Value<Y, X>[]> r = lim2(B, delta(B.projB, inst));
 
 			if (r == null) {
-				Set<Value<Y,X>> xxx = new HashSet<>();
-				Value<Y,X> arr = (Value<Y, X>) new Value<>("*");
-				
-				Value<Y,X>[] arr0 = new Value[1];
-				arr0[0] = arr;
-				Set<Value<Y,X>[]> yyy = new HashSet<>();
-				yyy.add(arr0);
-				xxx.add(arr);
-				ret1.put(d0, xxx);
-				nodetables.put(d0, yyy);
+				throw new RuntimeException();
+//				Set<Value<Y,X>> xxx = new HashSet<>();
+//				Value<Y,X> arr = (Value<Y, X>) new Value<>("*");
+//				
+//				Value<Y,X>[] arr0 = new Value[1];
+//				arr0[0] = arr;
+//				Set<Value<Y,X>[]> yyy = new HashSet<>();
+//				yyy.add(arr0);
+//				xxx.add(arr);
+//				ret1.put(d0, xxx);
+//				nodetables.put(d0, yyy);
 				
 			} else {
 				ret1.put(d0, squish(r));
@@ -226,12 +272,16 @@ public class FDM {
 		}
 
 		for (Arr<ObjD, ArrowD> s : D.arrows) {
+			
+//			if (D.isId(s)) {
+//				continue;
+//			}
 
+			//switched
 			ObjD dA = s.src;
 			CommaCat<ObjD, ArrowD, ObjC, ArrowC, ObjD, ArrowD> 
 			BA = nodecats.get(dA);
 			
-
 			Set<Value<Y, X>[]> q1 = nodetables.get(dA);
 			Triple<ObjD, ObjC, Arr<ObjD, ArrowD>> cnames1[] = new Triple[BA.objects.size()];
 			int i = 0;
@@ -251,7 +301,9 @@ public class FDM {
 			}
 
 			Set<Value<Y, X>[]> raw = product(q2, q1);
+		//	System.out.println("raw is " + raw);
 			Set<Value<Y, X>[]> rax = subset2(D, s, cnames2, cnames1, raw);
+		//	System.out.println("rax is " + rax);
 			Map<Value<Y, X>, Value<Y, X>> ray = project(rax, cnames2.length + 1, 0);
 
 			ret2.put(s, ray);
@@ -261,8 +313,8 @@ public class FDM {
 			//		q1);
 		}
 		
-		System.out.println(ret1);
-		System.out.println(ret2);
+		//System.out.println("ret1 " + ret1);
+		//System.out.println("ret2 " + ret2);
 
 		return new Inst<>(ret1, ret2, D);
 	}
@@ -271,32 +323,33 @@ public class FDM {
 	/**
 	 * The "subset portion" of pi
 	 */
-	private static <ObjC, ObjD,Y, X> Set<Value<Y,X>[]> subset(
-			FinCat<ObjD, Y> d,
-			Arr<ObjD, Y> s,
-			Map<ObjC, Integer> cnames2,
-			Map<ObjC, Integer> cnames1, Set<Value<Y, X>[]> raw) {
-		for (ObjC  x : cnames2.keySet()) {
-			int i = cnames2.get(x);
-			int j = cnames1.get(x);
-			raw = select(raw, i + 1, j + 2 + cnames2.size());
-		}
-		return raw;
-	}
+//	private static <ObjC, ObjD,Y, X> Set<Value<Y,X>[]> subset(
+//			FinCat<ObjD, Y> d,
+//			Arr<ObjD, Y> s,
+//			Map<ObjC, Integer> cnames2,
+//			Map<ObjC, Integer> cnames1, Set<Value<Y, X>[]> raw) {
+//		for (ObjC  x : cnames2.keySet()) {
+//			int i = cnames2.get(x);
+//			int j = cnames1.get(x);
+//			raw = select(raw, i + 1, j + 2 + cnames2.size());
+//		}
+//		return raw;
+//	}
 	
 	private static <ObjC, ArrowC, ObjD, ArrowD, Y, X> Set<Value<Y,X>[]> subset2(
 			FinCat<ObjD, ArrowD> cat,
 			Arr<ObjD, ArrowD> e,
 			Triple<ObjD, ObjC, Arr<ObjD, ArrowD>>[] q2cols,
 			Triple<ObjD, ObjC, Arr<ObjD, ArrowD>>[] q1cols, Set<Value<Y, X>[]> raw) {
-	// System.out.println("trying subset " + print(q1cols) + " in " +
-	// print(q2cols));
+//	 System.out.println("trying subset " + print(q1cols) + " in " +
+//	 print(q2cols));
 	List<Pair<Pair<String, String>, Pair<String, String>>> ret = new LinkedList<>();
 	//System.out.println("Arr" + e);
 	//System.out.println("Cat" + cat);
 	// turn e into arrow e', compute e' ; q2col, look for that
 	
 	a: for (int i = 0; i < q2cols.length; i++) {
+		boolean b = false;
 		for (int j = 0; j < q1cols.length; j++) {
 			Triple<ObjD, ObjC, Arr<ObjD, ArrowD>> q2c = q2cols[i];
 			Triple<ObjD, ObjC, Arr<ObjD, ArrowD>> q1c = q1cols[j];
@@ -306,16 +359,24 @@ public class FDM {
 //			System.out.println("compose " + cat.compose(q2c.third, e));
 //			System.out.println("compose " + cat.compose(e, q1c.third));
 //			System.out.println("compose " + cat.compose(q1c.third, e));
-//			// if (q1c.equals(q2c)) {
-			if (q1c.third.equals(cat.compose(e, q2c.third))) {
-			//	System.out.println("hit on " + q2c.third);
+////			// if (q1c.equals(q2c)) {
+			if (q1c.third.equals(cat.compose(e, q2c.third)) && q2c.second.equals(q1c.second)) {
+	//			System.out.println("hit on " + q2c.third);
 //				Pair<Pair<String, String>, Pair<String, String>> retadd = new Pair<>(new Pair<>(
 //						pre + "_" + q1name + "_limit", "c" + j),
 //						new Pair<String, String>(pre + "_" + q2name + "_limit", "c" + i));
 //			//	ret.add(retadd);
+			//	System.out.println("raw is " + printSetOfArrays(raw));
+				//1,2
+		//		System.out.println(" colums " + (j + 1) + " and " + (i + 2 + q1cols.length));
 				
 				raw = select(raw, i + 1, j + 2 + q2cols.length);
+				//System.out.println("raw now " + printSetOfArrays(raw));
 				//System.out.println("added to where: " +  retadd);
+				if (b) {
+					throw new RuntimeException();
+				}
+				b = true;
 				continue a;
 			}
 		}
@@ -329,6 +390,17 @@ public class FDM {
 	}
 	//System.out.println("where is " + ret);
 	return raw;
+	}
+	
+	public static <Y,X> String  printSetOfArrays(Set<Value<Y,X>[]> x) {
+		String ret = "";
+		for (Object[] o : x) {
+			for (int i = 0 ; i < o.length; i++) {
+				ret += "c" + i + "=" + o[i] + " ";
+			}
+			ret += "\n";
+		}
+		return ret;
 	}
 
 	/**
@@ -675,15 +747,20 @@ public class FDM {
 //		System.out.println("I " + I);
 		Map<ObjC, Map<Value<Y, X>, Value<Y, X>>> map = new HashMap<>();
 
+		//TODO: this has same problem as pi?
 		for (ObjC C : F.srcCat.objects) {
 			CommaCat<ObjD, ArrowD, ObjC, ArrowC, ObjD, ArrowD> B = doComma2(
 					F.dstCat, F.srcCat, F, F.applyO(C));
 
 			Set<Value<Y, X>[]> r = lim2(B, delta(B.projB, I));
+			if (r == null) {
+				throw new RuntimeException();
+			}
 			int i = 0;
 			boolean flag = true;
+			//TODO add check if it ever finds two
 			for (Triple<ObjD, ObjC, Arr<ObjD, ArrowD>> o : B.objects) {
-				if (o.second.equals(C)) {
+				if (o.second.equals(C) && F.dstCat.isId(o.third)) {
 					Map<Value<Y,X>, Value<Y,X>> xxx = project(r, 0, i + 1);
 					map.put(C, xxx); 
 					flag = false;

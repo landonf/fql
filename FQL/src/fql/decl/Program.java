@@ -37,5 +37,14 @@ public class Program {
 	}
 
 	public List<Decl> decls;
+
+	public boolean hasKey(String s) {
+		for (Decl d : decls) {
+			if (d.name.equals(s)) {
+				return true;
+			}
+		}
+		return false;
+	}
 		
 }

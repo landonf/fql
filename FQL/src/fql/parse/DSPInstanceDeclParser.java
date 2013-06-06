@@ -48,7 +48,7 @@ public class DSPInstanceDeclParser implements Parser<Decl> {
 			s = y.tokens;
 			s3 = y.value;
 			
-			System.out.println("type is " + type);
+			//System.out.println("type is " + type);
 			
 			return new Partial<Decl>(s, new EvalDSPInstanceDecl(s1,"delta",s2,s3, type));
 		} catch (Exception e) { }

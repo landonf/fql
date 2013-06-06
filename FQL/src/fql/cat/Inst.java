@@ -283,6 +283,17 @@ public class Inst<Obj, Arrow, Y, X> {
 					throw new RuntimeException();
 				}
 			}
+			
+			
+			for (Value<Y,X> aa : f.keySet()) {
+				Value<Y,X> bb = f.get(aa);
+				if (!src.contains(aa)) {
+					throw new RuntimeException();
+				} 
+				if (!dst.contains(bb)) {
+					throw new RuntimeException();
+				}
+			}
 
 			for (Arr<Obj, Arrow> b : cat.arrows) {
 				Arr<Obj, Arrow> c = cat.compose(a, b);

@@ -32,6 +32,7 @@ import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
+import fql.DEBUG;
 import fql.FQLException;
 import fql.Fn;
 import fql.Pair;
@@ -55,25 +56,36 @@ import fql.sql.RA;
  */
 public class Mapping implements Viewable<Mapping>, Jsonable {
 	
+	boolean ALLOW_WF_CHECK = true;
+	
 	public void validate() throws FQLException {
+		for (Attribute a : source.attrs) {
+			Attribute b = am.get(a);
+			if (b == null) {
+				throw new FQLException("Mapping " + name + " does not map attribute " + a);
+			}
+			if (!a.target.equals(b.target)) {
+				throw new FQLException("Mapping " + name + " does not preserve typing on " + a + " and " + b);
+			}
+		}
 		
 		//should be check by knuth-bendix
 		
-//		if (DEBUG.CHECK_MAPPINGS) {
-//			
-//			Triple<FinFunctor<Node, Path, Node, Path>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>> zzz = toFunctor2();
-//	
-//			for (Eq x : source.eqs) {
-//				appy(x.lhs);
-//				
-//				if (!zzz.third.second.of(appy(x.lhs)).equals(zzz.third.second.of(appy(x.rhs)))) {
-//					throw new FQLException("On " + name + ", equivalence " + x + 
-//							" not respected on \n\n" + x + "\n and \n" + appy(x.lhs) + "\n\n" + appy(x.rhs)
-//							);
-//							
-//				}
-//			}			
-//		}
+		if (!DEBUG.ALLOW_INFINITES && !name.equals("")) {
+			
+			Triple<FinFunctor<Node, Path, Node, Path>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>> zzz = toFunctor2();
+	
+			for (Eq x : source.eqs) {
+				appy(x.lhs);
+				
+				if (!zzz.third.second.of(appy(x.lhs)).equals(zzz.third.second.of(appy(x.rhs)))) {
+					throw new FQLException("On " + name + ", equivalence " + x + 
+							" not respected on \n\n" + x + "\n and \n" + appy(x.lhs) + "\n\n" + appy(x.rhs)
+							);
+							
+				}
+			}			
+		}
 		 
 	}
 	
@@ -585,33 +597,33 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	
 	
 	
-	public Map<String, Set<Pair<String, String>>> evalDelta(Instance theinstance) throws FQLException {
+	public Map<String, Set<Pair<Object, Object>>> evalDelta(Instance theinstance) throws FQLException {
 		
 		//System.out.println(FDM.delta(this.toFunctor(), theinstance.toFunctor()));
 		
 		Map<String, RA> x = RA.delta(this);
-		Map<String, Set<String[]>> i0 = Query.convert0(theinstance);
-		Map<String, Set<String[]>> i1 = RA.eval0(x, i0);
+		Map<String, Set<Object[]>> i0 = Query.convert0(theinstance);
+		Map<String, Set<Object[]>> i1 = RA.eval0(x, i0);
 		return Query.convert(i1);
 	}
 	
 
-	public Map<String, Set<Pair<String, String>>> evalSigma(Instance theinstance) throws FQLException {
+	public Map<String, Set<Pair<Object, Object>>> evalSigma(Instance theinstance) throws FQLException {
 		Map<String, RA> x = RA.sigma(this);
-		Map<String, Set<String[]>> i0 = Query.convert0(theinstance);
-		Map<String, Set<String[]>> i1 = RA.eval0(x, i0);
+		Map<String, Set<Object[]>> i0 = Query.convert0(theinstance);
+		Map<String, Set<Object[]>> i1 = RA.eval0(x, i0);
 		
 		//System.out.println(FDM.sigma(this.toFunctor(), theinstance.toFunctor()));
 
 		return Query.convert(i1);
 	}
 	
-	public Map<String, Set<Pair<String, String>>> evalPi(Instance theinstance) throws FQLException {
+	public Map<String, Set<Pair<Object, Object>>> evalPi(Instance theinstance) throws FQLException {
 		
 
 		Map<String, RA> x = RA.pi(this);
-		Map<String, Set<String[]>> i0 = Query.convert0(theinstance);
-		Map<String, Set<String[]>> i1 = RA.eval0(x, i0);
+		Map<String, Set<Object[]>> i0 = Query.convert0(theinstance);
+		Map<String, Set<Object[]>> i1 = RA.eval0(x, i0);
 		
 		//System.out.println(FDM.grothendieck(FDM.pi(this.toFunctor().first, theinstance.toFunctor())));
 

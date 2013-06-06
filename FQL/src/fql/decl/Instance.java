@@ -55,17 +55,17 @@ import fql.parse.PrettyPrinter;
 
 public class Instance implements Viewable<Instance>, Jsonable {
 
-	public static String data(String s) {
-		return s + " data";
-	}
+//	public static String data(String s) {
+//		return s + " data";
+//	}
 	
 	public void conformsTo(Signature s) throws FQLException {
 		for (Node n : s.nodes) {
-			Set<Pair<String, String>> i = data.get(n.string);
+			Set<Pair<Object, Object>> i = data.get(n.string);
 			if (i == null) {
 				throw new FQLException("Missing node table " + n.string + " in " + this);
 			}
-			for (Pair<String, String> p : i) {
+			for (Pair<Object, Object> p : i) {
 				if (!p.first.equals(p.second)) {
 					throw new FQLException("Not reflexive: " + s.name0 + " in "
 							+ s + " and " + this);
@@ -73,21 +73,21 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			}
 		}
 		for (Attribute a : s.attrs) {
-			Set<Pair<String, String>> i = data.get(a.name);
+			Set<Pair<Object, Object>> i = data.get(a.name);
 			if (i == null) {
 				throw new FQLException("Missing attribute table " + a.name + " in " + this);
 			}
 			
-			HashSet<String> x = new HashSet<>(); 
-			for (Pair<String, String> p : i) {
+			HashSet<Object> x = new HashSet<>(); 
+			for (Pair<Object, Object> p : i) {
 				x.add(p.first);
 			}
 			if (data.get(a.source.string).size() != x.size()) {
 				throw new RuntimeException("Instance does not map all domain values in " + a.name);
 			}
 			
-			for (Pair<String, String> p1 : i) {
-				for (Pair<String, String> p2 : i) {
+			for (Pair<Object, Object> p1 : i) {
+				for (Pair<Object, Object> p2 : i) {
 					if (p1.first.equals(p2.first)) {
 						if (!p2.second.equals(p2.second)) {
 							throw new FQLException("Not functional: " + s.name0
@@ -103,7 +103,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 				}
 				if (a.target instanceof Int) {
 					try {
-						Integer.parseInt(p1.second);
+						Integer.parseInt((String)p1.second);
 					} catch (NumberFormatException nfe) {
 						throw new FQLException("Not an int: " + p1.second);
 					}
@@ -111,21 +111,21 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			}
 		}
 		for (Edge e : s.edges) {
-			Set<Pair<String, String>> i = data.get(e.name);
+			Set<Pair<Object, Object>> i = data.get(e.name);
 			if (i == null) {
 				throw new FQLException("Missing edge table " + e.name + " in " + this);
 			}
 			
-			HashSet<String> x = new HashSet<>(); 
-			for (Pair<String, String> p : i) {
+			HashSet<Object> x = new HashSet<>(); 
+			for (Pair<Object, Object> p : i) {
 				x.add(p.first);
 			}
 			if (data.get(e.source.string).size() != x.size()) {
-				throw new RuntimeException("Instance does not map all domain values in " + e.name);
+				throw new FQLException("Instance does not map all domain values in " + e.name + " in " + this);
 			}
 			
-			for (Pair<String, String> p1 : i) {
-				for (Pair<String, String> p2 : i) {
+			for (Pair<Object, Object> p1 : i) {
+				for (Pair<Object, Object> p2 : i) {
 					if (p1.first.equals(p2.first)) {
 						if (!p2.second.equals(p2.second)) {
 							throw new FQLException("Not functional: " + s.name0
@@ -147,8 +147,8 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			}
 		}
 		for (Eq eq : s.eqs) {
-			Set<Pair<String, String>> lhs = evaluate(eq.lhs);
-			Set<Pair<String, String>> rhs = evaluate(eq.rhs);
+			Set<Pair<Object, Object>> lhs = evaluate(eq.lhs);
+			Set<Pair<Object, Object>> rhs = evaluate(eq.rhs);
 			if (!lhs.equals(rhs)) {
 				throw new FQLException("Violates constraints: " + s.name0
 						+ " in " + s + " and " + this + "\n\n eq is " + eq + "\nlhs is " + lhs + "\n\nrhs is " + rhs);
@@ -158,14 +158,14 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		//toFunctor();
 	}
 
-	private Set<Pair<String, String>> evaluate(Path p) {
-		Set<Pair<String, String>> x = data.get(p.source.string);
+	private Set<Pair<Object, Object>> evaluate(Path p) {
+		Set<Pair<Object, Object>> x = data.get(p.source.string);
 		if (x == null) {
-			System.out.println("Couldnt find " + p.source.string);
+			throw new RuntimeException("Couldnt find " + p.source.string);
 		}
 		for (Edge e : p.path) {
 			if (data.get(e.name) == null) {
-				System.out.println("Couldnt find " + e.name);
+				throw new RuntimeException("Couldnt find " + e.name);
 			}
 
 			x = compose(x, data.get(e.name));
@@ -173,14 +173,14 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		return x;
 	}
 
-	private static Set<Pair<String, String>> compose(
-			Set<Pair<String, String>> x, Set<Pair<String, String>> y) {
-		Set<Pair<String, String>> ret = new HashSet<Pair<String, String>>();
+	private static Set<Pair<Object, Object>> compose(
+			Set<Pair<Object, Object>> x, Set<Pair<Object, Object>> y) {
+		Set<Pair<Object, Object>> ret = new HashSet<>();
 
-		for (Pair<String, String> p1 : x) {
-			for (Pair<String, String> p2 : y) {
+		for (Pair<Object, Object> p1 : x) {
+			for (Pair<Object, Object> p2 : y) {
 				if (p1.second.equals(p2.first)) {
-					Pair<String, String> p = new Pair<String, String>(p1.first,
+					Pair<Object, Object> p = new Pair<>(p1.first,
 							p2.second);
 					ret.add(p);
 				}
@@ -189,38 +189,38 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		return ret;
 	}
 
-	private boolean contained(String s, Set<Pair<String, String>> set) {
-		for (Pair<String, String> p : set) {
-			if (p.first.equals(s) && p.second.equals(s)) {
+	private boolean contained(Object second, Set<Pair<Object, Object>> set) {
+		for (Pair<Object, Object> p : set) {
+			if (p.first.equals(second) && p.second.equals(second)) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	public Map<String, Set<Pair<String, String>>> data;
+	public Map<String, Set<Pair<Object, Object>>> data;
 
 	public Signature thesig;
 	
 	public Instance(String n, Signature thesig,
-			Map<String, Set<Pair<String, String>>> data)
+			Map<String, Set<Pair<Object, Object>>> data)
 			throws FQLException {
 		this(n, thesig, degraph(data));
 	}
 
-	private static List<Pair<String, List<Pair<String, String>>>>  degraph(
-			Map<String, Set<Pair<String, String>>> data2) {
-		List<Pair<String, List<Pair<String, String>>>> ret = new LinkedList<>();
-		for (Entry<String, Set<Pair<String, String>>> e : data2.entrySet()) {
-			ret.add(new Pair<String, List<Pair<String, String>>>(e.getKey(), new LinkedList<>(e.getValue())));
+	private static List<Pair<String, List<Pair<Object, Object>>>>  degraph(
+			Map<String, Set<Pair<Object, Object>>> data2) {
+		List<Pair<String, List<Pair<Object, Object>>>> ret = new LinkedList<>();
+		for (Entry<String, Set<Pair<Object, Object>>> e : data2.entrySet()) {
+			ret.add(new Pair<String, List<Pair<Object, Object>>>(e.getKey(), new LinkedList<>(e.getValue())));
 		}
 		return ret;
 	}
 
 	public Instance(String n, Signature thesig,
-			List<Pair<String, List<Pair<String, String>>>> data)
+			List<Pair<String, List<Pair<Object, Object>>>> data)
 			throws FQLException {
-		this.data = new HashMap<String, Set<Pair<String, String>>>();
+		this.data = new HashMap<>();
 		for (Node node : thesig.nodes) {
 			this.data.put(node.string, makeFirst(node.string, data));
 //			this.data.put(data(node.string), lookup(node.string, data));
@@ -238,9 +238,9 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		conformsTo(thesig);
 	}
 
-	private Set<Pair<String, String>> makeFirst(String string,
-			List<Pair<String, List<Pair<String, String>>>> data2) {
-		for (Pair<String, List<Pair<String, String>>> p : data2) {
+	private Set<Pair<Object, Object>> makeFirst(String string,
+			List<Pair<String, List<Pair<Object, Object>>>> data2) {
+		for (Pair<String, List<Pair<Object, Object>>> p : data2) {
 			if (string.equals(p.first)) {
 				return secol(p.second);
 			}
@@ -248,107 +248,107 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		throw new RuntimeException("cannot find " + string + " in " + data2);
 	}
 
-	private Set<Pair<String, String>> secol(List<Pair<String, String>> second) {
-		Set<Pair<String, String>> ret = new HashSet<>();
-		for (Pair<String, String> p : second) {
+	private Set<Pair<Object, Object>> secol(List<Pair<Object, Object>> second) {
+		Set<Pair<Object, Object>> ret = new HashSet<>();
+		for (Pair<Object, Object> p : second) {
 			ret.add(new Pair<>(p.first, p.first));
 		}
 		return ret;
 	}
 
-	private Set<Pair<String, String>> lookup(String name,
-			List<Pair<String, List<Pair<String, String>>>> data2) throws FQLException {
-		for (Pair<String, List<Pair<String, String>>> p : data2) {
+	private Set<Pair<Object, Object>> lookup(String name,
+			List<Pair<String, List<Pair<Object, Object>>>> data2) throws FQLException {
+		for (Pair<String, List<Pair<Object, Object>>> p : data2) {
 			if (name.equals(p.first)) {
-				return new HashSet<Pair<String, String>>(p.second);
+				return new HashSet<>(p.second);
 			}
 		}
 		throw new FQLException("cannot find " + name + " in " + data2);
 	}
 
-	public Instance(String name, Query thequery, Instance theinstance)
-			throws FQLException {
-		if (!thequery.getSource().equals(theinstance.thesig)) {
-			throw new FQLException("Incompatible types. Expected "
-					+ thequery.getSource() + " received " + theinstance.thesig);
-		}
-		thesig = thequery.getTarget();
-		data = thequery.eval(theinstance);
-		conformsTo(thesig);
-
-	}
-
-	public Instance(String name, Mapping m, Instance i, String type)
-			throws FQLException {
-		if (type.equals("delta")) {
-			if (!m.target.equals(i.thesig)) {
-				throw new FQLException("Incompatible types. Expected "
-						+ m.target + " received " + i.thesig);
-			}
-			thesig = m.source;
-			data = m.evalDelta(i);
-			conformsTo(thesig);
-
-		} else if (type.equals("sigma")) {
-			if (!m.source.equals(i.thesig)) {
-				throw new FQLException("Incompatible types. Expected "
-						+ m.source + " received " + i.thesig);
-			}
-			thesig = m.target;
-			data = m.evalSigma(i);
-
-			conformsTo(thesig);
-
-		} else if (type.equals("pi")) {
-			if (!m.source.equals(i.thesig)) {
-				throw new FQLException("Incompatible types. Expected "
-						+ m.source + " received " + i.thesig);
-			}
-			thesig = m.target;
-			data = m.evalPi(i);
-			conformsTo(thesig);
-
-		} else {
-			throw new FQLException("Unknown type " + type);
-		}
+//	public Instance(String name, Query thequery, Instance theinstance)
+//			throws FQLException {
+//		if (!thequery.getSource().equals(theinstance.thesig)) {
+//			throw new FQLException("Incompatible types. Expected "
+//					+ thequery.getSource() + " received " + theinstance.thesig);
+//		}
+//		thesig = thequery.getTarget();
+//		data = thequery.eval(theinstance);
+//		conformsTo(thesig);
+//
+//	}
+//
+//	public Instance(String name, Mapping m, Instance i, String type)
+//			throws FQLException {
+//		if (type.equals("delta")) {
+//			if (!m.target.equals(i.thesig)) {
+//				throw new FQLException("Incompatible types. Expected "
+//						+ m.target + " received " + i.thesig);
+//			}
+//			thesig = m.source;
+//			data = m.evalDelta(i);
+//			conformsTo(thesig);
+//
+//		} else if (type.equals("sigma")) {
+//			if (!m.source.equals(i.thesig)) {
+//				throw new FQLException("Incompatible types. Expected "
+//						+ m.source + " received " + i.thesig);
+//			}
+//			thesig = m.target;
+//			data = m.evalSigma(i);
+//
+//			conformsTo(thesig);
+//
+//		} else if (type.equals("pi")) {
+//			if (!m.source.equals(i.thesig)) {
+//				throw new FQLException("Incompatible types. Expected "
+//						+ m.source + " received " + i.thesig);
+//			}
+//			thesig = m.target;
+//			data = m.evalPi(i);
+//			conformsTo(thesig);
+//
+//		} else {
+//			throw new FQLException("Unknown type " + type);
+//		}
 	//	toFunctor().morphs(toFunctor(), toFunctor());
-	}
+	//}
 
 	//this is the json one
 	public Instance(
 			Signature sig,
-			List<Pair<String, List<String>>> ob,
-			List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>> mo) 
+			List<Pair<String, List<Object>>> ob,
+			List<Pair<Pair<Pair<Object, Object>, String>, List<Pair<Object, Object>>>> mo) 
 	throws FQLException
 	{
 		
 		this(null, sig, jsonmap(ob, mo));		
 	}
 
-	private static Map<String, Set<Pair<String, String>>> jsonmap(
-			List<Pair<String, List<String>>> ob,
-			List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>> mo) {
-		Map<String, Set<Pair<String, String>>> map = new HashMap<>();
-		for (Pair<String, List<String>> o : ob) {
+	private static Map<String, Set<Pair<Object, Object>>> jsonmap(
+			List<Pair<String, List<Object>>> ob,
+			List<Pair<Pair<Pair<Object, Object>, String>, List<Pair<Object, Object>>>> mo) {
+		Map<String, Set<Pair<Object, Object>>> map = new HashMap<>();
+		for (Pair<String, List<Object>> o : ob) {
 			map.put(o.first, dupl(o.second));
 		}
-		for (Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>> o : mo) {
+		for (Pair<Pair<Pair<Object, Object>, String>, List<Pair<Object, Object>>> o : mo) {
 			String arr = o.first.second;
-			Set<Pair<String, String>> set = map.get(arr);
+			Set<Pair<Object, Object>> set = map.get(arr);
 			if (set == null) {
 				set = new HashSet<>();
 				map.put(arr,  set);
 			}
-			for (Pair<String, String> oo : o.second) {
+			for (Pair<Object, Object> oo : o.second) {
 				set.add(oo);
 			}
 		}
 		return map;
 	}
 
-	private static Set<Pair<String, String>> dupl(List<String> x) {
-		Set<Pair<String, String>> ret = new HashSet<>();
-		for (String s : x) {
+	private static <X> Set<Pair<X, X>> dupl(List<X> x) {
+		Set<Pair<X, X>> ret = new HashSet<>();
+		for (X s : x) {
 			ret.add(new Pair<>(s, s));
 		}
 		return ret;
@@ -399,7 +399,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 		boolean first = true;
 		for (String k : data.keySet()) {
-			Set<Pair<String, String>> v = data.get(k);
+			Set<Pair<Object, Object>> v = data.get(k);
 			if (!first) {
 				sb.append("; ");
 			}
@@ -415,18 +415,18 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 	}
 
-	private String printSet(Set<Pair<String, String>> v) {
+	private String printSet(Set<Pair<Object, Object>> v) {
 		StringBuffer sb = new StringBuffer();
 		boolean first = true;
-		for (Pair<String, String> p : v) {
+		for (Pair<Object, Object> p : v) {
 			if (!first) {
 				sb.append(", ");
 			}
 			first = false;
 			sb.append("(");
-			sb.append(maybeQuote(p.first));
+			sb.append(maybeQuote(p.first.toString()));
 			sb.append(",");
-			sb.append(maybeQuote(p.second));
+			sb.append(maybeQuote(p.second.toString()));
 			sb.append(")");
 		}
 		return sb.toString();
@@ -452,21 +452,21 @@ public class Instance implements Viewable<Instance>, Jsonable {
             }        
         });
 		for (String k : sorted) {
-			Set<Pair<String, String>> xxx = data.get(k);
-			List<Pair<String, String>> table = new LinkedList<>(xxx);
-			Collections.sort(table, new Comparator<Pair<String, String>>()
+			Set<Pair<Object, Object>> xxx = data.get(k);
+			List<Pair<Object, Object>> table = new LinkedList<>(xxx);
+			Collections.sort(table, new Comparator<Pair<Object, Object>>()
 	                {
-	            public int compare(Pair<String,String> f1, Pair<String,String> f2)
+	            public int compare(Pair<Object,Object> f1, Pair<Object,Object> f2)
 	            {
 	                return f1.first.toString().compareTo(f2.first.toString());
 	            }        
 	        });
 
-			String[][] arr = new String[table.size()][2];
+			Object[][] arr = new Object[table.size()][2];
 			int i = 0;
-			for (Pair<String, String> p : table) {
-				arr[i][0] = p.first.trim();
-				arr[i][1] = p.second.trim();
+			for (Pair<Object, Object> p : table) {
+				arr[i][0] = p.first.toString().trim();
+				arr[i][1] = p.second.toString().trim();
 				i++;
 			}
 			Pair<String, String> cns = thesig.getColumnNames(k);
@@ -538,7 +538,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			//p.add(t);
 			p.add(new JScrollPane(t));
 	//		p.setMaximumSize(new Dimension(200,200));
-			p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), name));
+			p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), name  + "   (" + data.get(name).size() + " rows)"));
 			ret.add(p);
 		}
 		
@@ -553,16 +553,16 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		vwr.setLayout(cards);
 		vwr.add(new JPanel(), "");
 		cards.show(vwr, "");
-		Map<String, Map<String, Set<Pair<String, String>>>> jnd 
+		Map<String, Map<String, Set<Pair<Object, Object>>>> jnd 
 		= new HashMap<>();
-		Map<String, Set<Pair<String, String>>> nd
+		Map<String, Set<Pair<Object, Object>>> nd
 		= new HashMap<>();
 		
 		List<String> names = new LinkedList<>();
 		
 		for (Node n : thesig.nodes) {
 			nd.put(n.string, data.get(n.string));
-			jnd.put(n.string, new HashMap<String, Set<Pair<String, String>>>());
+			jnd.put(n.string, new HashMap<String, Set<Pair<Object, Object>>>());
 			names.add(n.string);
 		}
 		
@@ -590,8 +590,8 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	}
 
 	private Map<String, JTable> makejoined(
-			Map<String, Map<String, Set<Pair<String, String>>>> joined,
-			Map<String, Set<Pair<String, String>>> nd, List<String> names) {
+			Map<String, Map<String, Set<Pair<Object, Object>>>> joined,
+			Map<String, Set<Pair<Object, Object>>> nd, List<String> names) {
 		Comparator<String> strcmp = new Comparator<String>()  {
 	        public int compare(String f1, String f2) {
 	                return f1.compareTo(f2);
@@ -600,11 +600,11 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	        Map<String, JTable> ret = new HashMap<>();
 		for (String name : names) {
 //			System.out.println("Name " + name);
-			Map<String, Set<Pair<String, String>>> m = joined.get(name);
+			Map<String, Set<Pair<Object, Object>>> m = joined.get(name);
 	//		System.out.println("m " + m);
-			Set<Pair<String, String>> ids = nd.get(name);
+			Set<Pair<Object, Object>> ids = nd.get(name);
 		//	System.out.println("ids " + ids);
-			String[][] arr = new String[ids.size()][m.size() + 1];
+			Object[][] arr = new String[ids.size()][m.size() + 1];
 			Set<String> cols = m.keySet();
 	//		System.out.println("cols " + cols);
 			List<String> cols2 = new LinkedList<>(cols);
@@ -615,9 +615,9 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	//		System.out.println("cols3 " + cols3);
 			
 			int i = 0;
-			for (Pair<String, String> id : ids) {
+			for (Pair<Object, Object> id : ids) {
 //				System.out.println("id " + id);
-				arr[i][0] = id.first;
+				arr[i][0] = id.first.toString();
 //				System.out.println(" i " + i + " j " + 0 + " val " + arr[i][0]);
 
 				int j = 1;
@@ -626,11 +626,11 @@ public class Instance implements Viewable<Instance>, Jsonable {
 						continue;
 					}
 				//	System.out.println("col " + col);
-					Set<Pair<String, String>> coldata = m.get(col);
-					for (Pair<String, String> p : coldata) {
+					Set<Pair<Object, Object>> coldata = m.get(col);
+					for (Pair<Object, Object> p : coldata) {
 				//		System.out.println("p " + p);
 						if (p.first.equals(id.first)) {
-							arr[i][j] = p.second;
+							arr[i][j] = p.second.toString();
 //							System.out.println(" i " + i + " j " + j + " val " + arr[i][j]);
 							break;
 						}
@@ -640,11 +640,11 @@ public class Instance implements Viewable<Instance>, Jsonable {
 				i++;
 			}
 			
-			Arrays.sort(arr, new Comparator<String[]>() {
+			Arrays.sort(arr, new Comparator<Object[]>() {
 
 				@Override
-				public int compare(String[] o1, String[] o2) {
-					return o1[0].compareTo(o2[0]);
+				public int compare(Object[] o1, Object[] o2) {
+					return o1[0].toString().compareTo(o2[0].toString());
 				}
 				
 			});
@@ -713,14 +713,14 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 		Signature sig = i1.thesig;
 		
-		Map<String, List<Map<String, String>>> subs1 = new HashMap<>();
-		Map<String, List<Map<String, String>>> subs2 = new HashMap<>();
+		Map<String, List<Map<Object, Object>>> subs1 = new HashMap<>();
+		Map<String, List<Map<Object, Object>>> subs2 = new HashMap<>();
 		for (Node n : sig.nodes) {
 			String k = n.string;
 			
-			List<Map<String, String>> i1i2 = Inst.bijections(dedupl(i1.data.get(k)),
+			List<Map<Object, Object>> i1i2 = Inst.bijections(dedupl(i1.data.get(k)),
 									                         dedupl(i2.data.get(k)));
-			List<Map<String, String>> i2i1 = Inst.bijections(dedupl(i2.data.get(k)),
+			List<Map<Object, Object>> i2i1 = Inst.bijections(dedupl(i2.data.get(k)),
 															dedupl(i1.data.get(k)));
 			
 			subs1.put(k, i1i2);
@@ -729,7 +729,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		
 		Subs subs1X = new Subs(subs1);
 		Subs subs2X = new Subs(subs2);
-		Map<String, Map<String, String>> sub;
+		Map<String, Map<Object, Object>> sub;
 
 		boolean flag = false;
 		while ((sub = subs1X.next()) != null) {
@@ -763,25 +763,25 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	}
 
 	static class Subs {
-		private Map<String, List<Map<String, String>>> sub;
+		private Map<String, List<Map<Object, Object>>> sub;
 		private LinkedList<String> keys;
 		private int[] counters;
 		private int[] sizes;
 
-		public Subs(Map<String, List<Map<String, String>>> subs0) {
-			this.sub = subs0;
+		public Subs(Map<String, List<Map<Object, Object>>> subs1) {
+			this.sub = subs1;
 			this.keys = new LinkedList<>(sub.keySet());
 
 			this.counters = makeCounters(keys.size() + 1);
 			this.sizes = makeSizes(keys, sub);
 		}
 		
-		public Map<String, Map<String, String>> next() {
+		public Map<String, Map<Object, Object>> next() {
 			if (counters[keys.size()] == 1) {
 				return null;
 			}
 
-			Map<String, Map<String, String>> s = new HashMap<>();
+			Map<String, Map<Object, Object>> s = new HashMap<>();
 			for (String k : keys) {
 				s.put(k, sub.get(k).get(counters[keys.indexOf(k)]));
 			}
@@ -802,7 +802,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	}
 	
 	private static int[] makeSizes(List<String> keys,
-			Map<String, List<Map<String, String>>> sub) {
+			Map<String, List<Map<Object, Object>>> sub) {
 		int[] ret = new int[keys.size()];
 		int i = 0;
 		for (String k : keys) {
@@ -830,8 +830,8 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		return ret;
 	}
 
-	private Instance apply(Map<String, Map<String, String>> sub) throws FQLException {
-		List<Pair<String, List<Pair<String, String>>>> ret = new LinkedList<>();
+	private Instance apply(Map<String, Map<Object, Object>> sub) throws FQLException {
+		List<Pair<String, List<Pair<Object, Object>>>> ret = new LinkedList<>();
 		
 		for (Node n : thesig.nodes) {
 			ret.add(new Pair<>(n.string, apply(data.get(n.string), sub.get(n.string), sub.get(n.string))));
@@ -843,20 +843,20 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		return new Instance(null, thesig, ret);
 	}
 
-	private static List<Pair<String, String>> apply(Set<Pair<String, String>> set,
-			Map<String, String> s1, Map<String, String> s2) {
-		List<Pair<String, String>> ret = new LinkedList<>();
+	private static List<Pair<Object, Object>> apply(Set<Pair<Object, Object>> set,
+			Map<Object, Object> s1, Map<Object, Object> s2) {
+		List<Pair<Object, Object>> ret = new LinkedList<>();
 		
-		for (Pair<String, String> p : set) {
+		for (Pair<Object, Object> p : set) {
 			ret.add(new Pair<>(s1.get(p.first), s2.get(p.second)));
 		}
 		
 		return ret;
 	}
 
-	private static List<String> dedupl(Set<Pair<String, String>> set) {
-		List<String> ret = new LinkedList<>();
-		for (Pair<String, String> p : set) {
+	private static List<Object> dedupl(Set<Pair<Object, Object>> set) {
+		List<Object> ret = new LinkedList<>();
+		for (Pair<Object, Object> p : set) {
 			ret.add(p.first);
 		}
 		return ret;
@@ -1188,26 +1188,26 @@ public class Instance implements Viewable<Instance>, Jsonable {
 //	}
 
 	public static Instance terminal(Signature s, String g) throws FQLException {
-		List<Pair<String, List<Pair<String, String>>>> ret = new LinkedList<>();
+		List<Pair<String, List<Pair<Object, Object>>>> ret = new LinkedList<>();
 
 		int i = 0;
 		Map<Node, String> map = new HashMap<>();
 		for (Node node : s.nodes) {
-			List<Pair<String, String>> tuples = new LinkedList<>();
+			List<Pair<Object, Object>> tuples = new LinkedList<>();
 			
 			if (g == null) {
 				g = Integer.toString(i);
 			} 
 				
-			tuples.add(new Pair<>(g, g));
+			tuples.add(new Pair<Object, Object>(g, g));
 			ret.add(new Pair<>(node.string, tuples));
 			map.put(node, g);
 			i++;
 		}
 
 		for (Edge e : s.edges) {
-			List<Pair<String, String>> tuples = new LinkedList<>();
-			tuples.add(new Pair<>(map.get(e.source.string), map
+			List<Pair<Object, Object>> tuples = new LinkedList<>();
+			tuples.add(new Pair<Object,Object>(map.get(e.source.string), map
 					.get(e.target.string)));
 			ret.add(new Pair<>(e.name, tuples));
 		}
@@ -1215,31 +1215,31 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		return new Instance(s.name0 + "_terminal", s, ret);
 	}
 	
-	public Inst<Node, Path, String, String> toFunctor2() throws FQLException {
+	public Inst<Node, Path, Object, Object> toFunctor2() throws FQLException {
 		FinCat<Node, Path> cat = thesig.toCategory2().first;
 		
-		Map<Node, Set<Value<String,String>>> objM = new HashMap<>();
+		Map<Node, Set<Value<Object,Object>>> objM = new HashMap<>();
 		for (Node obj : cat.objects) {
 			if (data.get(obj.string) == null) {
-				System.out.println("No data for " + obj + " in " + data);
+				throw new RuntimeException("No data for " + obj + " in " + data);
 			}
 			objM.put(obj, conv(data.get(obj.string)));
 		}
 		
-		Map<Arr<Node, Path>, Map<Value<String, String>, Value<String, String>>> arrM = new HashMap<>();
+		Map<Arr<Node, Path>, Map<Value<Object, Object>, Value<Object, Object>>> arrM = new HashMap<>();
 		for (Arr<Node, Path> arr : cat.arrows) {
 			List<String> es = arr.arr.asList();
 			
 			String h = es.get(0);
-			Set<Pair<String, String>> h0 = data.get(h);
+			Set<Pair<Object, Object>> h0 = data.get(h);
 			for (int i = 1; i < es.size(); i++) {
 				h0 = compose(h0, data.get(es.get(i)));
 			}
-			Map<Value<String, String>, Value<String, String>> xxx = FDM.degraph(h0);
+			Map<Value<Object, Object>, Value<Object, Object>> xxx = FDM.degraph(h0);
 			arrM.put(arr, xxx);
 		}
 		
-		return new Inst<Node, Path, String, String>(objM, arrM, cat);
+		return new Inst<Node, Path, Object, Object>(objM, arrM, cat);
 	}
 
 //	public Inst<String, List<List<String>>, String, String> toFunctor() throws FQLException {
@@ -1266,10 +1266,10 @@ public class Instance implements Viewable<Instance>, Jsonable {
 //		return new Inst<String, List<List<String>>, String, String>(objM, arrM, cat);
 //	}
 
-	private Set<Value<String,String>> conv(Set<Pair<String, String>> set) {
-		Set<Value<String,String>> ret = new HashSet<>();
-		for (Pair<String, String> p : set) {
-			ret.add(new Value<String,String>(p.first));
+	private Set<Value<Object,Object>> conv(Set<Pair<Object, Object>> set) {
+		Set<Value<Object,Object>> ret = new HashSet<>();
+		for (Pair<Object, Object> p : set) {
+			ret.add(new Value<Object,Object>(p.first));
 		}
 		return ret;
 	}
@@ -1283,10 +1283,10 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		List<String> l = new LinkedList<String>();
 		for (Node kk : thesig.nodes) {
 			String k = kk.string;
-			Set<Pair<String, String>> v = data.get(k);
+			Set<Pair<Object, Object>> v = data.get(k);
 			boolean first = true;
 			String s = "\"" + k + "\" : [";
-			for (Pair<String, String> tuple : v) {
+			for (Pair<Object, Object> tuple : v) {
 				if (!first) {
 					s += ",";
 				}
@@ -1305,10 +1305,10 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		l = new LinkedList<String>();
 		for (Edge kk : thesig.edges) {
 			String k = kk.name;
-			Set<Pair<String, String>> v = data.get(k);
+			Set<Pair<Object, Object>> v = data.get(k);
 			boolean first = true;
 			s = "{\"arrow\":" + kk.tojson() + ",\n\"map\" : {";
-			for (Pair<String, String> tuple : v) {
+			for (Pair<Object, Object> tuple : v) {
 				if (!first) {
 					s += ",";
 				}

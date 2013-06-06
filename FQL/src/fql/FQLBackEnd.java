@@ -5,13 +5,14 @@ import fql.decl.Instance;
 import fql.decl.Mapping;
 
 
+
 public class FQLBackEnd implements BackEnd {
 
 	@Override
 	public String delta(String instance, String mapping) throws Exception {
 		Mapping m = Mapping.fromjson(mapping);
 		Instance i = Instance.fromjson(instance);		
-		Instance j = new Instance("", m.source, m.evalDelta(i));
+		Instance j = new Instance("json", m.source, m.evalDelta(i));
 		return j.tojson();
 	}
 
@@ -19,7 +20,7 @@ public class FQLBackEnd implements BackEnd {
 	public String sigma(String instance, String mapping) throws Exception {
 		Mapping m = Mapping.fromjson(mapping);
 		Instance i = Instance.fromjson(instance);		
-		Instance j = new Instance("", m.target, m.evalSigma(i));
+		Instance j = new Instance("json", m.target, m.evalSigma(i));
 		return j.tojson();
 	}
 
@@ -27,7 +28,7 @@ public class FQLBackEnd implements BackEnd {
 	public String pi(String instance, String mapping) throws Exception {
 		Mapping m = Mapping.fromjson(mapping);
 		Instance i = Instance.fromjson(instance);		
-		Instance j = new Instance("", m.target, m.evalPi(i));
+		Instance j = new Instance("json", m.target, m.evalPi(i));
 		return j.tojson();
 	}
 

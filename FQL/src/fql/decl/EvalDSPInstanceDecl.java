@@ -8,6 +8,12 @@ package fql.decl;
  */
 public class EvalDSPInstanceDecl extends InstanceDecl {
 	
+	@Override
+	public String toString() {
+		return "EvalDSPInstanceDecl [mapping=" + mapping + ", inst=" + inst
+				+ ", kind=" + kind + "]";
+	}
+
 	public String mapping;
 	public String inst;
 	public String kind;
