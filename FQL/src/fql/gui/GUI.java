@@ -113,13 +113,40 @@ public class GUI extends JPanel {
 				serverAction();
 			}
 		});
+		MenuItem jsonItem = new MenuItem("JSON Input");
+		webMenu.add(jsonItem);
+		jsonItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JsonPanel.showPanel(new FQLBackEnd());
+			}
+		});
 		
-		Menu optionsMenu = new Menu("Options");
+		
+		//Menu optionsMenu = new Menu("Options");
 		MenuItem optionsItem = new MenuItem("Show Options");
-		optionsMenu.add(optionsItem);
+		editMenu.add(optionsItem);
 		optionsItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				DEBUG.showOptions();
+			}
+		});
+		
+		Menu helpMenu = new Menu("About");
+		MenuItem helpItem = new MenuItem("Help");
+		helpMenu.add(helpItem);
+		helpItem.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				helpAction();
+			}
+			
+		});
+		MenuItem aboutItem = new MenuItem("Legal stuff");
+		helpMenu.add(aboutItem);
+		aboutItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				DEBUG.showAbout();
 			}
 		});
 		
@@ -164,9 +191,10 @@ public class GUI extends JPanel {
 				
 		menuBar.add(fileMenu);
 		menuBar.add(editMenu);
-		menuBar.add(optionsMenu);
+		//menuBar.add(optionsMenu);
 		
 		menuBar.add(webMenu);
+		menuBar.add(helpMenu);
 				
 		
 		//JSplitPane p = new FQLSplit(.8, JSplitPane.HORIZONTAL_SPLIT);
@@ -263,11 +291,11 @@ public class GUI extends JPanel {
 	     
 	     toolBar.add(helpB);
 	     
-	     JButton jsonb = new JButton("JSON Input");
-	     toolBar.add(jsonb);
-			jsonb.addActionListener(new ActionListener() {
+	     JButton optionsb = new JButton("Options");
+	     toolBar.add(optionsb);
+			optionsb.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					JsonPanel.showPanel(new FQLBackEnd());
+					DEBUG.showOptions();
 				}
 			});
 

@@ -100,29 +100,32 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	public Mapping(String name, Environment env, MappingDecl md) throws FQLException {
 		this.name = name;
 		switch (md.kind) {
-		case COMPOSE : 
-			Mapping m1 = env.getMapping(md.source);
-			Mapping m2 = env.getMapping(md.target);
-		
-			if (!m2.target.equals(m1.source)) {
-				throw new FQLException("Ill-typed: " + md);
-			}
-			this.source = m2.source;
-			this.target = m1.target;
-			for (Node k : m1.source.nodes) {
-				Node v = m1.nm.get(k);
-				nm.put(k, m2.nm.get(v));
-			}
-			for (Edge k : m1.source.edges) {
-				Path v = m1.em.get(k);
-				Path p0 = expand(v, m2.nm, m2.em);
-				em.put(k, p0);
-			}
-			
-			
-			break;
+//		case COMPOSE : 
+//			Mapping m1 = env.getMapping(md.source);
+//			Mapping m2 = env.getMapping(md.target);
+//		
+//			if (!m2.target.equals(m1.source)) {
+//				throw new FQLException("Ill-typed: " + md);
+//			}
+//			this.source = m2.source;
+//			this.target = m1.target;
+//			for (Node k : m1.source.nodes) {
+//				Node v = m1.nm.get(k);
+//				nm.put(k, m2.nm.get(v));
+//			}
+//			for (Edge k : m1.source.edges) {
+//				Path v = m1.em.get(k);
+//				Path p0 = expand(v, m2.nm, m2.em);
+//				em.put(k, p0);
+//			}
+//			
+//			
+//			break;
 		case ID : 
 			Signature s = env.getSchema(md.schema);
+			if (!(md.schema.equals(md.source) && md.schema.equals(md.target))) {
+				throw new FQLException("Bad identity mapping : " + md.name);
+			}
 			identity(env, s);
 			break;
 		case MORPHISM :
@@ -368,15 +371,15 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	 */
 	public JPanel text() {
 		
-		String[] t = toString().split(";");
-		String ret = "";
-		for (String a : t) {
-		  ret += (a.trim() + ";\n\n");
-		}
+//		String[] t = toString().split(";");
+//		String ret = "";
+//		for (String a : t) {
+//		  ret += (a.trim());
+//		}
 		
 		JPanel tap = new JPanel(new GridLayout(2,2));
 
-		JTextArea ta = new JTextArea(ret);
+		JTextArea ta = new JTextArea(toString());
 		ta.setWrapStyleWord(true);
 		ta.setLineWrap(true);
 		JScrollPane xxx = new JScrollPane(ta);		
@@ -401,7 +404,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		
 		String pi = "";
 		try {
-			pi = printNicely(RA.pi(this));
+			pi = printNicely(PSMGen.pi(this, "input", "output"));
 		} catch (Exception e) {
 			pi = e.toString();
 		}
@@ -440,7 +443,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	
 	
 
-	private String printNicely(List<PSM> delta) {
+	static String printNicely(List<PSM> delta) {
 		String ret = "";
 		for (PSM p : delta) {
 			ret += p + "\n\n";
@@ -450,47 +453,53 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer("{ ");
+		StringBuffer sb = new StringBuffer("mapping " + name + " : " + source.name0 + " -> " + target.name0 + " = ");
+		if (isId) {
+			sb.append("id " + source.name0);
+			return sb.toString();
+		} else {
+			sb.append("{\n");
+		}
 		boolean first = true;
 		for (Node k : nm.keySet()) {
 			Node v = nm.get(k);
 			if (!first) {
-				sb.append(", ");
+				sb.append(",\n");
 			}
 			first = false;
-			sb.append("(");
+			//sb.append("(");
 			sb.append(k);
-			sb.append(",");
+			sb.append(" -> ");
 			sb.append(v);
-			sb.append(")");
+			//sb.append(")");
 		}
 		for (Attribute k : am.keySet()) {
 			Attribute v = am.get(k);
 			if (!first) {
-				sb.append(", ");
+				sb.append(",\n");
 			}
 			first = false;
-			sb.append("(");
+		//	sb.append("(");
 			sb.append(k.name);
-			sb.append(",");
+			sb.append(" -> ");
 			sb.append(v.name);
-			sb.append(")");
+		//	sb.append(")");
 		}
-		sb.append(" ; ");
+		sb.append("\n ;\n");
 		first = true;
 		for (Edge k : em.keySet()) {
 			Path v = em.get(k);
 			if (!first) {
-				sb.append(", ");
+				sb.append(",\n");
 			}
 			first = false;
-			sb.append("(");
+			//sb.append("(");
 			sb.append(k);
-			sb.append(",");
+			sb.append(" -> ");
 			sb.append(v);
-			sb.append(")");
+			//sb.append(")");
 		}
-		sb.append(" }");
+		sb.append("\n}");
 		return sb.toString();
 	}
 

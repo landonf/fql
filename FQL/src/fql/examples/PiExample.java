@@ -16,12 +16,12 @@ public class PiExample extends Example {
 			"schema C = { c : C1 -> C2 ; }\n" +
 					"\n" +
 					"instance I : C = {\n" +
-					"C1 = {(c1A,c1A),(c1B,c1B)},\n" +
-					"C2 = {(c2,c2)},\n" +
+					"C1 = {c1A,c1B},\n" +
+					"C2 = {c2};\n" +
 					"c = {(c1A,c2),(c1B,c2)}\n" +
 					"}\n" +
 					"\n"+
-					"mapping idC = id C\n" +
+					"mapping idC : C -> C = id C\n" +
 					"\n" + 
 					"instance J : C = pi idC I\n\n"
 					+ "\n\n\n/*"

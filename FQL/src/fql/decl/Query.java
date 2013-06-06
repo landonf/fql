@@ -47,6 +47,7 @@ import fql.cat.SetFunTrans;
 import fql.cat.Value;
 import fql.cat.Value.VALUETYPE;
 import fql.gui.Viewable;
+import fql.sql.PSMGen;
 import fql.sql.RA;
 
 /**
@@ -95,8 +96,9 @@ public class Query implements Viewable<Query> {
 		this.name = name;
 		switch (d.kind) {
 		case COMPOSE : 
-			Query m1 = env.getQuery(d.source);
-			Query m2 = env.getQuery(d.target);
+			isId = false;
+			Query m1 = env.getQuery(d.q1);
+			Query m2 = env.getQuery(d.q2);
 //			System.out.println("composing " + m1 + " and " + m2);
 //			System.out.println("m1src " + m1.getSource() + " and " + m2.getTarget());
 //			System.out.println(m2.getTarget().equals(m1.getSource()));
@@ -118,6 +120,7 @@ public class Query implements Viewable<Query> {
 			this.name = q.name;
 			break; 
 		case ID : 
+			isId = true;
 			Signature s = env.getSchema(d.schema);
 			project = new Mapping(env, s);
 			join = new Mapping(env, s);
@@ -129,6 +132,7 @@ public class Query implements Viewable<Query> {
 			// F : S' -> S
 			// G : S' -> S''
 			// H : S'' -> T
+			isId = false;
 			project = env.getMapping(d.project);
 			join = env.getMapping(d.join);
 			union = env.getMapping(d.union);
@@ -142,6 +146,7 @@ public class Query implements Viewable<Query> {
 		}
 	}
 
+boolean isId;
 
 	@Override
 	public JPanel view() throws FQLException {
@@ -181,21 +186,21 @@ public class Query implements Viewable<Query> {
 			
 			String delta = "";
 			try {
-				delta = Mapping.printNicely(RA.delta(project));
+				delta = Mapping.printNicely(PSMGen.delta(project, "input", "output"));
 			} catch (Exception e) {
 				delta = e.toString();
 			}
 			
 			String sigma = "";
 			try {
-				sigma = Mapping.printNicely(RA.sigma(union));
+				sigma = Mapping.printNicely(PSMGen.sigma(project, "input", "output"));
 			} catch (Exception e) {
 				sigma = e.toString();
 			}
 			
 			String pi = "";
 			try {
-				pi = Mapping.printNicely(RA.pi(join));
+				pi = Mapping.printNicely(PSMGen.pi(project, "input", "output"));
 			} catch (Exception e) {
 				pi = e.toString();
 			}
@@ -234,7 +239,11 @@ public class Query implements Viewable<Query> {
 
 	@Override
 	public String toString() {
-		return "delta " + project + "\n\n\npi " + join + "\n\n\nsigma " + union;
+		String s = "query " + name + " : " + getSource().name0 + " -> " + getTarget().name0 + " = ";
+		if (isId) {
+			return s + "id " + getSource().name0;
+		}
+		return s + "delta " + project.name + " pi " + join.name + " sigma " + union.name;
 	}
 
 	/**

@@ -131,5 +131,13 @@ public class DEBUG {
 			//MAX_JOIN_SIZE = c;
 		}
 	}
+	
+	public static void showAbout() {
+		JOptionPane.showMessageDialog(null, about, "About", JOptionPane.INFORMATION_MESSAGE);
+	}
+	
+	static String about = "FQL IDE Copyright (C) 2013 David Spivak and Ryan Wisnesky"
+			              + "\nLicense: Creative-Commons Attribution-NonCommercial-NoDerivs 3.0 Unported"
+			 	          + "\n\nLibraries used:\n\nJetty (servlets)\nJUNG (graph visualization)\nRSyntaxTextArea (code editor)";
 
 }

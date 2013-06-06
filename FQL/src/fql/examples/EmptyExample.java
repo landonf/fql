@@ -15,9 +15,9 @@ public class EmptyExample extends Example {
 	String s = 
 	"schema C = {;}"
 	+ "\n"
-	+ "\ninstance I : C = {}"
+	+ "\ninstance I : C = { ; }"
 	+ "\n"
-	+ "\nmapping F = id C"
+	+ "\nmapping F : C -> C = id C"
 	+ "\n"
 	+ "\ninstance I1 : C = delta F I"
 	+ "\n"
@@ -25,6 +25,6 @@ public class EmptyExample extends Example {
 	+ "\n"
 	+ "\ninstance I3 : C = sigma F I"
 	+ "\n"
-	+ "\nquery q = delta F pi F sigma F"
-	+ "\nquery p = q then q";
+	+ "\nquery q : C -> C = delta F pi F sigma F"
+	+ "\nquery p : C -> C = q then q";
 }

@@ -28,6 +28,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import org.apache.commons.collections15.Transformer;
 
@@ -58,6 +60,8 @@ public class Instance implements Viewable<Instance>, Jsonable {
 //	public static String data(String s) {
 //		return s + " data";
 //	}
+	
+	String name;
 	
 	public void conformsTo(Signature s) throws FQLException {
 		for (Node n : s.nodes) {
@@ -220,6 +224,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	public Instance(String n, Signature thesig,
 			List<Pair<String, List<Pair<Object, Object>>>> data)
 			throws FQLException {
+		this.name = n;
 		this.data = new HashMap<>();
 		for (Node node : thesig.nodes) {
 			this.data.put(node.string, makeFirst(node.string, data));
@@ -395,13 +400,38 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer("{ ");
+		StringBuffer sb = new StringBuffer("instance " + name + " : " + thesig.name0 + " = {\n");
 
 		boolean first = true;
-		for (String k : data.keySet()) {
-			Set<Pair<Object, Object>> v = data.get(k);
+		for (Node k : thesig.nodes) {
+			Set<Pair<Object, Object>> v = data.get(k.string);
 			if (!first) {
-				sb.append("; ");
+				sb.append(",\n");
+			}
+			first = false;
+			sb.append(k);
+			sb.append(" = { ");
+			sb.append(printNode(v));
+			sb.append(" }");
+		}
+		sb.append("\n ;\n");
+		
+		first = true;
+		for (Edge k : thesig.edges) {
+			Set<Pair<Object, Object>> v = data.get(k.name);
+			if (!first) {
+				sb.append(",\n");
+			}
+			first = false;
+			sb.append(k);
+			sb.append(" = { ");
+			sb.append(printSet(v));
+			sb.append(" }");
+		}
+		for (Attribute k : thesig.attrs) {
+			Set<Pair<Object, Object>> v = data.get(k.name);
+			if (!first) {
+				sb.append(",\n");
 			}
 			first = false;
 			sb.append(k);
@@ -410,9 +440,22 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			sb.append(" }");
 		}
 
-		sb.append(" }");
+		sb.append("\n}");
 		return sb.toString();
 
+	}
+	
+	private String printNode(Set<Pair<Object, Object>> v) {
+		StringBuffer sb = new StringBuffer();
+		boolean first = true;
+		for (Pair<Object, Object> p : v) {
+			if (!first) {
+				sb.append(", ");
+			}
+			first = false;
+			sb.append(maybeQuote(p.first.toString()));
+		}
+		return sb.toString();
 	}
 
 	private String printSet(Set<Pair<Object, Object>> v) {
@@ -454,29 +497,35 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		for (String k : sorted) {
 			Set<Pair<Object, Object>> xxx = data.get(k);
 			List<Pair<Object, Object>> table = new LinkedList<>(xxx);
-			Collections.sort(table, new Comparator<Pair<Object, Object>>()
-	                {
-	            public int compare(Pair<Object,Object> f1, Pair<Object,Object> f2)
-	            {
-	                return f1.first.toString().compareTo(f2.first.toString());
-	            }        
-	        });
+//			Collections.sort(table, new Comparator<Pair<Object, Object>>()
+//	                {
+//	            public int compare(Pair<Object,Object> f1, Pair<Object,Object> f2)
+//	            {
+//	                return f1.first.toString().compareTo(f2.first.toString());
+//	            }        
+//	        });
 
 			Object[][] arr = new Object[table.size()][2];
 			int i = 0;
 			for (Pair<Object, Object> p : table) {
-				arr[i][0] = p.first.toString().trim();
-				arr[i][1] = p.second.toString().trim();
+				arr[i][0] = p.first;
+				arr[i][1] = p.second;
 				i++;
 			}
 			Pair<String, String> cns = thesig.getColumnNames(k);
 			JTable t = new JTable(arr, new Object[] { cns.first, cns.second });
-			t.setRowSelectionAllowed(false);
-			t.setColumnSelectionAllowed(false);
-			MouseListener[] listeners = t.getMouseListeners();
-			for (MouseListener l : listeners) {
-				t.removeMouseListener(l);
-			}
+//			//t.setRowSelectionAllowed(false);
+//			t.setColumnSelectionAllowed(false);
+//			MouseListener[] listeners = t.getMouseListeners();
+//			for (MouseListener l : listeners) {
+//				t.removeMouseListener(l);
+//			}
+			TableRowSorter sorter 
+		    = new MyTableRowSorter(t.getModel());
+			
+		t.setRowSorter(sorter);
+		sorter.allRowsChanged();
+		sorter.toggleSortOrder(0);
 			t.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 			JPanel p = new JPanel(new GridLayout(1, 1));
 			p.add(new JScrollPane(t));
@@ -604,7 +653,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	//		System.out.println("m " + m);
 			Set<Pair<Object, Object>> ids = nd.get(name);
 		//	System.out.println("ids " + ids);
-			Object[][] arr = new String[ids.size()][m.size() + 1];
+			Object[][] arr = new Object[ids.size()][m.size() + 1];
 			Set<String> cols = m.keySet();
 	//		System.out.println("cols " + cols);
 			List<String> cols2 = new LinkedList<>(cols);
@@ -617,7 +666,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			int i = 0;
 			for (Pair<Object, Object> id : ids) {
 //				System.out.println("id " + id);
-				arr[i][0] = id.first.toString();
+				arr[i][0] = id.first;
 //				System.out.println(" i " + i + " j " + 0 + " val " + arr[i][0]);
 
 				int j = 1;
@@ -630,7 +679,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 					for (Pair<Object, Object> p : coldata) {
 				//		System.out.println("p " + p);
 						if (p.first.equals(id.first)) {
-							arr[i][j] = p.second.toString();
+							arr[i][j] = p.second;
 //							System.out.println(" i " + i + " j " + j + " val " + arr[i][j]);
 							break;
 						}
@@ -640,14 +689,14 @@ public class Instance implements Viewable<Instance>, Jsonable {
 				i++;
 			}
 			
-			Arrays.sort(arr, new Comparator<Object[]>() {
-
-				@Override
-				public int compare(Object[] o1, Object[] o2) {
-					return o1[0].toString().compareTo(o2[0].toString());
-				}
-				
-			});
+//			Arrays.sort(arr, new Comparator<Object[]>() {
+//
+//				@Override
+//				public int compare(Object[] o1, Object[] o2) {
+//					return o1[0].toString().compareTo(o2[0].toString());
+//				}
+//				
+//			});
 			
 			JTable t = new JTable(arr, cols3) {
 				  public Dimension getPreferredScrollableViewportSize() {
@@ -658,6 +707,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 				  
 				//  cards.(name, t);
 				  
+				  //foo and t are for the graph and tabular pane, resp
 				  JTable foo = new JTable(t.getModel()) {
 					  public Dimension getPreferredScrollableViewportSize() {
 						  Dimension d = getPreferredSize();
@@ -666,6 +716,20 @@ public class Instance implements Viewable<Instance>, Jsonable {
 					  };
 			JPanel p = new JPanel(new GridLayout(1,1));
 			//p.add(t);
+			TableRowSorter sorter 
+		    = new MyTableRowSorter(t.getModel());
+		
+			sorter.toggleSortOrder(0);
+		t.setRowSorter(sorter);
+		sorter.allRowsChanged();
+		TableRowSorter sorter2
+	    = new MyTableRowSorter(foo.getModel());
+	
+		sorter.toggleSortOrder(0);
+	foo.setRowSorter(sorter2);
+	sorter2.allRowsChanged();
+			//foo.set
+			//foo.setAutoCreateRowSorter(true);
 			p.add(new JScrollPane(foo));
 	//		p.setMaximumSize(new Dimension(200,200));
 			p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), name));
@@ -683,13 +747,13 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	@Override
 	public JPanel text() {
 		// String s = toString().replace('{', ' ').replace('}', ' ').trim();
-		String[] t = toString().split(";");
-		String ret = "";
-		for (String a : t) {
-			ret += (a.trim() + ";\n\n");
-		}
+//		String[] t = toString().split(";");
+//		String ret = "";
+//		for (String a : t) {
+//			ret += (a.trim() + ";\n\n");
+//		}
 
-		JTextArea ta = new JTextArea(ret);
+		JTextArea ta = new JTextArea(toString());
 		JPanel tap = new JPanel(new GridLayout(1, 1));
 		ta.setBorder(BorderFactory.createEmptyBorder());
 		//

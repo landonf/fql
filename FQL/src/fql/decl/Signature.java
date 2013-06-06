@@ -413,12 +413,12 @@ public class Signature implements Viewable<Signature> {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer("{ ");
+		StringBuffer sb = new StringBuffer("schema " + name0 + " = {\n");
 
 		boolean first = true;
 		for (Edge e : edges) {
 			if (!first) {
-				sb.append(", ");
+				sb.append(",\n");
 			}
 			first = false;
 			sb.append(e);
@@ -426,7 +426,7 @@ public class Signature implements Viewable<Signature> {
 
 		for (Attribute a : attrs) {
 			if (!first) {
-				sb.append(", ");
+				sb.append(",\n");
 			}
 			first = false;
 			sb.append(a);
@@ -438,23 +438,23 @@ public class Signature implements Viewable<Signature> {
 				continue;
 			}
 			if (!first) {
-				sb.append(", ");
+				sb.append(",\n");
 			}
 			first = false;
 			sb.append(n.string);
 		}
 
-		sb.append(" ; ");
+		sb.append("\n ;\n");
 
 		first = true;
 		for (Eq eq : eqs) {
 			if (!first) {
-				sb.append(",");
+				sb.append(",\n");
 			}
 			first = false;
 			sb.append(eq);
 		}
-		sb.append(" }");
+		sb.append("\n}");
 		return sb.toString();
 	}
 
@@ -474,18 +474,18 @@ public class Signature implements Viewable<Signature> {
 
 	@Override
 	public JPanel text() {
-		String s = toString().replace(";", "\n\n;\n\n");
-		String[] t = s.split(",");
-		String ret = "";
-		for (String a : t) {
-			ret += (a.trim() + ",\n\n");
-		}
-		ret = ret.trim();
-		if (ret.endsWith(",")) {
-			ret = ret.substring(0, ret.length() - 1);
-		}
+//		String s = toString().replace(";", "\n\n;\n\n");
+//		String[] t = s.split(",");
+//		String ret = "";
+//		for (String a : t) {
+//			ret += (a.trim() + ",\n\n");
+//		}
+//		ret = ret.trim();
+//		if (ret.endsWith(",")) {
+//			ret = ret.substring(0, ret.length() - 1);
+//		}
 
-		JTextArea ta = new JTextArea(ret);
+		JTextArea ta = new JTextArea(toString());
 		JPanel tap = new JPanel(new GridLayout(1, 1));
 		ta.setBorder(BorderFactory.createEmptyBorder());
 		//

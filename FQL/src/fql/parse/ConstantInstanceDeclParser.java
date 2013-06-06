@@ -28,7 +28,10 @@ public class ConstantInstanceDeclParser implements Parser<Decl> {
 		Parser<Pair<String, List<Pair<String, String>>>> p1 = new TableDeclParser();
 		Parser<List<Pair<String, List<Pair<String, String>>>>> u = ParserUtils.manySep(p1, sep);
 		
-		Parser<?> l = new KeywordParser("{");
+		Parser<?> lx = new KeywordParser("{");
+		
+		Parser<List<Pair<String, List<Pair<String, String>>>>> uX = ParserUtils.seq(lx, ParserUtils.manySep(new TableDeclParser2(), sep));
+		Parser<?> l = new KeywordParser(";");
 		Parser<?> r = new KeywordParser("}");
 		Parser<List<Pair<String, List<Pair<String, String>>>>> u0 =ParserUtils.outside(l, u, r);
 		
@@ -49,7 +52,11 @@ public class ConstantInstanceDeclParser implements Parser<Decl> {
 		x = e.parse(s);
 		s = x.tokens;
 		
+		Partial<List<Pair<String, List<Pair<String, String>>>>> aaa0 = uX.parse(s);
+		s = aaa0.tokens;
 		Partial<List<Pair<String, List<Pair<String, String>>>>> aaa = u0.parse(s);
+		aaa.value.addAll(aaa0.value);
+		
 		List<Pair<String, List<Pair<Object, Object>>>> ooo  = 
 				new LinkedList<>();
 				

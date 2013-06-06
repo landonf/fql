@@ -22,7 +22,7 @@ public class CompositionExample extends Example {
 			"\nmapping f : B -> A = { b1 -> a1, b2 -> a2 ; }" +
 			"\nmapping t : A -> T = { a1 -> t, a2 -> t, a3 -> t ; }" +
 			"\n" +
-			"\nquery q1 = delta s pi f sigma t" +
+			"\nquery q1 : S -> T = delta s pi f sigma t" +
 			"\n" +
 			"\nschema D = { d1,d2 ; }" +
 			"\nschema C = { c ; }" +
@@ -32,8 +32,8 @@ public class CompositionExample extends Example {
 			"\nmapping g : D -> C = { d1 -> c, d2 -> c ; }\n" +
 			"\nmapping v : C -> U = { c -> u ; }\n" +
 			"\n" + 
-			"query q2 = delta u pi g sigma v" +
-			"\nquery q = q1 then q2";
+			"query q2 : T -> U = delta u pi g sigma v" +
+			"\nquery q : S -> U = q1 then q2";
 
 
 }

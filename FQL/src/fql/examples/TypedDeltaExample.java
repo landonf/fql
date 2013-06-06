@@ -43,7 +43,7 @@ public class TypedDeltaExample extends Example {
 					+ "\n" + "  , t2_salary -> salary0;"
 					+ "\n" + "}" 
 					+ "\n\ninstance J : D = {\n"
-					+ " T = { (XF667,XF667),(XF891,XF891),(XF221,XF221) },\n"
+					+ " T = { XF667,XF891,XF221 } ; \n"
 					+ " ssn0 = { (XF667,115-234),(XF891,112-988),(XF221,198-887) },\n"
 					+ " first0 = { (XF667,Bob),(XF891,Sue),(XF221,Alice) },\n"
 					+ " last0 = { (XF667,Smith),(XF891,Smith),(XF221,Jones) },\n"

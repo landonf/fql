@@ -14,6 +14,8 @@ public class EvalInstanceDeclParser implements Parser<Decl> {
 	@Override
 	public Partial<Decl> parse(Tokens s) throws BadSyntax, IllTyped {
 		Parser<?> pre = new KeywordParser("instance");
+		
+		
 		Parser<?> e = new KeywordParser("=");
 		Parser<?> ev = new KeywordParser("eval");
 		Parser<String> p1 = new StringParser();

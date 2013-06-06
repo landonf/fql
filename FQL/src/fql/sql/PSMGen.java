@@ -549,8 +549,7 @@ public class PSMGen {
 				return peqc;
 			}
 		}
-		throw new FQLException("Could not find attribute mapping to " + a
-				+ " under " + f);
+		throw new FQLException("Could not find attribute mapping to " + a);
 	}
 
 	private static Path findEquiv(Node c, Mapping f, Edge e)
@@ -570,8 +569,7 @@ public class PSMGen {
 				return path;
 			}
 		}
-		throw new FQLException("Could not find path mapping to " + e
-				+ " under " + f);
+		throw new FQLException("Could not find path mapping to " + e);
 	}
 
 	// int
@@ -717,14 +715,14 @@ public class PSMGen {
 					continue;
 				}
 				if (found) {
-					throw new RuntimeException("Attribute mapping not bijection " + a);
+					throw new FQLException("Attribute mapping not bijection " + a);
 				}
 				found = true;
 				j = u;
 				u++;
 			}
 			if (!found) {
-				throw new RuntimeException("Attribute mapping not found " + a);
+				throw new FQLException("Attribute mapping not found " + a);
 			}
 			//System.out.println("i is " + i);
 			//System.out.println("u is " + u);

@@ -12,7 +12,7 @@ import fql.Pair;
  */
 public class MappingDecl extends Decl {
 	
-	public enum KIND { ID, COMPOSE, MORPHISM }
+	public enum KIND { ID, /* COMPOSE, */ MORPHISM }
 	public KIND kind;
 	public String source, target;
 	public String schema;
@@ -20,24 +20,29 @@ public class MappingDecl extends Decl {
 	public List<Pair<String, String>> objs;
 
 	
-	public MappingDecl(String name, String schema) {
+	public MappingDecl(String name, String schema, String src, String dst) {
 		super(name);
 		this.schema = schema;
 		kind = KIND.ID;
+		source = src;
+		target = dst;
 	}
-
+/*
 	public MappingDecl(String name, String source, String target) {
 		super(name);
 		this.source = source;
 		this.target = target;
 		kind = KIND.COMPOSE;
 	}
+	*/
 
 	public MappingDecl(String name, String source, String target,
 			List<Pair<String, String>> objs,
 			List<Pair<String, List<String>>> arrows) {
-		this(name, source, target);
+		super(name);
 		this.objs = objs;
+		this.source = source;
+		this.target = target;
 		this.arrows = arrows;
 		kind = KIND.MORPHISM;
 	}

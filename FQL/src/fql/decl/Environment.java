@@ -33,12 +33,13 @@ public class Environment {
 	static Map<String, Object> graphs;
 
 	public Environment(Program p) throws FQLException {
-		signatures = new HashMap<String, Signature>();
-		mappings = new HashMap<String, Mapping>();
-		queries = new HashMap<String, Query>();
-		instances = new HashMap<String, Instance>();		
-		Set<String> names = new HashSet<String>();
-		colors =  new HashMap<String, Color>();
+		signatures = new HashMap<>();
+		mappings = new HashMap<>();
+		queries = new HashMap<>();
+		instances = new HashMap<>();		
+		Set<String> names = new HashSet<>();
+		colors =  new HashMap<>();
+		instance_types = new HashMap<>();
 		
 		Map<String, Signature> it = new HashMap<>();
 		for (Decl d : p.decls) {
@@ -54,11 +55,14 @@ public class Environment {
 			} else if (d instanceof QueryDecl) {
 				addQuery((QueryDecl) d);
 			} else if (d instanceof EvalInstanceDecl) {
-				
-		//		addInstance((EvalInstanceDecl) d);
+				check((EvalInstanceDecl) d);
+				instance_types.put(d.name, signatures.get(((EvalInstanceDecl) d).type));
 			} else if (d instanceof EvalDSPInstanceDecl) {
-		//		addInstance((EvalDSPInstanceDecl) d);
+				check((EvalDSPInstanceDecl) d);
+				instance_types.put(d.name, signatures.get(((EvalDSPInstanceDecl) d).type));
 			} else if (d instanceof ConstantInstanceDecl) {
+				instance_types.put(d.name, signatures.get(((ConstantInstanceDecl) d).type));
+				
 		//		addInstance((GivenInstanceDecl) d);
 			}
 			
@@ -106,6 +110,43 @@ public class Environment {
 		
 	}
 	
+	private void check(EvalInstanceDecl d) throws FQLException {
+		if (!d.type.equals(queries.get(d.query).union.target.name0)) {
+			throw new FQLException("Ill-typed query return  : " + d.name);
+		}
+		if (!queries.get(d.query).project.target.name0.equals(instance_types.get(d.inst).name0)) {
+			throw new FQLException("Ill-typed input  : " + d.name);
+		}
+	}
+
+	private void check(EvalDSPInstanceDecl d) throws FQLException {
+		if(d.kind.equals("delta")) {
+			if (!mappings.get(d.mapping).source.name0.equals(d.type)) {
+				throw new FQLException("Ill-typed return  : " + d.name);
+			}
+			if (!mappings.get(d.mapping).target.name0.equals(instance_types.get(d.inst).name0)) {
+				throw new FQLException("Ill-typed input  : " + d.name);
+			}
+		} else if(d.kind.equals("sigma")) {
+			if (!mappings.get(d.mapping).target.name0.equals(d.type)) {
+				throw new FQLException("Ill-typed return  : " + d.name);
+			}
+			if (!mappings.get(d.mapping).source.name0.equals(instance_types.get(d.inst).name0)) {
+				throw new FQLException("Ill-typed input  : " + d.name);
+			}
+		} else if(d.kind.equals("pi")) {
+			if (!mappings.get(d.mapping).target.name0.equals(d.type)) {
+				throw new FQLException("Ill-typed return value : " + d.name);
+			}
+			if (!mappings.get(d.mapping).source.name0.equals(instance_types.get(d.inst).name0)) {
+				throw new FQLException("Ill-typed input  : " + d.name);
+			}
+		} else {
+			throw new RuntimeException();
+		}
+		
+	}
+
 	public static List<Pair<String, List<Pair<Object, Object>>>> gather(String pre,
 			Signature sig, Map<String, Set<Map<String, Object>>> state) {
 		List<Pair<String, List<Pair<Object, Object>>>> ret = new LinkedList<>();
@@ -165,6 +206,12 @@ public class Environment {
 
 	private void addQuery(QueryDecl queryDecl) throws FQLException {
 		Query q = new Query(queryDecl.name, this, queryDecl);
+		if (!q.getSource().name0.equals(queryDecl.source)) {
+			throw new FQLException("Query typing source mismatch on " + queryDecl.name + " " + q.getSource().name0 + " and " + queryDecl.source);
+		}
+		if (!q.getTarget().name0.equals(queryDecl.target)) {
+			throw new FQLException("Query typing target mismatch on " + queryDecl.name + " " + q.getTarget().name0 + " and " + queryDecl.target);
+		}
 		queries.put(queryDecl.name, q);
 	}
 
@@ -183,6 +230,8 @@ public class Environment {
 	public Map<String, Mapping> mappings;
 	public Map<String, Query> queries;
 	public Map<String, Instance> instances;
+	
+	public Map<String, Signature> instance_types;
 	
 	public Viewable<?> get(String name) throws FQLException {
 		Viewable<?> v = null;

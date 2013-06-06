@@ -4,7 +4,7 @@ public class Int extends Type {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o instanceof Varchar) {
+		if (o instanceof Int) {
 			return true;
 		}
 		return false;
