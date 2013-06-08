@@ -1,20 +1,23 @@
 package fql.gui;
 
-import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.LinkedList;
+import java.util.List;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
-import javax.swing.border.Border;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -25,12 +28,32 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 
+import fql.DEBUG;
+import fql.DEBUG.Intermediate;
+import fql.decl.Environment;
+import fql.decl.Mapping;
+import fql.decl.Program;
+import fql.decl.Signature;
+import fql.examples.Example;
+import fql.sql.PSM;
+import fql.sql.PSMGen;
+import fql.sql.PSMInterp;
+
 
 public class CodeEditor extends JPanel {
+	
+	final Integer id;
+	
+	
+	
+	Display display;
 
    private static final long serialVersionUID = 1L;
-   
-   RSyntaxTextArea textArea = new RSyntaxTextArea();
+     
+   RSyntaxTextArea topArea = new RSyntaxTextArea();
+	
+   FQLTextPanel respArea = new FQLTextPanel("Compiler response", "");
+
 	
    final JTextField  searchField = new JTextField();
    final JButton nextButton = new JButton("Find Next");
@@ -109,9 +132,9 @@ protected void doFind(boolean b) {
     
     if (replaceCB.isSelected()) {
     	context.setReplaceWith(replaceField.getText());
-    	SearchEngine.replace(textArea, context);
+    	SearchEngine.replace(topArea, context);
     } else {
-    	SearchEngine.find(textArea, context);
+    	SearchEngine.find(topArea, context);
     }
 //    if (!found) {
 //       JOptionPane.showMessageDialog(null, "Text not found");
@@ -137,7 +160,7 @@ protected void doFind(boolean b) {
 //	      context.setSearchForward(forward);
 //	      context.setWholeWord(false);
 //
-//	      boolean found = SearchEngine.find(textArea, context);
+//	      boolean found = SearchEngine.find(topArea, context);
 //	      if (!found) {
 //	         JOptionPane.showMessageDialog(this, "Text not found");
 //	      }
@@ -146,13 +169,13 @@ protected void doFind(boolean b) {
 
    
 	public void setText(String s) {
-		textArea.setText(s);
-		textArea.setCaretPosition(0);
-		//textArea.set
+		topArea.setText(s);
+		topArea.setCaretPosition(0);
+		//topArea.set
 	}
 	
 	public String getText() {
-		return textArea.getText();
+		return topArea.getText();
 	}
 
 	public void makeSearchVisible() {
@@ -177,46 +200,84 @@ protected void doFind(boolean b) {
 		});
 		
 	}
-	
-   public  CodeEditor(String title, String content) {
+
+	public  CodeEditor(Integer id, String content) {
 	super(new GridLayout(1,1));
 	
-	
-	
-	
-	Border b = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), title);
+		this.id = id;
+		respArea.setWordWrap(true);
+  	
+  	
+	//Border b = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), "FQL Program");
 
-	setBorder(b);
+	//setBorder(b);
 
      // JPanel cp = new JPanel(new BorderLayout());
 
-      textArea = new RSyntaxTextArea();
-    //  textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
+      topArea = new RSyntaxTextArea();
+    //  topArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
       
       AbstractTokenMakerFactory atmf = (AbstractTokenMakerFactory)TokenMakerFactory.getDefaultInstance();
       atmf.putMapping("text/fql", "fql.parse.FqlTokenMaker");
      FoldParserManager.get().addFoldParserMapping("text/fql", new CurlyFoldParser());
-     textArea.setSyntaxEditingStyle("text/fql");
+     topArea.setSyntaxEditingStyle("text/fql");
+     topArea.setText(content);
+     topArea.setCaretPosition(0);
      
      
-    //  textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
-    //  textArea.setSyn
+     
+    //  topArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
+    //  topArea.setSyn
       
   //    RSyntaxDocument.
-    //  SyntaxScheme scheme = textArea.s();
+    //  SyntaxScheme scheme = topArea.s();
      
-      //textArea.setS
-      textArea.setCodeFoldingEnabled(true);
-      textArea.setAntiAliasingEnabled(true);
-      RTextScrollPane sp = new RTextScrollPane(textArea);
+      //topArea.setS
+      topArea.setCodeFoldingEnabled(true);
+      topArea.setAntiAliasingEnabled(true);
+      RTextScrollPane sp = new RTextScrollPane(topArea);
       sp.setFoldIndicatorEnabled(true);
-      add(sp);
+      //add(sp);
 
-      textArea.setText(content);
-      textArea.setCaretPosition(0);
+      
+      
+     
+		JSplitPane xx1 = new FQLSplit(.8, JSplitPane.VERTICAL_SPLIT);
+		//topArea.setPreferredSize(new Dimension(600,400));
+		xx1.add(sp);
+		xx1.setDividerSize(6);
+		xx1.setResizeWeight(.8);
+		xx1.add(respArea);
+	//	respArea.setPreferredSize(new Dimension(200,400));
+		
+		add(xx1);
+		
+		topArea.getDocument().addDocumentListener(new DocumentListener() {
+
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				GUI.setDirty(CodeEditor.this.id, true);
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				GUI.setDirty(CodeEditor.this.id, true);
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				GUI.setDirty(CodeEditor.this.id, true);
+			}
+	    	 
+	     });
 
    }
 
+	protected  void findAction() {
+		
+		makeSearchVisible();
+
+}
 //   public static void main(String[] args) {
 //      // Start all Swing applications on the EDT.
 //      SwingUtilities.invokeLater(new Runnable() {
@@ -231,5 +292,75 @@ protected void doFind(boolean b) {
 //         }
 //      });
 //   }
+   
+	//static String program = Examples.INIT_EXAMPLE.getText();
 
-}
+   protected  void doExample(Example e) {
+		if (abortBecauseDirty()) {
+			return;
+		}		
+		String program = e.getText();
+		topArea.setText(program);
+		topArea.setCaretPosition(0);
+//		bottomArea.setText(Examples.employeesCommands);
+		respArea.setText("");
+		GUI.setDirty(CodeEditor.this.id, false);
+		if (display != null) {
+			display.close();
+		}
+		display = null;		
+	}
+   
+    void runAction() {
+		String program = topArea.getText();
+		//String view = bottomArea.getText();
+		
+		try {
+			Program parsed_program = Program.parse(program);
+			Environment cp = new Environment(parsed_program);
+			
+			List<String> commands = new LinkedList<>();
+			for (String s : parsed_program.inorder()) {
+				if (parsed_program.isMapping(s) || parsed_program.isSignature(s)) {
+					if (!parsed_program.hasKey(s) && DEBUG.INTERMEDIATE == Intermediate.NONE) {
+						continue;
+					}
+				}
+				commands.add(s);
+			}
+			
+//			Commands parsed_view = Commands.parse(view);
+			if (display != null) {
+				display.close();
+			}
+			display = new Display(cp, commands);
+			display.display(GUI.getTitle(id), commands);
+			
+			String psm = PSMGen.compile(cp, parsed_program);
+			respArea.setText(psm);
+						
+			List<PSM> psm0 = PSMGen.compile0(cp, parsed_program);
+			String output0 = PSMInterp.interp0(psm0);
+		//	System.out.println(output0);
+		//	respArea.setText(output0 + "\n\n---------------\n\n" + psm);
+			
+		} catch (Exception e) {
+			respArea.setText(e.toString());
+			e.printStackTrace();
+		}
+   }
+		 public boolean abortBecauseDirty() {
+			if (!GUI.getDirty(CodeEditor.this.id)) {
+				return false;
+			}
+			
+			int choice = JOptionPane.showConfirmDialog(null, "Unsaved Changes - Continue?", "Continue?", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+			if (choice == JOptionPane.NO_OPTION) {
+				return true;
+			}
+			return false;
+		}
+		
+	}
+
+

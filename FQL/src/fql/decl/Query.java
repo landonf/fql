@@ -299,12 +299,12 @@ boolean isId;
 	}
 	
 	@Override
-	public JPanel pretty() throws FQLException {
+	public JPanel pretty(final Environment env) throws FQLException {
 			Graph<String,String> g = build();
 			if (g.getVertexCount() == 0) {
 				return new JPanel();
 			}
-			return doView(g);
+			return doView(env, g);
 	}
 	
 	@Override
@@ -312,7 +312,7 @@ boolean isId;
 		return "query";
 	}
 	
-	public  JPanel doView(Graph<String,String> sgv) {
+	public  JPanel doView(final Environment env, Graph<String,String> sgv) {
 		// Layout<V, E>, BasicVisualizationServer<V,E>
 		//Layout<String, String> layout = new FRLayout<>(sgv);
 		//Layout<String, String> layout = new KKLayout(sgv);
@@ -334,13 +334,13 @@ boolean isId;
 				//String j = t.substring(i+1);
 				String p = t.substring(0, i);
 				if (p.equals("@project_source")) {
-					return Environment.colors.get(project.source.name0);
+					return env.colors.get(project.source.name0);
 				} else if (p.equals("@project_target")) {
-					return Environment.colors.get(project.target.name0);
+					return env.colors.get(project.target.name0);
 				} else if (p.equals("@join_target")) {
-					return Environment.colors.get(join.target.name0);
+					return env.colors.get(join.target.name0);
 				} else {
-					return Environment.colors.get(union.target.name0);
+					return env.colors.get(union.target.name0);
 				}
 			}
 		};
@@ -690,6 +690,11 @@ boolean isId;
 
 	@Override
 	public JPanel denotation() throws FQLException {
+		return null;
+	}
+
+	@Override
+	public JPanel initial() throws FQLException {
 		return null;
 	}
 	

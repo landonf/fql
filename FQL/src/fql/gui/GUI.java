@@ -3,7 +3,6 @@ package fql.gui;
 
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Menu;
 import java.awt.MenuBar;
@@ -18,47 +17,50 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.swing.AbstractAction;
+import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
 
 import fql.DEBUG;
-import fql.DEBUG.Intermediate;
 import fql.FQLApplet;
 import fql.FQLBackEnd;
 import fql.FQLServlet;
 import fql.Pair;
-import fql.decl.Environment;
-import fql.decl.Program;
 import fql.examples.Example;
 import fql.examples.Examples;
-import fql.sql.PSM;
-import fql.sql.PSMGen;
-import fql.sql.PSMInterp;
 
 @SuppressWarnings("serial")
 public class GUI extends JPanel {
 	
+	static JTabbedPane editors = new JTabbedPane();
 	
-	static Display display;
 	
-	static boolean dirty = false;
+	
+
 
 	
 	public static Pair<JPanel, MenuBar> makeGUI() {
+		
+		
+		// OSXAdapter.setQuitHandler(this, getClass().getDeclaredMethod("onClose", (Class[])null));
+		 
 		JPanel pan = new JPanel();
 		//super("FQL IDE");
+		
+		
 		
 		MenuBar menuBar = new MenuBar();
 		
@@ -68,17 +70,63 @@ public class GUI extends JPanel {
 		MenuItem newItem = new MenuItem("New");
 		MenuItem openItem = new MenuItem("Open");
 		MenuItem saveItem = new MenuItem("Save");
+		MenuItem saveAsItem = new MenuItem("Save As");
+		MenuItem closeItem = new MenuItem("Close");
 		MenuItem exitItem = new MenuItem("Exit");
 		fileMenu.add(newItem);
 		fileMenu.add(openItem);
 		fileMenu.add(saveItem);
+		fileMenu.add(saveAsItem);
+		fileMenu.add(closeItem);
 		fileMenu.add(exitItem);
-		respArea.setWordWrap(true);
+		
+		closeItem.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				closeAction();
+			}
+			
+		});
+		
+		saveAsItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				saveAsAction();
+			}
+		});
+	
 //		respArea.setWrapStyleWord();
 		KeyStroke ctrlS = KeyStroke.getKeyStroke(KeyEvent.VK_S,
 		        InputEvent.CTRL_MASK);
 		MenuShortcut s = new MenuShortcut(ctrlS.getKeyCode());
 		saveItem.setShortcut(s);
+		
+		KeyStroke ctrlW = KeyStroke.getKeyStroke(KeyEvent.VK_W,
+		        InputEvent.CTRL_MASK);
+		KeyStroke commandW = KeyStroke.getKeyStroke(KeyEvent.VK_W,
+		        InputEvent.META_MASK);
+		MenuShortcut c = new MenuShortcut(ctrlW.getKeyCode());
+		closeItem.setShortcut(c);
+		 
+		    // Get the appropriate input map using the JComponent constants.
+		    // This one works well when the component is a container. 
+	 //  InputMap inputMap = editors.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		  InputMap inputMap = editors.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+
+		    // Add the key binding for the keystroke to the action name
+		 inputMap.put(ctrlW, "closeTab");
+		 inputMap.put(commandW, "closeTab");
+		 
+		    // Now add a single binding for the action name to the anonymous action
+		 AbstractAction closeTabAction = new AbstractAction() {
+		      @Override
+		      public void actionPerformed(ActionEvent e) {
+		    closeAction();
+		      }
+		    };
+		editors.getActionMap().put("closeTab", closeTabAction);
+		
 		KeyStroke ctrlN = KeyStroke.getKeyStroke(KeyEvent.VK_N,
 		        InputEvent.CTRL_MASK);
 		MenuShortcut n = new MenuShortcut(ctrlN.getKeyCode());
@@ -87,7 +135,7 @@ public class GUI extends JPanel {
 		        InputEvent.CTRL_MASK);
 		MenuShortcut o = new MenuShortcut(ctrlO.getKeyCode());
 		openItem.setShortcut(o);
-		
+	
 		final Menu editMenu = new Menu("Edit");
 		MenuItem findItem = new MenuItem("Find");
 		editMenu.add(findItem);
@@ -99,10 +147,10 @@ public class GUI extends JPanel {
 		findItem.setShortcut(f);
 		
 		
-//		KeyStroke ctrlQ = KeyStroke.getKeyStroke(KeyEvent.VK_Q,
-//		        InputEvent.CTRL_MASK);
-//		MenuShortcut q = new MenuShortcut(ctrlQ.getKeyCode());
-//		exitItem.setShortcut(q);
+		KeyStroke ctrlQ = KeyStroke.getKeyStroke(KeyEvent.VK_Q,
+		        InputEvent.CTRL_MASK);
+		MenuShortcut q = new MenuShortcut(ctrlQ.getKeyCode());
+		exitItem.setShortcut(q);
 		
 		
 		Menu webMenu = new Menu("Web");
@@ -153,7 +201,7 @@ public class GUI extends JPanel {
 		newItem.addActionListener(
 				new	ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						newAction();
+						newAction(null, "");
 					}
 				}
 		);
@@ -182,10 +230,9 @@ public class GUI extends JPanel {
 		
 		findItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				findAction();
-//				findItem.
-//				editMenu.setEnabled(false);
-//				editMenu.setEnabled(true);
+				delay();
+				((CodeEditor)editors.getComponentAt(editors.getSelectedIndex())).findAction();
+
 			}
 		});
 				
@@ -203,13 +250,7 @@ public class GUI extends JPanel {
 		//p.add(bottomArea);
 		//p.setBorder(BorderFactory.createEmptyBorder());
 		
-		JPanel p = topArea;
 		
-		JSplitPane xx1 = new FQLSplit(.8, JSplitPane.VERTICAL_SPLIT);
-		p.setPreferredSize(new Dimension(600,400));
-		xx1.add(p);
-		xx1.setDividerSize(6);
-		xx1.add(respArea);
 		
 		 pan.setLayout(new BorderLayout());
 		 
@@ -222,7 +263,7 @@ public class GUI extends JPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				runAction();
+				((CodeEditor)editors.getComponentAt(editors.getSelectedIndex())).runAction();
 			}
 	    	 
 	     });
@@ -239,7 +280,7 @@ public class GUI extends JPanel {
 	     JButton new_button = new JButton("New");
 	     new_button.addActionListener(new ActionListener() {
 	    	public void actionPerformed(ActionEvent e) {
-	    		newAction();
+	    		newAction(null, "");
 	    	}
 	     });
 	     
@@ -330,8 +371,10 @@ public class GUI extends JPanel {
 	    // toolBar.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 	     
 	     pan.add(toolBar, BorderLayout.PAGE_START);
-	     pan.add(xx1, BorderLayout.CENTER);
+	     pan.add(editors, BorderLayout.CENTER);
 		
+	     newAction(null, "");
+			
 	  //   this.
 	     
 	//	setContentPane(pan);
@@ -344,11 +387,34 @@ public class GUI extends JPanel {
 	}
 
 
-	protected static void findAction() {
-		
-						topArea.makeSearchVisible();
-				
+	
+
+
+	protected static void doExample(Example e) {
+		//int i = untitled_count;
+		newAction(e.getName(), e.getText());
 	}
+
+
+
+
+
+	private static void closeAction() {
+		delay();
+		int i = editors.getSelectedIndex();
+		CodeEditor c = (CodeEditor) editors.getComponentAt(i);
+		if (c.abortBecauseDirty()) {
+			return;
+		}
+		editors.remove(i);
+		dirty.remove(c.id);
+		keys.remove(c.id);
+		files.remove(c.id);
+		titles.remove(c.id);
+	}
+
+
+
 
 
 	protected static void serverAction() {
@@ -368,20 +434,7 @@ public class GUI extends JPanel {
 
 	
 	
-	protected static void doExample(Example e) {
-		if (abortBecauseDirty()) {
-			return;
-		}		
-		program = e.getText();
-		topArea.setText(program);
-//		bottomArea.setText(Examples.employeesCommands);
-		respArea.setText("");
-		dirty = false;
-		if (display != null) {
-			display.close();
-		}
-		display = null;		
-	}
+	
 	
 	
 
@@ -393,154 +446,163 @@ public class GUI extends JPanel {
 	}
 
 
-	 static void runAction() {
-		String program = topArea.getText();
-		//String view = bottomArea.getText();
-		
-		try {
-			Program parsed_program = Program.parse(program);
-			Environment cp = new Environment(parsed_program);
-			
-			List<String> commands = new LinkedList<>();
-			for (String s : cp.instances.keySet()) {
-				commands.add(s);
-			}
-			for (String s : cp.mappings.keySet()) {
-				if (!parsed_program.hasKey(s) && DEBUG.INTERMEDIATE == Intermediate.NONE) {
-					continue;
-				}
-				commands.add(s);	
-			}
-			for (String s : cp.queries.keySet()) {
-				commands.add(s);
-			}
-			for (String s : cp.signatures.keySet()) {
-				if (!parsed_program.hasKey(s) && DEBUG.INTERMEDIATE == Intermediate.NONE) {
-					continue;
-				}
-				commands.add(s);
-			}
-//			Commands parsed_view = Commands.parse(view);
-			if (display != null) {
-				display.close();
-			}
-			display = new Display(cp, commands);
-			display.display();
-			
-			String psm = PSMGen.compile(cp, parsed_program);
-			respArea.setText(psm);
-						
-			List<PSM> psm0 = PSMGen.compile0(cp, parsed_program);
-			String output0 = PSMInterp.interp0(psm0);
-		//	System.out.println(output0);
-		//	respArea.setText(output0 + "\n\n---------------\n\n" + psm);
-			
-		} catch (Exception e) {
-			respArea.setText(e.toString());
-			e.printStackTrace();
-		}
-		
-	}
+	
 
-	static protected void exitAction() {
-		if (abortBecauseDirty()) {
+	public  static void exitAction() {
+		delay();
+		int i = 0;
+		for (Integer x : keys.keySet()) {
+			if (dirty.get(x).equals(true)) {
+				i++;
+			}
+		}
+		if (i == 0) {
+			System.exit(0);
+		}
+		int choice = JOptionPane.showConfirmDialog(null, i + " documents have unsaved changes - continue?", "Exit?", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+		if (choice == JOptionPane.NO_OPTION) {
 			return;
 		}
 		System.exit(0);
+		
+//		if (abortBecauseDirty()) {
+//			return;
+//		}
+//		System.exit(0);
 	}
 
-	static protected void saveAction() {
-		delay();
-		JFileChooser jfc = new JFileChooser();
-		jfc.showSaveDialog(null);
-		File f = jfc.getSelectedFile();
+	 protected static void saveAction() {
+		CodeEditor e = (CodeEditor) editors.getComponentAt(editors.getSelectedIndex());
+		File f = files.get(e.id);
 		if (f == null) {
-			return;
+			saveAsAction();
+		} else {
+			delay();
+			doSave(f, e.getText());
+			setDirty(e.id, false);
 		}
+	}
+	 
+	static void doSave(File f, String s) {
 		try {
 			FileWriter fw = new FileWriter(f);
-			fw.write(topArea.getText());
+			fw.write(s);
 			fw.close();
-			dirty = false;
-			program = topArea.getText();
 		} catch (Exception e){
 			e.printStackTrace();
-		}		
-	}
+			JOptionPane.showMessageDialog(null, "Could not save to " + f);
+		}	
+	 }
+		
+		protected static void saveAsAction() {
+			delay();
+			JFileChooser jfc = new JFileChooser();
+			jfc.showSaveDialog(null);
+			File f = jfc.getSelectedFile();
+			if (f == null) {
+				return;
+			}
+			CodeEditor e = (CodeEditor) editors.getComponentAt(editors.getSelectedIndex());
+			doSave(f, e.getText());
+			closeAction();
+			doOpen(f);
+		}
 
+		
+		static void doOpen(File f) {
+			String s = readFile(f.getAbsolutePath());
+			if (s == null) {
+				return;
+			}
+			Integer i = newAction(f.getName(), s);
+			files.put(i, f);
+		}
+		
 	static protected void openAction() {
 		delay();
-		if (abortBecauseDirty()) {
-			return;
-		}
 		JFileChooser jfc = new JFileChooser();
 		jfc.showOpenDialog(null);
 		File f = jfc.getSelectedFile();
 		if (f == null) {
 			return;
 		}
-		try {
-			String s = readFile(f.getAbsolutePath());
-			topArea.setText(s);
-			dirty = false;
-			program = s;
-			if (display != null) {
-				display.close();
-			}
-			display = null;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		doOpen(f);
 	}
 
-	static protected void newAction() {
-		if (abortBecauseDirty()) {
-			return;
-		}
-		topArea.setText("");
-//		bottomArea.setText("");
-		dirty = false;
-		program = "";
-		if (display != null) {
-			display.close();
-		}
-		display = null;
+	static void setDirty(Integer i, boolean b) {
+		dirty.put(i, b);
 	}
-
-	static private boolean abortBecauseDirty() {
-		if (program.trim().equals(topArea.getText().trim())) {
-			
-			return false;
-		}
+	static Boolean getDirty(Integer i) {
+		return dirty.get(i);
+	}
+	static Map<Integer, Boolean> dirty = new HashMap<>();
+	static Map<Integer, CodeEditor> keys = new HashMap<>();
+	static Map<Integer, File> files = new HashMap<>();
+	static Map<Integer, String> titles = new HashMap<>();
+	//static Map<Integer, Integer> position = new HashMap<>();
+	static int untitled_count = 1;
+	
+	public static String getTitle(Integer i) {
+		return titles.get(i);
+	}
+	static Integer  newAction(String title, String content) {
+		CodeEditor c = new CodeEditor(untitled_count, content);
+		int i = editors.getTabCount();
+		keys.put(untitled_count, c);
+		dirty.put(untitled_count, false);
+	//	position.put(untitled_count, i);
 		
-		int choice = JOptionPane.showConfirmDialog(null, "Unsaved Changes - Continue?", "Continue?", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null);
-		if (choice == JOptionPane.NO_OPTION) {
-			return true;
+		if (title == null) {
+			title = "Untitled " + untitled_count++;
 		}
-		return false;
+		titles.put(c.id, title);
+		editors.addTab(title, c);
+		 editors.setTabComponentAt(i,
+                 new ButtonTabComponent(editors));
+		 editors.setSelectedIndex(i);
+		 
+		 return c.id;
+//		if (abortBecauseDirty()) {
+//			return;
+//		}
+//		topArea.setText("");
+////		bottomArea.setText("");
+//		dirty = false;
+//		program = "";
+//		if (display != null) {
+//			display.close();
+//		}
+//		display = null;
 	}
+
+	
 	
 
-	static String program = Examples.INIT_EXAMPLE.getText();
-	static CodeEditor topArea = new CodeEditor("FQL Program",program);
+//	static CodeEditor topArea = new CodeEditor("FQL Program",program);
 
 	//static FQLTextPanel topArea = new FQLTextPanel("FQL Program",program);
 //	static FQLTextPanel bottomArea = new FQLTextPanel("Commands", Examples.initialCommands);
-	static FQLTextPanel respArea = new FQLTextPanel("Compiler response", "");
+//	static FQLTextPanel respArea = new FQLTextPanel("Compiler response", "");
 	
-	static private String readFile( String file ) throws IOException {
-	    BufferedReader reader = new BufferedReader( new FileReader (file));
-	    String         line = null;
-	    StringBuilder  stringBuilder = new StringBuilder();
-	    String         ls = System.getProperty("line.separator");
-
-	    while( ( line = reader.readLine() ) != null ) {
-	        stringBuilder.append( line );
-	        stringBuilder.append( ls );
-	    }
-
-	    reader.close();
-	    return stringBuilder.toString();
+	static private String readFile( String file )  {
+		try {
+		    BufferedReader reader = new BufferedReader( new FileReader (file));
+		    String         line = null;
+		    StringBuilder  stringBuilder = new StringBuilder();
+		    String         ls = System.getProperty("line.separator");
+	
+		    while( ( line = reader.readLine() ) != null ) {
+		        stringBuilder.append( line );
+		        stringBuilder.append( ls );
+		    }
+	
+		    reader.close();
+		    return stringBuilder.toString();
+		} catch (Exception e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Could not read from " + file);
+		}
+		return null;
 	}
 	
 	private static void delay() {

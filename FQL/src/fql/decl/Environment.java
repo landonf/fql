@@ -29,8 +29,8 @@ import fql.sql.PSMInterp;
  */
 public class Environment {
 
-	static Map<String, Color> colors;
-	static Map<String, Object> graphs;
+	final Map<String, Color> colors = new HashMap<>();
+	final Map<String, Object> graphs = new HashMap<>();
 
 	public Environment(Program p) throws FQLException {
 		signatures = new HashMap<>();
@@ -38,7 +38,7 @@ public class Environment {
 		queries = new HashMap<>();
 		instances = new HashMap<>();		
 		Set<String> names = new HashSet<>();
-		colors =  new HashMap<>();
+		//colors =  new HashMap<>();
 		instance_types = new HashMap<>();
 		
 		Map<String, Signature> it = new HashMap<>();
@@ -56,13 +56,21 @@ public class Environment {
 				addQuery((QueryDecl) d);
 			} else if (d instanceof EvalInstanceDecl) {
 				check((EvalInstanceDecl) d);
+				if (signatures.get(((EvalInstanceDecl) d).type) == null) {
+					throw new RuntimeException();
+				}
 				instance_types.put(d.name, signatures.get(((EvalInstanceDecl) d).type));
 			} else if (d instanceof EvalDSPInstanceDecl) {
 				check((EvalDSPInstanceDecl) d);
+				if (signatures.get(((EvalDSPInstanceDecl) d).type) == null) {
+					throw new RuntimeException();
+				}
 				instance_types.put(d.name, signatures.get(((EvalDSPInstanceDecl) d).type));
 			} else if (d instanceof ConstantInstanceDecl) {
 				instance_types.put(d.name, signatures.get(((ConstantInstanceDecl) d).type));
-				
+				if (signatures.get(((ConstantInstanceDecl) d).type) == null) {
+					throw new RuntimeException();
+				}
 		//		addInstance((GivenInstanceDecl) d);
 			}
 			
@@ -111,6 +119,12 @@ public class Environment {
 	}
 	
 	private void check(EvalInstanceDecl d) throws FQLException {
+		if (queries.get(d.query) == null) {
+			throw new FQLException("Cannot find query " + d.query);
+		}
+		if (instance_types.get(d.inst) == null) {
+			throw new FQLException("Cannot find instance " + d.inst);
+		}
 		if (!d.type.equals(queries.get(d.query).union.target.name0)) {
 			throw new FQLException("Ill-typed query return  : " + d.name);
 		}
@@ -120,6 +134,12 @@ public class Environment {
 	}
 
 	private void check(EvalDSPInstanceDecl d) throws FQLException {
+		if (mappings.get(d.mapping) == null) {
+			throw new FQLException("Cannot find mapping " + d.mapping);
+		}
+		if (instance_types.get(d.inst).name0 == null) {
+			throw new FQLException("Cannot find type for instance " + d.inst);
+		}
 		if(d.kind.equals("delta")) {
 			if (!mappings.get(d.mapping).source.name0.equals(d.type)) {
 				throw new FQLException("Ill-typed return  : " + d.name);
@@ -222,6 +242,7 @@ public class Environment {
 
 	private void addInstance(ConstantInstanceDecl instanceDecl) throws FQLException {
 		Signature thesig = signatures.get(instanceDecl.type);
+		instance_types.put(instanceDecl.name, thesig);
 		instances.put(instanceDecl.name, new Instance(instanceDecl.name, thesig,  instanceDecl.data));
 	}
 

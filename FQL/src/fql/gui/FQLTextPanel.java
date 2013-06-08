@@ -46,7 +46,7 @@ public class FQLTextPanel extends JPanel {
 	
 	public FQLTextPanel(String title, String text) {
 		super(new GridLayout(1,1));
-		Border b = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), title);
+		Border b = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), title);
 
 		setBorder(b);
 		

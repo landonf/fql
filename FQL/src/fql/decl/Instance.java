@@ -8,8 +8,6 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Stroke;
-import java.awt.event.MouseListener;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -28,7 +26,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.table.TableModel;
+import javax.swing.UIManager;
 import javax.swing.table.TableRowSorter;
 
 import org.apache.commons.collections15.Transformer;
@@ -954,8 +952,8 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 
 	@Override
-	public JPanel pretty() throws FQLException {
-		return makeViewer();
+	public JPanel pretty(Environment env) throws FQLException {
+		return makeViewer(env);
 	}
 
 	@Override
@@ -983,15 +981,15 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		return g2;
 	}
 
-	public JPanel makeViewer() {
+	public JPanel makeViewer(Environment env) {
 		Graph<String, String> g = build();
 		if (g.getVertexCount() == 0) {
 			return new JPanel();
 		}
-		return doView(g);
+		return doView(env, g);
 	}
 
-	public JPanel doView(Graph<String, String> sgv) {
+	public JPanel doView(final Environment env, Graph<String, String> sgv) {
 		// Layout<V, E>, BasicVisualizationServer<V,E>
 		// Layout<String, String> layout = new KKLayout(sgv);
 
@@ -1006,9 +1004,9 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
 			public Paint transform(String i) {
 				if (!thesig.isAttribute(i)) {
-					return Environment.colors.get(thesig.name0);
+					return env.colors.get(thesig.name0);
 				}
-				return null;
+				return UIManager.getColor ( "Panel.background" );
 			}
 		};
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
@@ -1414,6 +1412,11 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 	@Override
 	public JPanel denotation() throws FQLException {
+		return null;
+	}
+
+	@Override
+	public JPanel initial() throws FQLException {
 		return null;
 	}
 

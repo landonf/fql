@@ -36,18 +36,18 @@ import fql.decl.Environment;
  */
 public class Display {
 
-	Map<String, JComponent> frames;
+	List<Pair<String, JComponent>> frames = new LinkedList<>();
 
-	public Display(Environment environment, List<String> commands)
+	public Display(final Environment environment, List<String> commands)
 			throws FQLException {
-		frames = new HashMap<String, JComponent>();
+		//frames = new HashMap<String, JComponent>();
 
 		for (String c : commands) {
 				Viewable<?> view = environment.get(c);
 	
 				JTabbedPane px = new JTabbedPane();
 				
-				JPanel gp = view.pretty();
+				JPanel gp = view.pretty(environment);
 				JPanel gp0 = new JPanel(new GridLayout(1,1));
 				gp0.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 				gp0.add(gp);
@@ -75,6 +75,11 @@ public class Display {
 				if (den != null) {
 					px.add("Denotation", den);
 				}
+				
+				JPanel init = view.initial();
+				if (init != null) {
+					px.add("Initial", init);
+				}
 					
 				JPanel top = new JPanel(new GridLayout(1,1));
 				top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
@@ -88,37 +93,37 @@ public class Display {
 					xxx += (" : " + environment.queries.get(c).getSource().name0 + " -> " + environment.queries.get(c).getTarget().name0);
 				}
 
-				frames.put(xxx, top);
+				frames.add(new Pair<String, JComponent>(xxx, top));
 			} 
 		}
 	
 
 	JFrame frame = null;
 	
-	public void display() {
+	public void display(String s, List<String> order) {
 		final CardLayout cl = new CardLayout();
 		final JPanel x = new JPanel(cl);
 		frame = new JFrame();
 		
-		List<Pair<String, JComponent>> list = new LinkedList<Pair<String, JComponent>>();
-		for (Entry<String, JComponent> p : frames.entrySet()) {
-			list.add(new Pair<String, JComponent>(p.getKey(), p.getValue()));
-		}
-		Collections.sort(list, new Comparator<Pair<String, JComponent>>() {
-
-			@Override
-			public int compare(Pair<String, JComponent> arg0,
-					Pair<String, JComponent> arg1) {
-				String s1 = arg0.first.split(" ")[1];
-				String s2 = arg1.first.split(" ")[1];
-				return s1.compareTo(s2);
-			}
-			
-		});
+		//List<Pair<String, JComponent>> list = new LinkedList<Pair<String, JComponent>>();
+//		for (String p : order) {
+//			list.add(new Pair<String, JComponent>(p, frames.get(p)));
+//		}
+//		Collections.sort(list, new Comparator<Pair<String, JComponent>>() {
+//
+//			@Override
+//			public int compare(Pair<String, JComponent> arg0,
+//					Pair<String, JComponent> arg1) {
+//				String s1 = arg0.first.split(" ")[1];
+//				String s2 = arg1.first.split(" ")[1];
+//				return s1.compareTo(s2);
+//			}
+//			
+//		});
 		
 		final Vector<String> ooo = new Vector<>();
 		
-		for (Pair<String, JComponent> p : list) {
+		for (Pair<String, JComponent> p : frames) {
 			x.add(p.second, p.first);
 			ooo.add(p.first);
 		}
@@ -149,8 +154,8 @@ public class Display {
 		});
 		
 		FQLSplit px = new FQLSplit(.5, JSplitPane.HORIZONTAL_SPLIT);
-		
-		frame = new JFrame("Viewer");
+		px.setDividerSize(6);
+		frame = new JFrame("Viewer for " + s);
 		px.add(temp1);
 		px.add(x);
 		frame.setContentPane(px);

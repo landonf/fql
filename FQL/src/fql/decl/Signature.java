@@ -18,6 +18,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.UIManager;
 
 import org.apache.commons.collections15.Transformer;
 
@@ -341,7 +342,7 @@ public class Signature implements Viewable<Signature> {
 		JTable nodesComponent = new JTable(sn, new String[] { "Name" });
 		JPanel nodesTemp = new JPanel(new GridLayout(1, 1));
 		nodesTemp.setBorder(BorderFactory.createTitledBorder(
-				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Nodes"));
+				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Entities"));
 		nodesTemp.add(new JScrollPane(nodesComponent));
 //		nodesComponent.setRowSelectionAllowed(false);
 //		nodesComponent.setColumnSelectionAllowed(false);
@@ -368,7 +369,7 @@ public class Signature implements Viewable<Signature> {
 		JPanel edgesTemp = new JPanel(new GridLayout(1, 1));
 		edgesTemp.add(new JScrollPane(esC));
 		edgesTemp.setBorder(BorderFactory.createTitledBorder(
-				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Edges"));
+				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Foreign keys"));
 
 //		esC.setRowSelectionAllowed(false);
 //		esC.setColumnSelectionAllowed(false);
@@ -636,15 +637,15 @@ public class Signature implements Viewable<Signature> {
 		return g2;
 	}
 
-	public JPanel makeViewer() {
+	public JPanel makeViewer(final Environment env) {
 		Graph<String, String> g = build();
 		if (g.getVertexCount() == 0) {
 			return new JPanel();
 		}
-		return doView(g);
+		return doView(env, g);
 	}
 
-	public JPanel doView(Graph<String, String> sgv) {
+	public JPanel doView(final Environment env, Graph<String, String> sgv) {
 		// Layout<V, E>, BasicVisualizationServer<V,E>
 		// Layout<String, String> layout = new FRLayout(sgv);
 		Layout<String, String> layout = new ISOMLayout<String, String>(sgv);
@@ -660,9 +661,9 @@ public class Signature implements Viewable<Signature> {
 		Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
 			public Paint transform(String i) {
 				if (!isAttribute(i)) {
-					return Environment.colors.get(name0);
+					return env.colors.get(name0);
 			} else {
-				return null;
+				return UIManager.getColor ( "Panel.background" );
 				}
 			}
 		};
@@ -751,8 +752,8 @@ public class Signature implements Viewable<Signature> {
 	}
 
 	@Override
-	public JPanel pretty() throws FQLException {
-		return makeViewer();
+	public JPanel pretty(final Environment env) throws FQLException {
+		return makeViewer(env);
 	}
 
 	@Override
@@ -842,6 +843,25 @@ public class Signature implements Viewable<Signature> {
 			}
 		}
 		return a;
+	}
+
+	@Override
+	public JPanel initial() throws FQLException {
+		List<Pair<String, List<Pair<Object, Object>>>> b = new LinkedList<>();
+		for (Node n : nodes) {
+			List<Pair<Object, Object>> x = new LinkedList<>();
+			b.add(new Pair<>(n.string, x));
+		}
+		for (Attribute n : attrs) {
+			List<Pair<Object, Object>> x = new LinkedList<>();
+			b.add(new Pair<>(n.name, x));
+		}
+		for (Edge n : edges) {
+			List<Pair<Object, Object>> x = new LinkedList<>();
+			b.add(new Pair<>(n.name, x));
+		}
+		Instance i = new Instance("", this, b);
+		return i.join();
 	}
 
 }

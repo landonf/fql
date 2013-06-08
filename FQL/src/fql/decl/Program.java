@@ -46,5 +46,36 @@ public class Program {
 		}
 		return false;
 	}
+
+	public List<String> inorder() {
+		List<String> ret = new LinkedList<>();
+		for (Decl d : decls) {
+			ret.add(d.name);
+		}
+		return ret;
+	}
+
+	public boolean isMapping(String s) {
+		for (Decl d : decls) {
+			if (d.name.equals(s)) {
+				if (d instanceof MappingDecl) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public boolean isSignature(String s) {
+		for (Decl d : decls) {
+			if (d.name.equals(s)) {
+				if (d instanceof SignatureDecl) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 		
 }
