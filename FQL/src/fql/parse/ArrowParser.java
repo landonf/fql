@@ -29,21 +29,21 @@ public class ArrowParser implements Parser<Triple<String, String, String>> {
 			String c = x.value;
 			
 			return new Partial<Triple<String,String,String>>(x.tokens, new Triple<String,String,String>(a,b,c));
+//		} catch (Exception e) {
+//			
+//		}
+//		try {
+//			Parser<String> p = new StringParser();
+//			
+//			Partial<String> x = p.parse(s);	
+//			
+//			if (!Pattern.matches("[a-zA-Z0-9]+", x.value))  {
+//				throw new BadSyntax(s, "Could not parse node from " + s);
+//			}
+//			
+//			return new Partial<Triple<String,String,String>>(x.tokens, new Triple<String,String,String>(x.value, null, null));
 		} catch (Exception e) {
-			
-		}
-		try {
-			Parser<String> p = new StringParser();
-			
-			Partial<String> x = p.parse(s);	
-			
-			if (!Pattern.matches("[a-zA-Z0-9]+", x.value))  {
-				throw new BadSyntax("Could not parse node from " + s);
-			}
-			
-			return new Partial<Triple<String,String,String>>(x.tokens, new Triple<String,String,String>(x.value, null, null));
-		} catch (Exception e) {
-			throw new BadSyntax("Could not parse arrow from " + s);
+			throw new BadSyntax(s, "Could not parse arrow from " + s);
 		}
 	}
 

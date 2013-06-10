@@ -3,17 +3,21 @@ package fql.gui;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
@@ -31,9 +35,7 @@ import org.fife.ui.rtextarea.SearchEngine;
 import fql.DEBUG;
 import fql.DEBUG.Intermediate;
 import fql.decl.Environment;
-import fql.decl.Mapping;
 import fql.decl.Program;
-import fql.decl.Signature;
 import fql.examples.Example;
 import fql.sql.PSM;
 import fql.sql.PSMGen;
@@ -60,13 +62,14 @@ public class CodeEditor extends JPanel {
    final JButton prevButton = new JButton("Find Previous");
    final JCheckBox matchCaseCB = new JCheckBox("Match Case");
    final JCheckBox replaceCB = new JCheckBox("Replace");
+   final JCheckBox wholeCB = new JCheckBox("Whole Word");
    final JTextField replaceField = new JTextField();
    
    JFrame frame;
    
    
-   public JPanel foo() {
-   JPanel toolBar = new JPanel(new GridLayout(2,4));
+   public JPanel makeSearchDialog() {
+   JPanel toolBar = new JPanel(new GridLayout(3,4));
    
   // JPanel toolBar = new JPanel();
    toolBar.add(new JLabel("Search for:"));
@@ -98,6 +101,7 @@ public class CodeEditor extends JPanel {
       }
    });
    
+  
  
    
   // prevButton.setActionCommand("FindPrev");
@@ -110,6 +114,11 @@ public class CodeEditor extends JPanel {
    toolBar.add(new JLabel("Replace with:"));
    toolBar.add(replaceField);
    toolBar.add(replaceCB);
+   
+   toolBar.add(new JLabel());
+   toolBar.add(new JLabel());
+   toolBar.add(new JLabel());
+   toolBar.add(wholeCB);
    toolBar.add(matchCaseCB);
    
    //ret.add(toolBar);
@@ -128,7 +137,9 @@ protected void doFind(boolean b) {
     context.setMatchCase(matchCaseCB.isSelected());
     //context.setRegularExpression(regexCB.isSelected());
     context.setSearchForward(b);
-    context.setWholeWord(false);
+    context.setWholeWord(wholeCB.isSelected());
+  
+    
     
     if (replaceCB.isSelected()) {
     	context.setReplaceWith(replaceField.getText());
@@ -186,13 +197,34 @@ protected void doFind(boolean b) {
 				
 				if (frame == null) {
 					frame = new JFrame();
-					frame.setContentPane(foo()); 
+					frame.setContentPane(makeSearchDialog()); 
 					frame.setTitle("Find and Replace");
 					 
 					frame.pack();
 					frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 					//frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 					frame.setLocationRelativeTo(null);
+				
+					ActionListener escListener = new ActionListener() {
+					        @Override
+					        public void actionPerformed(ActionEvent e) {
+					            frame.setVisible(false);
+					        }
+					    };
+
+					    frame.getRootPane().registerKeyboardAction(escListener,
+					            KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+					            JComponent.WHEN_IN_FOCUSED_WINDOW);
+					    KeyStroke ctrlW = KeyStroke.getKeyStroke(KeyEvent.VK_W,
+						        InputEvent.CTRL_MASK);
+						KeyStroke commandW = KeyStroke.getKeyStroke(KeyEvent.VK_W,
+						        InputEvent.META_MASK);
+						frame.getRootPane().registerKeyboardAction(escListener,
+					           ctrlW,
+					            JComponent.WHEN_IN_FOCUSED_WINDOW);
+						frame.getRootPane().registerKeyboardAction(escListener,
+					            commandW,
+					            JComponent.WHEN_IN_FOCUSED_WINDOW);
 				}
 				frame.setVisible(true);
 			}
@@ -326,6 +358,15 @@ protected void doFind(boolean b) {
 						continue;
 					}
 				}
+				if (parsed_program.isMapping(s)) {
+					if (DEBUG.INTERMEDIATE == Intermediate.NONE || DEBUG.INTERMEDIATE == Intermediate.SOME) {
+						if (parsed_program.isId(s)) {
+							//System.out.println("skipping " + s);
+							continue;
+						} 
+					}
+				}
+				
 				commands.add(s);
 			}
 			

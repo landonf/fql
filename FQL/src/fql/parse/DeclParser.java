@@ -44,7 +44,7 @@ public class DeclParser implements Parser<Decl> {
 		} catch (IllTyped e) {
 		}
 		
-		throw new BadSyntax("Cannot parse from " + s);
+		throw new BadSyntax(s, "Cannot parse from " + s);
 		
 	}
 

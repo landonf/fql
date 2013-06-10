@@ -353,15 +353,15 @@ boolean isId;
 		float dash[] = { 10.0f };
 		final Stroke edgeStroke = new BasicStroke(1.0f, BasicStroke.CAP_BUTT,
 				BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
-		//final Stroke bs = new BasicStroke();
+		final Stroke bs = new BasicStroke();
 
 		Transformer<String, Stroke> edgeStrokeTransformer = new Transformer<String, Stroke>() {
 			public Stroke transform(String s) {
-//				if (s.contains("#")) {
-//					return edgeStroke;
-//				} 
-//				return bs;
-				return edgeStroke;
+				if (s.contains("#")) {
+					return edgeStroke;
+				} 
+				return bs;
+				//return edgeStroke;
 			}
 		};
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
@@ -424,6 +424,21 @@ boolean isId;
 		}
 		for (Node n : union.target.nodes) {
 			g2.addVertex("@union_target" + "." + n.string);
+		}
+		if (DEBUG.SHOW_QUERY_PATHS) {
+			for (Edge e : project.target.edges) {
+				g2.addEdge("@project_target" + "." + e.name, "@project_target" + "." + e.source.string, "@project_target" + "." + e.target.string);
+			}
+			for (Edge e : project.source.edges) {
+				g2.addEdge("@project_source" + "." + e.name, "@project_source" + "." + e.source.string, "@project_source" + "." + e.target.string);
+			}
+			for (Edge e : join.target.edges) {
+				g2.addEdge("@join_target" + "." + e.name, "@join_target" + "." + e.source.string, "@join_target" + "." + e.target.string);
+			}
+			for (Edge e : union.target.edges) {
+				g2.addEdge("@union_target" + "." + e.name, "@union_target" + "." + e.source.string, "@union_target" + "." + e.target.string);
+			}
+			
 		}
 		
 				

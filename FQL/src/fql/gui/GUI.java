@@ -307,6 +307,7 @@ public class GUI extends JPanel {
 	  //   toolBar temp1 = new JPanel();
 	     JLabel l = new JLabel("Load Example:", JLabel.RIGHT);
 	     final JComboBox<Example> box = new JComboBox<>(Examples.examples);
+	     box.setSelectedIndex(-1);
 	     box.addActionListener(new ActionListener() {
 
 			@Override

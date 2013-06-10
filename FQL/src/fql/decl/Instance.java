@@ -248,7 +248,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 				return secol(p.second);
 			}
 		}
-		throw new RuntimeException("cannot find " + string + " in " + data2);
+		throw new RuntimeException("cannot find " + string + " in " + data2 + " in " + name);
 	}
 
 	private Set<Pair<Object, Object>> secol(List<Pair<Object, Object>> second) {
@@ -401,13 +401,14 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		StringBuffer sb = new StringBuffer("instance " + name + " : " + thesig.name0 + " = {\n");
 
 		boolean first = true;
+		sb.append("nodes\n");
 		for (Node k : thesig.nodes) {
 			Set<Pair<Object, Object>> v = data.get(k.string);
 			if (!first) {
 				sb.append(",\n");
 			}
 			first = false;
-			sb.append(k);
+			sb.append(k.string);
 			sb.append(" = { ");
 			sb.append(printNode(v));
 			sb.append(" }");
@@ -415,28 +416,34 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		sb.append("\n ;\n");
 		
 		first = true;
-		for (Edge k : thesig.edges) {
-			Set<Pair<Object, Object>> v = data.get(k.name);
-			if (!first) {
-				sb.append(",\n");
-			}
-			first = false;
-			sb.append(k);
-			sb.append(" = { ");
-			sb.append(printSet(v));
-			sb.append(" }");
-		}
+		sb.append("attributes\n");
 		for (Attribute k : thesig.attrs) {
 			Set<Pair<Object, Object>> v = data.get(k.name);
 			if (!first) {
 				sb.append(",\n");
 			}
 			first = false;
-			sb.append(k);
+			sb.append(k.name);
 			sb.append(" = { ");
 			sb.append(printSet(v));
 			sb.append(" }");
 		}
+		sb.append("\n ;\n");
+		
+		first = true;
+		sb.append("arrows\n");
+		for (Edge k : thesig.edges) {
+			Set<Pair<Object, Object>> v = data.get(k.name);
+			if (!first) {
+				sb.append(",\n");
+			}
+			first = false;
+			sb.append(k.name);
+			sb.append(" = { ");
+			sb.append(printSet(v));
+			sb.append(" }");
+		}
+		
 
 		sb.append("\n}");
 		return sb.toString();

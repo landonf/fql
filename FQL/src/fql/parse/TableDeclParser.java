@@ -20,7 +20,7 @@ public class TableDeclParser implements
 		String name;
 		List<Pair<String, String>> data;
 
-		Parser<?> e = new KeywordParser("=");
+		Parser<?> e = new KeywordParser("->");
 		
 		Parser<?> sep = new KeywordParser(",");
 		Parser<Pair<String, String>> p1 = new TupleParser();

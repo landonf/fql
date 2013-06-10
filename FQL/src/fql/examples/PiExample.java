@@ -4,35 +4,59 @@ public class PiExample extends Example {
 
 	@Override
 	public String getName() {
-		return "Pi id";
+		return "Pi";
 	}
 
 	@Override
 	public String getText() {
-		return piDefinitions;
+		return s;
 	}
 	
-	public static final String piDefinitions = 
-			"schema C = { c : C1 -> C2 ; }\n" +
-					"\n" +
-					"instance I : C = {\n" +
-					"C1 = {c1A,c1B},\n" +
-					"C2 = {c2};\n" +
-					"c = {(c1A,c2),(c1B,c2)}\n" +
-					"}\n" +
-					"\n"+
-					"mapping idC : C -> C = id C\n" +
-					"\n" + 
-					"instance J : C = pi idC I\n\n"
-					+ "\n\n\n/*"
-					+ "\nExpected output:"
-					+ "\n"
-					+ "\nJ = {"
-					+ "\n  c = { (c2^c2^c1A,c2), (c2^c2^c1B,c2) };"
-					+ "\n  C1 = { (c2^c2^c1B,c2^c2^c1B), (c2^c2^c1A,c2^c2^c1A) };"
-					+ "\n  C2 = { (c2,c2) }"
+	public static final String s = 
+			"schema C = { "
+					+ "\n nodes"
+					+ "\n	C1, C2;"
+					+ "\n attributes;"
+					+ "\n arrows"
+					+ "\n 	c : C1 -> C2, "
+					+ "\n 	cc : C1 -> C2;"
+					+ "\n equations;"
 					+ "\n}"
-					+ "\n*/\n";
-	
+					+ "\n"
+					+ "\ninstance I : C = {"
+					+ "\n nodes"
+					+ "\n	C1 -> { c1A, c1B, c1C },"
+					+ "\n	C2 -> { c2x, c2y};"
+					+ "\n attributes;"
+					+ "\n arrows"
+					+ "\n	c ->  { (c1A,c2x), (c1B,c2x), (c1C,c2x) },"
+					+ "\n	cc -> { (c1A,c2x), (c1B,c2x), (c1C,c2y) };"
+					+ "\n}"
+					+ "\n"
+					+ "\nschema D = { "
+					+ "\n nodes"
+					+ "\n 	D1,"
+					+ "\n 	D2,"
+					+ "\n 	D3;"
+					+ "\n attributes;"
+					+ "\n arrows"
+					+ "\n	d : D1 -> D2, "
+					+ "\n	dd : D1 -> D2, "
+					+ "\n	ddd : D2 -> D3;"
+					+ "\n equations;"
+					+ "\n}"
+					+ "\n"
+					+ "\nmapping F : C -> D = {"
+					+ "\n nodes"
+					+ "\n  C1 -> D1,"
+					+ "\n  C2 -> D3;"
+					+ "\n  attributes;"
+					+ "\n  arrows"
+					+ "\n  c  -> D1.d.ddd,"
+					+ "\n  cc -> D1.dd.ddd;"
+					+ "\n}"
+					+ "\n"
+					+ "\ninstance J : D = pi F I";
+
 
 }

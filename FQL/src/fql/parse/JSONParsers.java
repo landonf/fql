@@ -58,7 +58,7 @@ public class JSONParsers {
 				m = new Mapping(zzz.value.first.first, zzz.value.first.second, zzz.value.second.first, zzz.value.second.second);
 			} catch (FQLException e) {
 				e.printStackTrace();
-				throw new BadSyntax(e.getMessage());
+				throw new BadSyntax(s, e.getMessage());
 			}
 			return new Partial<>(zzz.tokens, m);
 		}

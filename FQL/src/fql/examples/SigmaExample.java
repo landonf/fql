@@ -9,58 +9,90 @@ public class SigmaExample extends Example {
 
 	@Override
 	public String getText() {
-		return migrationDefinitions;
+		return s;
 	}
 	
-	public static final String migrationDefinitions = "schema C = {" +
-			"\n g1 : a1 -> b1, g2 : a2 -> b2, g3 : a3 -> b2," +
-			"\n h1 : a1 -> c1, h2 : a2 -> c2, h3 : a3 -> c4," +
-			"\n c3;" + 
-			"\n}" +
-			"\n" +
-			"\nschema D = {" +
-			"\n G : A -> B, H : A -> C;" +
-			"\n}" +
-			"\n" +
-			"\nmapping F : C -> D = {" +
-			"\n  a1 -> A, a2 -> A, a3 -> A," +
-			"\n  b1 -> B, b2 -> B, " +
-			"\n  c1 -> C, c2 -> C, c3 -> C, c4 -> C" +
-			"\n ; " +
-			"\n  g1 -> A.G, g2 -> A.G, g3 -> A.G," +
-			"\n  h1 -> A.H, h2 -> A.H, h3 -> A.H" +
-			"\n}\n\n" + 
-			"\ninstance I : C = {"+
-			"\n b2 = {a,b,c},"+
-			"\n b1 = {d,e},"+
-			"\n "+
-			"\n a3 = {1,2},"+
-			"\n a2 = {3,4,5},"+
-			"\n a1 = {6},"+
-			"\n "+
-			"\n c4 = {f,g},"+
-			"\n c3 = {h},"+
-			"\n c2 = {i,j},"+
-			"\n c1 = {k,l};"+
-			"\n "+
-			"\n g3 = {(1,a),(2,b)},"+
-			"\n g2 = {(3,a),(4,b),(5,c)},"+
-			"\n g1 = {(6,d)},"+
-			"\n "+
-			"\n h3 = {(1,f),(2,g)},"+
-			"\n h2 = {(3,i),(4,j),(5,j)},"+
-			"\n h1 = {(6,k)}"+
-			"\n}\n\n" 
-		//	+ "mapping idC = id C\nquery q = project idC join idC union F\n"
-			+ "instance J : D = sigma F I\n"
-	+ "\n\n\n/*\nExpected output:"
-	+ "\nJ = {"
-	+ "\n  G = { (a3_2,b2_b), (a2_4,b2_b), (a3_1,b2_a), (a2_5,b2_c), (a1_6,b1_d), (a2_3,b2_a) };"
-	+ "\n  A = { (a3_1,a3_1), (a2_5,a2_5), (a3_2,a3_2), (a2_4,a2_4), (a1_6,a1_6), (a2_3,a2_3) };"
-	+ "\n  B = { (b1_d,b1_d), (b1_e,b1_e), (b2_c,b2_c), (b2_a,b2_a), (b2_b,b2_b) };"
-	+ "\n  C = { (c2_i,c2_i), (c1_l,c1_l), (c1_k,c1_k), (c3_h,c3_h), (c4_g,c4_g), (c2_j,c2_j), (c4_f,c4_f) };"
-	+ "\n  H = { (a2_5,c2_j), (a3_1,c4_f), (a3_2,c4_g), (a1_6,c1_k), (a2_3,c2_i), (a2_4,c2_j) } "
-	+ "\n  }\n*/\n";
-
+	public static final String s = 
+			"schema C = {"
+					+ "\n nodes"
+					+ "\n 	a1, a2, a3, b1, b2, c1, c2, c3, c4;"
+					+ "\n 	"
+					+ "\n attributes;"
+					+ "\n "
+					+ "\n arrows"
+					+ "\n	g1 : a1 -> b1, "
+					+ "\n	g2 : a2 -> b2, "
+					+ "\n	g3 : a3 -> b2,"
+					+ "\n	h1 : a1 -> c1, "
+					+ "\n 	h2 : a2 -> c2, "
+					+ "\n 	h3 : a3 -> c4;"
+					+ "\n 	"
+					+ "\n equations;"
+					+ "\n}"
+					+ "\n"
+					+ "\nschema D = {"
+					+ "\n nodes"
+					+ "\n 	A, B, C;"
+					+ "\n 	"
+					+ "\n attributes;"
+					+ "\n "
+					+ "\n arrows"
+					+ "\n	G : A -> B, "
+					+ "\n	H : A -> C;"
+					+ "\n	"
+					+ "\n equations;"
+					+ "\n}"
+					+ "\n"
+					+ "\nmapping F : C -> D = {"
+					+ "\n nodes"
+					+ "\n	a1 -> A, "
+					+ "\n	a2 -> A, "
+					+ "\n	a3 -> A,"
+					+ "\n  	b1 -> B, "
+					+ "\n  	b2 -> B, "
+					+ "\n  	c1 -> C, "
+					+ "\n  	c2 -> C, "
+					+ "\n  	c3 -> C, "
+					+ "\n  	c4 -> C;"
+					+ "\n  	"
+					+ "\n attributes;"
+					+ "\n "
+					+ "\n arrows "
+					+ "\n  g1 -> A.G, "
+					+ "\n  g2 -> A.G, "
+					+ "\n  g3 -> A.G,"
+					+ "\n  h1 -> A.H, "
+					+ "\n  h2 -> A.H, "
+					+ "\n  h3 -> A.H;"
+					+ "\n}"
+					+ "\n"
+					+ "\n"
+					+ "\ninstance I : C = {"
+					+ "\n nodes"
+					+ "\n	b2 -> {a,b,c},"
+					+ "\n 	b1 -> {d,e},"
+					+ "\n "
+					+ "\n 	a3 -> {1,2},"
+					+ "\n 	a2 -> {3,4,5},"
+					+ "\n 	a1 -> {6},"
+					+ "\n"
+					+ "\n 	c4 -> {f,g},"
+					+ "\n 	c3 -> {h},"
+					+ "\n 	c2 -> {i,j},"
+					+ "\n 	c1 -> {k,l};"
+					+ "\n"
+					+ "\n attributes;"
+					+ "\n"
+					+ "\n arrows "
+					+ "\n 	g3 -> {(1,a),(2,b)},"
+					+ "\n 	g2 -> {(3,a),(4,b),(5,c)},"
+					+ "\n 	g1 -> {(6,d)},"
+					+ "\n "
+					+ "\n 	h3 -> {(1,f),(2,g)},"
+					+ "\n 	h2 -> {(3,i),(4,j),(5,j)},"
+					+ "\n 	h1 -> {(6,k)};"
+					+ "\n}"
+					+ "\n"
+					+ "\ninstance J : D = sigma F I";
 
 }

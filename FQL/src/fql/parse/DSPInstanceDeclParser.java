@@ -23,7 +23,7 @@ public class DSPInstanceDeclParser implements Parser<Decl> {
 			return doParse("pi", s0);
 		} catch (Exception e) { }
 		
-		throw new BadSyntax("Could not parse delta/sigma/pi instance decl from " + s0);
+		throw new BadSyntax(s0, "Could not parse delta/sigma/pi instance decl from " + s0);
 	}
 
 	private Partial<Decl> doParse(String kind, Tokens s0) throws BadSyntax, IllTyped {

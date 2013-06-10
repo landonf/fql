@@ -33,7 +33,7 @@ public class InstanceDeclParser implements Parser<Decl> {
 			
 		}
 
-		throw new BadSyntax("Cannot parse instance decl");
+		throw new BadSyntax(s, "Cannot parse instance decl");
 	}
 
 }

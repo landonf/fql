@@ -24,27 +24,67 @@ public class SchemaDeclParser implements Parser<Decl> {
 		
 		String name = p2.value;
 		
+		//System.out.println("EEEE");
+		
 		Parser<Unit> sp2 = new KeywordParser("=");
 		Partial<Unit> p3 = sp2.parse(p2.tokens);
 		
 		sp2 = new KeywordParser("{");
 		p3 = sp2.parse(p3.tokens);
 		
+		//System.out.println("ZZZZ");
+		
+		Parser<Unit> xxx1 = new KeywordParser("nodes");
+		p3 = xxx1.parse(p3.tokens);
+		Parser<List<String>> x = ParserUtils.manySep(new StringParser(), new KeywordParser(","));
+		Partial<List<String>> y = x.parse(p3.tokens);
+		sp2 = new KeywordParser(";");
+		p3 = sp2.parse(y.tokens);
+		
+		//System.out.println("AAAA");
+		sp2 = new KeywordParser("attributes");
+		p3 = sp2.parse(p3.tokens);
+		//System.out.println("BBBB");
+		
 		Parser<List<Triple<String, String, String>>> ap = new ArrowsParser();
 		Partial<List<Triple<String, String, String>>> ap2 = ap.parse(p3.tokens);
-		List<Triple<String, String, String>> arrows = ap2.value;
-		
+		List<Triple<String, String, String>> attrs = ap2.value;
+		//System.out.println("CCCCC");
 		sp2 = new KeywordParser(";");
 		p3 = sp2.parse(ap2.tokens);
+		//System.out.println("DDDDD");
+		
+		//
+		//System.out.println("xxAAAA");
+		sp2 = new KeywordParser("arrows");
+		p3 = sp2.parse(p3.tokens);
+		//System.out.println("xxBBBB");
+		
+		ap = new ArrowsParser();
+		 ap2 = ap.parse(p3.tokens);
+		List<Triple<String, String, String>> arrows = ap2.value;
+		//System.out.println("xxCCCCC");
+		sp2 = new KeywordParser(";");
+		p3 = sp2.parse(ap2.tokens);
+		//System.out.println("xxDDDDD");
+		//
+		
+		sp2 = new KeywordParser("equations");
+		p3 = sp2.parse(p3.tokens);
 		
 		Parser<List<Pair<List<String>, List<String>>>> ep = new EqsParser();
 		Partial<List<Pair<List<String>, List<String>>>> ep2 = ep.parse(p3.tokens);
 		List<Pair<List<String>, List<String>>> eqs = ep2.value;
 		
-		sp2 = new KeywordParser("}");
+		sp2 = new KeywordParser(";");
 		p3 = sp2.parse(ep2.tokens);
 		
-		Decl d = new SignatureDecl(name, arrows, eqs);
+		//System.out.println("QQQQQQ");
+		
+		sp2 = new KeywordParser("}");
+		p3 = sp2.parse(p3.tokens);
+		
+		Decl d = new SignatureDecl(name, y.value, attrs, arrows, eqs);
 		Partial<Decl> p = new Partial<Decl>(p3.tokens, d);
 		return p;
 	}

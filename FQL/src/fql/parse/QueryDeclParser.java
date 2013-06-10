@@ -173,6 +173,6 @@ public class QueryDeclParser implements Parser<Decl> {
 		} catch (IllTyped e) {
 		}
 
-		throw new BadSyntax("Could not parse a query from " + s);
+		throw new BadSyntax(s, "Could not parse a query from " + s);
 	}
 }

@@ -33,11 +33,12 @@ public class Examples {
 	public static Example typedemployees = new TypedEmployeesExample();
 	public static Example typedsigma = new TypedSigmaExample();
 	
-	public static Example[] examples = { typeddelta, delta, pi, pi2, typedPi, typedsigma, sigma, employess, typedemployees, composition, iso, triangle, cyclicgroup, dihedral, one, empty, foil, typedFoil, sql2fql, weird, typedWeird, people };
+	public static Example[] examples = { people, typeddelta, delta, pi, typedPi, typedsigma, sigma, employess, typedemployees, composition, iso, triangle, cyclicgroup, dihedral, /* one, */ empty, foil, typedFoil, sql2fql, weird, typedWeird };
 	
 	public static final Example INIT_EXAMPLE = typeddelta;
 	
-	public static final String helpString = "Available definitions (quasi-BNF): \n\n"
+	public static final String helpString = 
+			/* "Available definitions (quasi-BNF): \n\n"
 			+ "schema S = { [E : N -> N | N], ; [N[.E] = N[.E]], }"
 			+ "\n\nmapping F : S -> S = { [(N,N)], ; [(E, [E].)], }"
 			+ "\nmapping F = id S"
@@ -49,13 +50,9 @@ public class Examples {
 			+ "\ninstance I = eval Q I"
 			+ "\ninstance I = delta F I"
 			+ "\ninstance I = sigma F I"
-			+ "\ninstance I = pi F I"
-			+ "\n\nComments begin with /* and end with */ "
-			+ "\n"
-			+ "\nFor sigma/pi query generation, signatures must be finite."
-			+ "\n\nMapping well-formedness is not checked."
-			+ "\n\nKeyboard shotcuts should work."
-			+ "\n"
+			+ "\ninstance I = pi F I"  */
+			"See the Peoples example for a tutorial."
+			+   "\nFor sigma/pi query generation, signatures must be finite."
 			+ "\nFQL is not case-sensitive, but many SQL systems are."
 			+ "\n"
 			+ "\nInstance values must be single words, unless they are quoted."

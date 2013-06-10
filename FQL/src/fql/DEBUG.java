@@ -18,6 +18,8 @@ import javax.swing.JTextField;
  */
 public class DEBUG {
 
+	public static boolean SHOW_QUERY_PATHS = true;
+	
 	public static  Intermediate INTERMEDIATE = Intermediate.NONE;
 
 	public static  boolean VALIDATE = true;
@@ -28,7 +30,7 @@ public class DEBUG {
 	
 	//public static int MAX_JOIN_SIZE = 1024;
 	
-	public static  boolean ALLOW_INFINITES = true; 
+	public static  boolean ALLOW_INFINITES = false; 
 	
 	//public static boolean CHECK_MAPPINGS = false;
 	
@@ -38,11 +40,13 @@ public class DEBUG {
 	
 	
 	public static void showOptions() {
-		JPanel p = new JPanel(new GridLayout(6, 2));
+		JPanel p = new JPanel(new GridLayout(7, 2));
 		
-	//	JCheckBox jcb1 = new JCheckBox("", CHECK_MAPPINGS);
-	//	p.add(new JLabel("Require mapping well-formedness:"));
-	//	p.add(jcb1);
+		
+		JCheckBox jcb1 = new JCheckBox("", SHOW_QUERY_PATHS);
+		p.add(new JLabel("Draw paths in query graphs"));
+		p.add(jcb1);
+		
 		JRadioButton noneb = new JRadioButton("none");
 		JRadioButton somb = new JRadioButton("some");
 		JRadioButton allb = new JRadioButton("all");
@@ -115,6 +119,7 @@ public class DEBUG {
 			ALLOW_INFINITES = jcb0.isSelected();
 			VALIDATE = jcb.isSelected();
 			DO_NOT_GUIDIFY = jcbX.isSelected();
+			SHOW_QUERY_PATHS = jcb1.isSelected();
 			if (somb.isSelected()) {
 				INTERMEDIATE = Intermediate.SOME;
 			} else if (noneb.isSelected()) {
@@ -139,5 +144,7 @@ public class DEBUG {
 	static String about = "FQL IDE Copyright (C) 2013 David Spivak and Ryan Wisnesky"
 			              + "\nLicense: Creative-Commons Attribution-NonCommercial-NoDerivs 3.0 Unported"
 			 	          + "\n\nLibraries used:\n\nJetty (servlets)\nJUNG (graph visualization)\nRSyntaxTextArea (code editor)";
+
+	
 
 }

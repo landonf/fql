@@ -875,6 +875,7 @@ public class Denotation {
 			Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> xxx = toCategory();
 			
 			a.setText(xxx.first.toString());
+			a.setCaretPosition(0);
 			
 			q = makeNormalizer(xxx.second);
 			

@@ -220,7 +220,7 @@ public class Environment {
 		String name = schemaDecl.name;
 		List<Pair<List<String>, List<String>>> eqs = schemaDecl.eqs;
 
-		Signature signature = new Signature(schemaDecl.name, arrows, eqs);
+		Signature signature = new Signature(schemaDecl.name, schemaDecl.nodes, schemaDecl.attrs, arrows, eqs);
 		signatures.put(name, signature);		
 	}
 

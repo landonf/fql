@@ -1,10 +1,10 @@
 package fql.parse;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.LinkedList;
 import java.util.List;
-
-import fql.parse.BadSyntax;
-import fql.parse.Tokens;
 
 /**
  * 
@@ -34,7 +34,28 @@ public class FqlTokenizer implements Tokens {
 		}
 		
 		public FqlTokenizer(String s) throws BadSyntax {
-			words = tokenize(s);
+			BufferedReader br = new BufferedReader(new StringReader(s));
+			StringBuffer sb = new StringBuffer();
+			String l;
+			try {
+				while ((l = br.readLine()) != null) {
+					int i = l.indexOf("//");
+					if (i == -1) {
+						sb.append(l);
+						sb.append("\n");
+					} else {
+						String k = l.substring(0, i);
+						sb.append(k);
+						sb.append("\n");
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new RuntimeException();
+			}
+			
+			
+			words = tokenize(sb.toString());
 		}
 		
 		private static enum State { IN_QUOTE, IN_COMMENT, NORMAL };
@@ -62,8 +83,8 @@ public class FqlTokenizer implements Tokens {
 							ret.add(token_state);
 						}
 						return ret;
-					case IN_QUOTE : throw new BadSyntax("Unfinished quote: " + quote_state);
-					case IN_COMMENT : throw new BadSyntax("Unfinished comment: " + comment_state);
+					case IN_QUOTE : throw new BadSyntax(this, "Unfinished quote: " + quote_state);
+					case IN_COMMENT : throw new BadSyntax(this, "Unfinished comment: " + comment_state);
 					}
 				}
 				if (input.startsWith(comment_start)) {
@@ -88,7 +109,7 @@ public class FqlTokenizer implements Tokens {
 				if (input.startsWith(comment_end)) {
 					switch (state) {
 					case NORMAL :
-						throw new BadSyntax("No comment to end: " + token_state);
+						throw new BadSyntax(this, "No comment to end: " + token_state);
 					case IN_QUOTE :
 						quote_state += comment_end;
 						break;
@@ -292,7 +313,7 @@ public class FqlTokenizer implements Tokens {
 			try {
 				return words.get(0);
 			} catch (IndexOutOfBoundsException e) {
-				throw new BadSyntax("Premature end of input");
+				throw new BadSyntax(this, "Premature end of input");
 			}
 		}
 		
@@ -309,17 +330,42 @@ public class FqlTokenizer implements Tokens {
 			try {
 				ret.remove(0);
 			} catch (IndexOutOfBoundsException e) {
-				throw new BadSyntax("Premature end of input");
+				throw new BadSyntax(this, "Premature end of input");
 			}
 			return new FqlTokenizer(ret);
 		}
 
 		public String toString() {
+		//	int i = 0;
 			String s = "";
 			for (String w : words) {
 				s = s + " " + w + " ";
+			//	i++;
+//				if (i == 10) { 
+//					s += " ... ";
+//					break;
+//				}
 			}
 			return (s + "\n");
+		}
+		
+		public String toString2() {
+			int i = 0;
+			String s = "";
+			for (String w : words) {
+				s = s + " " + w + " ";
+				i++;
+				if (i == 10) { 
+					s += " ... ";
+					break;
+				}
+			}
+			return (s + "\n");
+		}
+
+		@Override
+		public List<String> words() {
+			return words;
 		}
 	
 	//}

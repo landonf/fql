@@ -15,16 +15,18 @@ public class OneExample extends Example {
 	}
 
 	String s = 
-	"schema C = { arr : A -> A ;  }" +
-	"\n" + 
-	"\nmapping F : C -> C = {" + 
-	"\n A -> A" +
-	"\n;" +
-	"\n arr -> A.arr" +
-	"\n}" + 
-	"\n" + 
-	"\ninstance I : C = {" +
-	"\n A = {x,y};" +
-	"\n arr = {(x,y),(y,x)}" +
-	"}\n";
+			"schema C = { nodes A; attributes; arrows arr : A -> A ; equations; }"
+					+ "\n"
+					+ "\nmapping F : C -> C = {"
+					+ "\n nodes A -> A;"
+					+ "\n attributes;"
+					+ "\n arrows arr -> A.arr;"
+					+ "\n}"
+					+ "\n"
+					+ "\ninstance I : C = {"
+					+ "\n nodes A -> {x,y};"
+					+ "\n attributes;"
+					+ "\n arrows arr -> {(x,y),(y,x)};"
+					+ "\n}";
+
 }

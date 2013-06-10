@@ -3,13 +3,12 @@ package fql.gui;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -20,10 +19,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import fql.DEBUG;
+import fql.DEBUG.Intermediate;
 import fql.FQLException;
 import fql.Pair;
 import fql.decl.Environment;
@@ -88,7 +90,8 @@ public class Display {
 				if (environment.instances.containsKey(c)) {
 					xxx += (" : " + environment.instances.get(c).thesig.name0);
 				} else if (environment.mappings.containsKey(c)) {
-					xxx += (" : " + environment.mappings.get(c).source.name0 + " -> " + environment.mappings.get(c).target.name0);
+						xxx += (" : " + environment.mappings.get(c).source.name0 + " -> " + environment.mappings.get(c).target.name0);	
+					
 				} else if (environment.queries.containsKey(c)) {
 					xxx += (" : " + environment.queries.get(c).getSource().name0 + " -> " + environment.queries.get(c).getTarget().name0);
 				}
@@ -104,6 +107,7 @@ public class Display {
 		final CardLayout cl = new CardLayout();
 		final JPanel x = new JPanel(cl);
 		frame = new JFrame();
+		
 		
 		//List<Pair<String, JComponent>> list = new LinkedList<Pair<String, JComponent>>();
 //		for (String p : order) {
@@ -160,6 +164,29 @@ public class Display {
 		px.add(x);
 		frame.setContentPane(px);
 		frame.setSize(850, 600);
+		
+		ActionListener escListener = new ActionListener() {
+	        @Override
+	        public void actionPerformed(ActionEvent e) {
+	            frame.dispose();
+	        }
+	    };
+
+	    frame.getRootPane().registerKeyboardAction(escListener,
+	            KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+	            JComponent.WHEN_IN_FOCUSED_WINDOW);
+	    KeyStroke ctrlW = KeyStroke.getKeyStroke(KeyEvent.VK_W,
+		        InputEvent.CTRL_MASK);
+		KeyStroke commandW = KeyStroke.getKeyStroke(KeyEvent.VK_W,
+		        InputEvent.META_MASK);
+		frame.getRootPane().registerKeyboardAction(escListener,
+	           ctrlW,
+	            JComponent.WHEN_IN_FOCUSED_WINDOW);
+		frame.getRootPane().registerKeyboardAction(escListener,
+	            commandW,
+	            JComponent.WHEN_IN_FOCUSED_WINDOW);
+		
+		
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 

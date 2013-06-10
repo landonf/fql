@@ -96,7 +96,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	public Signature source;
 	public Signature target;
 	public String name;
-	boolean isId = false;
+	public boolean isId = false;
 		
 	public Mapping(String name, Environment env, MappingDecl md) throws FQLException {
 		this.name = name;
@@ -464,7 +464,9 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		} else {
 			sb.append("{\n");
 		}
+		
 		boolean first = true;
+		sb.append("nodes\n");
 		for (Node k : nm.keySet()) {
 			Node v = nm.get(k);
 			if (!first) {
@@ -472,11 +474,14 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			}
 			first = false;
 			//sb.append("(");
-			sb.append(k);
+			sb.append(k.string);
 			sb.append(" -> ");
-			sb.append(v);
+			sb.append(v.string);
 			//sb.append(")");
 		}
+		 first = true;
+		sb.append("\n ;\nattributes\n");
+		
 		for (Attribute k : am.keySet()) {
 			Attribute v = am.get(k);
 			if (!first) {
@@ -489,7 +494,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			sb.append(v.name);
 		//	sb.append(")");
 		}
-		sb.append("\n ;\n");
+		sb.append("\n ;\narrows\n");
 		first = true;
 		for (Edge k : em.keySet()) {
 			Path v = em.get(k);
@@ -498,12 +503,12 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			}
 			first = false;
 			//sb.append("(");
-			sb.append(k);
+			sb.append(k.name);
 			sb.append(" -> ");
 			sb.append(v);
 			//sb.append(")");
 		}
-		sb.append("\n}");
+		sb.append("\n ;\n}");
 		return sb.toString();
 	}
 

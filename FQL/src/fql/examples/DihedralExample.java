@@ -11,14 +11,27 @@ public class DihedralExample extends Example {
 
 	@Override
 	public String getText() {
-		return "/* should have 4 elements */"
-				+ "\nschema Dihedral2 = {"
-				+ "\n	r: G -> G, R: G -> G, s: G -> G, S: G -> G ;"
-				+ "\n	G.r.R = G, G.R.r = G, G.s.S = G, G.S.s=G,"
-				+ "\n	G.r.r = G,"
-				+ "\n	G.s.s = G,"
-				+ "\n	G.S.r.s=G.R"
-				+ "\n}" ;
+		return s;
 	}
+
+	String s =
+			"// should have 4 elements "
+					+ "\nschema Dihedral2 = {"
+					+ "\n nodes G;"
+					+ "\n attributes;"
+					+ "\n arrows"
+					+ "\n	r: G -> G, "
+					+ "\n	R: G -> G, "
+					+ "\n	s: G -> G, "
+					+ "\n	S: G -> G;"
+					+ "\n equations"
+					+ "\n	G.r.R = G, "
+					+ "\n	G.R.r = G, "
+					+ "\n	G.s.S = G, "
+					+ "\n	G.S.s = G,"
+					+ "\n	G.r.r = G,"
+					+ "\n	G.s.s = G,"
+					+ "\n	G.S.r.s = G.R;"
+					+ "\n}";
 
 }

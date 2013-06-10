@@ -38,7 +38,7 @@ public class TupleParser implements Parser<Pair<String, String>> {
 //		} catch (BadSyntax e) {
 //		} catch (IllTyped e) {
 //		}
-		throw new BadSyntax("Could not parse tuple from " + s);
+		throw new BadSyntax(s, "Could not parse tuple from " + s);
 	}
 
 }

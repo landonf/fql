@@ -17,11 +17,11 @@ public class TableDeclParser2 implements
 	@Override
 	public Partial<Pair<String, List<Pair<String, String>>>> parse(Tokens s)
 			throws BadSyntax, IllTyped {
-		System.out.println("A");
+		//System.out.println("A");
 		String name;
 		List<Pair<String, String>> data;
 
-		Parser<?> e = new KeywordParser("=");
+		Parser<?> e = new KeywordParser("->");
 		
 		Parser<?> sep = new KeywordParser(",");
 		Parser<String> p1 = new LongStringParser();

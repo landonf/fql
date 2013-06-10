@@ -22,10 +22,14 @@ public class Program {
 		Tokens t = new FqlTokenizer(program);
 		Partial<Program> p = new ProgramParser().parse(t);
 		if (p.tokens.toString().trim().length() > 0) {
-			throw new BadSyntax("Uncomsumed input: " + p.tokens.toString().trim());
+			throw new BadSyntax(t, "Uncomsumed input: " + ((FqlTokenizer)p.tokens).toString2().trim());
 		}
 		return p.value;
 	}
+		
+
+//		return p.value;
+
 	
 	@Override
 	public String toString() {
@@ -70,6 +74,19 @@ public class Program {
 		for (Decl d : decls) {
 			if (d.name.equals(s)) {
 				if (d instanceof SignatureDecl) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+
+	public boolean isId(String s) {
+		for (Decl d : decls) {
+			if (d instanceof MappingDecl) {
+				MappingDecl d0 = (MappingDecl) d;
+				if (d.name.equals(s) && d0.kind.equals(MappingDecl.KIND.ID)) {
 					return true;
 				}
 			}

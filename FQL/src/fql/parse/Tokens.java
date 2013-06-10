@@ -1,5 +1,7 @@
 package fql.parse;
 
+import java.util.List;
+
 
 /**
  * 
@@ -9,6 +11,7 @@ package fql.parse;
  */
 public interface Tokens {
 
+	public String toString2();
 	/**
 	 * @return a new Tokens without the head
 	 * @throws BadSyntax
@@ -29,5 +32,7 @@ public interface Tokens {
 	 *             if there is none
 	 */
 	public String head() throws BadSyntax;
+
+	public List<String> words();
 	
 }

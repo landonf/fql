@@ -58,6 +58,93 @@ public class Signature implements Viewable<Signature> {
 
 	public Set<Eq> eqs;
 	public String name0;
+	
+	public Signature(String n, List<String> nodes_str, List<Triple<String, String, String>> attrs_str, List<Triple<String, String, String>> arrows,
+			List<Pair<List<String>, List<String>>> equivs) throws FQLException {
+		Set<Node> nodesA = new HashSet<>();
+		Set<Edge> edgesA = new HashSet<>();
+		Set<Attribute> attrsA = new HashSet<>();
+		name0 = n;
+		
+		Set<String> seen = new HashSet<String>();
+		for (String s : nodes_str) {
+			if (seen.contains(s)) {
+				throw new FQLException("Duplicate name: " + s);
+			}
+			seen.add(s);
+			nodesA.add(new Node(s));
+		}
+
+		
+		for (Triple<String, String, String> arrow : arrows) {
+			String name = arrow.first;
+			String source = arrow.second;
+			String target = arrow.third;
+
+			if (seen.contains(name)) {
+				throw new FQLException("Duplicate name: " + name);
+			}
+			seen.add(name);
+
+			Node source_node = lookup(source, nodesA);
+			if (source_node == null) {
+				throw new FQLException("Missing node " + source + " in " + n);
+			}
+			Node target_node = lookup(target, nodesA);
+			if (target_node == null) {
+				throw new FQLException("Missing node " + target + " in " + n);
+			}
+			//nodesA.add(target_node);
+			Edge e = new Edge(name, source_node, target_node);
+			edgesA.add(e);
+		}
+		
+		for (Triple<String, String, String> attr : attrs_str) {
+			String name = attr.first;
+			String source = attr.second;
+			String target = attr.third;
+
+			if (seen.contains(name)) {
+				throw new FQLException("Duplicate name: " + name);
+			}
+			seen.add(name);
+
+			Node source_node = lookup(source, nodesA);
+			if (source_node == null) {
+				throw new FQLException("Missing node " + source + " in " + n);
+			}
+			
+			
+			Attribute a = new Attribute(name, source_node, tryParseType(target));
+		
+			attrsA.add(a);
+			
+		}
+		
+
+		nodes = new LinkedList<>(nodesA);
+		edges = new LinkedList<>(edgesA);
+		attrs = new LinkedList<>(attrsA);
+
+		eqs = new HashSet<Eq>();
+		for (Pair<List<String>, List<String>> equiv : equivs) {
+			Path lhs = new Path(this, equiv.first);
+			Path rhs = new Path(this, equiv.second);
+			if (!lhs.source.equals(rhs.source)) {
+				throw new FQLException("source object mismatch " + lhs
+						+ " and " + rhs);
+			}
+			if (!lhs.target.equals(rhs.target)) {
+				throw new FQLException("target object mismatch " + lhs
+						+ " and " + rhs);
+			}
+			Eq eq = new Eq(lhs, rhs);
+			eqs.add(eq);
+		}
+		if (!DEBUG.ALLOW_INFINITES) {
+			toCategory2();
+		}
+	}
 
 	public Signature(String n, List<Triple<String, String, String>> arrows,
 			List<Pair<List<String>, List<String>>> equivs) throws FQLException {
@@ -172,8 +259,14 @@ public class Signature implements Viewable<Signature> {
 			seen.add(name);
 
 			Node source_node = lookup(source, nodesA);
+//			if (source_node == null) {
+//				throw new FQLException("Missing node " + source_node + " in " + name0);
+//			}
 			Node target_node = lookup(target, nodesA);
-
+//			if (target_node == null) {
+//				throw new FQLException("Missing node " + target_node + " in " + name0);
+//			}
+			
 			Edge e = new Edge(name, source_node, target_node);
 			edgesA.add(e);
 		}
@@ -269,6 +362,7 @@ public class Signature implements Viewable<Signature> {
 	}
 
 	private Node lookup(String string, Collection<Node> nodes) {
+		//System.out.println("Looking up " + string + " in " + nodes);
 		for (Node node : nodes) {
 			if (node.string.equals(string)) {
 				return node;
@@ -417,14 +511,18 @@ public class Signature implements Viewable<Signature> {
 		StringBuffer sb = new StringBuffer("schema " + name0 + " = {\n");
 
 		boolean first = true;
-		for (Edge e : edges) {
+		sb.append("nodes\n");
+		for (Node n : nodes) {
 			if (!first) {
 				sb.append(",\n");
 			}
 			first = false;
-			sb.append(e);
+			sb.append(n.string);
 		}
+		sb.append("\n ;\n");
 
+		first = true;
+		sb.append("attributes\n");
 		for (Attribute a : attrs) {
 			if (!first) {
 				sb.append(",\n");
@@ -432,22 +530,24 @@ public class Signature implements Viewable<Signature> {
 			first = false;
 			sb.append(a);
 		}
+		sb.append("\n ;\n");
 		
-		// first = true;
-		for (Node n : nodes) {
-			if (!disconnected(n)) {
-				continue;
-			}
+		first = true;
+		sb.append("edges\n");
+		for (Edge e : edges) {
 			if (!first) {
 				sb.append(",\n");
 			}
 			first = false;
-			sb.append(n.string);
+			sb.append(e);
 		}
+		// first = true;
+		
 
 		sb.append("\n ;\n");
 
 		first = true;
+		sb.append("equations\n");
 		for (Eq eq : eqs) {
 			if (!first) {
 				sb.append(",\n");
@@ -455,7 +555,7 @@ public class Signature implements Viewable<Signature> {
 			first = false;
 			sb.append(eq);
 		}
-		sb.append("\n}");
+		sb.append("\n ;\n}");
 		return sb.toString();
 	}
 
