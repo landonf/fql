@@ -18,31 +18,33 @@ import fql.gui.GUI;
 public class FQL {
 
 	public static void main(String[] args) {
-	//	System.setProperty("awt.useSystemAAFontSettings","on");
-		//  System.setProperty("swing.aatext", "true");
-		 SwingUtilities.invokeLater(new Runnable() {
-			 public void run() {
-		 
-		final Pair<JPanel, MenuBar> gui = GUI.makeGUI();
-		final JFrame f = new JFrame("FQL IDE");
-		f.setContentPane(gui.first);
-		f.setMenuBar(gui.second);
-		f.pack();
-		f.setSize(840, 630);
-		
-		f.setLocationRelativeTo(null);
-		f.setVisible(true);
-		
-		f.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		f.addWindowListener(new java.awt.event.WindowAdapter() {
-		    @Override
-		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-		       GUI.exitAction();
-		      
-		       
-		    }});
-			 }});
-		 }
+		// System.setProperty("awt.useSystemAAFontSettings","on");
+		// System.setProperty("swing.aatext", "true");
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+
+				final Pair<JPanel, MenuBar> gui = GUI.makeGUI();
+				final JFrame f = new JFrame("FQL IDE");
+				f.setContentPane(gui.first);
+				f.setMenuBar(gui.second);
+				f.pack();
+				f.setSize(840, 630);
+
+				f.setLocationRelativeTo(null);
+				f.setVisible(true);
+
+				f.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+				f.addWindowListener(new java.awt.event.WindowAdapter() {
+					@Override
+					public void windowClosing(
+							java.awt.event.WindowEvent windowEvent) {
+						GUI.exitAction();
+
+					}
+				});
+			}
+		});
+	}
 
 	static {
 		try {

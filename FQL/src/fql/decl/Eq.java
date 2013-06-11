@@ -5,19 +5,19 @@ import fql.parse.Jsonable;
 /**
  * 
  * @author ryan
- *
- * Syntax for equality of paths.
+ * 
+ *         Syntax for equality of paths.
  */
 public class Eq implements Jsonable {
 
 	public Path lhs;
 	public Path rhs;
-	
+
 	public Eq(Path lhs, Path rhs) {
 		this.lhs = lhs;
-		this.rhs = rhs;		
+		this.rhs = rhs;
 	}
-	
+
 	public String toString() {
 		return lhs + " = " + rhs;
 	}

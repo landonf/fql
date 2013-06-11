@@ -3,28 +3,33 @@ package fql.decl;
 /**
  * 
  * @author ryan
- *
- * Query declarations.
+ * 
+ *         Query declarations.
  */
 public class QueryDecl extends Decl {
-	
-	public enum KIND { ID, COMPOSE, QUERY }
+
+	public enum KIND {
+		ID, COMPOSE, QUERY
+	}
+
 	public KIND kind;
 	public String source;
 	public String target;
 	public String schema;
-	public String project, join, union;	
+	public String project, join, union;
 	public String q1, q2;
-	
-	public QueryDecl(String name, String schema, String source, String target, int x) {
+
+	public QueryDecl(String name, String schema, String source, String target,
+			int x) {
 		super(name);
 		this.schema = schema;
-		kind = KIND.ID;	
+		kind = KIND.ID;
 		this.source = source;
 		this.target = target;
 	}
 
-	public QueryDecl(String name, String m1, String m2, String source, String target) {
+	public QueryDecl(String name, String m1, String m2, String source,
+			String target) {
 		super(name);
 		this.source = source;
 		this.target = target;
@@ -32,8 +37,9 @@ public class QueryDecl extends Decl {
 		this.q2 = m2;
 		kind = KIND.COMPOSE;
 	}
-	
-	public QueryDecl(String name, String project, String join, String union, String src, String dst) {
+
+	public QueryDecl(String name, String project, String join, String union,
+			String src, String dst) {
 		super(name);
 		this.source = src;
 		this.target = dst;
@@ -47,6 +53,5 @@ public class QueryDecl extends Decl {
 	public String toString() {
 		return "project " + project + " join " + join + " union " + union;
 	}
-
 
 }

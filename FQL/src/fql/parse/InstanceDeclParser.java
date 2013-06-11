@@ -32,6 +32,18 @@ public class InstanceDeclParser implements Parser<Decl> {
 		} catch (Exception e) {
 			
 		}
+		try {
+			p = new ConstantInstanceDeclParser();
+			return p.parse(s);
+		} catch (Exception e) {
+			
+		}
+		try {
+			p = new ExternalDeclParser();
+			return p.parse(s);
+		} catch (Exception e) {
+			
+		}
 
 		throw new BadSyntax(s, "Cannot parse instance decl");
 	}

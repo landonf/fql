@@ -9,8 +9,8 @@ import fql.Triple;
 /**
  * 
  * @author ryan
- *
- * Declarations for signatures.
+ * 
+ *         Declarations for signatures.
  */
 public class SignatureDecl extends Decl {
 
@@ -19,7 +19,7 @@ public class SignatureDecl extends Decl {
 		return "SignatureDecl [name=" + name + ", arrows=" + arrows + ", eqs="
 				+ eqs + "]";
 	}
-	
+
 	public List<String> nodes;
 
 	public List<Triple<String, String, String>> arrows, attrs;

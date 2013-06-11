@@ -14,42 +14,52 @@ import fql.Triple;
 import fql.decl.Signature;
 
 /**
- *
+ * 
  * Implementation of finite categories.
+ * 
  * @author ryan
  * 
- * @param <Obj> type of objects
- * @param <Arrow> type of arrows
+ * @param <Obj>
+ *            type of objects
+ * @param <Arrow>
+ *            type of arrows
  */
-public class FinCat<Obj, Arrow>  {
+public class FinCat<Obj, Arrow> {
 
 	public List<Obj> objects = new LinkedList<>();
-	public List<Arr<Obj,Arrow>> arrows = new LinkedList<>();
-	public Map<Pair<Arr<Obj,Arrow>, Arr<Obj,Arrow>>, Arr<Obj,Arrow>> composition = new HashMap<>();
-	public Map<Obj, Arr<Obj,Arrow>> identities = new HashMap<>();
+	public List<Arr<Obj, Arrow>> arrows = new LinkedList<>();
+	public Map<Pair<Arr<Obj, Arrow>, Arr<Obj, Arrow>>, Arr<Obj, Arrow>> composition = new HashMap<>();
+	public Map<Obj, Arr<Obj, Arrow>> identities = new HashMap<>();
 
 	/**
 	 * Empty Category
 	 */
-	public FinCat() { }
-	
+	public FinCat() {
+	}
+
 	/**
 	 * Singleton category
-	 * @param o the object
-	 * @param a the identity arrow
+	 * 
+	 * @param o
+	 *            the object
+	 * @param a
+	 *            the identity arrow
 	 */
-	public FinCat(Obj o, Arr<Obj,Arrow> a) {
+	public FinCat(Obj o, Arr<Obj, Arrow> a) {
 		objects.add(o);
 		arrows.add(a);
-		composition.put(new Pair<>(a,a), a);
+		composition.put(new Pair<>(a, a), a);
 		identities.put(o, a);
 	}
-	
+
 	/**
 	 * Creates a new category, does not copy inputs.
 	 */
-	public FinCat(List<Obj> objects, List<Arr<Obj,Arrow>> arrows, Map<Pair<Arr<Obj,Arrow>, Arr<Obj,Arrow>>, Arr<Obj,Arrow>> composition,
-			Map<Obj, Arr<Obj,Arrow>> identities) {
+	public FinCat(
+			List<Obj> objects,
+			List<Arr<Obj, Arrow>> arrows,
+			Map<Pair<Arr<Obj, Arrow>, Arr<Obj, Arrow>>, Arr<Obj, Arrow>> composition,
+			Map<Obj, Arr<Obj, Arrow>> identities) {
 		noDupes(objects);
 		noDupes(arrows);
 		this.objects = objects;
@@ -72,7 +82,7 @@ public class FinCat<Obj, Arrow>  {
 		if (arrows.size() < objects.size()) {
 			throw new RuntimeException("Missing arrows: " + this);
 		}
-		for (Arr<Obj,Arrow> a : arrows) {
+		for (Arr<Obj, Arrow> a : arrows) {
 			if (a.src == null) {
 				throw new RuntimeException(a + " has no source " + this);
 			}
@@ -81,58 +91,65 @@ public class FinCat<Obj, Arrow>  {
 			}
 		}
 		for (Obj o : objects) {
-			Arr<Obj,Arrow> i = identities.get(o); 
+			Arr<Obj, Arrow> i = identities.get(o);
 			if (i == null) {
 				throw new RuntimeException(o + " has no arrow " + this);
 			}
-			for (Arr<Obj,Arrow> a : arrows) {
+			for (Arr<Obj, Arrow> a : arrows) {
 				if (a.src.equals(o)) {
 					if (!a.equals(compose(i, a))) {
-						throw new RuntimeException("Identity compose error1 " + i + o + a);
+						throw new RuntimeException("Identity compose error1 "
+								+ i + o + a);
 					}
 				}
 				if (a.dst.equals(o)) {
 					if (!a.equals(compose(a, i))) {
-						throw new RuntimeException("Identity compose error2 " + i + o + a);
+						throw new RuntimeException("Identity compose error2 "
+								+ i + o + a);
 					}
 				}
 			}
 		}
-		
-		
-		for (Arr<Obj,Arrow> a : arrows) {
-			for (Arr<Obj,Arrow> b : arrows) {
+
+		for (Arr<Obj, Arrow> a : arrows) {
+			for (Arr<Obj, Arrow> b : arrows) {
 				if (a.dst.equals(b.src)) {
-					Arr<Obj,Arrow> c = compose(a, b);
+					Arr<Obj, Arrow> c = compose(a, b);
 					if (!arrows.contains(c)) {
-						throw new RuntimeException("Not closed under composition " + a + b + c + this);
+						throw new RuntimeException(
+								"Not closed under composition " + a + b + c
+										+ this);
 					}
 					if (!a.src.equals(c.src)) {
-						throw new RuntimeException("Composition type error1 " + a + b + c + this);
+						throw new RuntimeException("Composition type error1 "
+								+ a + b + c + this);
 					}
 					if (!b.dst.equals(c.dst)) {
-						throw new RuntimeException("Composition type error2 " + a + b + c + this);
+						throw new RuntimeException("Composition type error2 "
+								+ a + b + c + this);
 					}
-					for (Arr<Obj,Arrow> cc : arrows) {
+					for (Arr<Obj, Arrow> cc : arrows) {
 						if (cc.src.equals(b.dst)) {
-							if (!compose(a, compose(b, cc)).equals(compose(compose(a,b), cc))) {
-								throw new RuntimeException("Not associative " + a + b + cc);
+							if (!compose(a, compose(b, cc)).equals(
+									compose(compose(a, b), cc))) {
+								throw new RuntimeException("Not associative "
+										+ a + b + cc);
 							}
 						}
 					}
 				}
 			}
 		}
-		
+
 	}
 
-	public Arr<Obj,Arrow> id(Obj o) {
+	public Arr<Obj, Arrow> id(Obj o) {
 		return identities.get(o);
 	}
-	
-	public Set<Arr<Obj,Arrow>> hom(Obj A, Obj B) {
-		Set<Arr<Obj,Arrow>> ret = new HashSet<>();
-		for (Arr<Obj,Arrow> a : arrows) {
+
+	public Set<Arr<Obj, Arrow>> hom(Obj A, Obj B) {
+		Set<Arr<Obj, Arrow>> ret = new HashSet<>();
+		for (Arr<Obj, Arrow> a : arrows) {
 			if (a.src.equals(A) && a.dst.equals(B)) {
 				ret.add(a);
 			}
@@ -140,23 +157,25 @@ public class FinCat<Obj, Arrow>  {
 		return ret;
 	}
 
-	public Arr<Obj,Arrow> compose(Arr<Obj,Arrow> a, Arr<Obj,Arrow> b) {
+	public Arr<Obj, Arrow> compose(Arr<Obj, Arrow> a, Arr<Obj, Arrow> b) {
 		return composition.get(new Pair<>(a, b));
 	}
 
-	public boolean isId(Arr<Obj,Arrow> a) {
+	public boolean isId(Arr<Obj, Arrow> a) {
 		return identities.containsValue(a);
 	}
-	
+
 	/**
-	 * Converts a category to a signature.  
-	 * @param n the "name" of the signature
+	 * Converts a category to a signature.
+	 * 
+	 * @param n
+	 *            the "name" of the signature
 	 * @return a signature and isomorphism
 	 * @throws FQLException
 	 */
-	public Triple<Signature, Pair<Map<Obj, String>, Map<String, Obj>>, Pair<Map<Arr<Obj, Arrow>, String>, Map<String, Arr<Obj, Arrow>>>> 
-	toSig(String n) throws FQLException {
-		
+	public Triple<Signature, Pair<Map<Obj, String>, Map<String, Obj>>, Pair<Map<Arr<Obj, Arrow>, String>, Map<String, Arr<Obj, Arrow>>>> toSig(
+			String n) throws FQLException {
+
 		int i = 0;
 		Map<String, Obj> objM = new HashMap<>();
 		Map<Obj, String> objM2 = new HashMap<>();
@@ -165,65 +184,66 @@ public class FinCat<Obj, Arrow>  {
 			objM.put("obj" + i, o);
 			i++;
 		}
-		
+
 		int j = 0;
-		Map<String, Arr<Obj,Arrow>> arrM = new HashMap<>();
-		Map<Arr<Obj,Arrow>, String> arrM2 = new HashMap<>();
-		for (Arr<Obj,Arrow> a : arrows) {
+		Map<String, Arr<Obj, Arrow>> arrM = new HashMap<>();
+		Map<Arr<Obj, Arrow>, String> arrM2 = new HashMap<>();
+		for (Arr<Obj, Arrow> a : arrows) {
 			arrM.put("arrow" + j, a);
-			arrM2.put(a, "arrow" + j);	
+			arrM2.put(a, "arrow" + j);
 			j++;
 		}
-		
-		//System.out.println(objM);
-		//System.out.println(arrM);
-		
+
+		// System.out.println(objM);
+		// System.out.println(arrM);
+
 		List<Triple<String, String, String>> arrows = new LinkedList<>();
-		for (Arr<Obj,Arrow> a : this.arrows) {
-	//		System.out.println("arrow a is " + a);
+		for (Arr<Obj, Arrow> a : this.arrows) {
+			// System.out.println("arrow a is " + a);
 			if (isId(a)) {
 				continue;
 			}
-			arrows.add(new Triple<>(arrM2.get(a), objM2.get(a.src), objM2.get(a.dst)));
+			arrows.add(new Triple<>(arrM2.get(a), objM2.get(a.src), objM2
+					.get(a.dst)));
 		}
-		
+
 		for (Obj o : isolated()) {
-//			System.out.println("isolated " + o);
-			arrows.add(new Triple<String, String, String>(objM2.get(o), null, null));
+			// System.out.println("isolated " + o);
+			arrows.add(new Triple<String, String, String>(objM2.get(o), null,
+					null));
 		}
-		
-	//	System.out.println("arrows are " + arrows);
-		
-		Signature ret2 = new Signature(n, arrows, new LinkedList<Pair<List<String>, List<String>>>());
-		
-//		System.out.println("$$$$$$$$$$$$$$$$$$$$$");
-//		System.out.println(this);
-//		System.out.println(ret2);
-//		System.out.println(objM);
-//		System.out.println(objM2);
-//		System.out.println(arrM);
-//		System.out.println(arrM2);
-//		System.out.println("$$$$$$$$$$$$$$$$$$$$$");
-		Triple<Signature, Pair<Map<Obj, String>, Map<String, Obj>>, Pair<Map<Arr<Obj,Arrow>, String>, Map<String, Arr<Obj,Arrow>>>> retret 
-		= new Triple<>(ret2, new Pair<>(objM2, objM), new Pair<>(arrM2, arrM));
+
+		// System.out.println("arrows are " + arrows);
+
+		Signature ret2 = new Signature(n, arrows,
+				new LinkedList<Pair<List<String>, List<String>>>());
+
+		// System.out.println("$$$$$$$$$$$$$$$$$$$$$");
+		// System.out.println(this);
+		// System.out.println(ret2);
+		// System.out.println(objM);
+		// System.out.println(objM2);
+		// System.out.println(arrM);
+		// System.out.println(arrM2);
+		// System.out.println("$$$$$$$$$$$$$$$$$$$$$");
+		Triple<Signature, Pair<Map<Obj, String>, Map<String, Obj>>, Pair<Map<Arr<Obj, Arrow>, String>, Map<String, Arr<Obj, Arrow>>>> retret = new Triple<>(
+				ret2, new Pair<>(objM2, objM), new Pair<>(arrM2, arrM));
 		return retret;
 	}
 
 	private Set<Obj> isolated() {
 		Set<Obj> ret = new HashSet<>(objects);
-		
-		for (Arr<Obj,Arrow> a : arrows) {
+
+		for (Arr<Obj, Arrow> a : arrows) {
 			if (isId(a)) {
 				continue;
 			}
 			ret.remove(a.src);
 			ret.remove(a.dst);
 		}
-		
+
 		return ret;
 	}
-	
-
 
 	@Override
 	public String toString() {
@@ -232,12 +252,12 @@ public class FinCat<Obj, Arrow>  {
 		for (Obj oo : objects) {
 			o += "\t" + oo + "\n";
 		}
-		
+
 		String a = "";
 		for (Arr<Obj, Arrow> aa : arrows) {
 			a += "\t" + aa.toString2() + "\n";
 		}
-		
+
 		String c = "";
 		for (Arr<Obj, Arrow> a1 : arrows) {
 			for (Arr<Obj, Arrow> a2 : arrows) {
@@ -247,16 +267,15 @@ public class FinCat<Obj, Arrow>  {
 				}
 			}
 		}
-		
+
 		String j = "";
 		for (Obj oo : objects) {
 			j += "\t" + "id_" + oo + " = " + identities.get(oo) + "\n";
 		}
-		
-	return "objects:\n" + o + "\n\narrows:\n" + a + "\n\ncomposition:\n" + c
-				+ "\n\nidentities:\n" + j;
-	}
 
+		return "objects:\n" + o + "\n\narrows:\n" + a + "\n\ncomposition:\n"
+				+ c + "\n\nidentities:\n" + j;
+	}
 
 	@Override
 	public int hashCode() {
@@ -304,6 +323,4 @@ public class FinCat<Obj, Arrow>  {
 		return true;
 	}
 
-	
-	
-	}
+}

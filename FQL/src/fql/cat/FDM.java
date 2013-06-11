@@ -11,15 +11,6 @@ import java.util.Set;
 import fql.FQLException;
 import fql.Pair;
 import fql.Triple;
-import fql.decl.Environment;
-import fql.decl.Instance;
-import fql.decl.Mapping;
-import fql.decl.Node;
-import fql.decl.Path;
-import fql.decl.Signature;
-import fql.sql.PSM;
-import fql.sql.PSMGen;
-import fql.sql.PSMInterp;
 
 /**
  * 
@@ -63,6 +54,7 @@ public class FDM {
 	/**
 	 * Limit as join all
 	 */
+	@SuppressWarnings("unchecked")
 	public static <ObjC, ObjD, ArrowC, ArrowD, Y, X> Set<Value<Y,X>[]> lim2
 	(
 			CommaCat<ObjD, ArrowD, ObjC, ArrowC, ObjD, ArrowD> B,
@@ -114,6 +106,7 @@ public class FDM {
 		return ret;
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static <X> Set<X[]> select(Set<X[]> i, int m, int n) {
 		Set<X[]> ret = new HashSet<>();
 		for (X[] tuple : i) {
@@ -222,6 +215,7 @@ public class FDM {
 	 * @return Pi_F(inst)
 	 * @throws FQLException
 	 */
+	@SuppressWarnings("unchecked")
 	public static <ObjC, ArrowC, ObjD, ArrowD, Y, X> Inst<ObjD, ArrowD, Y, X> 
 	pi(
 			FinFunctor<ObjC, ArrowC, ObjD, ArrowD> F, Inst<ObjC, ArrowC, Y, X> inst)
@@ -343,7 +337,7 @@ public class FDM {
 			Triple<ObjD, ObjC, Arr<ObjD, ArrowD>>[] q1cols, Set<Value<Y, X>[]> raw) {
 //	 System.out.println("trying subset " + print(q1cols) + " in " +
 //	 print(q2cols));
-	List<Pair<Pair<String, String>, Pair<String, String>>> ret = new LinkedList<>();
+	//List<Pair<Pair<String, String>, Pair<String, String>>> ret = new LinkedList<>();
 	//System.out.println("Arr" + e);
 	//System.out.println("Cat" + cat);
 	// turn e into arrow e', compute e' ; q2col, look for that
@@ -747,7 +741,6 @@ public class FDM {
 //		System.out.println("I " + I);
 		Map<ObjC, Map<Value<Y, X>, Value<Y, X>>> map = new HashMap<>();
 
-		//TODO: this has same problem as pi?
 		for (ObjC C : F.srcCat.objects) {
 			CommaCat<ObjD, ArrowD, ObjC, ArrowC, ObjD, ArrowD> B = doComma2(
 					F.dstCat, F.srcCat, F, F.applyO(C));
@@ -758,7 +751,7 @@ public class FDM {
 			}
 			int i = 0;
 			boolean flag = true;
-			//TODO add check if it ever finds two
+			//TODO DEFER add check if it ever finds two on FDM monad unit
 			for (Triple<ObjD, ObjC, Arr<ObjD, ArrowD>> o : B.objects) {
 				if (o.second.equals(C) && F.dstCat.isId(o.third)) {
 					Map<Value<Y,X>, Value<Y,X>> xxx = project(r, 0, i + 1);

@@ -5,16 +5,15 @@ import fql.parse.Jsonable;
 /**
  * 
  * @author ryan
- *
- * Class for edges in a signature.
+ * 
+ *         Class for edges in a signature.
  */
 public class Edge implements Jsonable {
-	
+
 	public String toString() {
 		return name + " : " + source + " -> " + target;
 	}
-	
-		
+
 	public String name;
 	public Node source;
 	public Node target;
@@ -68,7 +67,7 @@ public class Edge implements Jsonable {
 		String s = "{";
 		s += "\"source\" : " + source.tojson();
 		s += ", \"target\" : " + target.tojson();
-		s += ", \"label\" : \"" + name + "\"}";  
+		s += ", \"label\" : \"" + name + "\"}";
 		return s;
 	}
 

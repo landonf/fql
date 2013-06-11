@@ -8,6 +8,12 @@ import fql.parse.QuotedParser;
 import fql.parse.StringParser;
 import fql.parse.Tokens;
 
+/**
+ * 
+ * @author ryan
+ *
+ * parses a potentially quoted string
+ */
 public class LongStringParser implements Parser<String> {
 
 	@Override

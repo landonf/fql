@@ -4,6 +4,12 @@ import java.util.List;
 
 import fql.Pair;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Parser for sets of equations
+ */
 public class EqsParser implements Parser<List<Pair<List<String>, List<String>>>> {
 
 	@Override

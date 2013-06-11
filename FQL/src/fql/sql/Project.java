@@ -3,19 +3,19 @@ package fql.sql;
 /**
  * 
  * @author ryan
- *
- * Projection as RA syntax.
+ * 
+ *         Projection as RA syntax.
  */
 public class Project extends RA {
 
 	RA e;
 	public int[] cols;
-	
+
 	public Project(RA e, int[] cols) {
 		this.e = e;
 		this.cols = cols;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "(PROJECT " + toNice(cols) + " " + e + ")";

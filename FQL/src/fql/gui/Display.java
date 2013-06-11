@@ -24,8 +24,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import fql.DEBUG;
-import fql.DEBUG.Intermediate;
 import fql.FQLException;
 import fql.Pair;
 import fql.decl.Environment;
@@ -45,7 +43,7 @@ public class Display {
 		//frames = new HashMap<String, JComponent>();
 
 		for (String c : commands) {
-				Viewable<?> view = environment.get(c);
+			Viewable<?> view = environment.get(c);
 	
 				JTabbedPane px = new JTabbedPane();
 				

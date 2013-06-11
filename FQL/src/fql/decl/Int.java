@@ -1,5 +1,11 @@
 package fql.decl;
 
+/**
+ * 
+ * @author ryan
+ * 
+ *         The type of integers.
+ */
 public class Int extends Type {
 
 	@Override
@@ -15,7 +21,7 @@ public class Int extends Type {
 
 		return 0;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "int";

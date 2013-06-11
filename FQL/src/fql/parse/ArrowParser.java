@@ -1,9 +1,13 @@
 package fql.parse;
 
-import java.util.regex.Pattern;
-
 import fql.Triple;
 
+/**
+ * 
+ * @author ryan
+ * 
+ *         Parses an arrow
+ */
 public class ArrowParser implements Parser<Triple<String, String, String>> {
 
 	@Override
@@ -11,37 +15,39 @@ public class ArrowParser implements Parser<Triple<String, String, String>> {
 			throws BadSyntax, IllTyped {
 		try {
 			Parser<String> p = new StringParser();
-			
-			Partial<String> x = p.parse(s);		
+
+			Partial<String> x = p.parse(s);
 			String a = x.value;
-			
+
 			Parser<?> colon = new KeywordParser(":");
 			Parser<?> arrow = new KeywordParser("->");
-			
+
 			Partial<?> temp1 = colon.parse(x.tokens);
-	
+
 			x = p.parse(temp1.tokens);
 			String b = x.value;
-			
+
 			Partial<?> temp2 = arrow.parse(x.tokens);
-			
+
 			x = p.parse(temp2.tokens);
 			String c = x.value;
-			
-			return new Partial<Triple<String,String,String>>(x.tokens, new Triple<String,String,String>(a,b,c));
-//		} catch (Exception e) {
-//			
-//		}
-//		try {
-//			Parser<String> p = new StringParser();
-//			
-//			Partial<String> x = p.parse(s);	
-//			
-//			if (!Pattern.matches("[a-zA-Z0-9]+", x.value))  {
-//				throw new BadSyntax(s, "Could not parse node from " + s);
-//			}
-//			
-//			return new Partial<Triple<String,String,String>>(x.tokens, new Triple<String,String,String>(x.value, null, null));
+
+			return new Partial<Triple<String, String, String>>(x.tokens,
+					new Triple<String, String, String>(a, b, c));
+			// } catch (Exception e) {
+			//
+			// }
+			// try {
+			// Parser<String> p = new StringParser();
+			//
+			// Partial<String> x = p.parse(s);
+			//
+			// if (!Pattern.matches("[a-zA-Z0-9]+", x.value)) {
+			// throw new BadSyntax(s, "Could not parse node from " + s);
+			// }
+			//
+			// return new Partial<Triple<String,String,String>>(x.tokens, new
+			// Triple<String,String,String>(x.value, null, null));
 		} catch (Exception e) {
 			throw new BadSyntax(s, "Could not parse arrow from " + s);
 		}

@@ -207,6 +207,7 @@ public abstract class RA {
 	/**
 	 * Limit as join all.  Compare to FDM.lim
 	 */
+	@SuppressWarnings("unchecked")
 	public static  <Arrow> Pair<RA, Triple<Node, Node, Arr<Node, Path>>[]> 
 	lim(CommaCat<Node, Path, Node, Path, Node, Path> b,
 			Map<Triple<Node, Node, Arr<Node, Path>>, RA> map,
@@ -464,11 +465,11 @@ public abstract class RA {
 			Triple<Node, Node, Arr<Node, Path>>[] q1cols, RA raw) throws FQLException {
 //		 System.out.println("trying subset " + print(q1cols) + " in " +
 //		 print(q2cols));
-		List<Pair<Pair<String, String>, Pair<String, String>>> ret = new LinkedList<>();
+		//List<Pair<Pair<String, String>, Pair<String, String>>> ret = new LinkedList<>();
 		//System.out.println("Arr " + e);
 		//System.out.println("Cat" + cat);
 		// turn e into arrow e', compute e' ; q2col, look for that
-		a: for (int i = 0; i < q2cols.length; i++) {
+		/* a: */ for (int i = 0; i < q2cols.length; i++) {
 			boolean b = false;
 			for (int j = 0; j < q1cols.length; j++) {
 				Triple<Node, Node, Arr<Node, Path>> q2c = q2cols[i];
@@ -480,7 +481,7 @@ public abstract class RA {
 //				System.out.println("compose " + cat.compose(e, q1c.third));
 //				System.out.println("compose " + cat.compose(q1c.third, e));
 //				// if (q1c.equals(q2c)) {
-				//TODO add also match on second component
+			
 				if (q1c.third.equals(cat.compose(e, q2c.third)) && q1c.second.equals(q2c.second)) {
 			//		System.out.println("hit on " + q2c.third);
 					//System.out.println("raw is " + printSetOfArrays(raw));
@@ -544,13 +545,13 @@ public abstract class RA {
 //		return q1q2;
 //	}
 
-	private static String print(String[] q2cols) {
-		String s = "";
-				for (String a : q2cols) {
-					s += " " + a;
-				}
-		return s;
-	}
+//	private static String print(String[] q2cols) {
+//		String s = "";
+//				for (String a : q2cols) {
+//					s += " " + a;
+//				}
+//		return s;
+//	}
 
 	@SuppressWarnings("unused")
 	private static String printNice(

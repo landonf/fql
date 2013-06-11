@@ -1,7 +1,5 @@
 package fql.gui;
 
-
-
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.Menu;
@@ -16,7 +14,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,29 +40,24 @@ import fql.examples.Example;
 import fql.examples.Examples;
 
 @SuppressWarnings("serial")
+/**
+ * 
+ * @author ryan
+ *
+ * Top level gui
+ */
 public class GUI extends JPanel {
-	
+
 	static JTabbedPane editors = new JTabbedPane();
-	
-	
-	
 
-
-	
 	public static Pair<JPanel, MenuBar> makeGUI() {
-		
-		
-		// OSXAdapter.setQuitHandler(this, getClass().getDeclaredMethod("onClose", (Class[])null));
-		 
+
 		JPanel pan = new JPanel();
-		//super("FQL IDE");
-		
-		
-		
+
 		MenuBar menuBar = new MenuBar();
-		
-//		MenuItem m = new MenuItem()
-		
+
+		// MenuItem m = new MenuItem()
+
 		Menu fileMenu = new Menu("File");
 		MenuItem newItem = new MenuItem("New");
 		MenuItem openItem = new MenuItem("Open");
@@ -79,80 +71,79 @@ public class GUI extends JPanel {
 		fileMenu.add(saveAsItem);
 		fileMenu.add(closeItem);
 		fileMenu.add(exitItem);
-		
+
 		closeItem.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				closeAction();
 			}
-			
+
 		});
-		
+
 		saveAsItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				saveAsAction();
 			}
 		});
-	
-//		respArea.setWrapStyleWord();
+
+		// respArea.setWrapStyleWord();
 		KeyStroke ctrlS = KeyStroke.getKeyStroke(KeyEvent.VK_S,
-		        InputEvent.CTRL_MASK);
+				InputEvent.CTRL_MASK);
 		MenuShortcut s = new MenuShortcut(ctrlS.getKeyCode());
 		saveItem.setShortcut(s);
-		
+
 		KeyStroke ctrlW = KeyStroke.getKeyStroke(KeyEvent.VK_W,
-		        InputEvent.CTRL_MASK);
+				InputEvent.CTRL_MASK);
 		KeyStroke commandW = KeyStroke.getKeyStroke(KeyEvent.VK_W,
-		        InputEvent.META_MASK);
+				InputEvent.META_MASK);
 		MenuShortcut c = new MenuShortcut(ctrlW.getKeyCode());
 		closeItem.setShortcut(c);
-		 
-		    // Get the appropriate input map using the JComponent constants.
-		    // This one works well when the component is a container. 
-	 //  InputMap inputMap = editors.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-		  InputMap inputMap = editors.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-		    // Add the key binding for the keystroke to the action name
-		 inputMap.put(ctrlW, "closeTab");
-		 inputMap.put(commandW, "closeTab");
-		 
-		    // Now add a single binding for the action name to the anonymous action
-		 AbstractAction closeTabAction = new AbstractAction() {
-		      @Override
-		      public void actionPerformed(ActionEvent e) {
-		    closeAction();
-		      }
-		    };
+		// Get the appropriate input map using the JComponent constants.
+		// This one works well when the component is a container.
+		// InputMap inputMap =
+		// editors.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		InputMap inputMap = editors
+				.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+
+		// Add the key binding for the keystroke to the action name
+		inputMap.put(ctrlW, "closeTab");
+		inputMap.put(commandW, "closeTab");
+
+		// Now add a single binding for the action name to the anonymous action
+		AbstractAction closeTabAction = new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				closeAction();
+			}
+		};
 		editors.getActionMap().put("closeTab", closeTabAction);
-		
+
 		KeyStroke ctrlN = KeyStroke.getKeyStroke(KeyEvent.VK_N,
-		        InputEvent.CTRL_MASK);
+				InputEvent.CTRL_MASK);
 		MenuShortcut n = new MenuShortcut(ctrlN.getKeyCode());
 		newItem.setShortcut(n);
 		KeyStroke ctrlO = KeyStroke.getKeyStroke(KeyEvent.VK_O,
-		        InputEvent.CTRL_MASK);
+				InputEvent.CTRL_MASK);
 		MenuShortcut o = new MenuShortcut(ctrlO.getKeyCode());
 		openItem.setShortcut(o);
-	
+
 		final Menu editMenu = new Menu("Edit");
 		MenuItem findItem = new MenuItem("Find");
 		editMenu.add(findItem);
-		
-		
+
 		KeyStroke ctrlF = KeyStroke.getKeyStroke(KeyEvent.VK_F,
-		        InputEvent.CTRL_MASK);
+				InputEvent.CTRL_MASK);
 		MenuShortcut f = new MenuShortcut(ctrlF.getKeyCode());
 		findItem.setShortcut(f);
-		
-		
+
 		KeyStroke ctrlQ = KeyStroke.getKeyStroke(KeyEvent.VK_Q,
-		        InputEvent.CTRL_MASK);
+				InputEvent.CTRL_MASK);
 		MenuShortcut q = new MenuShortcut(ctrlQ.getKeyCode());
 		exitItem.setShortcut(q);
-		
-		
+
 		Menu webMenu = new Menu("Web");
 		MenuItem serverItem = new MenuItem("Start Local Server");
 		webMenu.add(serverItem);
@@ -168,9 +159,8 @@ public class GUI extends JPanel {
 				JsonPanel.showPanel(new FQLBackEnd());
 			}
 		});
-		
-		
-		//Menu optionsMenu = new Menu("Options");
+
+		// Menu optionsMenu = new Menu("Options");
 		MenuItem optionsItem = new MenuItem("Show Options");
 		editMenu.add(optionsItem);
 		optionsItem.addActionListener(new ActionListener() {
@@ -178,7 +168,7 @@ public class GUI extends JPanel {
 				DEBUG.showOptions();
 			}
 		});
-		
+
 		Menu helpMenu = new Menu("About");
 		MenuItem helpItem = new MenuItem("Help");
 		helpMenu.add(helpItem);
@@ -188,7 +178,7 @@ public class GUI extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				helpAction();
 			}
-			
+
 		});
 		MenuItem aboutItem = new MenuItem("Legal stuff");
 		helpMenu.add(aboutItem);
@@ -197,208 +187,186 @@ public class GUI extends JPanel {
 				DEBUG.showAbout();
 			}
 		});
-		
-		newItem.addActionListener(
-				new	ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						newAction(null, "");
-					}
-				}
-		);
-		openItem.addActionListener(
-				new	ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						openAction();
-					}
-				}
-		);
-		saveItem.addActionListener(
-				new	ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						saveAction();
-					}
-				}
-		);
-		
-		exitItem.addActionListener(
-				new	ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						exitAction();
-					}
-				}
-		);
-		
+
+		newItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				newAction(null, "");
+			}
+		});
+		openItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				openAction();
+			}
+		});
+		saveItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				saveAction();
+			}
+		});
+
+		exitItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				exitAction();
+			}
+		});
+
 		findItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				delay();
-				((CodeEditor)editors.getComponentAt(editors.getSelectedIndex())).findAction();
+				((CodeEditor) editors.getComponentAt(editors.getSelectedIndex()))
+						.findAction();
 
 			}
 		});
-				
+
 		menuBar.add(fileMenu);
 		menuBar.add(editMenu);
-		//menuBar.add(optionsMenu);
-		
+		// menuBar.add(optionsMenu);
+
 		menuBar.add(webMenu);
 		menuBar.add(helpMenu);
-				
-		
-		//JSplitPane p = new FQLSplit(.8, JSplitPane.HORIZONTAL_SPLIT);
-		//topArea.setPreferredSize(new Dimension(600,600));
-		//p.add(topArea);
-		//p.add(bottomArea);
-		//p.setBorder(BorderFactory.createEmptyBorder());
-		
-		
-		
-		 pan.setLayout(new BorderLayout());
-		 
-		 
-	     JPanel toolBar = new JPanel(new GridLayout(1,7));
-	    // toolBar.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-	     
-	     JButton compileB = new JButton("Compile");
-	     compileB.addActionListener(new ActionListener() {
+
+		// JSplitPane p = new FQLSplit(.8, JSplitPane.HORIZONTAL_SPLIT);
+		// topArea.setPreferredSize(new Dimension(600,600));
+		// p.add(topArea);
+		// p.add(bottomArea);
+		// p.setBorder(BorderFactory.createEmptyBorder());
+
+		pan.setLayout(new BorderLayout());
+
+		JPanel toolBar = new JPanel(new GridLayout(1, 7));
+		// toolBar.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+		JButton compileB = new JButton("Compile");
+		compileB.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				((CodeEditor)editors.getComponentAt(editors.getSelectedIndex())).runAction();
+				((CodeEditor) editors.getComponentAt(editors.getSelectedIndex()))
+						.runAction();
 			}
-	    	 
-	     });
-	     	     
-	     JButton helpB = new JButton("Help");
-	     helpB.addActionListener(new ActionListener() {
+
+		});
+
+		JButton helpB = new JButton("Help");
+		helpB.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				helpAction();
-			}	    	 
-	     });
-	     
-	     JButton new_button = new JButton("New");
-	     new_button.addActionListener(new ActionListener() {
-	    	public void actionPerformed(ActionEvent e) {
-	    		newAction(null, "");
-	    	}
-	     });
-	     
-	     JButton save_button = new JButton("Save");
-	     save_button.addActionListener(new ActionListener() {
-		    	public void actionPerformed(ActionEvent e) {
-		    		saveAction();
-		    	}
-		     });
-	     if (FQLApplet.isapplet) {
-	    	 save_button.setEnabled(false);
-	     }
-	     
-	     JButton open_button = new JButton("Open");
-	     open_button.addActionListener(new ActionListener() {
-		    	public void actionPerformed(ActionEvent e) {
-		    		openAction();
-		    	}
-		     });
-	     if (FQLApplet.isapplet) {
-	    	 open_button.setEnabled(false);
-	     }
+			}
+		});
 
-	  //   toolBar temp1 = new JPanel();
-	     JLabel l = new JLabel("Load Example:", JLabel.RIGHT);
-	     final JComboBox<Example> box = new JComboBox<>(Examples.examples);
-	     box.setSelectedIndex(-1);
-	     box.addActionListener(new ActionListener() {
+		JButton new_button = new JButton("New");
+		new_button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				newAction(null, "");
+			}
+		});
+
+		JButton save_button = new JButton("Save");
+		save_button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				saveAction();
+			}
+		});
+		if (FQLApplet.isapplet) {
+			save_button.setEnabled(false);
+		}
+
+		JButton open_button = new JButton("Open");
+		open_button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				openAction();
+			}
+		});
+		if (FQLApplet.isapplet) {
+			open_button.setEnabled(false);
+		}
+
+		// toolBar temp1 = new JPanel();
+		JLabel l = new JLabel("Load Example:", JLabel.RIGHT);
+		final JComboBox<Example> box = new JComboBox<>(Examples.examples);
+		box.setSelectedIndex(-1);
+		box.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				doExample((Example)box.getSelectedItem());
+				doExample((Example) box.getSelectedItem());
 			}
-	    	 
-	     });
-	     
-	     toolBar.add(compileB);
 
+		});
 
-//	     button.setFont(new Font("Arial", 12, Font.PLAIN));
-	//toolBar.setFont(new Font("Arial", 12, Font.PLAIN));
-	  //   toolBar.addSeparator();
-	     toolBar.add(new_button);
-	   //  toolBar.addSeparator();
-	     toolBar.add(open_button);
-	    // toolBar.addSeparator();
-	     toolBar.add(save_button);
-	     //toolBar.add(all_button);
-	    // toolBar.addSeparator();
-	     
-	     toolBar.add(helpB);
-	     
-	     JButton optionsb = new JButton("Options");
-	     toolBar.add(optionsb);
-			optionsb.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					DEBUG.showOptions();
-				}
-			});
+		toolBar.add(compileB);
 
-	     
-	     //JPanel temp2 = new JPanel();
-	     //temp2.add(l);
-	     //temp2.add(box);
-	     
-	     //toolBar.add(temp2);
-	     toolBar.add(l);
-	     toolBar.add(box);
+		// button.setFont(new Font("Arial", 12, Font.PLAIN));
+		// toolBar.setFont(new Font("Arial", 12, Font.PLAIN));
+		// toolBar.addSeparator();
+		toolBar.add(new_button);
+		// toolBar.addSeparator();
+		toolBar.add(open_button);
+		// toolBar.addSeparator();
+		toolBar.add(save_button);
+		// toolBar.add(all_button);
+		// toolBar.addSeparator();
 
+		toolBar.add(helpB);
 
+		JButton optionsb = new JButton("Options");
+		toolBar.add(optionsb);
+		optionsb.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				DEBUG.showOptions();
+			}
+		});
 
-	     //toolBar.add(temp1);
-	     
-//	     toolBar.add(reset_button);
-	    // toolBar.addSeparator();
-	//     toolBar.add(pi_button);
-	    // toolBar.addSeparator();
-	  //   toolBar.add(mig_button);
-	    // toolBar.addSeparator();
-	   //  toolBar.add(emps_button);
-	     //toolBar.addSeparator();
-	    // toolBar.add(comp_button);
-	     //toolBar.addSeparator();
+		// JPanel temp2 = new JPanel();
+		// temp2.add(l);
+		// temp2.add(box);
 
-//	     toolBar.addSeparator();
-	//     toolBar.add(new JLabel("Knuth-Bendix timout:"));
-	  //   toolBar.add(jcb);
-	   //  toolBar.setFloatable(false);
-	    // toolBar.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-	     
-	     pan.add(toolBar, BorderLayout.PAGE_START);
-	     pan.add(editors, BorderLayout.CENTER);
-		
-	     newAction(null, "");
-			
-	  //   this.
-	     
-	//	setContentPane(pan);
-	//	pan.setMenuBar(menuBar);
-	
-		//pack();
-		//setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		
-	     return new Pair<>(pan, menuBar);
+		// toolBar.add(temp2);
+		toolBar.add(l);
+		toolBar.add(box);
+
+		// toolBar.add(temp1);
+
+		// toolBar.add(reset_button);
+		// toolBar.addSeparator();
+		// toolBar.add(pi_button);
+		// toolBar.addSeparator();
+		// toolBar.add(mig_button);
+		// toolBar.addSeparator();
+		// toolBar.add(emps_button);
+		// toolBar.addSeparator();
+		// toolBar.add(comp_button);
+		// toolBar.addSeparator();
+
+		// toolBar.addSeparator();
+		// toolBar.add(new JLabel("Knuth-Bendix timout:"));
+		// toolBar.add(jcb);
+		// toolBar.setFloatable(false);
+		// toolBar.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+
+		pan.add(toolBar, BorderLayout.PAGE_START);
+		pan.add(editors, BorderLayout.CENTER);
+
+		newAction(null, "");
+
+		// this.
+
+		// setContentPane(pan);
+		// pan.setMenuBar(menuBar);
+
+		// pack();
+		// setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+		return new Pair<>(pan, menuBar);
 	}
-
-
-	
-
 
 	protected static void doExample(Example e) {
-		//int i = untitled_count;
+		// int i = untitled_count;
 		newAction(e.getName(), e.getText());
 	}
-
-
-
-
 
 	private static void closeAction() {
 		delay();
@@ -414,10 +382,6 @@ public class GUI extends JPanel {
 		titles.remove(c.id);
 	}
 
-
-
-
-
 	protected static void serverAction() {
 		String r = JOptionPane.showInputDialog("Local port:", 8085);
 		if (r == null) {
@@ -431,25 +395,15 @@ public class GUI extends JPanel {
 		}
 	}
 
-	
+	static void helpAction() {
+		JTextArea jta = new JTextArea(Examples.helpString);
+		JScrollPane p = new JScrollPane(jta);
 
-	
-	
-	
-	
-	
-
-	 static void helpAction() {
-		 JTextArea jta = new JTextArea(Examples.helpString);
-		 JScrollPane p = new JScrollPane(jta);
-		 
-		 JOptionPane.showMessageDialog(null, p, "Help", JOptionPane.QUESTION_MESSAGE);
+		JOptionPane.showMessageDialog(null, p, "Help",
+				JOptionPane.QUESTION_MESSAGE);
 	}
 
-
-	
-
-	public  static void exitAction() {
+	public static void exitAction() {
 		delay();
 		int i = 0;
 		for (Integer x : keys.keySet()) {
@@ -460,20 +414,23 @@ public class GUI extends JPanel {
 		if (i == 0) {
 			System.exit(0);
 		}
-		int choice = JOptionPane.showConfirmDialog(null, i + " documents have unsaved changes - continue?", "Exit?", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+		int choice = JOptionPane.showConfirmDialog(null, i
+				+ " documents have unsaved changes - continue?", "Exit?",
+				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null);
 		if (choice == JOptionPane.NO_OPTION) {
 			return;
 		}
 		System.exit(0);
-		
-//		if (abortBecauseDirty()) {
-//			return;
-//		}
-//		System.exit(0);
+
+		// if (abortBecauseDirty()) {
+		// return;
+		// }
+		// System.exit(0);
 	}
 
-	 protected static void saveAction() {
-		CodeEditor e = (CodeEditor) editors.getComponentAt(editors.getSelectedIndex());
+	protected static void saveAction() {
+		CodeEditor e = (CodeEditor) editors.getComponentAt(editors
+				.getSelectedIndex());
 		File f = files.get(e.id);
 		if (f == null) {
 			saveAsAction();
@@ -483,42 +440,42 @@ public class GUI extends JPanel {
 			setDirty(e.id, false);
 		}
 	}
-	 
+
 	static void doSave(File f, String s) {
 		try {
 			FileWriter fw = new FileWriter(f);
 			fw.write(s);
 			fw.close();
-		} catch (Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, "Could not save to " + f);
-		}	
-	 }
-		
-		protected static void saveAsAction() {
-			delay();
-			JFileChooser jfc = new JFileChooser();
-			jfc.showSaveDialog(null);
-			File f = jfc.getSelectedFile();
-			if (f == null) {
-				return;
-			}
-			CodeEditor e = (CodeEditor) editors.getComponentAt(editors.getSelectedIndex());
-			doSave(f, e.getText());
-			closeAction();
-			doOpen(f);
 		}
+	}
 
-		
-		static void doOpen(File f) {
-			String s = readFile(f.getAbsolutePath());
-			if (s == null) {
-				return;
-			}
-			Integer i = newAction(f.getName(), s);
-			files.put(i, f);
+	protected static void saveAsAction() {
+		delay();
+		JFileChooser jfc = new JFileChooser();
+		jfc.showSaveDialog(null);
+		File f = jfc.getSelectedFile();
+		if (f == null) {
+			return;
 		}
-		
+		CodeEditor e = (CodeEditor) editors.getComponentAt(editors
+				.getSelectedIndex());
+		doSave(f, e.getText());
+		closeAction();
+		doOpen(f);
+	}
+
+	static void doOpen(File f) {
+		String s = readFile(f.getAbsolutePath());
+		if (s == null) {
+			return;
+		}
+		Integer i = newAction(f.getName(), s);
+		files.put(i, f);
+	}
+
 	static protected void openAction() {
 		delay();
 		JFileChooser jfc = new JFileChooser();
@@ -533,86 +490,87 @@ public class GUI extends JPanel {
 	static void setDirty(Integer i, boolean b) {
 		dirty.put(i, b);
 	}
+
 	static Boolean getDirty(Integer i) {
 		return dirty.get(i);
 	}
+
 	static Map<Integer, Boolean> dirty = new HashMap<>();
 	static Map<Integer, CodeEditor> keys = new HashMap<>();
 	static Map<Integer, File> files = new HashMap<>();
 	static Map<Integer, String> titles = new HashMap<>();
-	//static Map<Integer, Integer> position = new HashMap<>();
+	// static Map<Integer, Integer> position = new HashMap<>();
 	static int untitled_count = 1;
-	
+
 	public static String getTitle(Integer i) {
 		return titles.get(i);
 	}
-	static Integer  newAction(String title, String content) {
+
+	static Integer newAction(String title, String content) {
 		CodeEditor c = new CodeEditor(untitled_count, content);
 		int i = editors.getTabCount();
 		keys.put(untitled_count, c);
 		dirty.put(untitled_count, false);
-	//	position.put(untitled_count, i);
-		
+		// position.put(untitled_count, i);
+
 		if (title == null) {
 			title = "Untitled " + untitled_count++;
 		}
 		titles.put(c.id, title);
 		editors.addTab(title, c);
-		 editors.setTabComponentAt(i,
-                 new ButtonTabComponent(editors));
-		 editors.setSelectedIndex(i);
-		 
-		 return c.id;
-//		if (abortBecauseDirty()) {
-//			return;
-//		}
-//		topArea.setText("");
-////		bottomArea.setText("");
-//		dirty = false;
-//		program = "";
-//		if (display != null) {
-//			display.close();
-//		}
-//		display = null;
+		editors.setTabComponentAt(i, new ButtonTabComponent(editors));
+		editors.setSelectedIndex(i);
+
+		return c.id;
+		// if (abortBecauseDirty()) {
+		// return;
+		// }
+		// topArea.setText("");
+		// // bottomArea.setText("");
+		// dirty = false;
+		// program = "";
+		// if (display != null) {
+		// display.close();
+		// }
+		// display = null;
 	}
 
-	
-	
+	// static CodeEditor topArea = new CodeEditor("FQL Program",program);
 
-//	static CodeEditor topArea = new CodeEditor("FQL Program",program);
+	// static FQLTextPanel topArea = new FQLTextPanel("FQL Program",program);
+	// static FQLTextPanel bottomArea = new FQLTextPanel("Commands",
+	// Examples.initialCommands);
+	// static FQLTextPanel respArea = new FQLTextPanel("Compiler response", "");
 
-	//static FQLTextPanel topArea = new FQLTextPanel("FQL Program",program);
-//	static FQLTextPanel bottomArea = new FQLTextPanel("Commands", Examples.initialCommands);
-//	static FQLTextPanel respArea = new FQLTextPanel("Compiler response", "");
-	
-	static private String readFile( String file )  {
+	static private String readFile(String file) {
 		try {
-		    BufferedReader reader = new BufferedReader( new FileReader (file));
-		    String         line = null;
-		    StringBuilder  stringBuilder = new StringBuilder();
-		    String         ls = System.getProperty("line.separator");
-	
-		    while( ( line = reader.readLine() ) != null ) {
-		        stringBuilder.append( line );
-		        stringBuilder.append( ls );
-		    }
-	
-		    reader.close();
-		    return stringBuilder.toString();
+			BufferedReader reader = new BufferedReader(new FileReader(file));
+			String line = null;
+			StringBuilder stringBuilder = new StringBuilder();
+			String ls = System.getProperty("line.separator");
+
+			while ((line = reader.readLine()) != null) {
+				stringBuilder.append(line);
+				stringBuilder.append(ls);
+			}
+
+			reader.close();
+			return stringBuilder.toString();
 		} catch (Exception e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, "Could not read from " + file);
 		}
 		return null;
 	}
-	
+
 	private static void delay() {
-	try {
-		//Thread.currentThread();
-		Thread.sleep(100); //hack for enough time to unhighlight menu
-	} catch (Exception e) {
-		e.printStackTrace();
-		return;
-	}}
+		try {
+			// Thread.currentThread();
+			Thread.sleep(100); // hack for enough time to unhighlight menu
+		} catch (Exception e) {
+			e.printStackTrace();
+			return;
+		}
+	}
 
 }

@@ -5,8 +5,8 @@ import fql.decl.Decl;
 /**
  * 
  * @author ryan
- *
- * Parser for declarations.
+ * 
+ *         Parser for declarations.
  */
 public class DeclParser implements Parser<Decl> {
 
@@ -24,13 +24,13 @@ public class DeclParser implements Parser<Decl> {
 		} catch (BadSyntax e) {
 		} catch (IllTyped e) {
 		}
-//		try {
-//			EvalInstanceDeclParser p = new EvalInstanceDeclParser();
-//			return p.parse(s);
-//		} catch (BadSyntax e) {
-//		} catch (IllTyped e) {
-//		}
-		
+		// try {
+		// EvalInstanceDeclParser p = new EvalInstanceDeclParser();
+		// return p.parse(s);
+		// } catch (BadSyntax e) {
+		// } catch (IllTyped e) {
+		// }
+
 		try {
 			MappingDeclParser p = new MappingDeclParser();
 			return p.parse(s);
@@ -43,9 +43,9 @@ public class DeclParser implements Parser<Decl> {
 		} catch (BadSyntax e) {
 		} catch (IllTyped e) {
 		}
-		
+
 		throw new BadSyntax(s, "Cannot parse from " + s);
-		
+
 	}
 
 }

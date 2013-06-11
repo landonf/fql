@@ -51,21 +51,22 @@ import fql.parse.PrettyPrinter;
  */
 public class Signature implements Viewable<Signature> {
 
-	
 	public List<Node> nodes;
 	public List<Edge> edges;
 	public List<Attribute> attrs;
 
 	public Set<Eq> eqs;
 	public String name0;
-	
-	public Signature(String n, List<String> nodes_str, List<Triple<String, String, String>> attrs_str, List<Triple<String, String, String>> arrows,
+
+	public Signature(String n, List<String> nodes_str,
+			List<Triple<String, String, String>> attrs_str,
+			List<Triple<String, String, String>> arrows,
 			List<Pair<List<String>, List<String>>> equivs) throws FQLException {
 		Set<Node> nodesA = new HashSet<>();
 		Set<Edge> edgesA = new HashSet<>();
 		Set<Attribute> attrsA = new HashSet<>();
 		name0 = n;
-		
+
 		Set<String> seen = new HashSet<String>();
 		for (String s : nodes_str) {
 			if (seen.contains(s)) {
@@ -75,7 +76,6 @@ public class Signature implements Viewable<Signature> {
 			nodesA.add(new Node(s));
 		}
 
-		
 		for (Triple<String, String, String> arrow : arrows) {
 			String name = arrow.first;
 			String source = arrow.second;
@@ -94,11 +94,11 @@ public class Signature implements Viewable<Signature> {
 			if (target_node == null) {
 				throw new FQLException("Missing node " + target + " in " + n);
 			}
-			//nodesA.add(target_node);
+			// nodesA.add(target_node);
 			Edge e = new Edge(name, source_node, target_node);
 			edgesA.add(e);
 		}
-		
+
 		for (Triple<String, String, String> attr : attrs_str) {
 			String name = attr.first;
 			String source = attr.second;
@@ -113,14 +113,12 @@ public class Signature implements Viewable<Signature> {
 			if (source_node == null) {
 				throw new FQLException("Missing node " + source + " in " + n);
 			}
-			
-			
+
 			Attribute a = new Attribute(name, source_node, tryParseType(target));
-		
+
 			attrsA.add(a);
-			
+
 		}
-		
 
 		nodes = new LinkedList<>(nodesA);
 		edges = new LinkedList<>(edgesA);
@@ -176,7 +174,7 @@ public class Signature implements Viewable<Signature> {
 				source_node = new Node(source);
 			}
 			nodesA.add(source_node);
-			
+
 			Type t;
 			if ((t = tryParseType(target)) != null) {
 				Attribute a = new Attribute(name, source_node, t);
@@ -187,7 +185,7 @@ public class Signature implements Viewable<Signature> {
 					target_node = new Node(target);
 				}
 				nodesA.add(target_node);
-	
+
 				Edge e = new Edge(name, source_node, target_node);
 				edgesA.add(e);
 			}
@@ -259,14 +257,16 @@ public class Signature implements Viewable<Signature> {
 			seen.add(name);
 
 			Node source_node = lookup(source, nodesA);
-//			if (source_node == null) {
-//				throw new FQLException("Missing node " + source_node + " in " + name0);
-//			}
+			// if (source_node == null) {
+			// throw new FQLException("Missing node " + source_node + " in " +
+			// name0);
+			// }
 			Node target_node = lookup(target, nodesA);
-//			if (target_node == null) {
-//				throw new FQLException("Missing node " + target_node + " in " + name0);
-//			}
-			
+			// if (target_node == null) {
+			// throw new FQLException("Missing node " + target_node + " in " +
+			// name0);
+			// }
+
 			Edge e = new Edge(name, source_node, target_node);
 			edgesA.add(e);
 		}
@@ -308,7 +308,8 @@ public class Signature implements Viewable<Signature> {
 
 	}
 
-	public Signature(String s, List<Node> n, List<Edge> e, List<Attribute> a, Set<Eq> ee) {
+	public Signature(String s, List<Node> n, List<Edge> e, List<Attribute> a,
+			Set<Eq> ee) {
 		name0 = s;
 		nodes = n;
 		edges = e;
@@ -362,7 +363,7 @@ public class Signature implements Viewable<Signature> {
 	}
 
 	private Node lookup(String string, Collection<Node> nodes) {
-		//System.out.println("Looking up " + string + " in " + nodes);
+		// System.out.println("Looking up " + string + " in " + nodes);
 		for (Node node : nodes) {
 			if (node.string.equals(string)) {
 				return node;
@@ -405,12 +406,12 @@ public class Signature implements Viewable<Signature> {
 		});
 
 		JTable eqsComponent = new JTable(arr, new Object[] { "lhs", "rhs" });
-//		MouseListener[] listeners = eqsComponent.getMouseListeners();
-//		for (MouseListener l : listeners) {
-//			eqsComponent.removeMouseListener(l);
-//		}
-//		eqsComponent.setRowSelectionAllowed(false);
-//		eqsComponent.setColumnSelectionAllowed(false);
+		// MouseListener[] listeners = eqsComponent.getMouseListeners();
+		// for (MouseListener l : listeners) {
+		// eqsComponent.removeMouseListener(l);
+		// }
+		// eqsComponent.setRowSelectionAllowed(false);
+		// eqsComponent.setColumnSelectionAllowed(false);
 
 		JPanel p = new JPanel(new GridLayout(2, 2));
 
@@ -438,12 +439,12 @@ public class Signature implements Viewable<Signature> {
 		nodesTemp.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Entities"));
 		nodesTemp.add(new JScrollPane(nodesComponent));
-//		nodesComponent.setRowSelectionAllowed(false);
-//		nodesComponent.setColumnSelectionAllowed(false);
-//		listeners = nodesComponent.getMouseListeners();
-//		for (MouseListener l : listeners) {
-//			nodesComponent.removeMouseListener(l);
-//		}
+		// nodesComponent.setRowSelectionAllowed(false);
+		// nodesComponent.setColumnSelectionAllowed(false);
+		// listeners = nodesComponent.getMouseListeners();
+		// for (MouseListener l : listeners) {
+		// nodesComponent.removeMouseListener(l);
+		// }
 
 		Object[][] es = new String[edges.size()][3];
 		int jj = 0;
@@ -465,15 +466,15 @@ public class Signature implements Viewable<Signature> {
 		edgesTemp.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Foreign keys"));
 
-//		esC.setRowSelectionAllowed(false);
-//		esC.setColumnSelectionAllowed(false);
-//		listeners = esC.getMouseListeners();
-//		for (MouseListener l : listeners) {
-//			esC.removeMouseListener(l);
-//		}
+		// esC.setRowSelectionAllowed(false);
+		// esC.setColumnSelectionAllowed(false);
+		// listeners = esC.getMouseListeners();
+		// for (MouseListener l : listeners) {
+		// esC.removeMouseListener(l);
+		// }
 
 		Object[][] as = new String[attrs.size()][3];
-		 jj = 0;
+		jj = 0;
 		for (Attribute a : attrs) {
 			as[jj][0] = a.name;
 			as[jj][1] = a.source.string;
@@ -492,12 +493,12 @@ public class Signature implements Viewable<Signature> {
 		attrsTemp.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Attributes"));
 
-//		esC.setRowSelectionAllowed(false);
-//		esC.setColumnSelectionAllowed(false);
-//		listeners = esC.getMouseListeners();
-//		for (MouseListener l : listeners) {
-//			esC.removeMouseListener(l);
-//		}
+		// esC.setRowSelectionAllowed(false);
+		// esC.setColumnSelectionAllowed(false);
+		// listeners = esC.getMouseListeners();
+		// for (MouseListener l : listeners) {
+		// esC.removeMouseListener(l);
+		// }
 		p.add(nodesTemp);
 		p.add(edgesTemp);
 		p.add(attrsTemp);
@@ -531,7 +532,7 @@ public class Signature implements Viewable<Signature> {
 			sb.append(a);
 		}
 		sb.append("\n ;\n");
-		
+
 		first = true;
 		sb.append("edges\n");
 		for (Edge e : edges) {
@@ -542,7 +543,6 @@ public class Signature implements Viewable<Signature> {
 			sb.append(e);
 		}
 		// first = true;
-		
 
 		sb.append("\n ;\n");
 
@@ -559,32 +559,32 @@ public class Signature implements Viewable<Signature> {
 		return sb.toString();
 	}
 
-	private boolean disconnected(Node n) {
-		for (Edge e : edges) {
-			if (e.source.equals(n) || e.target.equals(n)) {
-				return false;
-			}
-		}
-		for (Attribute a : attrs) {
-			if (a.source.equals(n)) {
-				return false;
-			}
-		}
-		return true;
-	}
+	// private boolean disconnected(Node n) {
+	// for (Edge e : edges) {
+	// if (e.source.equals(n) || e.target.equals(n)) {
+	// return false;
+	// }
+	// }
+	// for (Attribute a : attrs) {
+	// if (a.source.equals(n)) {
+	// return false;
+	// }
+	// }
+	// return true;
+	// }
 
 	@Override
 	public JPanel text() {
-//		String s = toString().replace(";", "\n\n;\n\n");
-//		String[] t = s.split(",");
-//		String ret = "";
-//		for (String a : t) {
-//			ret += (a.trim() + ",\n\n");
-//		}
-//		ret = ret.trim();
-//		if (ret.endsWith(",")) {
-//			ret = ret.substring(0, ret.length() - 1);
-//		}
+		// String s = toString().replace(";", "\n\n;\n\n");
+		// String[] t = s.split(",");
+		// String ret = "";
+		// for (String a : t) {
+		// ret += (a.trim() + ",\n\n");
+		// }
+		// ret = ret.trim();
+		// if (ret.endsWith(",")) {
+		// ret = ret.substring(0, ret.length() - 1);
+		// }
 
 		JTextArea ta = new JTextArea(toString());
 		JPanel tap = new JPanel(new GridLayout(1, 1));
@@ -602,15 +602,16 @@ public class Signature implements Viewable<Signature> {
 	}
 
 	public Pair<String, String> getColumnNames(String s) throws FQLException {
-//		if (s.contains(" ")) {
-//			return new Pair<>("ID", "string");
-//		}
+		// if (s.contains(" ")) {
+		// return new Pair<>("ID", "string");
+		// }
 		if (nodes.contains(new Node(s))) {
 			return new Pair<String, String>("ID", "ID");
 		}
 		Attribute a = getAttr(s);
 		if (a != null) {
-			return new Pair<String, String>(a.source.string, a.target.toString());
+			return new Pair<String, String>(a.source.string,
+					a.target.toString());
 		}
 		Edge e = getEdge(s);
 		return new Pair<String, String>(e.source.string, e.target.string);
@@ -643,15 +644,13 @@ public class Signature implements Viewable<Signature> {
 		return all().contains(s);
 	}
 
-	
-
 	/**
 	 * Converts a signature to a category.
 	 * 
 	 * @return the category, and some isomorphisms
 	 * @throws FQLException
 	 */
-	
+
 	public List<Path> pathsLessThan(int i) throws FQLException {
 		List<List<String>> paths = new LinkedList<>();
 
@@ -659,25 +658,25 @@ public class Signature implements Viewable<Signature> {
 			LinkedList<String> l = new LinkedList<String>();
 			l.add(n.string);
 			paths.add(l);
-		//	List<List<String>> ret0 = bfs(l, n);
-			 List<List<String>> ret0 = bfs(l, n, 0, i);
+			// List<List<String>> ret0 = bfs(l, n);
+			List<List<String>> ret0 = bfs(l, n, 0, i);
 			// System.out.println("ret0 " + ret0);
 			// System.out.println("ret1 " + ret1);
 			paths.addAll(ret0);
 		}
-		
+
 		List<Path> ret = new LinkedList<>();
 		for (List<String> x : paths) {
 			ret.add(new Path(this, x));
 		}
 		return ret;
 	}
-	
-	public Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> toCategory2() throws FQLException {
+
+	public Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> toCategory2()
+			throws FQLException {
 		Denotation d = new Denotation(this);
 		return d.toCategory();
 	}
-	
 
 	public static List<String> pathToList(Path p) {
 		List<String> ret = new LinkedList<String>();
@@ -688,7 +687,6 @@ public class Signature implements Viewable<Signature> {
 		return ret;
 	}
 
-	
 	private List<List<String>> bfs(LinkedList<String> l, Node n, int i, int stop) {
 		Set<Edge> outs = outEdges(n);
 		List<List<String>> ret = new LinkedList<List<String>>();
@@ -700,7 +698,7 @@ public class Signature implements Viewable<Signature> {
 			LinkedList<String> r = new LinkedList<String>(l);
 			r.add(e.name);
 			ret.add(r);
-			ret.addAll(bfs(new LinkedList<String>(r), e.target, i+1, stop));
+			ret.addAll(bfs(new LinkedList<String>(r), e.target, i + 1, stop));
 		}
 		return ret;
 	}
@@ -718,7 +716,6 @@ public class Signature implements Viewable<Signature> {
 	public Graph<String, String> build() {
 		// Graph<V, E> where V is the type of the vertices
 
-		
 		Graph<String, String> g2 = new DirectedSparseMultigraph<String, String>();
 		for (Node n : nodes) {
 			g2.addVertex(n.string);
@@ -727,12 +724,11 @@ public class Signature implements Viewable<Signature> {
 		for (Edge e : edges) {
 			g2.addEdge(e.name, e.source.string, e.target.string);
 		}
-		
+
 		for (Attribute a : attrs) {
 			g2.addVertex(a.name);
 			g2.addEdge(a.name, a.source.string, a.name);
 		}
-		
 
 		return g2;
 	}
@@ -762,8 +758,8 @@ public class Signature implements Viewable<Signature> {
 			public Paint transform(String i) {
 				if (!isAttribute(i)) {
 					return env.colors.get(name0);
-			} else {
-				return UIManager.getColor ( "Panel.background" );
+				} else {
+					return UIManager.getColor("Panel.background");
 				}
 			}
 		};
@@ -772,66 +768,51 @@ public class Signature implements Viewable<Signature> {
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		// Set up a new stroke Transformer for the edges
-		 float dash[] = { 1.0f };
-		 final Stroke edgeStroke = new BasicStroke(0.5f, BasicStroke.CAP_BUTT,
-		BasicStroke.JOIN_MITER, 10.0f, dash, 10.0f );
+		float dash[] = { 1.0f };
+		final Stroke edgeStroke = new BasicStroke(0.5f, BasicStroke.CAP_BUTT,
+				BasicStroke.JOIN_MITER, 10.0f, dash, 10.0f);
 		// Transformer<String, Stroke> edgeStrokeTransformer = new
 		// Transformer<String, Stroke>() {
 		// public Stroke transform(String s) {
 		// return edgeStroke;
 		// }
 		// };
-		 final Stroke bs = new BasicStroke();
+		final Stroke bs = new BasicStroke();
 		Transformer<String, Stroke> edgeStrokeTransformer = new Transformer<String, Stroke>() {
 			public Stroke transform(String s) {
 				if (isAttribute(s)) {
 					return edgeStroke;
-				} 
+				}
 				return bs;
 			}
 		};
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
-		 vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
+		vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
 		vv.getRenderContext().setVertexLabelTransformer(
 				new ToStringLabeller<String>());
-		vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller<String>()); /* {
-			
-			@Override
-			public String transform(String t) {
-				if (isAttribute(t)) {
-					return getTypeLabel(t);
-				}
-				return t;
-			}
-
-		
-
-			
-		}); */
-//				new ToStringLabeller<String>());
+		vv.getRenderContext().setEdgeLabelTransformer(
+				new ToStringLabeller<String>());
+		// new ToStringLabeller<String>());
 		// vv.getRenderer().getVertexRenderer().
 		// vv.getRenderContext().setLabelOffset(20);
 		// vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
 
-		
-		vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<String>() {
-			
-			@Override
-			public String transform(String t) {
-				if (isAttribute(t)) {
-					return getTypeLabel(t);
-				}
-				return t;
-			}
+		vv.getRenderContext().setVertexLabelTransformer(
+				new ToStringLabeller<String>() {
 
-		
+					@Override
+					public String transform(String t) {
+						if (isAttribute(t)) {
+							return getTypeLabel(t);
+						}
+						return t;
+					}
 
-			
-		});
-		
+				});
+
 		return vv;
 	}
-	
+
 	public String getTypeLabel(String t) {
 		for (Attribute a : attrs) {
 			if (a.name.equals(t)) {
@@ -840,8 +821,7 @@ public class Signature implements Viewable<Signature> {
 		}
 		throw new RuntimeException();
 	}
-	
-	
+
 	public boolean isAttribute(String t) {
 		for (Attribute a : attrs) {
 			if (a.name.equals(t)) {
@@ -924,7 +904,8 @@ public class Signature implements Viewable<Signature> {
 
 	public Signature onlyObjects() {
 		return new Signature("Obj(" + name0 + ")", nodes,
-				new LinkedList<Edge>(), new LinkedList<Attribute>(), new HashSet<Eq>());
+				new LinkedList<Edge>(), new LinkedList<Attribute>(),
+				new HashSet<Eq>());
 	}
 
 	public boolean isNode(String s) {

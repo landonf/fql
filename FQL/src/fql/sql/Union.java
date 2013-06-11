@@ -5,17 +5,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 
+ * @author ryan
+ * 
+ *         SQL Union
+ */
 public class Union extends SQL {
 
 	List<Flower> flowers;
-	
+
 	public Union(List<Flower> flowers) {
 		if (flowers.size() < 2) {
 			throw new RuntimeException();
 		}
 		this.flowers = flowers;
 	}
-	
 
 	@Override
 	public String toPSM() {
@@ -26,10 +31,9 @@ public class Union extends SQL {
 			}
 			ret += flowers.get(i);
 		}
-		
+
 		return ret;
 	}
-
 
 	@Override
 	public Set<Map<String, Object>> eval(

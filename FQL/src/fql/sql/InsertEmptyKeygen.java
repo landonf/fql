@@ -2,10 +2,15 @@ package fql.sql;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 
+ * @author ryan
+ *
+ * The unit for keygen, since SQL doesn't allow empty select-from-wheres
+ */
 public class InsertEmptyKeygen extends InsertKeygen {
 	
 	public InsertEmptyKeygen(String name) {

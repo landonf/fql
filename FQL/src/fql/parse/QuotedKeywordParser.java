@@ -2,7 +2,12 @@ package fql.parse;
 
 import fql.Unit;
 
-
+/**
+ * 
+ * @author ryan
+ *
+ * Parser for quoted keywords, for JSON.
+ */
 public class QuotedKeywordParser implements Parser<Unit> {
 
 	String p;

@@ -3,7 +3,12 @@ package fql.sql;
 import java.util.Map;
 import java.util.Set;
 
-
+/**
+ * 
+ * @author ryan
+ *
+ * A Select-from-where that just copies a table.
+ */
 public class CopyFlower extends Flower {
 
 	String name;

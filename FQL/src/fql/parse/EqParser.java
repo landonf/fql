@@ -4,6 +4,12 @@ import java.util.List;
 
 import fql.Pair;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Parser for path equalities
+ */
 public class EqParser implements Parser<Pair<List<String>, List<String>>> {
 
 	@Override

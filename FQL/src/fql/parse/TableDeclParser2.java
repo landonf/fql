@@ -9,7 +9,7 @@ import fql.Pair;
  * 
  * @author ryan
  *
- * Parser for the data part of instance declarations.
+ * Parser for the reflexive data part of instance declarations.
  */
 public class TableDeclParser2 implements
 		Parser<Pair<String, List<Pair<String, String>>>> {
@@ -37,7 +37,7 @@ public class TableDeclParser2 implements
 
 		Partial<?> y = e.parse(s);
 		s = y.tokens;
-		System.out.println("B");
+	//	System.out.println("B");
 		Partial<List<String>> z = u0.parse(s);
 		data = new LinkedList<>();
 		for (String str : z.value) {

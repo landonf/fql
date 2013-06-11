@@ -5,6 +5,12 @@ import java.util.Comparator;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Helper class for row sorting.
+ */
 public class MyTableRowSorter extends TableRowSorter<TableModel> {
 
 	public MyTableRowSorter(TableModel model) {
@@ -16,9 +22,10 @@ public class MyTableRowSorter extends TableRowSorter<TableModel> {
 		return false;
 	}
 	
+
 	@Override 
-	public Comparator getComparator(int c) {
-		return new Comparator() {
+	public Comparator<?> getComparator(int c) {
+		return new Comparator<Object>() {
 
 			@Override
 			public int compare(Object o1, Object o2) {

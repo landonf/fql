@@ -1,7 +1,13 @@
 package fql.decl;
 
+/**
+ * 
+ * @author ryan
+ * 
+ *         Implentation of atomic attributes.
+ */
 public class Attribute {
-	
+
 	public Attribute(String name, Node source, Type target) {
 		this.name = name;
 		this.source = source;
@@ -48,11 +54,9 @@ public class Attribute {
 	public String toString() {
 		return name + " : " + source + " -> " + target;
 	}
-	
-		
+
 	public String name;
 	public Node source;
 	public Type target;
-	
-	
+
 }

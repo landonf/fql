@@ -4,22 +4,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Insert values syntax
+ */
 public class InsertValues extends PSM {
 
 	String name;
 	List<String> attrs;
 	Set<Map<String, Object>> values;
-	
-	public InsertValues(String name, List<String> attrs, Set<Map<String, Object>> values) {
+
+	public InsertValues(String name, List<String> attrs,
+			Set<Map<String, Object>> values) {
 		this.name = name;
 		this.attrs = attrs;
 		this.values = values;
 	}
 
 	/*
-	 * INSERT INTO TABLE (column-a, [column-b, ...])
-     * VALUES ('value-1a', ['value-1b', ...]),
-     *        ('value-2a', ['value-2b', ...]),
+	 * INSERT INTO TABLE (column-a, [column-b, ...]) VALUES ('value-1a',
+	 * ['value-1b', ...]), ('value-2a', ['value-2b', ...]),
 	 */
 	@Override
 	public String toPSM() {
@@ -30,7 +36,7 @@ public class InsertValues extends PSM {
 			}
 			attrsStr += attrs.get(i);
 		}
-		
+
 		String pre = "INSERT INTO " + name + "(" + attrsStr + ") VALUES ";
 
 		String ret = "";
@@ -44,14 +50,14 @@ public class InsertValues extends PSM {
 			}
 			ret += pre + "(" + rowStr + ");\n";
 		}
-		
-//		for (i = 0; i < attrs.size(); i++) {
-//			if (i > 0) {
-//				attrsStr += ", ";
-//			}
-//			attrsStr += "'" + attrs.get(i) + "'";
-//		}
-		
+
+		// for (i = 0; i < attrs.size(); i++) {
+		// if (i > 0) {
+		// attrsStr += ", ";
+		// }
+		// attrsStr += "'" + attrs.get(i) + "'";
+		// }
+
 		return ret.trim();
 	}
 
@@ -60,7 +66,7 @@ public class InsertValues extends PSM {
 		if (state.get(name).size() > 0) {
 			throw new RuntimeException("table not empty: " + name);
 		}
-		state.put(name,  values);
+		state.put(name, values);
 	}
 
 }

@@ -3,14 +3,19 @@ package fql.sql;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 
+ * @author ryan
+ * 
+ *         Drop table statements.
+ */
 public class DropTable extends PSM {
 
 	String name;
-	
+
 	public DropTable(String name) {
 		this.name = name;
 	}
-	
 
 	@Override
 	public String toPSM() {

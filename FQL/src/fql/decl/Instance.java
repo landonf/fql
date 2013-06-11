@@ -55,17 +55,18 @@ import fql.parse.PrettyPrinter;
 
 public class Instance implements Viewable<Instance>, Jsonable {
 
-//	public static String data(String s) {
-//		return s + " data";
-//	}
-	
+	// public static String data(String s) {
+	// return s + " data";
+	// }
+
 	String name;
-	
+
 	public void conformsTo(Signature s) throws FQLException {
 		for (Node n : s.nodes) {
 			Set<Pair<Object, Object>> i = data.get(n.string);
 			if (i == null) {
-				throw new FQLException("Missing node table " + n.string + " in " + this);
+				throw new FQLException("Missing node table " + n.string
+						+ " in " + this);
 			}
 			for (Pair<Object, Object> p : i) {
 				if (!p.first.equals(p.second)) {
@@ -77,17 +78,19 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		for (Attribute a : s.attrs) {
 			Set<Pair<Object, Object>> i = data.get(a.name);
 			if (i == null) {
-				throw new FQLException("Missing attribute table " + a.name + " in " + this);
+				throw new FQLException("Missing attribute table " + a.name
+						+ " in " + this);
 			}
-			
-			HashSet<Object> x = new HashSet<>(); 
+
+			HashSet<Object> x = new HashSet<>();
 			for (Pair<Object, Object> p : i) {
 				x.add(p.first);
 			}
 			if (data.get(a.source.string).size() != x.size()) {
-				throw new RuntimeException("Instance does not map all domain values in " + a.name);
+				throw new RuntimeException(
+						"Instance does not map all domain values in " + a.name);
 			}
-			
+
 			for (Pair<Object, Object> p1 : i) {
 				for (Pair<Object, Object> p2 : i) {
 					if (p1.first.equals(p2.first)) {
@@ -105,7 +108,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 				}
 				if (a.target instanceof Int) {
 					try {
-						Integer.parseInt((String)p1.second);
+						Integer.parseInt((String) p1.second);
 					} catch (NumberFormatException nfe) {
 						throw new FQLException("Not an int: " + p1.second);
 					}
@@ -115,17 +118,20 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		for (Edge e : s.edges) {
 			Set<Pair<Object, Object>> i = data.get(e.name);
 			if (i == null) {
-				throw new FQLException("Missing edge table " + e.name + " in " + this);
+				throw new FQLException("Missing edge table " + e.name + " in "
+						+ this);
 			}
-			
-			HashSet<Object> x = new HashSet<>(); 
+
+			HashSet<Object> x = new HashSet<>();
 			for (Pair<Object, Object> p : i) {
 				x.add(p.first);
 			}
 			if (data.get(e.source.string).size() != x.size()) {
-				throw new FQLException("Instance does not map all domain values in " + e.name + " in " + this);
+				throw new FQLException(
+						"Instance does not map all domain values in " + e.name
+								+ " in " + this);
 			}
-			
+
 			for (Pair<Object, Object> p1 : i) {
 				for (Pair<Object, Object> p2 : i) {
 					if (p1.first.equals(p2.first)) {
@@ -136,7 +142,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 					}
 				}
 				// functional
-				
+
 				if (!contained(p1.first, data.get(e.source.string))) {
 					throw new FQLException("Domain has non foreign key: "
 							+ s.name0 + " in " + s + " and " + this);
@@ -144,7 +150,8 @@ public class Instance implements Viewable<Instance>, Jsonable {
 				if (!contained(p1.second, data.get(e.target.string))) {
 					throw new FQLException("Range has non foreign key: \n"
 							+ p1.second + "\n\n " + data.get(e.target.string)
-							+ "\n\n " + s.name0 + " \n\n " + s + " \n\n " + this);
+							+ "\n\n " + s.name0 + " \n\n " + s + " \n\n "
+							+ this);
 				}
 			}
 		}
@@ -153,11 +160,12 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			Set<Pair<Object, Object>> rhs = evaluate(eq.rhs);
 			if (!lhs.equals(rhs)) {
 				throw new FQLException("Violates constraints: " + s.name0
-						+ " in " + s + " and " + this + "\n\n eq is " + eq + "\nlhs is " + lhs + "\n\nrhs is " + rhs);
+						+ " in " + s + " and " + this + "\n\n eq is " + eq
+						+ "\nlhs is " + lhs + "\n\nrhs is " + rhs);
 			}
 		}
-		
-		//toFunctor();
+
+		// toFunctor();
 	}
 
 	private Set<Pair<Object, Object>> evaluate(Path p) {
@@ -182,8 +190,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		for (Pair<Object, Object> p1 : x) {
 			for (Pair<Object, Object> p2 : y) {
 				if (p1.second.equals(p2.first)) {
-					Pair<Object, Object> p = new Pair<>(p1.first,
-							p2.second);
+					Pair<Object, Object> p = new Pair<>(p1.first, p2.second);
 					ret.add(p);
 				}
 			}
@@ -203,20 +210,46 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	public Map<String, Set<Pair<Object, Object>>> data;
 
 	public Signature thesig;
-	
+
 	public Instance(String n, Signature thesig,
-			Map<String, Set<Pair<Object, Object>>> data)
-			throws FQLException {
+			Map<String, Set<Pair<Object, Object>>> data) throws FQLException {
 		this(n, thesig, degraph(data));
 	}
 
-	private static List<Pair<String, List<Pair<Object, Object>>>>  degraph(
+	private static List<Pair<String, List<Pair<Object, Object>>>> degraph(
 			Map<String, Set<Pair<Object, Object>>> data2) {
 		List<Pair<String, List<Pair<Object, Object>>>> ret = new LinkedList<>();
 		for (Entry<String, Set<Pair<Object, Object>>> e : data2.entrySet()) {
-			ret.add(new Pair<String, List<Pair<Object, Object>>>(e.getKey(), new LinkedList<>(e.getValue())));
+			ret.add(new Pair<String, List<Pair<Object, Object>>>(e.getKey(),
+					new LinkedList<>(e.getValue())));
 		}
 		return ret;
+	}
+
+	private boolean external = false;
+
+	public boolean isExternal() {
+		return external;
+	}
+
+	public Instance(String n, Signature thesig) throws FQLException {
+		this.name = n;
+		this.data = new HashMap<>();
+		this.external = true;
+		for (Node node : thesig.nodes) {
+			this.data.put(node.string, new HashSet<Pair<Object, Object>>());
+		}
+		for (Edge e : thesig.edges) {
+			this.data.put(e.name, new HashSet<Pair<Object, Object>>());
+		}
+		for (Attribute a : thesig.attrs) {
+			this.data.put(a.name, new HashSet<Pair<Object, Object>>());
+		}
+		this.thesig = thesig;
+		if (!typeCheck(thesig)) {
+			throw new FQLException("Type-checking failure " + n);
+		}
+		conformsTo(thesig);
 	}
 
 	public Instance(String n, Signature thesig,
@@ -226,7 +259,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		this.data = new HashMap<>();
 		for (Node node : thesig.nodes) {
 			this.data.put(node.string, makeFirst(node.string, data));
-//			this.data.put(data(node.string), lookup(node.string, data));
+			// this.data.put(data(node.string), lookup(node.string, data));
 		}
 		for (Edge e : thesig.edges) {
 			this.data.put(e.name, lookup(e.name, data));
@@ -248,7 +281,8 @@ public class Instance implements Viewable<Instance>, Jsonable {
 				return secol(p.second);
 			}
 		}
-		throw new RuntimeException("cannot find " + string + " in " + data2 + " in " + name);
+		throw new RuntimeException("cannot find " + string + " in " + data2
+				+ " in " + name);
 	}
 
 	private Set<Pair<Object, Object>> secol(List<Pair<Object, Object>> second) {
@@ -260,7 +294,8 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	}
 
 	private Set<Pair<Object, Object>> lookup(String name,
-			List<Pair<String, List<Pair<Object, Object>>>> data2) throws FQLException {
+			List<Pair<String, List<Pair<Object, Object>>>> data2)
+			throws FQLException {
 		for (Pair<String, List<Pair<Object, Object>>> p : data2) {
 			if (name.equals(p.first)) {
 				return new HashSet<>(p.second);
@@ -269,63 +304,62 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		throw new FQLException("cannot find " + name + " in " + data2);
 	}
 
-//	public Instance(String name, Query thequery, Instance theinstance)
-//			throws FQLException {
-//		if (!thequery.getSource().equals(theinstance.thesig)) {
-//			throw new FQLException("Incompatible types. Expected "
-//					+ thequery.getSource() + " received " + theinstance.thesig);
-//		}
-//		thesig = thequery.getTarget();
-//		data = thequery.eval(theinstance);
-//		conformsTo(thesig);
-//
-//	}
-//
-//	public Instance(String name, Mapping m, Instance i, String type)
-//			throws FQLException {
-//		if (type.equals("delta")) {
-//			if (!m.target.equals(i.thesig)) {
-//				throw new FQLException("Incompatible types. Expected "
-//						+ m.target + " received " + i.thesig);
-//			}
-//			thesig = m.source;
-//			data = m.evalDelta(i);
-//			conformsTo(thesig);
-//
-//		} else if (type.equals("sigma")) {
-//			if (!m.source.equals(i.thesig)) {
-//				throw new FQLException("Incompatible types. Expected "
-//						+ m.source + " received " + i.thesig);
-//			}
-//			thesig = m.target;
-//			data = m.evalSigma(i);
-//
-//			conformsTo(thesig);
-//
-//		} else if (type.equals("pi")) {
-//			if (!m.source.equals(i.thesig)) {
-//				throw new FQLException("Incompatible types. Expected "
-//						+ m.source + " received " + i.thesig);
-//			}
-//			thesig = m.target;
-//			data = m.evalPi(i);
-//			conformsTo(thesig);
-//
-//		} else {
-//			throw new FQLException("Unknown type " + type);
-//		}
-	//	toFunctor().morphs(toFunctor(), toFunctor());
-	//}
+	// public Instance(String name, Query thequery, Instance theinstance)
+	// throws FQLException {
+	// if (!thequery.getSource().equals(theinstance.thesig)) {
+	// throw new FQLException("Incompatible types. Expected "
+	// + thequery.getSource() + " received " + theinstance.thesig);
+	// }
+	// thesig = thequery.getTarget();
+	// data = thequery.eval(theinstance);
+	// conformsTo(thesig);
+	//
+	// }
+	//
+	// public Instance(String name, Mapping m, Instance i, String type)
+	// throws FQLException {
+	// if (type.equals("delta")) {
+	// if (!m.target.equals(i.thesig)) {
+	// throw new FQLException("Incompatible types. Expected "
+	// + m.target + " received " + i.thesig);
+	// }
+	// thesig = m.source;
+	// data = m.evalDelta(i);
+	// conformsTo(thesig);
+	//
+	// } else if (type.equals("sigma")) {
+	// if (!m.source.equals(i.thesig)) {
+	// throw new FQLException("Incompatible types. Expected "
+	// + m.source + " received " + i.thesig);
+	// }
+	// thesig = m.target;
+	// data = m.evalSigma(i);
+	//
+	// conformsTo(thesig);
+	//
+	// } else if (type.equals("pi")) {
+	// if (!m.source.equals(i.thesig)) {
+	// throw new FQLException("Incompatible types. Expected "
+	// + m.source + " received " + i.thesig);
+	// }
+	// thesig = m.target;
+	// data = m.evalPi(i);
+	// conformsTo(thesig);
+	//
+	// } else {
+	// throw new FQLException("Unknown type " + type);
+	// }
+	// toFunctor().morphs(toFunctor(), toFunctor());
+	// }
 
-	//this is the json one
+	// this is the json one
 	public Instance(
 			Signature sig,
 			List<Pair<String, List<Object>>> ob,
-			List<Pair<Pair<Pair<Object, Object>, String>, List<Pair<Object, Object>>>> mo) 
-	throws FQLException
-	{
-		
-		this(null, sig, jsonmap(ob, mo));		
+			List<Pair<Pair<Pair<Object, Object>, String>, List<Pair<Object, Object>>>> mo)
+			throws FQLException {
+
+		this(null, sig, jsonmap(ob, mo));
 	}
 
 	private static Map<String, Set<Pair<Object, Object>>> jsonmap(
@@ -340,7 +374,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			Set<Pair<Object, Object>> set = map.get(arr);
 			if (set == null) {
 				set = new HashSet<>();
-				map.put(arr,  set);
+				map.put(arr, set);
 			}
 			for (Pair<Object, Object> oo : o.second) {
 				set.add(oo);
@@ -398,7 +432,8 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer("instance " + name + " : " + thesig.name0 + " = {\n");
+		StringBuffer sb = new StringBuffer("instance " + name + " : "
+				+ thesig.name0 + " = {\n");
 
 		boolean first = true;
 		sb.append("nodes\n");
@@ -414,7 +449,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			sb.append(" }");
 		}
 		sb.append("\n ;\n");
-		
+
 		first = true;
 		sb.append("attributes\n");
 		for (Attribute k : thesig.attrs) {
@@ -429,7 +464,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			sb.append(" }");
 		}
 		sb.append("\n ;\n");
-		
+
 		first = true;
 		sb.append("arrows\n");
 		for (Edge k : thesig.edges) {
@@ -443,13 +478,12 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			sb.append(printSet(v));
 			sb.append(" }");
 		}
-		
 
 		sb.append("\n}");
 		return sb.toString();
 
 	}
-	
+
 	private String printNode(Set<Pair<Object, Object>> v) {
 		StringBuffer sb = new StringBuffer();
 		boolean first = true;
@@ -481,7 +515,8 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	}
 
 	private String maybeQuote(String s) {
-		if (s.contains(" ") || s.contains("\n") || s.contains("\r") || s.contains("\t")) {
+		if (s.contains(" ") || s.contains("\n") || s.contains("\r")
+				|| s.contains("\t")) {
 			return "\"" + s + "\"";
 		}
 		return s;
@@ -492,23 +527,22 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		List<JPanel> panels = new LinkedList<JPanel>();
 		// Map<String, Set<Pair<String,String>>> data;
 		LinkedList<String> sorted = new LinkedList<String>(data.keySet());
-		Collections.sort(sorted, new Comparator<String>()
-                {
-            public int compare(String f1, String f2)
-            {
-                return f1.toString().compareTo(f2.toString());
-            }        
-        });
+		Collections.sort(sorted, new Comparator<String>() {
+			public int compare(String f1, String f2) {
+				return f1.toString().compareTo(f2.toString());
+			}
+		});
 		for (String k : sorted) {
 			Set<Pair<Object, Object>> xxx = data.get(k);
 			List<Pair<Object, Object>> table = new LinkedList<>(xxx);
-//			Collections.sort(table, new Comparator<Pair<Object, Object>>()
-//	                {
-//	            public int compare(Pair<Object,Object> f1, Pair<Object,Object> f2)
-//	            {
-//	                return f1.first.toString().compareTo(f2.first.toString());
-//	            }        
-//	        });
+			// Collections.sort(table, new Comparator<Pair<Object, Object>>()
+			// {
+			// public int compare(Pair<Object,Object> f1, Pair<Object,Object>
+			// f2)
+			// {
+			// return f1.first.toString().compareTo(f2.first.toString());
+			// }
+			// });
 
 			Object[][] arr = new Object[table.size()][2];
 			int i = 0;
@@ -519,18 +553,17 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			}
 			Pair<String, String> cns = thesig.getColumnNames(k);
 			JTable t = new JTable(arr, new Object[] { cns.first, cns.second });
-//			//t.setRowSelectionAllowed(false);
-//			t.setColumnSelectionAllowed(false);
-//			MouseListener[] listeners = t.getMouseListeners();
-//			for (MouseListener l : listeners) {
-//				t.removeMouseListener(l);
-//			}
-			TableRowSorter sorter 
-		    = new MyTableRowSorter(t.getModel());
-			
-		t.setRowSorter(sorter);
-		sorter.allRowsChanged();
-		sorter.toggleSortOrder(0);
+			// //t.setRowSelectionAllowed(false);
+			// t.setColumnSelectionAllowed(false);
+			// MouseListener[] listeners = t.getMouseListeners();
+			// for (MouseListener l : listeners) {
+			// t.removeMouseListener(l);
+			// }
+			TableRowSorter<?> sorter = new MyTableRowSorter(t.getModel());
+
+			t.setRowSorter(sorter);
+			sorter.allRowsChanged();
+			sorter.toggleSortOrder(0);
 			t.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 			JPanel p = new JPanel(new GridLayout(1, 1));
 			p.add(new JScrollPane(t));
@@ -555,48 +588,49 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	@Override
 	public JPanel join() throws FQLException {
 		// Map<String, Set<Pair<String,String>>> data;
-		
-		prejoin(); 
-		
+
+		prejoin();
+
 		List<JPanel> pans = makePanels();
-	
+
 		int x = (int) Math.ceil(Math.sqrt(pans.size()));
 		JPanel panel;
 		if (x == 0) {
-			panel =  new JPanel();
+			panel = new JPanel();
 		} else {
-		 panel = new JPanel(new GridLayout(x, x));
+			panel = new JPanel(new GridLayout(x, x));
 		}
 		for (JPanel p : pans) {
 			panel.add(p);
 		}
 		panel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-		return panel;		
+		return panel;
 	}
 
 	private List<JPanel> makePanels() {
 		List<JPanel> ret = new LinkedList<>();
-		
-		Comparator<String> strcmp = new Comparator<String>()  {
-	        public int compare(String f1, String f2) {
-	                return f1.compareTo(f2);
-	            }        
-	        };
-	        
-	        List<String> xxx = new LinkedList<>(joined.keySet());
-	        Collections.sort(xxx, strcmp);
-	        
+
+		Comparator<String> strcmp = new Comparator<String>() {
+			public int compare(String f1, String f2) {
+				return f1.compareTo(f2);
+			}
+		};
+
+		List<String> xxx = new LinkedList<>(joined.keySet());
+		Collections.sort(xxx, strcmp);
+
 		for (String name : xxx) {
 			JTable t = joined.get(name);
-			JPanel p = new JPanel(new GridLayout(1,1));
-			//p.add(t);
+			JPanel p = new JPanel(new GridLayout(1, 1));
+			// p.add(t);
 			p.add(new JScrollPane(t));
-	//		p.setMaximumSize(new Dimension(200,200));
-			p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), name  + "   (" + data.get(name).size() + " rows)"));
+			// p.setMaximumSize(new Dimension(200,200));
+			p.setBorder(BorderFactory.createTitledBorder(
+					BorderFactory.createEmptyBorder(), name + "   ("
+							+ data.get(name).size() + " rows)"));
 			ret.add(p);
 		}
-		
-		
+
 		return ret;
 	}
 
@@ -607,85 +641,85 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		vwr.setLayout(cards);
 		vwr.add(new JPanel(), "");
 		cards.show(vwr, "");
-		Map<String, Map<String, Set<Pair<Object, Object>>>> jnd 
-		= new HashMap<>();
-		Map<String, Set<Pair<Object, Object>>> nd
-		= new HashMap<>();
-		
+		Map<String, Map<String, Set<Pair<Object, Object>>>> jnd = new HashMap<>();
+		Map<String, Set<Pair<Object, Object>>> nd = new HashMap<>();
+
 		List<String> names = new LinkedList<>();
-		
+
 		for (Node n : thesig.nodes) {
 			nd.put(n.string, data.get(n.string));
 			jnd.put(n.string, new HashMap<String, Set<Pair<Object, Object>>>());
 			names.add(n.string);
 		}
-		
+
 		for (Edge e : thesig.edges) {
 			jnd.get(e.source.string).put(e.name, data.get(e.name));
-	//		names.add(e.name);
+			// names.add(e.name);
 		}
-		
+
 		for (Attribute a : thesig.attrs) {
 			jnd.get(a.source.string).put(a.name, data.get(a.name));
 		}
-		
-//		System.out.println(joined);
-	//	System.out.println(nd);
-		
-		Comparator<String> strcmp = new Comparator<String>()  {
-	        public int compare(String f1, String f2) {
-	                return f1.compareTo(f2);
-	            }        
-	        };
+
+		// System.out.println(joined);
+		// System.out.println(nd);
+
+		Comparator<String> strcmp = new Comparator<String>() {
+			public int compare(String f1, String f2) {
+				return f1.compareTo(f2);
+			}
+		};
 		Collections.sort(names, strcmp);
 
 		joined = makejoined(jnd, nd, names);
-		
+
 	}
 
 	private Map<String, JTable> makejoined(
 			Map<String, Map<String, Set<Pair<Object, Object>>>> joined,
 			Map<String, Set<Pair<Object, Object>>> nd, List<String> names) {
-		Comparator<String> strcmp = new Comparator<String>()  {
-	        public int compare(String f1, String f2) {
-	                return f1.compareTo(f2);
-	            }        
-	        };
-	        Map<String, JTable> ret = new HashMap<>();
+		Comparator<String> strcmp = new Comparator<String>() {
+			public int compare(String f1, String f2) {
+				return f1.compareTo(f2);
+			}
+		};
+		Map<String, JTable> ret = new HashMap<>();
 		for (String name : names) {
-//			System.out.println("Name " + name);
+			// System.out.println("Name " + name);
 			Map<String, Set<Pair<Object, Object>>> m = joined.get(name);
-	//		System.out.println("m " + m);
+			// System.out.println("m " + m);
 			Set<Pair<Object, Object>> ids = nd.get(name);
-		//	System.out.println("ids " + ids);
+			// System.out.println("ids " + ids);
 			Object[][] arr = new Object[ids.size()][m.size() + 1];
 			Set<String> cols = m.keySet();
-	//		System.out.println("cols " + cols);
+			// System.out.println("cols " + cols);
 			List<String> cols2 = new LinkedList<>(cols);
 			Collections.sort(cols2, strcmp);
 			cols2.add(0, "ID");
-	//		System.out.println("cols2 " + cols2);
+			// System.out.println("cols2 " + cols2);
 			Object[] cols3 = cols2.toArray();
-	//		System.out.println("cols3 " + cols3);
-			
+			// System.out.println("cols3 " + cols3);
+
 			int i = 0;
 			for (Pair<Object, Object> id : ids) {
-//				System.out.println("id " + id);
+				// System.out.println("id " + id);
 				arr[i][0] = id.first;
-//				System.out.println(" i " + i + " j " + 0 + " val " + arr[i][0]);
+				// System.out.println(" i " + i + " j " + 0 + " val " +
+				// arr[i][0]);
 
 				int j = 1;
 				for (String col : cols2) {
 					if (col.equals("ID")) {
 						continue;
 					}
-				//	System.out.println("col " + col);
+					// System.out.println("col " + col);
 					Set<Pair<Object, Object>> coldata = m.get(col);
 					for (Pair<Object, Object> p : coldata) {
-				//		System.out.println("p " + p);
+						// System.out.println("p " + p);
 						if (p.first.equals(id.first)) {
 							arr[i][j] = p.second;
-//							System.out.println(" i " + i + " j " + j + " val " + arr[i][j]);
+							// System.out.println(" i " + i + " j " + j +
+							// " val " + arr[i][j]);
 							break;
 						}
 					}
@@ -693,71 +727,62 @@ public class Instance implements Viewable<Instance>, Jsonable {
 				}
 				i++;
 			}
-			
-//			Arrays.sort(arr, new Comparator<Object[]>() {
-//
-//				@Override
-//				public int compare(Object[] o1, Object[] o2) {
-//					return o1[0].toString().compareTo(o2[0].toString());
-//				}
-//				
-//			});
-			
+
+			// Arrays.sort(arr, new Comparator<Object[]>() {
+			//
+			// @Override
+			// public int compare(Object[] o1, Object[] o2) {
+			// return o1[0].toString().compareTo(o2[0].toString());
+			// }
+			//
+			// });
+
 			JTable t = new JTable(arr, cols3) {
-				  public Dimension getPreferredScrollableViewportSize() {
-					  Dimension d = getPreferredSize();
-				  return new Dimension(d.width, d.height * 2);
-				  }
-				  };
-				  
-				//  cards.(name, t);
-				  
-				  //foo and t are for the graph and tabular pane, resp
-				  JTable foo = new JTable(t.getModel()) {
-					  public Dimension getPreferredScrollableViewportSize() {
-						  Dimension d = getPreferredSize();
-					  return new Dimension(d.width, d.height * 2);
-					  }
-					  };
-			JPanel p = new JPanel(new GridLayout(1,1));
-			//p.add(t);
-			TableRowSorter sorter 
-		    = new MyTableRowSorter(t.getModel());
-		
+				public Dimension getPreferredScrollableViewportSize() {
+					Dimension d = getPreferredSize();
+					return new Dimension(d.width, d.height * 2);
+				}
+			};
+
+			// cards.(name, t);
+
+			// foo and t are for the graph and tabular pane, resp
+			JTable foo = new JTable(t.getModel()) {
+				public Dimension getPreferredScrollableViewportSize() {
+					Dimension d = getPreferredSize();
+					return new Dimension(d.width, d.height * 2);
+				}
+			};
+			JPanel p = new JPanel(new GridLayout(1, 1));
+			// p.add(t);
+			TableRowSorter<?> sorter = new MyTableRowSorter(t.getModel());
+
 			sorter.toggleSortOrder(0);
-		t.setRowSorter(sorter);
-		sorter.allRowsChanged();
-		TableRowSorter sorter2
-	    = new MyTableRowSorter(foo.getModel());
-	
-		sorter.toggleSortOrder(0);
-	foo.setRowSorter(sorter2);
-	sorter2.allRowsChanged();
-			//foo.set
-			//foo.setAutoCreateRowSorter(true);
+			t.setRowSorter(sorter);
+			sorter.allRowsChanged();
+			TableRowSorter<?> sorter2 = new MyTableRowSorter(foo.getModel());
+
+			sorter.toggleSortOrder(0);
+			foo.setRowSorter(sorter2);
+			sorter2.allRowsChanged();
+			// foo.set
+			// foo.setAutoCreateRowSorter(true);
 			p.add(new JScrollPane(foo));
-	//		p.setMaximumSize(new Dimension(200,200));
-			p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), name));
+			// p.setMaximumSize(new Dimension(200,200));
+			p.setBorder(BorderFactory.createTitledBorder(
+					BorderFactory.createEmptyBorder(), name));
 			vwr.add(p, name);
-			
-//			foo.setMaximumSize(new Dimension(600,200));
-			
+
+			// foo.setMaximumSize(new Dimension(600,200));
+
 			ret.put(name, t);
 		}
-		
+
 		return ret;
 	}
 
-	
 	@Override
 	public JPanel text() {
-		// String s = toString().replace('{', ' ').replace('}', ' ').trim();
-//		String[] t = toString().split(";");
-//		String ret = "";
-//		for (String a : t) {
-//			ret += (a.trim() + ";\n\n");
-//		}
-
 		JTextArea ta = new JTextArea(toString());
 		JPanel tap = new JPanel(new GridLayout(1, 1));
 		ta.setBorder(BorderFactory.createEmptyBorder());
@@ -774,28 +799,26 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		return tap;
 	}
 
-
-
 	public static boolean iso(Instance i1, Instance i2) {
 		sameNodes(i1, i2);
 		sameEdges(i1, i2);
 
 		Signature sig = i1.thesig;
-		
+
 		Map<String, List<Map<Object, Object>>> subs1 = new HashMap<>();
 		Map<String, List<Map<Object, Object>>> subs2 = new HashMap<>();
 		for (Node n : sig.nodes) {
 			String k = n.string;
-			
-			List<Map<Object, Object>> i1i2 = Inst.bijections(dedupl(i1.data.get(k)),
-									                         dedupl(i2.data.get(k)));
-			List<Map<Object, Object>> i2i1 = Inst.bijections(dedupl(i2.data.get(k)),
-															dedupl(i1.data.get(k)));
-			
+
+			List<Map<Object, Object>> i1i2 = Inst.bijections(
+					dedupl(i1.data.get(k)), dedupl(i2.data.get(k)));
+			List<Map<Object, Object>> i2i1 = Inst.bijections(
+					dedupl(i2.data.get(k)), dedupl(i1.data.get(k)));
+
 			subs1.put(k, i1i2);
-			subs2.put(k, i2i1);		 
+			subs2.put(k, i2i1);
 		}
-		
+
 		Subs subs1X = new Subs(subs1);
 		Subs subs2X = new Subs(subs2);
 		Map<String, Map<Object, Object>> sub;
@@ -808,12 +831,13 @@ public class Instance implements Viewable<Instance>, Jsonable {
 					flag = true;
 					break;
 				}
-			} catch (Exception e) { }
+			} catch (Exception e) {
+			}
 		}
 		if (!flag) {
 			return false;
 		}
-		
+
 		flag = false;
 		while ((sub = subs2X.next()) != null) {
 			try {
@@ -822,7 +846,8 @@ public class Instance implements Viewable<Instance>, Jsonable {
 					flag = true;
 					break;
 				}
-			} catch (Exception e) { }
+			} catch (Exception e) {
+			}
 		}
 		if (!flag) {
 			return false;
@@ -844,7 +869,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			this.counters = makeCounters(keys.size() + 1);
 			this.sizes = makeSizes(keys, sub);
 		}
-		
+
 		public Map<String, Map<Object, Object>> next() {
 			if (counters[keys.size()] == 1) {
 				return null;
@@ -854,13 +879,12 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			for (String k : keys) {
 				s.put(k, sub.get(k).get(counters[keys.indexOf(k)]));
 			}
-			
+
 			inc5(counters, sizes);
-			
+
 			return s;
 		}
 	}
-	
 
 	public static void printnice(int[] x) {
 		for (int i = 0; i < x.length; i++) {
@@ -869,7 +893,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		}
 		System.out.println();
 	}
-	
+
 	private static int[] makeSizes(List<String> keys,
 			Map<String, List<Map<Object, Object>>> sub) {
 		int[] ret = new int[keys.size()];
@@ -890,7 +914,6 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		}
 	}
 
-
 	private static int[] makeCounters(int size) {
 		int[] ret = new int[size];
 		for (int i = 0; i < size; i++) {
@@ -899,27 +922,31 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		return ret;
 	}
 
-	private Instance apply(Map<String, Map<Object, Object>> sub) throws FQLException {
+	private Instance apply(Map<String, Map<Object, Object>> sub)
+			throws FQLException {
 		List<Pair<String, List<Pair<Object, Object>>>> ret = new LinkedList<>();
-		
+
 		for (Node n : thesig.nodes) {
-			ret.add(new Pair<>(n.string, apply(data.get(n.string), sub.get(n.string), sub.get(n.string))));
+			ret.add(new Pair<>(n.string, apply(data.get(n.string),
+					sub.get(n.string), sub.get(n.string))));
 		}
 		for (Edge e : thesig.edges) {
-			ret.add(new Pair<>(e.name, apply(data.get(e.name), sub.get(e.source.string), sub.get(e.target.string))));
+			ret.add(new Pair<>(e.name, apply(data.get(e.name),
+					sub.get(e.source.string), sub.get(e.target.string))));
 		}
-		
+
 		return new Instance(null, thesig, ret);
 	}
 
-	private static List<Pair<Object, Object>> apply(Set<Pair<Object, Object>> set,
-			Map<Object, Object> s1, Map<Object, Object> s2) {
+	private static List<Pair<Object, Object>> apply(
+			Set<Pair<Object, Object>> set, Map<Object, Object> s1,
+			Map<Object, Object> s2) {
 		List<Pair<Object, Object>> ret = new LinkedList<>();
-		
+
 		for (Pair<Object, Object> p : set) {
 			ret.add(new Pair<>(s1.get(p.first), s2.get(p.second)));
 		}
-		
+
 		return ret;
 	}
 
@@ -957,7 +984,6 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		}
 	}
 
-
 	@Override
 	public JPanel pretty(Environment env) throws FQLException {
 		return makeViewer(env);
@@ -979,7 +1005,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		for (Edge e : thesig.edges) {
 			g2.addEdge(e.name, e.source.string, e.target.string);
 		}
-		
+
 		for (Attribute a : thesig.attrs) {
 			g2.addVertex(a.name);
 			g2.addEdge(a.name, a.source.string, a.name);
@@ -1001,31 +1027,31 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		// Layout<String, String> layout = new KKLayout(sgv);
 
 		// Layout<String, String> layout = new FRLayout(sgv);
-		 Layout<String, String> layout = new ISOMLayout<String,String>(sgv);
-		//Layout<String, String> layout = new CircleLayout<>(sgv);
+		Layout<String, String> layout = new ISOMLayout<String, String>(sgv);
+		// Layout<String, String> layout = new CircleLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
-		VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(layout);
+		VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
+				layout);
 		vv.setPreferredSize(new Dimension(600, 400));
-		//vv.getRenderContext().setEdgeLabelRerderer(new MyEdgeT());
+		// vv.getRenderContext().setEdgeLabelRerderer(new MyEdgeT());
 		// Setup up a new vertex to paint transformer...
 		Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
 			public Paint transform(String i) {
 				if (!thesig.isAttribute(i)) {
 					return env.colors.get(thesig.name0);
 				}
-				return UIManager.getColor ( "Panel.background" );
+				return UIManager.getColor("Panel.background");
 			}
 		};
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-      //  gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
-        vv.setGraphMouse(gm);
-        gm.setMode(Mode.PICKING);
-//        gm.add(new AnnotatingGraphMousePlugin(vv.getRenderContext()) {
-//
-//		
-//        	
-//        }.);
-               
+		// gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		vv.setGraphMouse(gm);
+		gm.setMode(Mode.PICKING);
+		// gm.add(new AnnotatingGraphMousePlugin(vv.getRenderContext()) {
+		//
+		//
+		//
+		// }.);
 
 		// Set up a new stroke Transformer for the edges
 		// float dash[] = { 10.0f };
@@ -1042,219 +1068,217 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		vv.getRenderContext().setVertexLabelRenderer(new MyVertexT());
 		// vv.getRenderContext().setVertexLabelTransformer(new
 		// ToStringLabeller());
-		
-//				new MyEdgeT()); // {
 
-//		vv.getRenderContext().setEdgeLabelTransformer(new MyEdgeT2(vv.getPickedEdgeState()));
-	//	vv.getRenderContext().setVertexLabelTransformer(new MyVertexT(vv.getPickedVertexState()));
+		// new MyEdgeT()); // {
+
+		// vv.getRenderContext().setEdgeLabelTransformer(new
+		// MyEdgeT2(vv.getPickedEdgeState()));
+		// vv.getRenderContext().setVertexLabelTransformer(new
+		// MyVertexT(vv.getPickedVertexState()));
 		// vv.getRenderer().getVertexRenderer().
 		vv.getRenderContext().setLabelOffset(20);
-		vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller<String>());
-//		vv.getRenderContext().getEdgeLabelRenderer().
+		vv.getRenderContext().setEdgeLabelTransformer(
+				new ToStringLabeller<String>());
+		// vv.getRenderContext().getEdgeLabelRenderer().
 		// vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
 
-		 float dash[] = { 1.0f };
-		 final Stroke edgeStroke = new BasicStroke(0.5f, BasicStroke.CAP_BUTT,
-		BasicStroke.JOIN_MITER, 10.0f, dash, 10.0f );
+		float dash[] = { 1.0f };
+		final Stroke edgeStroke = new BasicStroke(0.5f, BasicStroke.CAP_BUTT,
+				BasicStroke.JOIN_MITER, 10.0f, dash, 10.0f);
 		// Transformer<String, Stroke> edgeStrokeTransformer = new
 		// Transformer<String, Stroke>() {
 		// public Stroke transform(String s) {
 		// return edgeStroke;
 		// }
 		// };
-		 final Stroke bs = new BasicStroke();
+		final Stroke bs = new BasicStroke();
 		Transformer<String, Stroke> edgeStrokeTransformer = new Transformer<String, Stroke>() {
 			public Stroke transform(String s) {
 				if (thesig.isAttribute(s)) {
 					return edgeStroke;
-				} 
+				}
 				return bs;
 			}
 		};
-		
-			vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
-			 vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
-			vv.getRenderContext().setVertexLabelTransformer(
-					new ToStringLabeller<String>());
-			vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller<String>()); 
-			
+
+		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+		vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
+		vv.getRenderContext().setVertexLabelTransformer(
+				new ToStringLabeller<String>());
+		vv.getRenderContext().setEdgeLabelTransformer(
+				new ToStringLabeller<String>());
+
 		JSplitPane newthing = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		newthing.setDividerLocation(.9d);
 		newthing.add(vv);
 		newthing.add(vwr);
-		JPanel xxx = new JPanel(new GridLayout(1,1));
+		JPanel xxx = new JPanel(new GridLayout(1, 1));
 		xxx.add(newthing);
-//		xxx.setMaximumSize(new Dimension(400,400));
-		return xxx; 
+		// xxx.setMaximumSize(new Dimension(400,400));
+		return xxx;
 	}
-	
-	private class MyVertexT implements VertexLabelRenderer{
-	  
-		
-	    public MyVertexT(){
-	    }
 
-	    @Override
-	    public <T> Component getVertexLabelRendererComponent(
-				JComponent arg0, Object arg1, Font arg2, boolean arg3,
-				T arg4) {
-	    	if (arg3) {
-	    		prejoin();
-	    	//	Map<String, JPanel> panels = makejoined();
-//			    	 if (pi.isPicked((String) arg4)) {
+	private class MyVertexT implements VertexLabelRenderer {
 
-	    		cards.show(vwr, (String)arg4);
-	    		
-	    		  String s = (String) arg4;	
-			        if (thesig.isAttribute(s)) {
-						s = thesig.getTypeLabel(s);
-					}
-	            return new JLabel(s);
+		public MyVertexT() {
+		}
 
-	    		
-//	    		JTable t = joined.get(arg4);
-//	    		
-//				JPanel p = new JPanel(new GridLayout(1,1));
-//				//p.add(t);
-//				p.add(new JScrollPane(t));
-//		//		p.setMaximumSize(new Dimension(200,200));
-//				p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), (String)arg4));
-//
-//	    		
-//	   // 		JPanel p = new JPanel(new GridLayout(1,1));
-//	    //		p.add(new JScrollPane(joined.get(arg4)));
-//	    	//	p.setMaximumSize(new Dimension(100,100));
-//	  //  		p.setPreferredSize(new Dimension(100,100));
-//	    	//	p.setSize(new Dimension(100,100));
-//			    	return p;
-		        }
-		        else {
-		        String s = (String) arg4;	
-		        if (thesig.isAttribute(s)) {
+		@Override
+		public <T> Component getVertexLabelRendererComponent(JComponent arg0,
+				Object arg1, Font arg2, boolean arg3, T arg4) {
+			if (arg3) {
+				prejoin();
+				// Map<String, JPanel> panels = makejoined();
+				// if (pi.isPicked((String) arg4)) {
+
+				cards.show(vwr, (String) arg4);
+
+				String s = (String) arg4;
+				if (thesig.isAttribute(s)) {
 					s = thesig.getTypeLabel(s);
 				}
-		          return new JLabel(s);
-		        }
-		    }
-	    }
-	
-//	private class MyEdgeT extends DefaultEdgeLabelRenderer {
-//	   // private final PickedInfo<String> pi;
-//
-//	    public MyEdgeT(){
-//	    	super(Color.GRAY, false);
-//	      //  this.pi = pi;
-//	    }
-//
-//	    @Override
-//	    public <T> Component getEdgeLabelRendererComponent(
-//				JComponent arg0, Object arg1, Font arg2, boolean arg3,
-//				T arg4) {
-//	    //	if (true) throw new RuntimeException();
-//	    	if (arg3) {
-////			    	 if (pi.isPicked((String) arg4)) {
-//			    		 Vector<String> ld = new  Vector<>();
-//
-//			    		 Set<Pair<String, String>> table = data.get(arg4);
-//			    		 
-//
-//			    		 String s = (String) arg4;
-//			    		 boolean b = false;
-//			    		 s += " = ";
-//			    		 for (Pair<String, String> x : table) {
-//			    			 if (b) {
-//			    				 s += ", ";
-//			    			 }
-//			    			 b = true;
-//			    			 s += x.first;
-//			    			 ld.add(x.first);
-//			    		 }
-//			    		 JList<String> jl = new JList<>(ld);
-//			    		 JPanel p = new JPanel(new GridLayout(1,1));
-//			    		 p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), (String) arg4));
-//			    		 p.add(new JScrollPane(jl));
-//			    		// p.add(jl);
-//			    		 
-////					JLabel x = new JLabel(s);
-//					// x.setFont(new Font("Arial", 8, Font.PLAIN));
-//		//			return x;
-////					return new JTextArea(s);
-//			    		// return p;
-//			    		 return new JLabel("ZZZZ");
-//		        }
-//		        else {
-//		        	return new JLabel("HHHH");
-//		         // return new JLabel("ZZZZZ" + (String)arg4);
-//		        }
-//		    }
-//
-//	    boolean b = false;
-//		@Override
-//		public boolean isRotateEdgeLabels() {
-//			return b;
-//		}
-//
-//		@Override
-//		public void setRotateEdgeLabels(boolean arg0) {
-//			this.b = arg0;
-//		}
-//	    }
-//	
-//	private  class MyEdgeT2 implements Transformer<String,String>{
-//	    private final PickedInfo<String> pi;
-//
-//	    public MyEdgeT2( PickedInfo<String> pi ){
-//	        this.pi = pi;
-//	    }
-//
-//	    @Override
-//	    public String transform(String t) {
-//	        if (pi.isPicked(t)) {
-//				Set<Pair<String, String>> table = data.get(t);
-//
-//				String s = t;
-//				boolean b = false;
-//				s += " = ";
-//				for (Pair<String, String> x : table) {
-//					if (b) {
-//						s += ", ";
-//					}
-//					b = true;
-//					s += x.first;
-//					s += " -> ";
-//					s += x.second;
-//				}
-////				JLabel x = new JLabel(s);
-//				// x.setFont(new Font("Arial", 8, Font.PLAIN));
-//	//			return x;
-//				return s;
-//
-//	        }
-//	        else {
-//	          return t;
-//	        }
-//	    }
-//	}
+				return new JLabel(s);
 
-	
-	
+				// JTable t = joined.get(arg4);
+				//
+				// JPanel p = new JPanel(new GridLayout(1,1));
+				// //p.add(t);
+				// p.add(new JScrollPane(t));
+				// // p.setMaximumSize(new Dimension(200,200));
+				// p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(),
+				// (String)arg4));
+				//
+				//
+				// // JPanel p = new JPanel(new GridLayout(1,1));
+				// // p.add(new JScrollPane(joined.get(arg4)));
+				// // p.setMaximumSize(new Dimension(100,100));
+				// // p.setPreferredSize(new Dimension(100,100));
+				// // p.setSize(new Dimension(100,100));
+				// return p;
+			} else {
+				String s = (String) arg4;
+				if (thesig.isAttribute(s)) {
+					s = thesig.getTypeLabel(s);
+				}
+				return new JLabel(s);
+			}
+		}
+	}
 
+	// private class MyEdgeT extends DefaultEdgeLabelRenderer {
+	// // private final PickedInfo<String> pi;
+	//
+	// public MyEdgeT(){
+	// super(Color.GRAY, false);
+	// // this.pi = pi;
+	// }
+	//
+	// @Override
+	// public <T> Component getEdgeLabelRendererComponent(
+	// JComponent arg0, Object arg1, Font arg2, boolean arg3,
+	// T arg4) {
+	// // if (true) throw new RuntimeException();
+	// if (arg3) {
+	// // if (pi.isPicked((String) arg4)) {
+	// Vector<String> ld = new Vector<>();
+	//
+	// Set<Pair<String, String>> table = data.get(arg4);
+	//
+	//
+	// String s = (String) arg4;
+	// boolean b = false;
+	// s += " = ";
+	// for (Pair<String, String> x : table) {
+	// if (b) {
+	// s += ", ";
+	// }
+	// b = true;
+	// s += x.first;
+	// ld.add(x.first);
+	// }
+	// JList<String> jl = new JList<>(ld);
+	// JPanel p = new JPanel(new GridLayout(1,1));
+	// p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(),
+	// (String) arg4));
+	// p.add(new JScrollPane(jl));
+	// // p.add(jl);
+	//
+	// // JLabel x = new JLabel(s);
+	// // x.setFont(new Font("Arial", 8, Font.PLAIN));
+	// // return x;
+	// // return new JTextArea(s);
+	// // return p;
+	// return new JLabel("ZZZZ");
+	// }
+	// else {
+	// return new JLabel("HHHH");
+	// // return new JLabel("ZZZZZ" + (String)arg4);
+	// }
+	// }
+	//
+	// boolean b = false;
+	// @Override
+	// public boolean isRotateEdgeLabels() {
+	// return b;
+	// }
+	//
+	// @Override
+	// public void setRotateEdgeLabels(boolean arg0) {
+	// this.b = arg0;
+	// }
+	// }
+	//
+	// private class MyEdgeT2 implements Transformer<String,String>{
+	// private final PickedInfo<String> pi;
+	//
+	// public MyEdgeT2( PickedInfo<String> pi ){
+	// this.pi = pi;
+	// }
+	//
+	// @Override
+	// public String transform(String t) {
+	// if (pi.isPicked(t)) {
+	// Set<Pair<String, String>> table = data.get(t);
+	//
+	// String s = t;
+	// boolean b = false;
+	// s += " = ";
+	// for (Pair<String, String> x : table) {
+	// if (b) {
+	// s += ", ";
+	// }
+	// b = true;
+	// s += x.first;
+	// s += " -> ";
+	// s += x.second;
+	// }
+	// // JLabel x = new JLabel(s);
+	// // x.setFont(new Font("Arial", 8, Font.PLAIN));
+	// // return x;
+	// return s;
+	//
+	// }
+	// else {
+	// return t;
+	// }
+	// }
+	// }
 
-//	private static List<Pair<String,String>> dupl(Map<String, String> map) {
-//		List<Pair<String,String>> ret = new LinkedList<Pair<String,String>>();
-//		for (String k : map.keySet()) {
-//			ret.add(new Pair<>(k,map.get(k)));
-//		}
-//		return ret;	
-//	}
-//
-//	private static List<Pair<String,String>> dupl(Set<String> set) {
-//		List<Pair<String,String>> ret = new LinkedList<Pair<String,String>>();
-//		for (String s : set) {
-//			ret.add(new Pair<>(s,s));
-//		}
-//		return ret;		
-//	}
+	// private static List<Pair<String,String>> dupl(Map<String, String> map) {
+	// List<Pair<String,String>> ret = new LinkedList<Pair<String,String>>();
+	// for (String k : map.keySet()) {
+	// ret.add(new Pair<>(k,map.get(k)));
+	// }
+	// return ret;
+	// }
+	//
+	// private static List<Pair<String,String>> dupl(Set<String> set) {
+	// List<Pair<String,String>> ret = new LinkedList<Pair<String,String>>();
+	// for (String s : set) {
+	// ret.add(new Pair<>(s,s));
+	// }
+	// return ret;
+	// }
 
 	public static Instance terminal(Signature s, String g) throws FQLException {
 		List<Pair<String, List<Pair<Object, Object>>>> ret = new LinkedList<>();
@@ -1263,11 +1287,11 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		Map<Node, String> map = new HashMap<>();
 		for (Node node : s.nodes) {
 			List<Pair<Object, Object>> tuples = new LinkedList<>();
-			
+
 			if (g == null) {
 				g = Integer.toString(i);
-			} 
-				
+			}
+
 			tuples.add(new Pair<Object, Object>(g, g));
 			ret.add(new Pair<>(node.string, tuples));
 			map.put(node, g);
@@ -1276,73 +1300,77 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 		for (Edge e : s.edges) {
 			List<Pair<Object, Object>> tuples = new LinkedList<>();
-			tuples.add(new Pair<Object,Object>(map.get(e.source.string), map
+			tuples.add(new Pair<Object, Object>(map.get(e.source.string), map
 					.get(e.target.string)));
 			ret.add(new Pair<>(e.name, tuples));
 		}
 
 		return new Instance(s.name0 + "_terminal", s, ret);
 	}
-	
+
 	public Inst<Node, Path, Object, Object> toFunctor2() throws FQLException {
 		FinCat<Node, Path> cat = thesig.toCategory2().first;
-		
-		Map<Node, Set<Value<Object,Object>>> objM = new HashMap<>();
+
+		Map<Node, Set<Value<Object, Object>>> objM = new HashMap<>();
 		for (Node obj : cat.objects) {
 			if (data.get(obj.string) == null) {
 				throw new RuntimeException("No data for " + obj + " in " + data);
 			}
 			objM.put(obj, conv(data.get(obj.string)));
 		}
-		
+
 		Map<Arr<Node, Path>, Map<Value<Object, Object>, Value<Object, Object>>> arrM = new HashMap<>();
 		for (Arr<Node, Path> arr : cat.arrows) {
 			List<String> es = arr.arr.asList();
-			
+
 			String h = es.get(0);
 			Set<Pair<Object, Object>> h0 = data.get(h);
 			for (int i = 1; i < es.size(); i++) {
 				h0 = compose(h0, data.get(es.get(i)));
 			}
-			Map<Value<Object, Object>, Value<Object, Object>> xxx = FDM.degraph(h0);
+			Map<Value<Object, Object>, Value<Object, Object>> xxx = FDM
+					.degraph(h0);
 			arrM.put(arr, xxx);
 		}
-		
+
 		return new Inst<Node, Path, Object, Object>(objM, arrM, cat);
 	}
 
-//	public Inst<String, List<List<String>>, String, String> toFunctor() throws FQLException {
-//		FinCat<String, List<List<String>>> cat = thesig.toCategory().first;
-//		
-//		Map<String, Set<Value<String, String>>> objM = new HashMap<>();
-//		for (String obj : cat.objects) {
-//			objM.put(obj, conv(data.get(obj)));
-//		}
-//		
-//		Map<Arr<String, List<List<String>>>, Map<Value<String, String>, Value<String, String>>> arrM = new HashMap<>();
-//		for (Arr<String, List<List<String>>> arr : cat.arrows) {
-//			List<String> es = arr.arr.get(0);
-//			
-//			String h = es.get(0);
-//			Set<Pair<String, String>> h0 = data.get(h);
-//			for (int i = 1; i < es.size(); i++) {
-//				h0 = compose(h0, data.get(es.get(i)));
-//			}
-//			Map<Value<String, String>, Value<String, String>> xxx = FDM.degraph(h0);
-//			arrM.put(arr, xxx);
-//		}
-//		
-//		return new Inst<String, List<List<String>>, String, String>(objM, arrM, cat);
-//	}
+	// public Inst<String, List<List<String>>, String, String> toFunctor()
+	// throws FQLException {
+	// FinCat<String, List<List<String>>> cat = thesig.toCategory().first;
+	//
+	// Map<String, Set<Value<String, String>>> objM = new HashMap<>();
+	// for (String obj : cat.objects) {
+	// objM.put(obj, conv(data.get(obj)));
+	// }
+	//
+	// Map<Arr<String, List<List<String>>>, Map<Value<String, String>,
+	// Value<String, String>>> arrM = new HashMap<>();
+	// for (Arr<String, List<List<String>>> arr : cat.arrows) {
+	// List<String> es = arr.arr.get(0);
+	//
+	// String h = es.get(0);
+	// Set<Pair<String, String>> h0 = data.get(h);
+	// for (int i = 1; i < es.size(); i++) {
+	// h0 = compose(h0, data.get(es.get(i)));
+	// }
+	// Map<Value<String, String>, Value<String, String>> xxx = FDM.degraph(h0);
+	// arrM.put(arr, xxx);
+	// }
+	//
+	// return new Inst<String, List<List<String>>, String, String>(objM, arrM,
+	// cat);
+	// }
 
-	private Set<Value<Object,Object>> conv(Set<Pair<Object, Object>> set) {
-		Set<Value<Object,Object>> ret = new HashSet<>();
+	private Set<Value<Object, Object>> conv(Set<Pair<Object, Object>> set) {
+		Set<Value<Object, Object>> ret = new HashSet<>();
 		for (Pair<Object, Object> p : set) {
-			ret.add(new Value<Object,Object>(p.first));
+			ret.add(new Value<Object, Object>(p.first));
 		}
 		return ret;
 	}
-	
+
 	JPanel vwr = new JPanel();
 	CardLayout cards = new CardLayout();
 	Map<String, JTable> joined;
@@ -1360,17 +1388,17 @@ public class Instance implements Viewable<Instance>, Jsonable {
 					s += ",";
 				}
 				first = false;
-				
+
 				s += "\"" + tuple.first + "\"";
 			}
 			s += "]";
 			l.add(s);
 		}
-		
+
 		String s = PrettyPrinter.sep0(",\n", l);
-		
+
 		String onobjects = "\"onObjects\" : {\n" + s + "\n}";
-		
+
 		l = new LinkedList<String>();
 		for (Edge kk : thesig.edges) {
 			String k = kk.name;
@@ -1381,40 +1409,44 @@ public class Instance implements Viewable<Instance>, Jsonable {
 				if (!first) {
 					s += ",";
 				}
-				s += "\"" + tuple.first + "\":" +  "\"" + tuple.second + "\"";
+				s += "\"" + tuple.first + "\":" + "\"" + tuple.second + "\"";
 				first = false;
 			}
 			s += "}}\n";
-			l.add(s); 
+			l.add(s);
 		}
-		
-		String onmorphisms = "\"onMorphisms\":[\n" + PrettyPrinter.sep0(",", l) + "]\n}\n";
-		
-		String ret = "{\n\"ontology\":" + thesig.tojson() + ",\n" + onobjects + ",\n" + onmorphisms;
-		
-//		try {
-//			System.out.println(new JSONParsers.JSONInstParser().parse(new Tokens(ret)));
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+
+		String onmorphisms = "\"onMorphisms\":[\n" + PrettyPrinter.sep0(",", l)
+				+ "]\n}\n";
+
+		String ret = "{\n\"ontology\":" + thesig.tojson() + ",\n" + onobjects
+				+ ",\n" + onmorphisms;
+
+		// try {
+		// System.out.println(new JSONParsers.JSONInstParser().parse(new
+		// Tokens(ret)));
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
 		return ret;
-		
+
 	}
 
 	@Override
 	public JPanel json() {
-		JTextArea q = new JTextArea(tojson());		
+		JTextArea q = new JTextArea(tojson());
 		q.setWrapStyleWord(true);
 		q.setLineWrap(true);
-		JPanel p = new JPanel(new GridLayout(1,1));
+		JPanel p = new JPanel(new GridLayout(1, 1));
 		JScrollPane jsc = new JScrollPane(q);
-	//	jsc.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		// jsc.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		p.add(jsc);
 		return p;
 	}
 
 	public static Instance fromjson(String instance) throws Exception {
-		return new JSONParsers.JSONInstParser().parse(new FqlTokenizer(instance)).value;
+		return new JSONParsers.JSONInstParser()
+				.parse(new FqlTokenizer(instance)).value;
 	}
 
 	@Override
@@ -1426,6 +1458,5 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	public JPanel initial() throws FQLException {
 		return null;
 	}
-
 
 }

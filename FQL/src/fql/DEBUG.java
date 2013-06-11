@@ -17,6 +17,8 @@ import javax.swing.JTextField;
  * Contains global constants for debugging.
  */
 public class DEBUG {
+	
+	public static int varlen = 128;
 
 	public static boolean SHOW_QUERY_PATHS = true;
 	
@@ -40,7 +42,7 @@ public class DEBUG {
 	
 	
 	public static void showOptions() {
-		JPanel p = new JPanel(new GridLayout(7, 2));
+		JPanel p = new JPanel(new GridLayout(8, 2));
 		
 		
 		JCheckBox jcb1 = new JCheckBox("", SHOW_QUERY_PATHS);
@@ -100,6 +102,10 @@ public class DEBUG {
 		p.add(iter);
 		//p.add(p2);
 		
+		JTextField vlen = new JTextField(Integer.toString(varlen));
+		p.add(new JLabel("VARCHAR size"));
+		p.add(vlen);
+		
 //		JTextField sz = new JTextField(Integer.toString(MAX_JOIN_SIZE));
 //		p.add(new JLabel("Maximum potential join size:"));
 //		p.add(iter);
@@ -108,10 +114,12 @@ public class DEBUG {
 		if (ret == JOptionPane.YES_OPTION) {
 			int a = MAX_PATH_LENGTH;
 			int b = MAX_DENOTE_ITERATIONS;
+			int d = varlen;
 			//int c = MAX_JOIN_SIZE;
 			try {
 				a = Integer.parseInt(plen.getText());
 				b = Integer.parseInt(iter.getText());
+				d = Integer.parseInt(vlen.getText());
 		//		c = Integer.parseInt(sz.getText());
 			} catch (NumberFormatException nfe) {
 				return;
@@ -133,6 +141,7 @@ public class DEBUG {
 	//		CHECK_MAPPINGS = jcb1.isSelected();
 			MAX_PATH_LENGTH = a;
 			MAX_DENOTE_ITERATIONS = b;
+			varlen = d;
 			//MAX_JOIN_SIZE = c;
 		}
 	}

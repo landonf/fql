@@ -1,5 +1,11 @@
 package fql.decl;
 
+/**
+ * 
+ * @author ryan
+ *
+ * FQL string type
+ */
 public class Varchar extends Type {
 
 	@Override

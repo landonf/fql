@@ -5,6 +5,12 @@ import java.util.List;
 
 import fql.Pair;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Combine parsers to make new parsers
+ */
 public class ParserUtils {
 
 	public static <T> Parser<List<T>> many(final Parser<T> p) {

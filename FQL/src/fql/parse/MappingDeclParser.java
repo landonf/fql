@@ -59,6 +59,7 @@ public class MappingDeclParser implements Parser<Decl> {
 		} catch (BadSyntax e) {
 		} catch (IllTyped e) {
 		}
+		//TODO: expose mapping composition to users
 //		try {
 //			s = olds;
 //			Parser<?> p1 = new KeywordParser("mapping");

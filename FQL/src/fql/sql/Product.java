@@ -3,8 +3,8 @@ package fql.sql;
 /**
  * 
  * @author ryan
- *
- * RA syntax for binary products
+ * 
+ *         RA syntax for binary products
  */
 public class Product extends RA {
 
@@ -14,7 +14,7 @@ public class Product extends RA {
 		this.e1 = e1;
 		this.e2 = e2;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "(" + e1 + " * " + e2 + ")";

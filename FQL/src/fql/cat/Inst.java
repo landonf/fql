@@ -35,12 +35,12 @@ public class Inst<Obj, Arrow, Y, X> {
 		A.add("a");
 		A.add("b");
 		A.add("c");
-	//	A.add("d");
+		// A.add("d");
 		B.add("x");
 		B.add("y");
 		B.add("z");
 		System.out.println("bijections " + bijections(A, B));
-		System.out.println("morphisms "  + homomorphs(A, B));
+		System.out.println("morphisms " + homomorphs(A, B));
 	}
 
 	public static <Obj, Arrow, Y, X> List<Map<Obj, Map<Value<Y, X>, Value<Y, X>>>> morphsX(
@@ -123,7 +123,7 @@ public class Inst<Obj, Arrow, Y, X> {
 
 		int[] counters = new int[A.size() + 1];
 
-//		int i = 0;
+		// int i = 0;
 		for (;;) {
 
 			if (counters[A.size()] == 1) {
@@ -131,7 +131,7 @@ public class Inst<Obj, Arrow, Y, X> {
 			}
 			ret.add(make2(counters, A, B));
 			inc(counters, B.size());
-	//		i++;
+			// i++;
 			// if (i == 100) {
 			// System.out.println(A);
 			// System.out.println(B);
@@ -159,7 +159,7 @@ public class Inst<Obj, Arrow, Y, X> {
 		if (B.size() == 0) {
 			throw new RuntimeException();
 		}
-		
+
 		if (A.size() != B.size()) {
 			throw new RuntimeException();
 		}
@@ -169,12 +169,13 @@ public class Inst<Obj, Arrow, Y, X> {
 			seq.add(i);
 		}
 
-//		System.out.println(seq);
-		Collection<List<Integer>> xxx = new SetPermutations<Integer>().permute(seq);
-//		System.out.println(xxx);
-		
+		// System.out.println(seq);
+		Collection<List<Integer>> xxx = new SetPermutations<Integer>()
+				.permute(seq);
+		// System.out.println(xxx);
+
 		for (List<Integer> l : xxx) {
-			Map<X,X> m = new HashMap<>();
+			Map<X, X> m = new HashMap<>();
 			int j = 0;
 			for (Integer i : l) {
 				m.put(A.get(j), B.get(i));
@@ -182,7 +183,7 @@ public class Inst<Obj, Arrow, Y, X> {
 			}
 			ret.add(m);
 		}
-		
+
 		return ret;
 	}
 
@@ -283,13 +284,12 @@ public class Inst<Obj, Arrow, Y, X> {
 					throw new RuntimeException();
 				}
 			}
-			
-			
-			for (Value<Y,X> aa : f.keySet()) {
-				Value<Y,X> bb = f.get(aa);
+
+			for (Value<Y, X> aa : f.keySet()) {
+				Value<Y, X> bb = f.get(aa);
 				if (!src.contains(aa)) {
 					throw new RuntimeException();
-				} 
+				}
 				if (!dst.contains(bb)) {
 					throw new RuntimeException();
 				}

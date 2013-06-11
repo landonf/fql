@@ -48,7 +48,6 @@ import fql.cat.Value;
 import fql.cat.Value.VALUETYPE;
 import fql.gui.Viewable;
 import fql.sql.PSMGen;
-import fql.sql.RA;
 
 /**
  * 

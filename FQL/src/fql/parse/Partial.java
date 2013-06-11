@@ -1,5 +1,15 @@
 package fql.parse;
 
+/**
+ * 
+ * @author ryan
+ * 
+ * @param <T>
+ *            the type of thing to parse
+ * 
+ *            Represents the intermediate parsing states return from parsing
+ *            combinators.
+ */
 public class Partial<T> {
 	public Tokens tokens;
 

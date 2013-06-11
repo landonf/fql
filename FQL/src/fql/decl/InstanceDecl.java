@@ -3,8 +3,8 @@ package fql.decl;
 /**
  * 
  * @author ryan
- *
- * Superclass for instance declarations.
+ * 
+ *         Superclass for instance declarations.
  */
 public class InstanceDecl extends Decl {
 

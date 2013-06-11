@@ -3,16 +3,22 @@ package fql.sql;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 
+ * @author ryan
+ * 
+ *         Insert the result of a SQL query into a table.
+ */
 public class InsertSQL extends PSM {
 
 	String name;
 	SQL sql;
-	
+
 	public InsertSQL(String name, SQL sql) {
 		this.name = name;
 		this.sql = sql;
 	}
- 
+
 	@Override
 	public String toPSM() {
 		return "INSERT INTO " + name + " " + sql.toPSM() + ";";

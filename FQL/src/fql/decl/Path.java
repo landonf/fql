@@ -16,24 +16,24 @@ import fql.parse.Tokens;
 /**
  * 
  * @author ryan
- *
- * Paths
+ * 
+ *         Paths
  */
 public class Path implements Jsonable {
 
 	public Node source;
 	public Node target;
 	public List<Edge> path;
-	
+
 	public Path(Node source, Node target, List<Edge> path) {
-		assert(source != null);
-		assert(target != null);
-		assert(path != null);
+		assert (source != null);
+		assert (target != null);
+		assert (path != null);
 		this.source = source;
 		this.target = target;
 		this.path = path;
 	}
-	
+
 	public List<String> asList() {
 		List<String> ret = new LinkedList<String>();
 		ret.add(source.string);
@@ -42,40 +42,41 @@ public class Path implements Jsonable {
 		}
 		return ret;
 	}
-	
+
 	public Path(Signature schema, List<String> strings) throws FQLException {
 		if (strings.isEmpty()) {
 			throw new FQLException("Empty path");
 		}
-		
+
 		path = new LinkedList<Edge>();
-		
+
 		String head = strings.get(0);
 		source = schema.getNode(head);
-		assert(source != null);
-		
+		assert (source != null);
+
 		target = source;
 		for (int i = 1; i < strings.size(); i++) {
 			String string = strings.get(i);
 			Edge e = schema.getEdge(string);
 			path.add(e);
 			target = e.target;
-			assert(target != null);
+			assert (target != null);
 		}
 	}
 
 	public Path(Signature s, Edge e) throws FQLException {
-		this(s, doStuff(s,e));
+		this(s, doStuff(s, e));
 	}
 
 	public Path(Unit n, Signature schema,
-			List<Pair<Pair<String, String>, String>> strings)  throws FQLException {
+			List<Pair<Pair<String, String>, String>> strings)
+			throws FQLException {
 		if (strings.isEmpty()) {
 			throw new FQLException("Empty path");
 		}
-		
+
 		path = new LinkedList<Edge>();
-		
+
 		source = schema.getNode(strings.get(0).first.first);
 
 		for (int i = 0; i < strings.size(); i++) {
@@ -88,9 +89,10 @@ public class Path implements Jsonable {
 	}
 
 	public Path(Signature schema,
-			List<Pair<Pair<String, String>, String>> strings, Node node) throws FQLException {
+			List<Pair<Pair<String, String>, String>> strings, Node node)
+			throws FQLException {
 		path = new LinkedList<Edge>();
-		
+
 		if (node == null) {
 			throw new RuntimeException();
 		}
@@ -105,37 +107,37 @@ public class Path implements Jsonable {
 		}
 	}
 
-//	private static List<String> convert(
-//			List<Pair<Pair<String, String>, String>> l) {
-//		List<String> ret = new LinkedList<>();
-//		for (Pair<Pair<String, String>, String> x : l) {
-//			ret.add(x.second);
-//		}
-//		return ret;
-//	}
-	
-	
+	// private static List<String> convert(
+	// List<Pair<Pair<String, String>, String>> l) {
+	// List<String> ret = new LinkedList<>();
+	// for (Pair<Pair<String, String>, String> x : l) {
+	// ret.add(x.second);
+	// }
+	// return ret;
+	// }
+
 	public static Path parsePath(Signature a, String s) throws FQLException {
 		try {
 			Tokens t = new FqlTokenizer(s);
 			PathParser pp = new PathParser();
 			Partial<List<String>> r = pp.parse(t);
 			if (r.tokens.toString().trim().length() != 0) {
-				throw new FQLException("Invalid path: " + s); 
+				throw new FQLException("Invalid path: " + s);
 			}
 			return new Path(a, r.value);
-			
+
 		} catch (Exception e) {
-			throw new FQLException("Invalid path: " + s); 
-		}		
-		
+			throw new FQLException("Invalid path: " + s);
+		}
+
 	}
 
 	public Path(Signature a, Node a2) throws FQLException {
 		this(a, foo(a2));
 	}
-	
-	public static Path append(Signature s, Path arr, Path arr2) throws FQLException {
+
+	public static Path append(Signature s, Path arr, Path arr2)
+			throws FQLException {
 		if (!arr.target.equals(arr2.source)) {
 			throw new RuntimeException("bad path append");
 		}
@@ -209,13 +211,12 @@ public class Path implements Jsonable {
 		return true;
 	}
 
-
 	public String toLong() {
 		return toString() + " : " + source.string + " -> " + target.string;
 	}
 
 	@Override
 	public String tojson() {
-		return PrettyPrinter.sep(",","[","]", path);
+		return PrettyPrinter.sep(",", "[", "]", path);
 	}
 }

@@ -5,22 +5,21 @@ import fql.parse.Jsonable;
 /**
  * 
  * @author ryan
- *
- * Nodes in a signature.
+ * 
+ *         Nodes in a signature.
  */
 public class Node implements Jsonable {
-	
+
 	public String toString() {
 		return string;
 	}
-	
+
 	public String string;
-	
+
 	public Node(String string) {
-		assert(string != null);
+		assert (string != null);
 		this.string = string;
 	}
-
 
 	@Override
 	public int hashCode() {
@@ -46,11 +45,9 @@ public class Node implements Jsonable {
 			return false;
 		return true;
 	}
-	
+
 	public String tojson() {
 		return "\"" + string + "\"";
 	}
-	
-	
 
 }

@@ -15,7 +15,12 @@ import net.categoricaldata.api.BackEnd;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 
-
+/**
+ * 
+ * @author ryan
+ *
+ * Mini servlet for JSON-based deltas,sigmas,pis
+ */
 public class FQLServlet extends HttpServlet {
 
 	BackEnd backend;
@@ -66,20 +71,20 @@ public class FQLServlet extends HttpServlet {
 		String map = readFrom(request.getPart("area2").getInputStream());
 		String sel = readFrom(request.getPart("selected").getInputStream());
 		String ver = backend.version();
-		
+
 		String res;
 		try {
 			switch (sel) {
-			case "delta" :
+			case "delta":
 				res = backend.delta(inst, map);
 				break;
-			case "sigma" :
+			case "sigma":
 				res = backend.sigma(inst, map);
 				break;
-			case "pi" :
+			case "pi":
 				res = backend.pi(inst, map);
 				break;
-			case "iso" :
+			case "iso":
 				res = backend.iso(inst, map);
 				break;
 			default:
@@ -88,12 +93,12 @@ public class FQLServlet extends HttpServlet {
 		} catch (Exception e) {
 			res = e.getMessage();
 		}
-		
+
 		response.setContentType("text/html");
 		response.setStatus(HttpServletResponse.SC_OK);
-		response.getWriter().println(html(inst, map, res, sel, ver, backend.readme()));
+		response.getWriter().println(
+				html(inst, map, res, sel, ver, backend.readme()));
 
-			
 	}
 
 	@Override
@@ -151,8 +156,11 @@ public class FQLServlet extends HttpServlet {
 				+ "\n</TEXTAREA>"
 				+ "\n<br><br>"
 				+ "\nBack-end: "
-				+ version + "\n</body>" + "\n</html>"
-				+ "<br><br>" + readme
+				+ version
+				+ "\n</body>"
+				+ "\n</html>"
+				+ "<br><br>"
+				+ readme
 				+ "\n";
 	}
 

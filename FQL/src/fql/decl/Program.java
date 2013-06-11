@@ -13,24 +13,21 @@ import fql.parse.Tokens;
 /**
  * 
  * @author ryan
- *
- * Syntax for FQL programs.
+ * 
+ *         Syntax for FQL programs.
  */
 public class Program {
-	
+
 	public static Program parse(String program) throws BadSyntax, IllTyped {
 		Tokens t = new FqlTokenizer(program);
 		Partial<Program> p = new ProgramParser().parse(t);
 		if (p.tokens.toString().trim().length() > 0) {
-			throw new BadSyntax(t, "Uncomsumed input: " + ((FqlTokenizer)p.tokens).toString2().trim());
+			throw new BadSyntax(t, "Uncomsumed input: "
+					+ ((FqlTokenizer) p.tokens).toString2().trim());
 		}
 		return p.value;
 	}
-		
 
-//		return p.value;
-
-	
 	@Override
 	public String toString() {
 		return "Program [decls=" + decls + "]";
@@ -81,7 +78,6 @@ public class Program {
 		return false;
 	}
 
-
 	public boolean isId(String s) {
 		for (Decl d : decls) {
 			if (d instanceof MappingDecl) {
@@ -93,6 +89,5 @@ public class Program {
 		}
 		return false;
 	}
-	
-		
+
 }

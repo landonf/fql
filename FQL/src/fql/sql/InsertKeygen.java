@@ -6,9 +6,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 
+ * @author ryan
+ *
+ * PSM for keygeneration
+ */
 public class InsertKeygen extends PSM {
 
-	
 	String name;
 	String col;
 	String r;

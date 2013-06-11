@@ -1,5 +1,11 @@
 package fql.decl;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Represents types for attributes
+ */
 public abstract class Type {
 
 	@Override

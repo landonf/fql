@@ -3,10 +3,20 @@ package fql.sql;
 import java.util.Map;
 import java.util.Set;
 
+import fql.DEBUG;
+
+/**
+ * 
+ * @author ryan
+ *
+ * Class for PSM, which raps SQL.
+ */
 public abstract class PSM {
 	
 	public final static String INTEGER = "INTEGER";
-	public final static String VARCHAR = "VARCHAR(128)";
+	public final static String VARCHAR() {
+		return "VARCHAR(" + DEBUG.varlen + ")";
+	}
 
 	public  abstract void exec(Map<String, Set<Map<String, Object>>> state);
 	

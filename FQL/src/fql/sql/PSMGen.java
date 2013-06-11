@@ -34,7 +34,14 @@ import fql.decl.Query;
 import fql.decl.Signature;
 import fql.decl.Type;
 import fql.decl.Varchar;
+import fql.parse.ExternalDecl;
 
+/**
+ * 
+ * @author ryan
+ *
+ * PSM generator.
+ */
 public class PSMGen {
 
 	public static List<PSM> guidify(String pre0, Signature sig) {	
@@ -48,11 +55,11 @@ public class PSMGen {
 		Map<String, String> guid_attrs = new HashMap<>();
 		Map<String, String> twocol_attrs = new HashMap<>();
 
-		twocol_attrs.put("c0", PSM.VARCHAR);
-		twocol_attrs.put("c1", PSM.VARCHAR);
-		guid_attrs.put("c0", PSM.VARCHAR);
-		guid_attrs.put("c1", PSM.VARCHAR);
-		guid_attrs.put("guid", PSM.VARCHAR);
+		twocol_attrs.put("c0", PSM.VARCHAR());
+		twocol_attrs.put("c1", PSM.VARCHAR());
+		guid_attrs.put("c0", PSM.VARCHAR());
+		guid_attrs.put("c1", PSM.VARCHAR());
+		guid_attrs.put("guid", PSM.VARCHAR());
 
 		List<String> attrs_foo = new LinkedList<>();
 		attrs_foo.add("c0");
@@ -62,18 +69,18 @@ public class PSMGen {
 			String pre = pre0 + "_" + n;
 
 			// make new table with GUID
-			ret.add(new CreateTable(pre + "_guid", guid_attrs));
+			ret.add(new CreateTable(pre + "_guid", guid_attrs, false));
 			ret.add(new InsertKeygen(pre + "_guid", "guid", pre, attrs_foo));
 
 			// make a substitution table
-			ret.add(new CreateTable(pre + "_subst", twocol_attrs));
+			ret.add(new CreateTable(pre + "_subst", twocol_attrs, false));
 			ret.add(new InsertSQL(pre + "_subst", makeSubst(pre0, n)));
 
-			ret.add(new CreateTable(pre + "_subst_inv", twocol_attrs));
+			ret.add(new CreateTable(pre + "_subst_inv", twocol_attrs, false));
 			ret.add(new InsertSQL(pre + "_subst_inv", invertSubst(pre0, n)));
 
 			// create a new table that applies the substitution
-			ret.add(new CreateTable(pre + "_applied", twocol_attrs));
+			ret.add(new CreateTable(pre + "_applied", twocol_attrs, false));
 			ret.add(new InsertSQL(pre + "_applied", makeApplyNode(pre0, n)));
 
 			// drop guid table
@@ -83,7 +90,7 @@ public class PSMGen {
 			ret.add(new DropTable(pre));
 
 			// copy the new table
-			ret.add(new CreateTable(pre, twocol_attrs));
+			ret.add(new CreateTable(pre, twocol_attrs, false));
 			ret.add(new InsertSQL(pre, new CopyFlower(pre + "_applied")));
 
 			// drop the new table
@@ -94,14 +101,14 @@ public class PSMGen {
 			String pre = pre0 + "_" + e.name;
 
 			// create a new table that applies the substitution
-			ret.add(new CreateTable(pre + "_applied", twocol_attrs));
+			ret.add(new CreateTable(pre + "_applied", twocol_attrs, false));
 			ret.add(new InsertSQL(pre + "_applied", makeApplyEdge(pre0, e)));
 
 			// drop original table
 			ret.add(new DropTable(pre));
 
 			// copy the new table
-			ret.add(new CreateTable(pre, twocol_attrs));
+			ret.add(new CreateTable(pre, twocol_attrs, false));
 			ret.add(new InsertSQL(pre, new CopyFlower(pre + "_applied")));
 
 			// drop the new table
@@ -114,14 +121,14 @@ public class PSMGen {
 
 			// create a new table that applies the substitution
 
-			ret.add(new CreateTable(pre + "_applied", colattrs(a)));
+			ret.add(new CreateTable(pre + "_applied", colattrs(a), false));
 			ret.add(new InsertSQL(pre + "_applied", makeAttr(pre0, a)));
 
 			// drop original table
 			ret.add(new DropTable(pre));
 
 			// copy the new table
-			ret.add(new CreateTable(pre, twocol_attrs));
+			ret.add(new CreateTable(pre, twocol_attrs, false));
 			ret.add(new InsertSQL(pre, new CopyFlower(pre + "_applied")));
 
 			// drop the new table
@@ -143,7 +150,7 @@ public class PSMGen {
 
 	private static Map<String, String> colattrs(Attribute a) {
 		Map<String, String> twocol_attrs = new HashMap<>();
-		twocol_attrs.put("c0", PSM.VARCHAR);
+		twocol_attrs.put("c0", PSM.VARCHAR());
 		twocol_attrs.put("c1", typeTrans(a.target));
 		return twocol_attrs;
 	}
@@ -228,6 +235,8 @@ public class PSMGen {
 				ret.addAll(xxx);
 			} else if (d instanceof EvalDSPInstanceDecl) {
 				ret.addAll(addInstance(env, (EvalDSPInstanceDecl) d));
+			} else if (d instanceof ExternalDecl) {
+				ret.addAll(addInstance(env, (ExternalDecl)d));
 			}
 		}
 		return ret;
@@ -241,6 +250,10 @@ public class PSMGen {
 	private static String prettyPrint(List<PSM> l) {
 		String ret = "";
 		for (PSM p : l) {
+			String s = p.toPSM();
+			if (s.trim().length() == 0) {
+				continue;
+			}
 			ret += p.toPSM() + "\n\n";
 		}
 		return ret;
@@ -274,9 +287,9 @@ public class PSMGen {
 		ret.addAll(addInstance(env, pi));
 		//ret.addAll(makeTables(name, un.target));
 		ret.addAll(addInstance(env, sigma));
-		//ret.addAll(dropTables(name + "_tempdelta", proj.source));
-		//ret.addAll(dropTables(name + "_temppi", join.target));
-		//ret.addAll(dropTables(name + "_tempsigma", un.target));
+		ret.addAll(dropTables(name + "_tempdelta", proj.source));
+		ret.addAll(dropTables(name + "_temppi", join.target));
+		ret.addAll(dropTables(name + "_tempsigma", un.target));
 		//System.out.println("zzzzzzz" + ret);
 		return ret;
 	}
@@ -306,16 +319,16 @@ public class PSMGen {
 		String name = d.name;
 
 		if (d.kind.equals("delta")) {
-			ret.addAll(makeTables(name, f.source));
+			ret.addAll(makeTables(name, f.source, false));
 			ret.addAll(delta(f, inst, name));
 			ret.addAll(guidify(name, f.source));
 			// System.out.println("adding " + delta(f, inst, name));
 		} else if (d.kind.equals("sigma")) {
-			ret.addAll(makeTables(name, f.target));
+			ret.addAll(makeTables(name, f.target, false));
 			ret.addAll(sigma(f, name, inst));
 			ret.addAll(guidify(name, f.target));
 		} else if (d.kind.equals("pi")) {
-			ret.addAll(makeTables(name, f.target));
+			ret.addAll(makeTables(name, f.target, false));
 			ret.addAll(pi(f, inst, name));
 			// not needed ret.addAll(guidify(name, f.target));
 		} else {
@@ -332,7 +345,7 @@ public class PSMGen {
 		Signature sig = env.signatures.get(d.type);
 		Instance inst = new Instance(d.name, sig, d.data);
 
-		ret.addAll(makeTables(d.name, sig));
+		ret.addAll(makeTables(d.name, sig, false));
 
 		for (Node n : sig.nodes) {
 			ret.add(populateTable(d.name, n.string, inst.data.get(n.string)));
@@ -349,6 +362,30 @@ public class PSMGen {
 		return ret;
 	}
 
+	private static List<PSM> addInstance(Environment env, ExternalDecl d)
+			throws FQLException {
+		List<PSM> ret = new LinkedList<>();
+
+		Signature sig = env.signatures.get(d.type);
+		Instance inst = new Instance(d.name, sig);
+
+		ret.addAll(makeTables(d.name, sig, true));
+
+		for (Node n : sig.nodes) {
+			ret.add(populateTable(d.name, n.string, inst.data.get(n.string)));
+		}
+		for (Edge e : sig.edges) {
+			ret.add(populateTable(d.name, e.name, inst.data.get(e.name)));
+		}
+		for (Attribute a : sig.attrs) {
+			ret.add(populateTable(d.name, a.name, inst.data.get(a.name)));
+		}
+
+		 ret.addAll(guidify(d.name, sig));
+
+		return ret;
+	}
+	
 	private static PSM populateTable(String iname, String tname,
 			Set<Pair<Object, Object>> data) {
 
@@ -367,26 +404,26 @@ public class PSMGen {
 		return new InsertValues(iname + "_" + tname, attrs, values);
 	}
 
-	private static List<PSM> makeTables(String name, Signature sig) {
+	private static List<PSM> makeTables(String name, Signature sig, boolean suppress) {
 		List<PSM> ret = new LinkedList<>();
 
 		for (Node n : sig.nodes) {
 			Map<String, String> attrs = new HashMap<>();
-			attrs.put("c0", PSM.VARCHAR);
-			attrs.put("c1", PSM.VARCHAR);
-			ret.add(new CreateTable(name + "_" + n.string, attrs));
+			attrs.put("c0", PSM.VARCHAR());
+			attrs.put("c1", PSM.VARCHAR());
+			ret.add(new CreateTable(name + "_" + n.string, attrs, suppress));
 		}
 		for (Edge e : sig.edges) {
 			Map<String, String> attrs = new HashMap<>();
-			attrs.put("c0", PSM.VARCHAR);
-			attrs.put("c1", PSM.VARCHAR);
-			ret.add(new CreateTable(name + "_" + e.name, attrs));
+			attrs.put("c0", PSM.VARCHAR());
+			attrs.put("c1", PSM.VARCHAR());
+			ret.add(new CreateTable(name + "_" + e.name, attrs, suppress));
 		}
 		for (Attribute a : sig.attrs) {
 			Map<String, String> attrs = new HashMap<>();
-			attrs.put("c0", PSM.VARCHAR);
+			attrs.put("c0", PSM.VARCHAR());
 			attrs.put("c1", typeTrans(a.target));
-			ret.add(new CreateTable(name + "_" + a.name, attrs));
+			ret.add(new CreateTable(name + "_" + a.name, attrs, suppress));
 		}
 
 		return ret;
@@ -396,7 +433,7 @@ public class PSMGen {
 		if (t instanceof Int) {
 			return PSM.INTEGER;
 		} else if (t instanceof Varchar) {
-			return PSM.VARCHAR;
+			return PSM.VARCHAR();
 		}
 		throw new RuntimeException();
 	}
@@ -607,9 +644,9 @@ public class PSMGen {
 			//comma cat is empty, need unit for product
 			if (xxx == null) {
 				Map<String, String> attrs2 = new HashMap<>();
-				attrs2.put("guid", PSM.VARCHAR);
+				attrs2.put("guid", PSM.VARCHAR());
 				
-				ret.add(new CreateTable(dst + "_" + d0.string + "_limit", attrs2));
+				ret.add(new CreateTable(dst + "_" + d0.string + "_limit", attrs2, false));
 				ret.add(new InsertEmptyKeygen(dst + "_" + d0.string + "_limit"));
 				ret.add(new InsertSQL(dst + "_" + d0.string, new SquishFlower(dst
 						+ "_" + d0.string + "_limit")));
@@ -617,10 +654,10 @@ public class PSMGen {
 			}
 			
 			Triple<Node, Node, Arr<Node, Path>>[] cols = xxx.second;
-			String ggg = "";
-			for (Triple<Node, Node, Arr<Node, Path>> t : cols) {
-				ggg += " " + t;
-			}
+//			String ggg = "";
+//			for (Triple<Node, Node, Arr<Node, Path>> t : cols) {
+//				ggg += " " + t;
+//			}
 			//System.out.println("Cols are " + ggg);
 
 	//		System.out.println("done with limit");
@@ -635,21 +672,21 @@ public class PSMGen {
 
 			Map<String, String> attrs1 = new HashMap<>();
 			for (int i = 0; i < xxx.second.length; i++) {
-				attrs1.put("c" + i, PSM.VARCHAR);
+				attrs1.put("c" + i, PSM.VARCHAR());
 			}
 			for (int j = 0; j < xxx.third.length; j++) {
 				attrs1.put("c" + (xxx.second.length + j), typeTrans(xxx.third[j].target));
 			}
 			Map<String, String> attrs2 = new HashMap<>(attrs1);
-			attrs2.put("guid", PSM.VARCHAR);
+			attrs2.put("guid", PSM.VARCHAR());
 
 			List<String> attcs = new LinkedList<>(attrs1.keySet());
 
 			ret.add(new CreateTable(dst + "_" + d0.string + "_limnoguid",
-					attrs1));
+					attrs1, false));
 			ret.add(new InsertSQL(dst + "_" + d0.string + "_limnoguid", r));
 
-			ret.add(new CreateTable(dst + "_" + d0.string + "_limit", attrs2));
+			ret.add(new CreateTable(dst + "_" + d0.string + "_limit", attrs2, false));
 			ret.add(new InsertKeygen(dst + "_" + d0.string + "_limit", "guid",
 					dst + "_" + d0.string + "_limnoguid", attcs));
 
@@ -764,7 +801,7 @@ public class PSMGen {
 		//System.out.println("Arr " + e);
 		//System.out.println("Cat" + cat);
 		// turn e into arrow e', compute e' ; q2col, look for that
-		a: for (int i = 0; i < q2cols.length; i++) {
+		/* a: */ for (int i = 0; i < q2cols.length; i++) {
 			boolean b = false;
 			for (int j = 0; j < q1cols.length; j++) {
 				Triple<Node, Node, Arr<Node, Path>> q2c = q2cols[i];
@@ -776,7 +813,7 @@ public class PSMGen {
 //				System.out.println("compose " + cat.compose(e, q1c.third));
 //				System.out.println("compose " + cat.compose(q1c.third, e));
 //				// if (q1c.equals(q2c)) {
-				//TODO add also match on second component
+				
 				if (q1c.third.equals(cat.compose(e, q2c.third)) && q1c.second.equals(q2c.second)) {
 				//	System.out.println("hit on " + q2c.third);
 					Pair<Pair<String, String>, Pair<String, String>> retadd = new Pair<>(new Pair<>(
@@ -874,11 +911,7 @@ public class PSMGen {
 			select.put("c" + temp, new Pair<>("t" + temp, "c0"));
 			temp++;
 			//System.out.println("&&&" + n);
-			//TODO add column for attribute like on board
-			//do not filter on attributes
-			//DO NOT USE NEW ATTRIBUTE STUFF FOR EDGES
-			//to materialize attribute, look up in limit table
-			//should have bijection columns in limit table with attributes
+		
 		}
 		
 		for (Triple<Node, Node, Arr<Node, Path>> n : b.objects) {
@@ -955,8 +988,8 @@ public class PSMGen {
 			FinFunctor<Triple<Node, Node, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Node, Path>>, Node, Path> projB) {
 		Map<String, String> twocol_attrs = new HashMap<>();
 
-		twocol_attrs.put("c0", PSM.VARCHAR);
-		twocol_attrs.put("c1", PSM.VARCHAR);
+		twocol_attrs.put("c0", PSM.VARCHAR());
+		twocol_attrs.put("c1", PSM.VARCHAR());
 		List<PSM> ret = new LinkedList<>();
 
 		// Map<Triple<Node, Node, Arr<Node, Path>>, String> ret = new
@@ -968,7 +1001,7 @@ public class PSMGen {
 		for (Entry<Arr<Triple<Node, Node, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Node, Path>>>, Arr<Node, Path>> p : projB.arrowMapping
 				.entrySet()) {
 			Path x = p.getKey().arr.second.arr;
-			ret.add(new CreateTable("temp" + tempTables, twocol_attrs));
+			ret.add(new CreateTable("temp" + tempTables, twocol_attrs, false));
 			ret.add(new InsertSQL("temp" + tempTables, compose(pre, x)));
 			ar.put(p.getKey().arr, "temp" + tempTables++);
 		}
