@@ -1,19 +1,5 @@
 package fql;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import net.categoricaldata.api.BackEnd;
-
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
 
 /**
  * 
@@ -21,7 +7,7 @@ import org.eclipse.jetty.servlet.ServletHandler;
  *
  * Mini servlet for JSON-based deltas,sigmas,pis
  */
-public class FQLServlet extends HttpServlet {
+public class FQLServlet { /* extends HttpServlet {
 
 	BackEnd backend;
 
@@ -163,5 +149,5 @@ public class FQLServlet extends HttpServlet {
 				+ readme
 				+ "\n";
 	}
-
+*/
 }

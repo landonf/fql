@@ -34,7 +34,6 @@ import javax.swing.KeyStroke;
 import fql.DEBUG;
 import fql.FQLApplet;
 import fql.FQLBackEnd;
-import fql.FQLServlet;
 import fql.Pair;
 import fql.examples.Example;
 import fql.examples.Examples;
@@ -145,13 +144,13 @@ public class GUI extends JPanel {
 		exitItem.setShortcut(q);
 
 		Menu webMenu = new Menu("Web");
-		MenuItem serverItem = new MenuItem("Start Local Server");
-		webMenu.add(serverItem);
-		serverItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				serverAction();
-			}
-		});
+		//MenuItem serverItem = new MenuItem("Start Local Server");
+//		webMenu.add(serverItem);
+//		serverItem.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				serverAction();
+//			}
+//		});
 		MenuItem jsonItem = new MenuItem("JSON Input");
 		webMenu.add(jsonItem);
 		jsonItem.addActionListener(new ActionListener() {
@@ -383,16 +382,16 @@ public class GUI extends JPanel {
 	}
 
 	protected static void serverAction() {
-		String r = JOptionPane.showInputDialog("Local port:", 8085);
-		if (r == null) {
-			return;
-		}
-		try {
-			int rr = Integer.parseInt(r);
-			FQLServlet.serve(rr);
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, e);
-		}
+//		String r = JOptionPane.showInputDialog("Local port:", 8085);
+//		if (r == null) {
+//			return;
+//		}
+//		try {
+//			int rr = Integer.parseInt(r);
+//			FQLServlet.serve(rr);
+//		} catch (Exception e) {
+//			JOptionPane.showMessageDialog(null, e);
+//		}
 	}
 
 	static void helpAction() {
