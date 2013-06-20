@@ -326,8 +326,13 @@ public class PSMGen {
 		} else if (d.kind.equals("sigma")) {
 			ret.addAll(makeTables(name, f.target, false));
 			ret.addAll(sigma(f, name, inst));
+		//	not needed ret.addAll(guidify(name, f.target));
+		} else if (d.kind.equals("SIGMA")) {
+			ret.addAll(makeTables(name, f.target, false));
+			ret.addAll(SIGMA(env, f, name, inst));
 			ret.addAll(guidify(name, f.target));
-		} else if (d.kind.equals("pi")) {
+		}
+		else if (d.kind.equals("pi")) {
 			ret.addAll(makeTables(name, f.target, false));
 			ret.addAll(pi(f, inst, name));
 			// not needed ret.addAll(guidify(name, f.target));
@@ -505,6 +510,14 @@ public class PSMGen {
 		return new Flower(select, from, where);
 	}
 
+	public static List<PSM> SIGMA(Environment env, Mapping F, String pre, String inst)
+			throws FQLException {
+		List<PSM> ret = new LinkedList<>();
+		
+		ret.add(new FullSigma(F, pre, inst));
+		
+		return ret;
+	}
 	public static List<PSM> sigma(Mapping F, String pre, String inst)
 			throws FQLException {
 		Signature C = F.source;

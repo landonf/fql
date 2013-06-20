@@ -5,6 +5,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.sql.Date;
+import java.text.DateFormat;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -361,13 +363,36 @@ public class CodeEditor extends JPanel {
 
 				commands.add(s);
 			}
+			
+			for (String m : cp.mappings.keySet()) {
+				if (parsed_program.isMapping(m)) {
+					continue;
+				}
+				if (DEBUG.INTERMEDIATE == Intermediate.ALL) {
+					commands.add(m);
+				}
+			}
+			for (String m : cp.signatures.keySet()) {
+				if (parsed_program.isSignature(m)) {
+					continue;
+				}
+				if (DEBUG.INTERMEDIATE == Intermediate.ALL) {
+					commands.add(m);
+				}
+			}
+			
 
 			// Commands parsed_view = Commands.parse(view);
-			if (display != null) {
+			if (display != null && !DEBUG.MultiView) {
 				display.close();
 			}
+			DateFormat format = DateFormat.getTimeInstance();
 			display = new Display(cp, commands);
-			display.display(GUI.getTitle(id), commands);
+			String foo = GUI.getTitle(id);
+			if (DEBUG.MultiView) {
+				foo += " - " + format.format(new Date(System.currentTimeMillis()));
+			}
+			display.display(foo, commands);
 
 			String psm = PSMGen.compile(cp, parsed_program);
 			respArea.setText(psm);

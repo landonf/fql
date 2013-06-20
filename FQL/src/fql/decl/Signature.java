@@ -58,6 +58,16 @@ public class Signature implements Viewable<Signature> {
 	public Set<Eq> eqs;
 	public String name0;
 
+	public Signature clone(String newname) {
+		Signature s = new Signature();
+		s.nodes = new LinkedList<>(nodes);
+		s.edges = new LinkedList<>(edges);
+		s.attrs = new LinkedList<>(attrs);
+		s.eqs = new HashSet<>(eqs);
+		s.name0 = newname;
+		return s;
+	}
+	
 	public Signature(String n, List<String> nodes_str,
 			List<Triple<String, String, String>> attrs_str,
 			List<Triple<String, String, String>> arrows,
@@ -317,6 +327,10 @@ public class Signature implements Viewable<Signature> {
 		attrs = a;
 	}
 
+	private Signature() {
+		
+	}
+
 	public boolean acyclic() {
 		for (Node n : nodes) {
 			Set<Node> r = reachable(n);
@@ -378,7 +392,7 @@ public class Signature implements Viewable<Signature> {
 				return edge;
 			}
 		}
-		throw new FQLException("Unknown edge: " + string);
+		throw new FQLException("Unknown arrow: " + string);
 	}
 
 	public Node getNode(String string) throws FQLException {
@@ -945,4 +959,8 @@ public class Signature implements Viewable<Signature> {
 		return i.join();
 	}
 
+	@Override
+	public JPanel groth() throws FQLException {
+		return null;
+	}
 }

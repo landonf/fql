@@ -47,6 +47,7 @@ import fql.cat.FDM;
 import fql.cat.FinCat;
 import fql.cat.Inst;
 import fql.cat.Value;
+import fql.gui.CategoryOfElements;
 import fql.gui.Viewable;
 import fql.parse.FqlTokenizer;
 import fql.parse.JSONParsers;
@@ -60,7 +61,9 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	// }
 
 	String name;
-
+	
+	
+	
 	public void conformsTo(Signature s) throws FQLException {
 		for (Node n : s.nodes) {
 			Set<Pair<Object, Object>> i = data.get(n.string);
@@ -168,7 +171,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		// toFunctor();
 	}
 
-	private Set<Pair<Object, Object>> evaluate(Path p) {
+	public Set<Pair<Object, Object>> evaluate(Path p) {
 		Set<Pair<Object, Object>> x = data.get(p.source.string);
 		if (x == null) {
 			throw new RuntimeException("Couldnt find " + p.source.string);
@@ -183,7 +186,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		return x;
 	}
 
-	private static Set<Pair<Object, Object>> compose(
+	public static Set<Pair<Object, Object>> compose(
 			Set<Pair<Object, Object>> x, Set<Pair<Object, Object>> y) {
 		Set<Pair<Object, Object>> ret = new HashSet<>();
 
@@ -675,6 +678,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 	}
 
+	@SuppressWarnings("serial")
 	private Map<String, JTable> makejoined(
 			Map<String, Map<String, Set<Pair<Object, Object>>>> joined,
 			Map<String, Set<Pair<Object, Object>>> nd, List<String> names) {
@@ -1457,6 +1461,11 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	@Override
 	public JPanel initial() throws FQLException {
 		return null;
+	}
+
+	@Override
+	public JPanel groth() throws FQLException {
+		return CategoryOfElements.makePanel(this);
 	}
 
 }

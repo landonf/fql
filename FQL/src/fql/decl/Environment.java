@@ -165,7 +165,7 @@ public class Environment {
 					.get(d.inst).name0)) {
 				throw new FQLException("Ill-typed input  : " + d.name);
 			}
-		} else if (d.kind.equals("sigma")) {
+		} else if (d.kind.equals("sigma") || d.kind.equals("SIGMA")) {
 			if (!mappings.get(d.mapping).target.name0.equals(d.type)) {
 				throw new FQLException("Ill-typed return  : " + d.name);
 			}
@@ -264,6 +264,13 @@ public class Environment {
 	private void addMapping(MappingDecl mappingDecl) throws FQLException {
 		Mapping m = new Mapping(mappingDecl.name, this, mappingDecl);
 		mappings.put(mappingDecl.name, m);
+	}
+	
+	public void addInstance(Instance i)
+			throws FQLException {
+		Signature thesig = signatures.get(i.thesig.name0);
+		instance_types.put(i.name, thesig);
+		instances.put(i.name, i);
 	}
 
 	private void addInstance(ConstantInstanceDecl instanceDecl)

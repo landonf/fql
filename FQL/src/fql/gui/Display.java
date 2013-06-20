@@ -80,6 +80,11 @@ public class Display {
 				if (init != null) {
 					px.add("Initial", init);
 				}
+				
+				JPanel groth = view.groth();
+				if (groth != null) {
+					px.add("Grothendieck", new JScrollPane(groth));
+				}
 					
 				JPanel top = new JPanel(new GridLayout(1,1));
 				top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));

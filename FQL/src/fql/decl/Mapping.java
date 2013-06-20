@@ -59,6 +59,15 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 
 	boolean ALLOW_WF_CHECK = true;
 
+	public Mapping(String name, Signature src, Signature dst, Map<Node, Node> nm, Map<Edge, Path> em) {
+		ALLOW_WF_CHECK = false;
+		this.name = name;
+		this.source = src;
+		this.target = dst;
+		this.nm = nm;
+		this.em = em;
+	}
+
 	public void validate() throws FQLException {
 		for (Attribute a : source.attrs) {
 			Attribute b = am.get(a);
@@ -957,6 +966,11 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 
 	@Override
 	public JPanel initial() throws FQLException {
+		return null;
+	}
+
+	@Override
+	public JPanel groth() throws FQLException {
 		return null;
 	}
 

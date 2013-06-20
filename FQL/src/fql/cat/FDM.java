@@ -631,7 +631,7 @@ public class FDM {
 
 		for (Pair<Obj, Value<Y,X>> a : c1.objects) {
 			objM.put(a, new Pair<>(a.first, sf.eta(a.first).get(a.second)));
-		}
+		} 
 
 		for (Arr<Pair<Obj, Value<Y,X>>, Arr<Obj, Arrow>> a : c1.arrows) {
 			arrM.put(a, new Arr<>(a.arr, objM.get(a.src), objM.get(a.dst)));

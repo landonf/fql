@@ -22,6 +22,10 @@ public class DSPInstanceDeclParser implements Parser<Decl> {
 		} catch (Exception e) {
 		}
 		try {
+			return doParse("SIGMA", s0);
+		} catch (Exception e) {
+		}
+		try {
 			return doParse("pi", s0);
 		} catch (Exception e) {
 		}
