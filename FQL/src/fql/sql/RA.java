@@ -609,7 +609,7 @@ public abstract class RA {
 		for (Entry<Edge, Path> e : m.em.entrySet()) {
 			ret.put(e.getKey().name, compose(e.getValue()));
 		}
-		for (Entry<Attribute, Attribute> a : m.am.entrySet()) {
+		for (Entry<Attribute<Node>, Attribute<Node>> a : m.am.entrySet()) {
 			ret.put(a.getKey().name, new Relvar(a.getValue().name));
 		}
 		return ret;

@@ -27,6 +27,7 @@ public class Examples {
 	public static Example pi2 = new Pi2Example();
 	public static Example sigma = new SigmaExample();
 	public static Example composition = new CompositionExample();
+	public static Example tcomp = new TypedCompositionExample();
 	public static Example iso = new IsoExample();
 	public static Example triangle = new TriangleExample();
 	public static Example cyclicgroup = new CyclicExample();
@@ -36,7 +37,7 @@ public class Examples {
 	public static Example typedemployees = new TypedEmployeesExample();
 	public static Example typedsigma = new TypedSigmaExample();
 	
-	public static Example[] examples = { people, external, typeddelta, delta, pi, typedPi, typedsigma, sigma, full, employess, typedemployees, composition, iso, triangle, cyclicgroup, dihedral, /* one, */ empty, foil, typedFoil, sql2fql, weird, typedWeird };
+	public static Example[] examples = { people, external, typeddelta, delta, pi, typedPi, typedsigma, sigma, full, employess, typedemployees, composition, tcomp, iso, triangle, cyclicgroup, dihedral, /* one, */ empty, foil, typedFoil, sql2fql, weird, typedWeird };
 	
 	public static final Example INIT_EXAMPLE = typeddelta;
 	

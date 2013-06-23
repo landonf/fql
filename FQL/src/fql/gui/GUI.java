@@ -371,6 +371,9 @@ public class GUI extends JPanel {
 		delay();
 		int i = editors.getSelectedIndex();
 		CodeEditor c = (CodeEditor) editors.getComponentAt(i);
+		if (c == null) {
+			return;
+		}
 		if (c.abortBecauseDirty()) {
 			return;
 		}
@@ -491,6 +494,10 @@ public class GUI extends JPanel {
 	}
 
 	static Boolean getDirty(Integer i) {
+		Boolean ret = dirty.get(i);
+		if (ret == null) {
+			throw new RuntimeException();
+		}
 		return dirty.get(i);
 	}
 
@@ -499,13 +506,14 @@ public class GUI extends JPanel {
 	static Map<Integer, File> files = new HashMap<>();
 	static Map<Integer, String> titles = new HashMap<>();
 	// static Map<Integer, Integer> position = new HashMap<>();
-	static int untitled_count = 1;
+	static int untitled_count = 0;
 
 	public static String getTitle(Integer i) {
 		return titles.get(i);
 	}
 
 	static Integer newAction(String title, String content) {
+		untitled_count++;
 		CodeEditor c = new CodeEditor(untitled_count, content);
 		int i = editors.getTabCount();
 		keys.put(untitled_count, c);
@@ -513,7 +521,7 @@ public class GUI extends JPanel {
 		// position.put(untitled_count, i);
 
 		if (title == null) {
-			title = "Untitled " + untitled_count++;
+			title = "Untitled " + untitled_count;
 		}
 		titles.put(c.id, title);
 		editors.addTab(title, c);

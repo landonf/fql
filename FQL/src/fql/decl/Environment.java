@@ -206,7 +206,7 @@ public class Environment {
 
 			ret.add(new Pair<>(e.name, gather0(v)));
 		}
-		for (Attribute a : sig.attrs) {
+		for (Attribute<Node> a : sig.attrs) {
 			Set<Map<String, Object>> v = state.get(pre + "_" + a.name);
 			ret.add(new Pair<>(a.name, gather0(v)));
 		}

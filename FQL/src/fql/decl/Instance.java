@@ -78,10 +78,10 @@ public class Instance implements Viewable<Instance>, Jsonable {
 				}
 			}
 		}
-		for (Attribute a : s.attrs) {
+		for (Attribute<Node> a : s.attrs) {
 			Set<Pair<Object, Object>> i = data.get(a.name);
 			if (i == null) {
-				throw new FQLException("Missing attribute table " + a.name
+				throw new FQLException("Missing Attribute<Node> table " + a.name
 						+ " in " + this);
 			}
 
@@ -245,7 +245,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		for (Edge e : thesig.edges) {
 			this.data.put(e.name, new HashSet<Pair<Object, Object>>());
 		}
-		for (Attribute a : thesig.attrs) {
+		for (Attribute<Node> a : thesig.attrs) {
 			this.data.put(a.name, new HashSet<Pair<Object, Object>>());
 		}
 		this.thesig = thesig;
@@ -267,7 +267,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		for (Edge e : thesig.edges) {
 			this.data.put(e.name, lookup(e.name, data));
 		}
-		for (Attribute a : thesig.attrs) {
+		for (Attribute<Node> a : thesig.attrs) {
 			this.data.put(a.name, lookup(a.name, data));
 		}
 		this.thesig = thesig;
@@ -454,8 +454,8 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		sb.append("\n ;\n");
 
 		first = true;
-		sb.append("attributes\n");
-		for (Attribute k : thesig.attrs) {
+		sb.append("Attribute<Node>s\n");
+		for (Attribute<Node> k : thesig.attrs) {
 			Set<Pair<Object, Object>> v = data.get(k.name);
 			if (!first) {
 				sb.append(",\n");
@@ -660,7 +660,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			// names.add(e.name);
 		}
 
-		for (Attribute a : thesig.attrs) {
+		for (Attribute<Node> a : thesig.attrs) {
 			jnd.get(a.source.string).put(a.name, data.get(a.name));
 		}
 
@@ -1010,7 +1010,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			g2.addEdge(e.name, e.source.string, e.target.string);
 		}
 
-		for (Attribute a : thesig.attrs) {
+		for (Attribute<Node> a : thesig.attrs) {
 			g2.addVertex(a.name);
 			g2.addEdge(a.name, a.source.string, a.name);
 		}

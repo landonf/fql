@@ -6,7 +6,8 @@ package fql.decl;
  * 
  *         Implentation of atomic attributes.
  */
-public class Attribute {
+@SuppressWarnings("hiding")
+public class Attribute<Node> {
 
 	public Attribute(String name, Node source, Type target) {
 		this.name = name;
@@ -24,6 +25,7 @@ public class Attribute {
 		return result;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

@@ -161,14 +161,14 @@ x = ParserUtils.seq(mapping,
 	List<Pair<String, String>> objs2 = x.value.second.second.second.first;
 	List<Pair<String, String>> objs = new LinkedList<>();
 	objs.addAll(objs1);
-	objs.addAll(objs2);
+	//objs.addAll(objs2);
 	
 	List<Pair<String, List<String>>> arrows = x.value.second.second.second.second;
 	String src = x.value.second.first.first;
 	String dst = x.value.second.first.second;
 	String n = x.value.first;
 	
-	Decl d = new MappingDecl(n, src, dst, objs, arrows); 
+	Decl d = new MappingDecl(n, src, dst, objs, objs2, arrows); 
 			 //x.value.first, x.value.second.first.first, x.value.second.first.second, x.value.second.second.first, x.value.second.second.second);
 			return new Partial<Decl>(x.tokens, d);
 		} catch (BadSyntax e) {

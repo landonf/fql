@@ -23,7 +23,7 @@ public class TypedPiExample extends Example {
 					+ "\n attributes"
 					+ "\n	att1 : c1 -> string,"
 					+ "\n	att2 : c1 -> string, "
-					+ "\n	att3 : c2->string;"
+					+ "\n	att3 : c2 -> string;"
 					+ "\n arrows;"
 					+ "\n equations;"
 					+ "\n}"

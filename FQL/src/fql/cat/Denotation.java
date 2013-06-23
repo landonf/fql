@@ -16,7 +16,6 @@ import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
@@ -247,7 +246,7 @@ public class Denotation {
 		for (Node n : a.nodes) {
 			obm.add(new Pair<>(n.string, n.string));
 		}
-		return new Mapping("", a, b, obm,
+		return new Mapping("", a, b, obm, new LinkedList<Pair<String, String>>(),
 				new LinkedList<Pair<String, List<String>>>());
 	}
 
@@ -1007,7 +1006,7 @@ public class Denotation {
 		 for (Edge e : ntables.keySet()) {
 		 m.put("F" + e.name + " = " + F.em.get(e), new JTable(nt.get(e)));
 		 }
-		 t.addTab("Naturality Tables", makePanels(m));
+//		 t.addTab("Naturality Tables", makePanels(m));
 
 		return t;
 	}

@@ -162,7 +162,7 @@ public class Display {
 		
 		FQLSplit px = new FQLSplit(.5, JSplitPane.HORIZONTAL_SPLIT);
 		px.setDividerSize(6);
-		frame = new JFrame("Viewer for " + s);
+		frame = new JFrame(/*"Viewer for " + */s);
 		px.add(temp1);
 		px.add(x);
 		frame.setContentPane(px);

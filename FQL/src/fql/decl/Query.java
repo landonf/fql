@@ -15,9 +15,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 
 import org.apache.commons.collections15.Transformer;
 
@@ -35,6 +38,7 @@ import fql.DEBUG.Intermediate;
 import fql.FQLException;
 import fql.Fn;
 import fql.Pair;
+import fql.Quad;
 import fql.Triple;
 import fql.cat.Arr;
 import fql.cat.CommaCat;
@@ -89,6 +93,8 @@ public class Query implements Viewable<Query> {
 		this.project = project;
 		this.join = join;
 		this.union = union;
+		join.okForPi();
+		union.okForSigma();
 	}
 	
 	public Query(String name, Environment env, QueryDecl d) throws FQLException {
@@ -117,6 +123,8 @@ public class Query implements Viewable<Query> {
 			this.join = q.join;
 			this.union = q.union;
 			this.name = q.name;
+			join.okForPi();
+			union.okForSigma();
 			break; 
 		case ID : 
 			isId = true;
@@ -135,6 +143,8 @@ public class Query implements Viewable<Query> {
 			project = env.getMapping(d.project);
 			join = env.getMapping(d.join);
 			union = env.getMapping(d.union);
+			join.okForPi();
+			union.okForSigma();
 			if (!project.source.equals(join.source) || !join.target.equals(union.source)) {
 				throw new FQLException("Ill-typed: " + d);
 			}
@@ -303,7 +313,43 @@ boolean isId;
 			if (g.getVertexCount() == 0) {
 				return new JPanel();
 			}
-			return doView(env, g);
+			JPanel ret = doView(env, g);
+			JSplitPane p = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+			JPanel pan = new JPanel(new GridLayout(1,4));
+			
+			JLabel l1 = new JLabel(getSource().name0);
+			l1.setBackground(env.colors.get(getSource().name0));
+			l1.setOpaque(true);
+			l1.setHorizontalAlignment(SwingConstants.CENTER);
+			pan.add(l1);
+			
+			l1 = new JLabel(getTarget().name0);
+			l1.setBackground(env.colors.get(getTarget().name0));
+			l1.setOpaque(true);
+			l1.setHorizontalAlignment(SwingConstants.CENTER);
+			pan.add(l1);
+			
+			l1 = new JLabel(join.source.name0);
+			l1.setBackground(env.colors.get(join.source.name0));
+			l1.setOpaque(true);
+			l1.setHorizontalAlignment(SwingConstants.CENTER);
+			pan.add(l1);
+			
+			l1 = new JLabel(union.source.name0);
+			l1.setBackground(env.colors.get(union.source.name0));
+			l1.setOpaque(true);
+			l1.setHorizontalAlignment(SwingConstants.CENTER);
+			pan.add(l1);
+			
+			pan.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), "Legend"));
+			
+			p.add(ret);
+			p.add(pan);
+			
+			JPanel retX = new JPanel(new GridLayout(1,1));
+			retX.add(p);
+			
+			return retX;
 	}
 	
 	@Override
@@ -478,28 +524,92 @@ boolean isId;
 		FinCat<ObjA, ArrowA> A = t.srcCat;
 		FinCat<ObjT, ArrowT> T = t.dstCat;
 		FinCat<ObjD, ArrowD> D = g.srcCat;
-		//FinCat<ObjC, ArrowC> C = g.dstCat;
+		if (B.attrs == null || A .attrs == null || T.attrs == null || D.attrs == null) {
+			throw new RuntimeException();
+		}
+		FinCat<ObjC, ArrowC> C = g.dstCat;
 		//FinCat<ObjU, ArrowU> U = v.dstCat;
 				
 		Triple<FinCat<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>, FinFunctor<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>, ObjA, ArrowA>, FinFunctor<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>, ObjD, ArrowD>> 
 		  one = FDM.pullback(A, D, T, t, u);
 		
 
-		FinCat<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>> Aprime = one.first;
-		FinFunctor<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>, ObjA, ArrowA> h = one.second;
-		FinFunctor<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>, ObjD, ArrowD> k = one.third;
+		FinCat<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>> 
+		Aprime = one.first;
+		FinFunctor<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>, ObjA, ArrowA>
+		h = one.second;
+		FinFunctor<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>, ObjD, ArrowD> 
+		k = one.third;
 		
-		
-		CommaCat<ObjB, ArrowB, Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>, ObjA, ArrowA> Bprime = new CommaCat<>(B, Aprime, A, f, h);
+		//Attributes for Aprime, h, k
+		int cnt = 0;
+		Aprime.attrs = new LinkedList<>();
+		h.am = new HashMap<>();
+		k.am = new HashMap<>();
+		for (Attribute<ObjA> a1 : A.attrs) {
+			for (Attribute<ObjD> a2 : D.attrs) {
+				Attribute<ObjT> l = t.am.get(a1);
+				Attribute<ObjT> r = u.am.get(a2);
+				if (l.equals(r)) {
+					Attribute<Triple<ObjA, ObjD, ObjT>> toadd = new Attribute<>("attr" + cnt++, new Triple<>(a1.source, a2.source, l.source), l.target);
+					Aprime.attrs.add(toadd);
+					h.am.put(toadd, a1);
+					k.am.put(toadd, a2);
+				}
+			}
+		}
+		//attributes for Aprime, h, k
+			
+		CommaCat<ObjB, ArrowB, Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>, ObjA, ArrowA> 
+		Bprime = new CommaCat<>(B, Aprime, A, f, h);
 		FinFunctor<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, ObjB, ArrowB> 
 		m = Bprime.projA;
 		FinFunctor<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>> 
 		r = Bprime.projB;
+		
+		//attributes for Bprime, m, r
+		Bprime.attrs = new LinkedList<>();
+		m.am = new HashMap<>();
+		r.am = new HashMap<>();
+		int xnc = 0;
+		for (Attribute<Triple<ObjA, ObjD, ObjT>> att : Aprime.attrs) {
+			Attribute<ObjA> ap = h.am.get(att);
+			for (Attribute<ObjB> kk : f.am.keySet()) {
+				if (f.am.get(kk).equals(ap)) {
+					Attribute<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>> toadd
+					= new Attribute<>("att" + xnc++, new Triple<>(kk.source, att.source, A.id(ap.source)), ap.target);
+					Bprime.attrs.add(toadd);
+					m.am.put(toadd,  kk);
+					r.am.put(toadd, att);
+				}
+			}
+		}		
+		//attributes for Bprime, m, r
 
-		Inst<ObjD, ArrowD, Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>> du = FDM.degrothendieck(k);
-		Inst<ObjC, ArrowC, Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>> piresult = FDM.pi(g, du);
-		FinFunctor<Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjC, ArrowC>, ObjC, ArrowC> w = FDM.grothendieck(piresult);
-		FinCat<Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjC, ArrowC>> M = w.srcCat;
+		Inst<ObjD, ArrowD, Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>> 
+		du = FDM.degrothendieck(k);
+		Inst<ObjC, ArrowC, Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>> 
+		piresult = FDM.pi(g, du);
+		FinFunctor<Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjC, ArrowC>, ObjC, ArrowC> 
+		w = FDM.grothendieck(piresult);
+		FinCat<Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjC, ArrowC>> 
+		M = w.srcCat;
+		
+		//attributes for M, w
+		int aname = 0;
+		M.attrs = new LinkedList<>();
+		w.am = new HashMap<>();
+		for (Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>> x : M.objects) {
+			ObjC y = w.applyO(x);
+			for (Attribute<ObjC> a : C.attrs) {
+				if (a.source.equals(y)) {
+					Attribute<Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>> a0 = new Attribute<>(a.name + "_" + aname++, x, a.target);
+					M.attrs.add(a0);
+					w.am.put(a0, a);
+				}
+			}
+		}
+		//attributes for M, w
 				
 		Inst<ObjD, ArrowD, Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>> deltaresult = FDM.delta(g, piresult);
 		FinFunctor<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>, ObjD, ArrowD> w0 = FDM.grothendieck(deltaresult);
@@ -524,8 +634,13 @@ boolean isId;
 		FinFunctor<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>>
 		e0 = FDM.grothendieck(epsilonresult);
 		
-		FinFunctor<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>, Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjC, ArrowC>> q = FDM.makeG(w0.srcCat, w.srcCat, g);
+		FinFunctor<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>, Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjC, ArrowC>> 
+		q = FDM.makeG(w0.srcCat, w.srcCat, g);
 
+		FinCat<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>> xxx = q.srcCat;
+		FinCat<Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjC, ArrowC>> yyy = q.dstCat;
+		
+		
 		
 		/////////////////////////////////////
 
@@ -555,10 +670,24 @@ boolean isId;
 		pairToTripleBe = 
 				new FinFunctor<>(pairToTripleBe1, pairToTripleBe2, e0.dstCat, k.srcCat);
 		
-		FinFunctor<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>, Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>> e
-				= FinFunctor.compose(e0, pairToTripleBe);
+		FinFunctor<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>, Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>> 
+		e = FinFunctor.compose(e0, pairToTripleBe);
 
-		////////////////////////////////////
+		//attributes for Dprime, e
+		aname = 0;
+		Dprime.attrs = new LinkedList<>();
+		e.am = new HashMap<>();
+		for (Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>> x : Dprime.objects) {
+			Triple<ObjA, ObjD, ObjT> y = e.applyO(x);
+			for (Attribute<Triple<ObjA, ObjD, ObjT>> a : Aprime.attrs) {
+				if (a.source.equals(y)) {
+					Attribute<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>> a0 = new Attribute<>(a.name + "_" + aname++, x, a.target);
+					Dprime.attrs.add(a0);
+					e.am.put(a0, a);
+				}
+			}
+		}
+		//attributes for Dprime, e
 		
 		CommaCat<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>, Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>> 
 		N = new CommaCat<>(Bprime, Dprime, Aprime, r, e);
@@ -567,9 +696,46 @@ boolean isId;
 		FinFunctor<Triple<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, Pair<Arr<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>>, Arr<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>>>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>>
 		p = N.projB;
 		
+		//attributes for N, n, p
+				N.attrs = new LinkedList<>();
+				n.am = new HashMap<>();
+				p.am = new HashMap<>();
+				xnc = 0;
+				for (Attribute<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>> att : Dprime.attrs) {
+					Attribute<Triple<ObjA, ObjD, ObjT>> ap =  e.am.get(att);
+					for (Attribute<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>> kk : r.am.keySet()) {
+						if (r.am.get(kk).equals(ap)) {
+							Attribute<Triple<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>> toadd
+							= new Attribute<>("att" + xnc++, new Triple<>(kk.source, att.source, Aprime.id(ap.source)), ap.target);
+							N.attrs.add(toadd);
+							n.am.put(toadd,  kk);
+							p.am.put(toadd, att);
+						}
+					}
+				}		
+				//attributes for Bprime, m, r
+		
+				
+				// attributes for q
+				q.am = new HashMap<>();
+				for (Attribute<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>> a : xxx.attrs) {
+					for (Attribute<Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>> a0 : yyy.attrs) {
+						Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>> ax = a.source;
+						Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>> a0x = a0.source;
+						if (ax.second.equals(a0x.second)) {
+							if (q.am.get(a) != null) {
+								throw new RuntimeException();
+							}
+							q.am.put(a, a0);
+						}
+					}
+				}
+				//
+				
 		FinFunctor<Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjC, ArrowC>, ObjU, ArrowU> union = FinFunctor.compose(w, v);
 		
-		FinFunctor<Triple<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, Pair<Arr<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>>, Arr<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>>>, Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjC, ArrowC>> join = FinFunctor.compose(p,q);
+		FinFunctor<Triple<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, Pair<Arr<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>>, Arr<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>>>, Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjC, ArrowC>> 
+		join = FinFunctor.compose(p,q);
 
 		FinFunctor<Triple<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, Pair<Arr<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>>, Arr<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>>>, ObjS, ArrowS> project = FinFunctor.compose(FinFunctor.compose(n,m),s);
 				
@@ -620,11 +786,11 @@ boolean isId;
 		SemQuery<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, Pair<Arr<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>, Node, Path, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>, Node, Path> 
 		ret = doComposition(env, isoS.first,f0.toFunctor2().first,t0.toFunctor2().first,u0.toFunctor2().first,g0.toFunctor2().first,isoT.first);
 
-		Triple<Mapping, Triple<Signature, Pair<Map<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, String>, Map<String, Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>>, Pair<Map<Arr<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, Pair<Arr<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>, String>, Map<String, Arr<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, Pair<Arr<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>>>>, Triple<Signature, Pair<Map<Node, String>, Map<String, Node>>, Pair<Map<Arr<Node, Path>, String>, Map<String, Arr<Node, Path>>>>> 
+		Triple<Mapping, Quad<Signature, Pair<Map<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, String>, Map<String, Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>>, Pair<Map<Arr<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, Pair<Arr<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>, String>, Map<String, Arr<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, Pair<Arr<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>>>, Pair<Map<Attribute<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, String>, Map<String, Attribute<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>>>>, Quad<Signature, Pair<Map<Node, String>, Map<String, Node>>, Pair<Map<Arr<Node, Path>, String>, Map<String, Arr<Node, Path>>>, Pair<Map<Attribute<Node>, String>, Map<String, Attribute<Node>>>>> 
 		proj1 = ret.project.toMapping(name + "_delta", name + "_B", name + "_S");
-		Triple<Mapping, Triple<Signature, Pair<Map<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, String>, Map<String, Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>>, Pair<Map<Arr<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, Pair<Arr<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>, String>, Map<String, Arr<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, Pair<Arr<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>>>>, Triple<Signature, Pair<Map<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, String>, Map<String, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>>, Pair<Map<Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>, String>, Map<String, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>>> 
+		Triple<Mapping, Quad<Signature, Pair<Map<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, String>, Map<String, Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>>, Pair<Map<Arr<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, Pair<Arr<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>, String>, Map<String, Arr<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, Pair<Arr<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>>>, Pair<Map<Attribute<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, String>, Map<String, Attribute<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>>>>, Quad<Signature, Pair<Map<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, String>, Map<String, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>>, Pair<Map<Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>, String>, Map<String, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>, Pair<Map<Attribute<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>, String>, Map<String, Attribute<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>>>>> 
 		join1 = ret.join.toMapping(name + "_pi", name + "_B", name + "_A" );
-		Triple<Mapping, Triple<Signature, Pair<Map<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, String>, Map<String, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>>, Pair<Map<Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>, String>, Map<String, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>>, Triple<Signature, Pair<Map<Node, String>, Map<String, Node>>, Pair<Map<Arr<Node, Path>, String>, Map<String, Arr<Node, Path>>>>> 
+		Triple<Mapping, Quad<Signature, Pair<Map<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, String>, Map<String, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>>, Pair<Map<Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>, String>, Map<String, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>, Pair<Map<Attribute<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>, String>, Map<String, Attribute<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>>>>, Quad<Signature, Pair<Map<Node, String>, Map<String, Node>>, Pair<Map<Arr<Node, Path>, String>, Map<String, Arr<Node, Path>>>, Pair<Map<Attribute<Node>, String>, Map<String, Attribute<Node>>>>> 
 		union1 = ret.union.toMapping(name + "_sigma", name + "_A", name + "_T");
 		
 		env.signatures.put(name + "_B", proj1.second.first);
@@ -638,7 +804,18 @@ boolean isId;
 			Node x1 = map1.get(n.string);
 			xxx.add(new Pair<>(n.string, x1.string));
 		}
-
+		
+		Map<String, Attribute<Node>> map0 = proj1.third.fourth.second;
+		List<Pair<String, String>> zzz = new LinkedList<>();
+		for (Attribute<Node> n : proj1.first.target.attrs) {
+			Attribute<Node> x1 = map0.get(n.name);
+			if (x1 == null) {
+				throw new RuntimeException("Cannot find " + n.name + " in " + map0);
+			}
+			zzz.add(new Pair<>(n.name, x1.name));
+		}
+		
+	
 		Map<String, Arr<Node, Path>> mapA =  proj1.third.third.second;
 		Fn<Path, Arr<Node, Path>> mapB = isoS.third.second; //.second.second;
 		for (Edge e : proj1.first.target.edges) {
@@ -656,8 +833,9 @@ boolean isId;
 //		System.out.println(yyy);
 //		System.out.println(proj1.first.target);
 //		System.out.println(q1.getSource());
-		Mapping xyz = new Mapping(name + "iso1",proj1.first.target, q1.getSource(),  xxx, yyy);
+		Mapping xyz = new Mapping(name + "iso1",proj1.first.target, q1.getSource(),  xxx, zzz, yyy);
 		
+	//	System.out.println("qdelta from " + proj1.first + "\nand\n" + xyz);
 		Mapping newproj = Mapping.compose(name + "_delta", proj1.first, xyz);
 		env.mappings.put(name + "_delta", newproj);
 
@@ -669,6 +847,12 @@ boolean isId;
 			Node x1 = map1.get(n.string);
 //			String x2 =  map2.of(x1);
 			xxx.add(new Pair<>(n.string, x1.string));
+		}
+		map0 = union1.third.fourth.second;
+	    zzz = new LinkedList<>();
+		for (Attribute<Node> n : union1.first.target.attrs) {
+			Attribute<Node> x1 = map0.get(n.name);
+			zzz.add(new Pair<>(n.name, x1.name));
 		}
 		
 		mapA =  union1.third.third.second;
@@ -683,7 +867,7 @@ boolean isId;
 //			}
 			yyy.add(new Pair<>(e.name, x2.arr.asList()));
 		}
-		xyz = new Mapping(name + "iso2",union1.first.target, q2.getTarget(),  xxx, yyy);
+		xyz = new Mapping(name + "iso2",union1.first.target, q2.getTarget(),  xxx, zzz, yyy);
 		
 		Mapping newunion = Mapping.compose(name + "_sigma", union1.first, xyz);
 		env.mappings.put(name + "_sigma", newunion);

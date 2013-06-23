@@ -69,8 +69,8 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	}
 
 	public void validate() throws FQLException {
-		for (Attribute a : source.attrs) {
-			Attribute b = am.get(a);
+		for (Attribute<Node> a : source.attrs) {
+			Attribute<Node> b = am.get(a);
 			if (b == null) {
 				throw new FQLException("Mapping " + name
 						+ " does not map attribute " + a);
@@ -104,7 +104,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 
 	public Map<Node, Node> nm = new HashMap<>();
 	public Map<Edge, Path> em = new HashMap<>();
-	public Map<Attribute, Attribute> am = new HashMap<>();
+	public Map<Attribute<Node>, Attribute<Node>> am = new HashMap<>();
 	public Signature source;
 	public Signature target;
 	public String name;
@@ -146,7 +146,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			// Pair<List<Pair<String, String>>, List<Pair<String, String>>> xxx
 			// = filter(md.objs);
 			initialize(env.getSchema(md.source), env.getSchema(md.target),
-					md.objs, md.arrows);
+					md.objs, md.atts, md.arrows);
 			break;
 		}
 		validate();
@@ -163,7 +163,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			} else if (source.isNode(p.first) && target.isNode(p.second)) {
 				ret2.add(p);
 			} else {
-				throw new FQLException("Bad mapping: " + p);
+				throw new FQLException("Bad mapping: " + p + "\n in " + name);
 			}
 		}
 
@@ -192,9 +192,10 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	 */
 	public Mapping(String name, Signature source, Signature target,
 			List<Pair<String, String>> objs,
+			List<Pair<String, String>> atts,
 			List<Pair<String, List<String>>> arrows) throws FQLException {
 		this.name = name;
-		initialize(source, target, objs, arrows);
+		initialize(source, target, objs, atts, arrows);
 		validate();
 	}
 
@@ -238,13 +239,14 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	 */
 	private void initialize(Signature source, Signature target,
 			List<Pair<String, String>> objs,
+			List<Pair<String, String>> attrs,
 			List<Pair<String, List<String>>> arrows) throws FQLException {
 		this.source = source;
 		this.target = target;
 
 		Pair<List<Pair<String, String>>, List<Pair<String, String>>> s = filter(objs);
 		objs = s.first;
-		List<Pair<String, String>> attrs = s.second;
+	//	List<Pair<String, String>> attrs = s.second;
 		for (Pair<String, String> p : objs) {
 			Node sn = this.source.getNode(p.first);
 			Node tn = this.target.getNode(p.second);
@@ -255,13 +257,31 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			Path p = new Path(this.target, arrow.second);
 			em.put(e, p);
 		}
+		//System.out.println("INIT \n" + this);
 		for (Pair<String, String> a : attrs) {
-			Attribute a1 = source.getAttr(a.first);
-			Attribute a2 = target.getAttr(a.second);
-			if (a1.target.equals(a2.target)) {
-				am.put(a1, a2);
-			} else {
-				throw new FQLException("Incompatible attribute mapping types " + a);
+			Attribute<Node> a1 = source.getAttr(a.first);
+			Attribute<Node> a2 = target.getAttr(a.second);
+			if (a1 == null) {
+				throw new FQLException("In mapping " + name + ", cannot find source attr " + a.first + " in " + source.name0);
+			}
+			if (a2 == null) {
+				throw new FQLException("In mapping " + name + ", cannot find target attr " + a.second + " in " + target.name0);
+			}
+			try {
+				if (a1.target.equals(a2.target)) {
+					am.put(a1, a2);
+				} else {
+					throw new FQLException("Incompatible attribute mapping types " + a);
+				}
+			} catch (NullPointerException npe) {
+				System.out.println(this);
+				System.out.println(a.first);
+				System.out.println(a1);
+				System.out.println(a.second);
+				System.out.println(a2);
+				System.out.println(source);
+				System.out.println(target);
+				throw npe;
 			}
 		}
 		for (Node n : this.source.nodes) {
@@ -276,7 +296,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 						+ " in " + name);
 			}
 		}
-		for (Attribute a : this.source.attrs) {
+		for (Attribute<Node> a : this.source.attrs) {
 			if (am.get(a) == null) {
 				throw new FQLException("Missing attribute mapping from " + a
 						+ " in " + name);
@@ -294,7 +314,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		for (Edge e : s.edges) {
 			em.put(e, new Path(s, e));
 		}
-		for (Attribute a : s.attrs) {
+		for (Attribute<Node> a : s.attrs) {
 			am.put(a, a);
 		}
 		this.source = s;
@@ -343,7 +363,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 
 		Object[][] arr3 = new Object[am.size()][2];
 		int i3 = 0;
-		for (Entry<Attribute, Attribute> eq : am.entrySet()) {
+		for (Entry<Attribute<Node>, Attribute<Node>> eq : am.entrySet()) {
 			arr3[i3][0] = eq.getKey();
 			arr3[i3][1] = eq.getValue();
 			i3++;
@@ -511,8 +531,8 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		first = true;
 		sb.append("\n ;\nattributes\n");
 
-		for (Attribute k : am.keySet()) {
-			Attribute v = am.get(k);
+		for (Attribute<Node> k : am.keySet()) {
+			Attribute<Node> v = am.get(k);
 			if (!first) {
 				sb.append(",\n");
 			}
@@ -623,9 +643,12 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			arrowMapping.put(new Arr<>(arrow, arrow.source, arrow.target),
 					dstCat0.second.of(mapped));
 		}
-
-		return new Triple<>(new FinFunctor<>(objMapping, arrowMapping, srcCat,
-				dstCat), srcCat0, dstCat0);
+		
+		FinFunctor<Node, Path, Node, Path> F = new FinFunctor<>(objMapping, arrowMapping, srcCat, dstCat);
+		
+		F.am = am;
+		
+		return new Triple<>(F, srcCat0, dstCat0);
 	}
 
 	// private Arr<String, List<List<String>>> findeqc(
@@ -723,7 +746,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			g2.addEdge("@source" + "." + e.name, "@source" + "."
 					+ e.source.string, "@source" + "." + e.target.string);
 		}
-		for (Attribute a : source.attrs) {
+		for (Attribute<Node> a : source.attrs) {
 			g2.addVertex("@source" + "." + a.name);
 			g2.addEdge("@source" + "." + a.name, "@source" + "."
 					+ a.source.string, "@source" + "." + a.name);
@@ -736,7 +759,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			g2.addEdge("@target" + "." + e.name, "@target" + "."
 					+ e.source.string, "@target" + "." + e.target.string);
 		}
-		for (Attribute a : target.attrs) {
+		for (Attribute<Node> a : target.attrs) {
 			g2.addVertex("@target" + "." + a.name);
 			g2.addEdge("@target" + "." + a.name, "@target" + "."
 					+ a.source.string, "@target" + "." + a.name);
@@ -748,8 +771,8 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 					"@target" + "." + m.string);
 		}
 
-		for (Attribute n : am.keySet()) {
-			Attribute m = am.get(n);
+		for (Attribute<Node> n : am.keySet()) {
+			Attribute<Node> m = am.get(n);
 			g2.addEdge(n.name + " " + m.name, "@source" + "." + n.name,
 					"@target" + "." + m.name);
 		}
@@ -871,6 +894,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 
 		List<Pair<String, String>> xxx = new LinkedList<>();
 		List<Pair<String, List<String>>> yyy = new LinkedList<>();
+		List<Pair<String, String>> zzz = new LinkedList<>();
 
 		for (Node n : l.source.nodes) {
 			xxx.add(new Pair<>(n.string, r.nm.get(l.nm.get(n)).string));
@@ -881,12 +905,12 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			yyy.add(new Pair<>(e.name, r.appy(p).asList()));
 		}
 		
-		for (Attribute a : l.source.attrs) {
-			Attribute b = l.am.get(a);
-			xxx.add(new Pair<>(a.name, r.am.get(b).name));
+		for (Attribute<Node> a : l.source.attrs) {
+			Attribute<Node> b = l.am.get(a);
+			zzz.add(new Pair<>(a.name, r.am.get(b).name));
 		}
 		
-		return new Mapping(string, l.source, r.target, xxx, yyy);
+		return new Mapping(string, l.source, r.target, xxx, zzz, yyy);
 	}
 
 	@Override
@@ -972,6 +996,68 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	@Override
 	public JPanel groth() throws FQLException {
 		return null;
+	}
+	
+	public void okForPi() throws FQLException {
+		for (Attribute<Node> n : target.attrs) {
+			boolean found = false;
+			for (Attribute<Node> a : source.attrs) {
+				Attribute<Node> c = am.get(a);
+				if (c.equals(n)) {
+					if (found) {
+						throw new FQLException("Not attribute bijection " + name);
+					}
+					found = true;
+				}
+			}
+			if (!found) {
+				throw new FQLException("Not attribute bijection " + name);
+			}
+		}
+		
+	}
+	
+	public void okForSigma() throws FQLException {
+		for (Node n : source.nodes) {
+			List<Attribute<Node>> nattrs = source.attrsFor(n);
+			
+			List<Attribute<Node>> mattrs = target.attrsFor(nm.get(n));
+			
+			if (!isBijection(nattrs, mattrs, am)) {
+				throw new FQLException("Not union compatible " + name);
+			}
+		}
+		
+	}
+
+	private <X> boolean isBijection(List<X> l, List<X> r,
+			Map<X, X> f) {
+
+		for (X x : l) {
+			if (f.get(x) == null) {
+				return false;
+			}
+			if (!r.contains(f.get(x))) {
+				return false;
+			}
+		}
+		
+		for (X x : r) {
+			boolean found = false;
+			for (X y : l) {
+				if (f.get(y).equals(x)) {
+					if (found) {
+						return false;
+					}
+					found = true;
+				}
+			}
+			if (!found) {
+				return false;
+			}
+		}
+		
+		return true;
 	}
 
 }

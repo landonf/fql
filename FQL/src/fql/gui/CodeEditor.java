@@ -409,8 +409,13 @@ public class CodeEditor extends JPanel {
 	}
 
 	public boolean abortBecauseDirty() {
-		if (!GUI.getDirty(CodeEditor.this.id)) {
-			return false;
+		try {
+			if (!GUI.getDirty(id)) {
+				return false;
+			}
+		} catch (NullPointerException npe) {
+			npe.printStackTrace();
+			return true;
 		}
 
 		int choice = JOptionPane.showConfirmDialog(null,

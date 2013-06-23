@@ -1,5 +1,6 @@
 package fql;
 
+import java.awt.Dimension;
 import java.awt.GridLayout;
 
 import javax.swing.ButtonGroup;
@@ -17,6 +18,9 @@ import javax.swing.JTextField;
  * Contains global constants for debugging.
  */
 public class DEBUG {
+	
+	public static String prelude = 
+			"DROP DATABASE FQL; CREATE DATABASE FQL; USE FQL; SET @guid := 0;";
 	
 	public static  boolean MultiView = true;
 
@@ -52,16 +56,16 @@ public class DEBUG {
 	static String label8text = "Sets the size of Strings in the SQL output (used for ID columns and string columns).";
 	static String labelMtext = "Allows multiple viewers for the same editor.";
 	public static void showOptions() {
-		JPanel p = new JPanel(new GridLayout(9, 2));
+		JPanel p = new JPanel(new GridLayout(10, 2));
 		
 		JCheckBox jcbM = new JCheckBox("", MultiView);
 		jcbM.setToolTipText(labelMtext);
-		JLabel labelM = new JLabel("Allow multiple viewers per editor");
+		JLabel labelM = new JLabel("Allow multiple viewers per editor:");
 		p.add(labelM);
 		p.add(jcbM);
 		
 		JCheckBox jcb1 = new JCheckBox("", SHOW_QUERY_PATHS);
-		JLabel label1 = new JLabel("Draw arrows in query graphs");
+		JLabel label1 = new JLabel("Draw arrows in query graphs:");
 		label1.setToolTipText(label1text);
 		p.add(label1);
 		p.add(jcb1);
@@ -132,10 +136,20 @@ public class DEBUG {
 		//p.add(p2);
 		
 		JTextField vlen = new JTextField(Integer.toString(varlen));
-		JLabel label8 = new JLabel("VARCHAR size");
+		JLabel label8 = new JLabel("VARCHAR size:");
 		label8.setToolTipText(label8text);
 		p.add(label8);
 		p.add(vlen);
+		
+		JTextField area = new JTextField(12);
+		//JTextArea area = new JTextArea(1, 14);
+		area.setText(prelude);
+		JLabel areaLabel = new JLabel("Generated SQL prelude:");
+		areaLabel.setToolTipText("Set the prelude for the generated SQL.");
+		p.add(areaLabel);
+		p.add(area);
+		area.setMaximumSize(new Dimension(200,300));
+		
 		
 //		JTextField sz = new JTextField(Integer.toString(MAX_JOIN_SIZE));
 //		p.add(new JLabel("Maximum potential join size:"));
@@ -174,6 +188,7 @@ public class DEBUG {
 			MAX_PATH_LENGTH = a;
 			MAX_DENOTE_ITERATIONS = b;
 			varlen = d;
+			prelude = area.getText();
 			//MAX_JOIN_SIZE = c;
 		}
 	}

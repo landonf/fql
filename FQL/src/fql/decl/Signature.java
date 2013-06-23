@@ -53,7 +53,7 @@ public class Signature implements Viewable<Signature> {
 
 	public List<Node> nodes;
 	public List<Edge> edges;
-	public List<Attribute> attrs;
+	public List<Attribute<Node>> attrs;
 
 	public Set<Eq> eqs;
 	public String name0;
@@ -74,7 +74,7 @@ public class Signature implements Viewable<Signature> {
 			List<Pair<List<String>, List<String>>> equivs) throws FQLException {
 		Set<Node> nodesA = new HashSet<>();
 		Set<Edge> edgesA = new HashSet<>();
-		Set<Attribute> attrsA = new HashSet<>();
+		Set<Attribute<Node>> attrsA = new HashSet<>();
 		name0 = n;
 
 		Set<String> seen = new HashSet<String>();
@@ -124,7 +124,7 @@ public class Signature implements Viewable<Signature> {
 				throw new FQLException("Missing node " + source + " in " + n);
 			}
 
-			Attribute a = new Attribute(name, source_node, tryParseType(target));
+			Attribute<Node> a = new Attribute<>(name, source_node, tryParseType(target));
 
 			attrsA.add(a);
 
@@ -158,7 +158,7 @@ public class Signature implements Viewable<Signature> {
 			List<Pair<List<String>, List<String>>> equivs) throws FQLException {
 		Set<Node> nodesA = new HashSet<>();
 		Set<Edge> edgesA = new HashSet<>();
-		Set<Attribute> attrsA = new HashSet<>();
+		Set<Attribute<Node>> attrsA = new HashSet<>();
 		name0 = n;
 
 		Set<String> seen = new HashSet<String>();
@@ -187,7 +187,7 @@ public class Signature implements Viewable<Signature> {
 
 			Type t;
 			if ((t = tryParseType(target)) != null) {
-				Attribute a = new Attribute(name, source_node, t);
+				Attribute<Node> a = new Attribute<>(name, source_node, t);
 				attrsA.add(a);
 			} else {
 				Node target_node = lookup(target, nodesA);
@@ -242,7 +242,7 @@ public class Signature implements Viewable<Signature> {
 			throws FQLException {
 		Set<Node> nodesA = new HashSet<Node>();
 		Set<Edge> edgesA = new HashSet<Edge>();
-		attrs = new LinkedList<Attribute>();
+		attrs = new LinkedList<>();
 
 		// name0 = n;
 
@@ -318,7 +318,7 @@ public class Signature implements Viewable<Signature> {
 
 	}
 
-	public Signature(String s, List<Node> n, List<Edge> e, List<Attribute> a,
+	public Signature(String s, List<Node> n, List<Edge> e, List<Attribute<Node>> a,
 			Set<Eq> ee) {
 		name0 = s;
 		nodes = n;
@@ -489,7 +489,7 @@ public class Signature implements Viewable<Signature> {
 
 		Object[][] as = new String[attrs.size()][3];
 		jj = 0;
-		for (Attribute a : attrs) {
+		for (Attribute<Node> a : attrs) {
 			as[jj][0] = a.name;
 			as[jj][1] = a.source.string;
 			as[jj][2] = a.target.toString();
@@ -538,7 +538,7 @@ public class Signature implements Viewable<Signature> {
 
 		first = true;
 		sb.append("attributes\n");
-		for (Attribute a : attrs) {
+		for (Attribute<Node> a : attrs) {
 			if (!first) {
 				sb.append(",\n");
 			}
@@ -622,7 +622,7 @@ public class Signature implements Viewable<Signature> {
 		if (nodes.contains(new Node(s))) {
 			return new Pair<String, String>("ID", "ID");
 		}
-		Attribute a = getAttr(s);
+		Attribute<Node> a = getAttr(s);
 		if (a != null) {
 			return new Pair<String, String>(a.source.string,
 					a.target.toString());
@@ -631,8 +631,8 @@ public class Signature implements Viewable<Signature> {
 		return new Pair<String, String>(e.source.string, e.target.string);
 	}
 
-	public Attribute getAttr(String s) {
-		for (Attribute a : attrs) {
+	public Attribute<Node> getAttr(String s) {
+		for (Attribute<Node> a : attrs) {
 			if (a.name.equals(s)) {
 				return a;
 			}
@@ -648,7 +648,7 @@ public class Signature implements Viewable<Signature> {
 		for (Edge e : edges) {
 			ret.add(e.name);
 		}
-		for (Attribute a : attrs) {
+		for (Attribute<Node> a : attrs) {
 			ret.add(a.name);
 		}
 		return ret;
@@ -689,7 +689,11 @@ public class Signature implements Viewable<Signature> {
 	public Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> toCategory2()
 			throws FQLException {
 		Denotation d = new Denotation(this);
-		return d.toCategory();
+		Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> ret = d.toCategory();
+		
+		ret.first.attrs = attrs;
+		
+		return ret;
 	}
 
 	public static List<String> pathToList(Path p) {
@@ -739,7 +743,7 @@ public class Signature implements Viewable<Signature> {
 			g2.addEdge(e.name, e.source.string, e.target.string);
 		}
 
-		for (Attribute a : attrs) {
+		for (Attribute<Node> a : attrs) {
 			g2.addVertex(a.name);
 			g2.addEdge(a.name, a.source.string, a.name);
 		}
@@ -828,7 +832,7 @@ public class Signature implements Viewable<Signature> {
 	}
 
 	public String getTypeLabel(String t) {
-		for (Attribute a : attrs) {
+		for (Attribute<Node> a : attrs) {
 			if (a.name.equals(t)) {
 				return a.target.toString();
 			}
@@ -837,7 +841,7 @@ public class Signature implements Viewable<Signature> {
 	}
 
 	public boolean isAttribute(String t) {
-		for (Attribute a : attrs) {
+		for (Attribute<Node> a : attrs) {
 			if (a.name.equals(t)) {
 				return true;
 			}
@@ -918,7 +922,7 @@ public class Signature implements Viewable<Signature> {
 
 	public Signature onlyObjects() {
 		return new Signature("Obj(" + name0 + ")", nodes,
-				new LinkedList<Edge>(), new LinkedList<Attribute>(),
+				new LinkedList<Edge>(), new LinkedList<Attribute<Node>>(),
 				new HashSet<Eq>());
 	}
 
@@ -930,9 +934,9 @@ public class Signature implements Viewable<Signature> {
 		}
 	}
 
-	public List<Attribute> attrsFor(Node n) {
-		List<Attribute> a = new LinkedList<>();
-		for (Attribute x : attrs) {
+	public List<Attribute<Node>> attrsFor(Node n) {
+		List<Attribute<Node>> a = new LinkedList<>();
+		for (Attribute<Node> x : attrs) {
 			if (x.source.equals(n)) {
 				a.add(x);
 			}
@@ -947,7 +951,7 @@ public class Signature implements Viewable<Signature> {
 			List<Pair<Object, Object>> x = new LinkedList<>();
 			b.add(new Pair<>(n.string, x));
 		}
-		for (Attribute n : attrs) {
+		for (Attribute<Node> n : attrs) {
 			List<Pair<Object, Object>> x = new LinkedList<>();
 			b.add(new Pair<>(n.name, x));
 		}

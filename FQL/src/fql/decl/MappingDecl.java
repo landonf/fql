@@ -21,6 +21,7 @@ public class MappingDecl extends Decl {
 	public String schema;
 	public List<Pair<String, List<String>>> arrows;
 	public List<Pair<String, String>> objs;
+	public List<Pair<String, String>> atts;
 
 	public MappingDecl(String name, String schema, String src, String dst) {
 		super(name);
@@ -38,12 +39,14 @@ public class MappingDecl extends Decl {
 
 	public MappingDecl(String name, String source, String target,
 			List<Pair<String, String>> objs,
+			List<Pair<String, String>> atts,
 			List<Pair<String, List<String>>> arrows) {
 		super(name);
 		this.objs = objs;
 		this.source = source;
 		this.target = target;
 		this.arrows = arrows;
+		this.atts = atts;
 		kind = KIND.MORPHISM;
 	}
 

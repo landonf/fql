@@ -8,7 +8,9 @@ import java.util.Map;
 import fql.DEBUG;
 import fql.FQLException;
 import fql.Pair;
+import fql.Quad;
 import fql.Triple;
+import fql.decl.Attribute;
 import fql.decl.Mapping;
 import fql.decl.Signature;
 
@@ -27,6 +29,8 @@ import fql.decl.Signature;
  *            target arrows
  */
 public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
+	
+	public Map<Attribute<ObjA>, Attribute<ObjB>> am;
 
 	/**
 	 * Apply to an object.
@@ -142,11 +146,11 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 	 * @return the mapping, and a bunch of isomorphisms
 	 * @throws FQLException
 	 */
-	public Triple<Mapping, Triple<Signature, Pair<Map<ObjA, String>, Map<String, ObjA>>, Pair<Map<Arr<ObjA, ArrowA>, String>, Map<String, Arr<ObjA, ArrowA>>>>, Triple<Signature, Pair<Map<ObjB, String>, Map<String, ObjB>>, Pair<Map<Arr<ObjB, ArrowB>, String>, Map<String, Arr<ObjB, ArrowB>>>>> toMapping(
-			String n, String n1, String n2) throws FQLException {
-		Triple<Signature, Pair<Map<ObjA, String>, Map<String, ObjA>>, Pair<Map<Arr<ObjA, ArrowA>, String>, Map<String, Arr<ObjA, ArrowA>>>> src = srcCat
+	public Triple<Mapping, Quad<Signature, Pair<Map<ObjA, String>, Map<String, ObjA>>, Pair<Map<Arr<ObjA, ArrowA>, String>, Map<String, Arr<ObjA, ArrowA>>>, Pair<Map<Attribute<ObjA>, String>, Map<String, Attribute<ObjA>>>>, Quad<Signature, Pair<Map<ObjB, String>, Map<String, ObjB>>, Pair<Map<Arr<ObjB, ArrowB>, String>, Map<String, Arr<ObjB, ArrowB>>>, Pair<Map<Attribute<ObjB>, String>, Map<String, Attribute<ObjB>>>>> 
+	toMapping(String n, String n1, String n2) throws FQLException {
+		Quad<Signature, Pair<Map<ObjA, String>, Map<String, ObjA>>, Pair<Map<Arr<ObjA, ArrowA>, String>, Map<String, Arr<ObjA, ArrowA>>>, Pair<Map<Attribute<ObjA>, String>, Map<String, Attribute<ObjA>>>> src = srcCat
 				.toSig(n1);
-		Triple<Signature, Pair<Map<ObjB, String>, Map<String, ObjB>>, Pair<Map<Arr<ObjB, ArrowB>, String>, Map<String, Arr<ObjB, ArrowB>>>> dst = dstCat
+		Quad<Signature, Pair<Map<ObjB, String>, Map<String, ObjB>>, Pair<Map<Arr<ObjB, ArrowB>, String>, Map<String, Arr<ObjB, ArrowB>>>, Pair<Map<Attribute<ObjB>, String>, Map<String, Attribute<ObjB>>>> dst = dstCat
 				.toSig(n2);
 
 		Signature srcSig = src.first;
@@ -154,16 +158,23 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 
 		Map<Arr<ObjA, ArrowA>, String> srcM = src.third.first;
 		Map<ObjA, String> srcM2 = src.second.first;
+		Map<Attribute<ObjA>, String> srcMA = src.fourth.first;	
+		
 		Map<Arr<ObjB, ArrowB>, String> dstM = dst.third.first;
 		Map<ObjB, String> dstM2 = dst.second.first;
+		Map<Attribute<ObjB>, String> dstMA = dst.fourth.first;
+		
+		
 
-		// System.out.println("&&&&&&&&&&&&&&&&&&&&&&&");
-		//
-		// System.out.println(srcSig);
-		// System.out.println(dstSig);
-		// System.out.println(srcM2);
+//		 System.out.println("&&&&&&&&&&&&&&&&&&&&&&&");
+//		
+//		 System.out.println(srcSig);
+//		 System.out.println(dstSig);
+//		 System.out.println(srcM2);
+//		 System.out.println(dstM2);
+//		 System.out.println(srcMA);
 		// srcCat.validate();
-		// System.out.println(srcCat.arrows);
+//		 System.out.println(srcCat.arrows);
 		// System.out.println("&&&&&&&&&&&&&&&&&&&&&&&");
 
 		List<Pair<String, String>> nm = new LinkedList<>();
@@ -183,8 +194,16 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 				em.add(new Pair<>(srcM.get(a), t));
 			}
 		}
-
-		Mapping m = new Mapping(n, srcSig, dstSig, nm, em);
+		
+		List<Pair<String, String>> am0 = new LinkedList<>(); 
+		for (Attribute<ObjA> k : am.keySet()) {
+			am0.add(new Pair<>(srcMA.get(k), dstMA.get(am.get(k))));
+		}
+		
+//		System.out.println("am0 is " + am0);
+//		System.out.println("srcSig is " + srcSig);
+//		System.out.println("dstSig is " + dstSig);
+		Mapping m = new Mapping(n, srcSig, dstSig, nm, am0, em);
 		return new Triple<>(m, src, dst);
 	}
 
@@ -211,8 +230,24 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 		for (Arr<ObjC1, ArrowC1> c1 : h.srcCat.arrows) {
 			ret2.put(c1, G.applyA(h.applyA(c1)));
 		}
+		
+		FinFunctor<ObjC1, ArrowC1, ObjT, ArrowT> ret = new FinFunctor<>(ret1, ret2, h.srcCat, G.dstCat);
 
-		return new FinFunctor<>(ret1, ret2, h.srcCat, G.dstCat);
+		if (h.am == null && G.am == null) {
+			
+		} else if (h.am != null && G.am != null) {
+			
+			Map<Attribute<ObjC1>, Attribute<ObjT>> ret3 = new HashMap<>();
+			for (Attribute<ObjC1> c1 : h.srcCat.attrs) {
+				ret3.put(c1, G.am.get(h.am.get(c1)));
+			}
+			ret.am = ret3;			
+			
+		} else {
+			throw new RuntimeException("h.am " + h.am + "\nG.am " + G.am);
+		}
+		
+		return ret;
 	}
 
 	/**
