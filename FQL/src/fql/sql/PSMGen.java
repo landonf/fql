@@ -315,8 +315,15 @@ public class PSMGen {
 		List<PSM> ret = new LinkedList<>();
 
 		String inst = d.inst;
-		Mapping f = env.getMapping(d.mapping);
 		String name = d.name;
+		
+		if (d.kind.equals("relationalize")) {
+			Signature s = env.signatures.get(d.type);
+			//sig, outname, inname
+			return Relationalizer.compile(s, d.name, d.mapping);
+		}
+
+		Mapping f = env.getMapping(d.mapping);
 
 		if (d.kind.equals("delta")) {
 			ret.addAll(makeTables(name, f.source, false));
@@ -491,7 +498,7 @@ public class PSMGen {
 		return new Flower(select, from, where);
 	}
 
-	private static Flower compose(String pre, Path p) {
+	public static Flower compose(String pre, Path p) {
 		Map<String, Pair<String, String>> select = new HashMap<>();
 		Map<String, String> from = new HashMap<>();
 		List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();

@@ -14,19 +14,23 @@ public class DSPInstanceDeclParser implements Parser<Decl> {
 	@Override
 	public Partial<Decl> parse(Tokens s0) throws BadSyntax, IllTyped {
 		try {
-			return doParse("delta", s0);
+			return doParse("delta", s0, false);
 		} catch (Exception e) {
 		}
 		try {
-			return doParse("sigma", s0);
+			return doParse("sigma", s0, false);
 		} catch (Exception e) {
 		}
 		try {
-			return doParse("SIGMA", s0);
+			return doParse("SIGMA", s0, false);
 		} catch (Exception e) {
 		}
 		try {
-			return doParse("pi", s0);
+			return doParse("pi", s0, false);
+		} catch (Exception e) {
+		}
+		try {
+			return doParse("relationalize", s0, true);
 		} catch (Exception e) {
 		}
 
@@ -34,7 +38,7 @@ public class DSPInstanceDeclParser implements Parser<Decl> {
 				"Could not parse delta/sigma/pi instance decl from " + s0);
 	}
 
-	private Partial<Decl> doParse(String kind, Tokens s0) throws BadSyntax,
+	private Partial<Decl> doParse(String kind, Tokens s0, boolean isRelativize) throws BadSyntax,
 			IllTyped {
 		Tokens s = s0;
 
@@ -67,6 +71,12 @@ public class DSPInstanceDeclParser implements Parser<Decl> {
 		y = p2.parse(s);
 		s = y.tokens;
 		s2 = y.value;
+		
+		if (isRelativize) {
+			return new Partial<Decl>(s, new EvalDSPInstanceDecl(s1, kind, s2, null,
+					type));
+		}
+		
 		y = p3.parse(s);
 		s = y.tokens;
 		s3 = y.value;

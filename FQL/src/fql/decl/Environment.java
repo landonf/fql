@@ -85,6 +85,9 @@ public class Environment {
 
 		List<PSM> psm = PSMGen.compile0(this, p);
 		Map<String, Set<Map<String, Object>>> output0 = PSMInterp.interp(psm);
+		
+	//	System.out.println("output is");
+	//	System.out.println(output0);
 
 		for (Decl d : p.decls) {
 			if (d instanceof InstanceDecl) {
@@ -151,6 +154,15 @@ public class Environment {
 	}
 
 	private void check(EvalDSPInstanceDecl d) throws FQLException {
+		if (d.kind.equals("relationalize")) {
+			if (instance_types.get(d.mapping) == null) {
+				throw new FQLException("Cannot find type instance " + d.mapping);
+			}	
+			if (!signatures.get(d.type).name0.equals(instance_types.get(d.mapping).name0)) {
+				throw new FQLException("Relativize must have same input and output schemas, not " + signatures.get(d.type).name0 + " and " + instance_types.get(d.mapping).name0);
+			}
+			return;
+		}
 		if (mappings.get(d.mapping) == null) {
 			throw new FQLException("Cannot find mapping " + d.mapping);
 		}

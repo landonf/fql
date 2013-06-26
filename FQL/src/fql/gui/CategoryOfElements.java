@@ -1,9 +1,22 @@
 package fql.gui;
 
+import java.awt.CardLayout;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import javax.swing.BorderFactory;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTable;
 
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
@@ -14,10 +27,13 @@ import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
+import edu.uci.ics.jung.visualization.renderers.VertexLabelRenderer;
+import fql.DEBUG;
 import fql.FQLException;
 import fql.Pair;
 import fql.cat.Arr;
 import fql.cat.FinCat;
+import fql.decl.Attribute;
 import fql.decl.Instance;
 import fql.decl.Node;
 import fql.decl.Path;
@@ -31,13 +47,23 @@ import fql.decl.Path;
  */
 public class CategoryOfElements {
 	
-	private static Graph<Pair<Node, Object>, Pair<Path, Integer>> build(Instance i) throws FQLException {
+	private static Pair<Graph<Pair<Node, Object>, Pair<Path, Integer>>, HashMap<Pair<Node, Object>, Map<Attribute<Node>, Object>>>  build(Instance i) throws FQLException {
 		FinCat<Node, Path> c = i.thesig.toCategory2().first;
+		HashMap<Pair<Node, Object>, Map<Attribute<Node>, Object>> map = new HashMap<>();
 
 		Graph<Pair<Node, Object>, Pair<Path, Integer>> g2 = new DirectedSparseMultigraph<>();
 		for (Node n : c.objects) {
 			for (Pair<Object, Object> o : i.data.get(n.string)) {
-				g2.addVertex(new Pair<>(n, o.first));
+				Pair<Node, Object> xx = new Pair<>(n, o.first);
+				g2.addVertex(xx);
+				
+				List<Attribute<Node>> attrs = i.thesig.attrsFor(n);
+				Map<Attribute<Node>, Object> m = new HashMap<>();
+				for (Attribute<Node> attr : attrs) {
+					Object a = lookup(i.data.get(attr.name), o.first);
+					m.put(attr,  a);
+				}
+				map.put(xx, m);
 			}			
 		}
 		
@@ -49,6 +75,9 @@ public class CategoryOfElements {
 					if (c.isId(arr)) {
 						continue;
 					}
+					if (!DEBUG.ALL_GR_PATHS && arr.arr.path.size() != 1) {
+						continue;
+					}
 					if (doLookup(i, arr.arr, x.second, y.second)) {
 						g2.addEdge(new Pair<>(arr.arr, j++), x, y);
 					}
@@ -56,10 +85,20 @@ public class CategoryOfElements {
 			}
 		}
 
-		return g2;
+		return new Pair<>(g2, map);
 	}
 
 	
+	private static Object lookup(Set<Pair<Object, Object>> set, Object first) {
+		for (Pair<Object, Object> p : set) {
+			if (p.first.equals(first)) {
+				return p.second;
+			}
+		}
+		throw new RuntimeException();
+	}
+
+
 	private static boolean doLookup(Instance i, Path arr, Object x1,
 			Object x2) {
 		for (Pair<Object, Object> y : i.evaluate(arr)) {
@@ -70,7 +109,11 @@ public class CategoryOfElements {
 		return false;
 	}
 
-	public static JPanel doView(Graph<Pair<Node, Object>, Pair<Path, Integer>> sgv) {
+	public static JPanel doView(Graph<Pair<Node, Object>, Pair<Path, Integer>> sgv, HashMap<Pair<Node, Object>, Map<Attribute<Node>, Object>> map0) {
+	//	HashMap<Pair<Node, Object>,String> map = new HashMap<>();
+		JPanel cards = new JPanel(new CardLayout());
+
+		
 		// Layout<V, E>, BasicVisualizationServer<V,E>
 		 Layout<Pair<Node, Object>, Pair<Path, Integer>> layout = new FRLayout<>(sgv);
 	//	Layout<Pair<Node, Object>, Pair<Path, Integer>> layout = new ISOMLayout<>(sgv);
@@ -106,6 +149,7 @@ public class CategoryOfElements {
 		// return edgeStroke;
 		// }
 		// };
+		vv.getRenderContext().setVertexLabelRenderer(new MyVertexT(cards));
 	//	final Stroke bs = new BasicStroke();
 //		Transformer<String, Stroke> edgeStrokeTransformer = new Transformer<String, Stroke>() {
 //			public Stroke transform(String s) {
@@ -143,15 +187,75 @@ public class CategoryOfElements {
 
 				});
 
-		return vv;
+		JPanel ret = new JPanel(new GridLayout(1,1));
+		JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		
+		for (Pair<Node, Object> n : sgv.getVertices()) {
+			Map<Attribute<Node>, Object> s = map0.get(n);
+			Object[] columnNames = new Object[s.keySet().size()];
+			Object[][] rowData = new Object[1][s.keySet().size()];
+
+			int i = 0;
+//			for (Pair<Node, Object> k : map0.keySet()) {
+	//			Map<Attribute<Node>, Object> v = ma;
+				for (Attribute<Node> a : s.keySet()) {
+					columnNames[i] = a.name;
+					rowData[0][i] = s.get(a);
+					i++;
+				}
+
+			//}
+			JPanel p = new JPanel(new GridLayout(1,1));
+			JTable table = new JTable(rowData, columnNames);
+			JScrollPane jsp = new JScrollPane(table);
+			p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "Attributes for " + n.second));
+
+			p.add(jsp);
+			cards.add(p, n.second.toString());
+		}
+		cards.add(new JPanel(), "blank");
+		CardLayout cl = (CardLayout)(cards.getLayout());
+		cl.show(cards, "blank");
+
+		pane.add(vv);
+		pane.add(cards);
+		ret.add(pane);
+		cards.setPreferredSize(new Dimension(400,100));
+		
+		return ret;
 	}
 
 	public static JPanel makePanel(Instance i) throws FQLException {
-		Graph<Pair<Node, Object>, Pair<Path, Integer>> g = build(i);
-		if (g.getVertexCount() == 0) {
+				
+		Pair<Graph<Pair<Node, Object>, Pair<Path, Integer>>, HashMap<Pair<Node, Object>, Map<Attribute<Node>, Object>>> g = build(i);
+		if (g.first.getVertexCount() == 0) {
 			return new JPanel();
 		}
-		return doView(g);
+
+		
+		return doView(g.first, g.second);
+		
+	}
+	
+	private static class MyVertexT implements VertexLabelRenderer {
+
+		JPanel cards;
+		public MyVertexT(JPanel cards) {
+			this.cards = cards;
+		}
+
+		@Override
+		public <T> Component getVertexLabelRendererComponent(JComponent arg0,
+				Object arg1, Font arg2, boolean arg3, T arg4) {
+			Pair<Node, Object> p = (Pair<Node, Object>) arg4;
+			if (arg3) {
+				CardLayout c = (CardLayout) cards.getLayout();
+						c.show(cards, p.second.toString());
+			}
+
+			return new JLabel(p.second.toString());
+
+		}
 	}
 
 }

@@ -36,6 +36,9 @@ public class DEBUG {
 
 	public static  int MAX_DENOTE_ITERATIONS = 64;
 	
+	public static boolean ALL_GR_PATHS = false;
+
+	
 	//public static int MAX_JOIN_SIZE = 1024;
 	
 	public static  boolean ALLOW_INFINITES = false; 
@@ -56,7 +59,13 @@ public class DEBUG {
 	static String label8text = "Sets the size of Strings in the SQL output (used for ID columns and string columns).";
 	static String labelMtext = "Allows multiple viewers for the same editor.";
 	public static void showOptions() {
-		JPanel p = new JPanel(new GridLayout(10, 2));
+		JPanel p = new JPanel(new GridLayout(11, 2));
+		
+		JCheckBox gr = new JCheckBox("", ALL_GR_PATHS);
+		gr.setToolTipText("Show all paths in category of elements");
+		JLabel grL = new JLabel("Show all paths in Grothendieck:");
+		p.add(grL);
+		p.add(gr);
 		
 		JCheckBox jcbM = new JCheckBox("", MultiView);
 		jcbM.setToolTipText(labelMtext);
@@ -169,6 +178,7 @@ public class DEBUG {
 			} catch (NumberFormatException nfe) {
 				return;
 			}
+			ALL_GR_PATHS = gr.isSelected();
 			ALLOW_INFINITES = jcb0.isSelected();
 			VALIDATE = jcb.isSelected();
 			DO_NOT_GUIDIFY = jcbX.isSelected();
@@ -200,6 +210,7 @@ public class DEBUG {
 	static String about = "FQL IDE Copyright (C) 2013 David Spivak and Ryan Wisnesky"
 			              + "\nLicense: Creative-Commons Attribution-NonCommercial-NoDerivs 3.0 Unported"
 			 	          + "\n\nLibraries used:\n\nJetty (servlets)\nJUNG (graph visualization)\nRSyntaxTextArea (code editor)";
+
 
 	
 

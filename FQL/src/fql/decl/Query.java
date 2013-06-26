@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Stroke;
+import java.awt.geom.Point2D;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -307,6 +308,94 @@ boolean isId;
 		return ret;
 	}
 	
+
+	public Graph<String, String> legend() {
+		Graph<String, String> ret = new DirectedSparseMultigraph<String, String>();
+		
+		ret.addVertex(getSource().name0);
+		ret.addVertex(getTarget().name0);
+		ret.addVertex(join.source.name0);
+		ret.addVertex(union.source.name0);
+		
+		ret.addEdge(project.name, join.source.name0, getSource().name0); 
+		ret.addEdge(join.name, join.source.name0, join.target.name0); 
+		ret.addEdge(union.name, join.target.name0, union.target.name0); 
+		
+		return ret;
+	}
+	
+	public JPanel lowerComp2(final Environment env) {
+		// Layout<V, E>, BasicVisualizationServer<V,E>
+		//Layout<String, String> layout = new FRLayout<>(sgv);
+		//Layout<String, String> layout = new KKLayout(sgv);
+		//Layout<String, String> layout = new SpringLayout(sgv);
+
+			Layout<String, String> layout = new ISOMLayout<String,String>(legend());
+	//			Layout<String, String> layout = new CircleLayout(sgv);
+		layout.setSize(new Dimension(500, 100));
+		//layout.setLocation(getSource().name0, new Point2D(0,0));
+		VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(layout);
+		vv.setPreferredSize(new Dimension(500, 100));
+		// Setup up a new vertex to paint transformer...
+		Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
+			public Paint transform(String i) {
+				return which(i);
+			}
+
+			private Color which(String t) {
+				return env.colors.get(t);
+			}
+		};
+		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
+        gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+        vv.setGraphMouse(gm);
+        gm.setMode(Mode.PICKING);
+
+        vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller<String>());
+        vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<String>());
+        
+		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+		//vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
+		
+		
+		//vv.getRenderer().getVertexRenderer().
+	//	vv.getRenderContext().setLabelOffset(20);
+	//	vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
+		
+		return vv;
+	}
+	
+	public JPanel lowerComp(final Environment env) {
+		JPanel pan = new JPanel(new GridLayout(1,4));
+		
+		JLabel l1 = new JLabel(getSource().name0 + "    <-----");
+		l1.setBackground(env.colors.get(getSource().name0));
+		l1.setOpaque(true);
+		l1.setHorizontalAlignment(SwingConstants.CENTER);
+		pan.add(l1);
+		
+		
+		l1 = new JLabel(join.source.name0+ "    ----->");
+		l1.setBackground(env.colors.get(join.source.name0));
+		l1.setOpaque(true);
+		l1.setHorizontalAlignment(SwingConstants.CENTER);
+		pan.add(l1);
+		
+		l1 = new JLabel(union.source.name0+ "    ----->");
+		l1.setBackground(env.colors.get(union.source.name0));
+		l1.setOpaque(true);
+		l1.setHorizontalAlignment(SwingConstants.CENTER);
+		pan.add(l1);
+		
+		l1 = new JLabel(getTarget().name0);
+		l1.setBackground(env.colors.get(getTarget().name0));
+		l1.setOpaque(true);
+		l1.setHorizontalAlignment(SwingConstants.CENTER);
+		pan.add(l1);
+		
+//		pan.setMa`
+		return pan;
+	}
 	@Override
 	public JPanel pretty(final Environment env) throws FQLException {
 			Graph<String,String> g = build();
@@ -315,32 +404,9 @@ boolean isId;
 			}
 			JPanel ret = doView(env, g);
 			JSplitPane p = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-			JPanel pan = new JPanel(new GridLayout(1,4));
 			
-			JLabel l1 = new JLabel(getSource().name0);
-			l1.setBackground(env.colors.get(getSource().name0));
-			l1.setOpaque(true);
-			l1.setHorizontalAlignment(SwingConstants.CENTER);
-			pan.add(l1);
-			
-			l1 = new JLabel(getTarget().name0);
-			l1.setBackground(env.colors.get(getTarget().name0));
-			l1.setOpaque(true);
-			l1.setHorizontalAlignment(SwingConstants.CENTER);
-			pan.add(l1);
-			
-			l1 = new JLabel(join.source.name0);
-			l1.setBackground(env.colors.get(join.source.name0));
-			l1.setOpaque(true);
-			l1.setHorizontalAlignment(SwingConstants.CENTER);
-			pan.add(l1);
-			
-			l1 = new JLabel(union.source.name0);
-			l1.setBackground(env.colors.get(union.source.name0));
-			l1.setOpaque(true);
-			l1.setHorizontalAlignment(SwingConstants.CENTER);
-			pan.add(l1);
-			
+			JPanel pan = lowerComp(env);
+			//JPanel pan = lowerComp2(env);
 			pan.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), "Legend"));
 			
 			p.add(ret);

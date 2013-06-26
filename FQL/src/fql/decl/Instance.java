@@ -69,12 +69,12 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			Set<Pair<Object, Object>> i = data.get(n.string);
 			if (i == null) {
 				throw new FQLException("Missing node table " + n.string
-						+ " in " + this);
+						+ " in " + name);
 			}
 			for (Pair<Object, Object> p : i) {
 				if (!p.first.equals(p.second)) {
 					throw new FQLException("Not reflexive: " + s.name0 + " in "
-							+ s + " and " + this);
+							+ s + " and " + name);
 				}
 			}
 		}
@@ -82,7 +82,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			Set<Pair<Object, Object>> i = data.get(a.name);
 			if (i == null) {
 				throw new FQLException("Missing Attribute<Node> table " + a.name
-						+ " in " + this);
+						+ " in " + name);
 			}
 
 			HashSet<Object> x = new HashSet<>();
@@ -91,15 +91,15 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			}
 			if (data.get(a.source.string).size() != x.size()) {
 				throw new RuntimeException(
-						"Instance does not map all domain values in " + a.name);
+						"Instance " + name + " does not map all domain values in " + a.name);
 			}
 
 			for (Pair<Object, Object> p1 : i) {
 				for (Pair<Object, Object> p2 : i) {
 					if (p1.first.equals(p2.first)) {
 						if (!p2.second.equals(p2.second)) {
-							throw new FQLException("Not functional: " + s.name0
-									+ " in " + s + " and " + this);
+							throw new FQLException("In " + name + ", not functional: " + s.name0
+									+ " in " + s);
 						}
 					}
 				}
@@ -296,15 +296,15 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		return ret;
 	}
 
-	private Set<Pair<Object, Object>> lookup(String name,
+	private Set<Pair<Object, Object>> lookup(String n,
 			List<Pair<String, List<Pair<Object, Object>>>> data2)
 			throws FQLException {
 		for (Pair<String, List<Pair<Object, Object>>> p : data2) {
-			if (name.equals(p.first)) {
+			if (n.equals(p.first)) {
 				return new HashSet<>(p.second);
 			}
 		}
-		throw new FQLException("cannot find " + name + " in " + data2);
+		throw new FQLException("cannot find " + n + " in " + name);
 	}
 
 	// public Instance(String name, Query thequery, Instance theinstance)
@@ -454,7 +454,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		sb.append("\n ;\n");
 
 		first = true;
-		sb.append("Attribute<Node>s\n");
+		sb.append("attributes\n");
 		for (Attribute<Node> k : thesig.attrs) {
 			Set<Pair<Object, Object>> v = data.get(k.name);
 			if (!first) {
