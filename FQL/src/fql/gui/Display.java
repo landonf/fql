@@ -85,6 +85,11 @@ public class Display {
 				if (groth != null) {
 					px.add("Grothendieck", new JScrollPane(groth));
 				}
+				
+				JPanel rel = view.observables();
+				if (rel != null) {
+					px.add("Observables", new JScrollPane(rel));
+				}
 					
 				JPanel top = new JPanel(new GridLayout(1,1));
 				top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));

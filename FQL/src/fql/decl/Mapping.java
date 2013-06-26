@@ -1060,4 +1060,9 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		return true;
 	}
 
+	@Override
+	public JPanel observables() {
+		return null;
+	}
+
 }

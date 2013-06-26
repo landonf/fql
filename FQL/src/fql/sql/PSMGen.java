@@ -320,7 +320,7 @@ public class PSMGen {
 		if (d.kind.equals("relationalize")) {
 			Signature s = env.signatures.get(d.type);
 			//sig, outname, inname
-			return Relationalizer.compile(s, d.name, d.mapping);
+			return Relationalizer.compile(s, d.name, d.mapping, false);
 		}
 
 		Mapping f = env.getMapping(d.mapping);

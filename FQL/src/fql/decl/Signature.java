@@ -967,4 +967,9 @@ public class Signature implements Viewable<Signature> {
 	public JPanel groth() throws FQLException {
 		return null;
 	}
+
+	@Override
+	public JPanel observables() {
+		return null;
+	}
 }

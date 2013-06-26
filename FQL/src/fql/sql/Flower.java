@@ -77,10 +77,10 @@ public class Flower extends SQL {
 	public Set<Map<String, Object>> eval(
 			Map<String, Set<Map<String, Object>>> state) {
 
-		// System.out.println("********");
-		// System.out.println("Evaluating " + this);
-		// System.out.println("state " + state);
-		//
+//		 System.out.println("********");
+//		 System.out.println("Evaluating " + this);
+//		 System.out.println("state " + state);
+//		
 
 		Set<Map<Pair<String, String>, Object>> tableau = evalFrom(state);
 

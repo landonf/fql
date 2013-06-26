@@ -967,5 +967,10 @@ boolean isId;
 		return null;
 	}
 
+	@Override
+	public JPanel observables() {
+		return null;
+	}
+
 
 }

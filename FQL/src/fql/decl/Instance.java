@@ -24,9 +24,11 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
+import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import org.apache.commons.collections15.Transformer;
@@ -53,6 +55,9 @@ import fql.parse.FqlTokenizer;
 import fql.parse.JSONParsers;
 import fql.parse.Jsonable;
 import fql.parse.PrettyPrinter;
+import fql.sql.PSM;
+import fql.sql.PSMInterp;
+import fql.sql.Relationalizer;
 
 public class Instance implements Viewable<Instance>, Jsonable {
 
@@ -1466,6 +1471,95 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	@Override
 	public JPanel groth() throws FQLException {
 		return CategoryOfElements.makePanel(this);
+	}
+
+	@Override
+	public JPanel observables() {
+		JTabbedPane t = new JTabbedPane();
+
+		Map<String, Set<Map<String, Object>>> state = shred(name);
+		//System.out.println(state);
+		try {
+			List<PSM> prog = Relationalizer.compile(thesig, "output", name, true);
+			Map<String, Set<Map<String, Object>>> res = PSMInterp.interpX(prog, state);
+						
+			for (Node n : thesig.nodes) {
+				t.addTab(n.string, makePanel(Relationalizer.attrs.get(n), res, n));
+			}
+			JPanel ret = new JPanel(new GridLayout(1,1));
+			ret.add(t);
+			return ret;
+
+		} catch (FQLException e) {
+			JPanel ret = new JPanel(new GridLayout(1,1));
+			JTextArea a = new JTextArea(e.getMessage());
+			ret.add(new JScrollPane(a));
+			return ret;
+		}
+	}
+
+	private JPanel makePanel(List<String> attrs,
+			Map<String, Set<Map<String, Object>>> res, Node n) {
+		try {
+//		System.out.println("********");
+//		System.out.println(res);
+//		
+		JPanel ret = new JPanel(new GridLayout(1,1));
+		Object[] colNames = new Object[attrs.size() + 1];
+		int x = 1;
+		colNames[0] = "ID";
+		for (String s : attrs) {
+			colNames[x++] = s;
+		}
+		Object[][] rows = new Object[data.get(n.string).size()][attrs.size() + 1];
+		
+		int j = 0;
+		for (Map<String, Object> row : res.get(n.string + "_observables")) {
+			for (int i = 0; i < attrs.size(); i++) {
+				rows[j][i+1] = row.get("c" + i);
+			}
+			rows[j][0] = row.get("id");
+			j++;
+		}
+		
+		JTable table = new JTable(rows, colNames);		
+		TableRowSorter<?> sorter = new MyTableRowSorter(table.getModel());
+
+		table.setRowSorter(sorter);
+		sorter.allRowsChanged();
+		sorter.toggleSortOrder(0);
+
+		ret.add(new JScrollPane(table));
+		
+		String str = data.get(n.string).size() + " IDs, " + res.get(n.string + "_observables_proj").size() + " unique attribute combinations";
+		ret.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), str));
+		
+		return ret;
+		
+		} catch (Throwable e) {
+			e.printStackTrace();
+			return new JPanel();
+		}
+	
+	}
+
+	private Map<String, Set<Map<String, Object>>> shred(String pre) {
+		Map<String, Set<Map<String, Object>>> ret = new HashMap<>();
+		for (String k : data.keySet()) {
+			ret.put(pre + "_" + k, shred0(data.get(k)));
+		}
+		return ret;
+	}
+
+	private Set<Map<String, Object>> shred0(Set<Pair<Object, Object>> set) {
+		Set<Map<String, Object>> ret = new HashSet<>();
+		for (Pair<Object, Object> p : set) {
+			Map<String, Object> m = new HashMap<>();
+			m.put("c0", p.first);
+			m.put("c1", p.second);
+			ret.add(m);
+		}
+		return ret;
 	}
 
 }

@@ -86,8 +86,8 @@ public class Environment {
 		List<PSM> psm = PSMGen.compile0(this, p);
 		Map<String, Set<Map<String, Object>>> output0 = PSMInterp.interp(psm);
 		
-	//	System.out.println("output is");
-	//	System.out.println(output0);
+//		System.out.println("output is");
+//		System.out.println(output0);
 
 		for (Decl d : p.decls) {
 			if (d instanceof InstanceDecl) {

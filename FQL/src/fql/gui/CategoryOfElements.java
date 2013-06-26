@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
@@ -227,13 +228,22 @@ public class CategoryOfElements {
 
 	public static JPanel makePanel(Instance i) throws FQLException {
 				
-		Pair<Graph<Pair<Node, Object>, Pair<Path, Integer>>, HashMap<Pair<Node, Object>, Map<Attribute<Node>, Object>>> g = build(i);
-		if (g.first.getVertexCount() == 0) {
-			return new JPanel();
+		try {
+		
+			Pair<Graph<Pair<Node, Object>, Pair<Path, Integer>>, HashMap<Pair<Node, Object>, Map<Attribute<Node>, Object>>> g = build(i);
+			if (g.first.getVertexCount() == 0) {
+				return new JPanel();
+			}
+			return doView(g.first, g.second);
+
+		} catch (FQLException e) {
+			JPanel p = new JPanel(new GridLayout(1,1));
+			JTextArea a = new JTextArea(e.getMessage());
+			p.add(new JScrollPane(a));
+			return p;
 		}
 
 		
-		return doView(g.first, g.second);
 		
 	}
 	

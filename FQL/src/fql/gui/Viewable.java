@@ -34,5 +34,7 @@ public interface Viewable<X> {
 	public JPanel join() throws FQLException;
 
 	public JPanel json();
+	
+	public JPanel observables();
 
 }
