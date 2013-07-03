@@ -869,5 +869,10 @@ private static final int ZZ_BUFFERSIZE = 16384;
     }
   }
 
+  @Override
+  public boolean getCurlyBracesDenoteCodeBlocks() {
+	  return true;
+  }
+
 
 }

@@ -16,8 +16,8 @@ public class SignatureDecl extends Decl {
 
 	@Override
 	public String toString() {
-		return "SignatureDecl [name=" + name + ", arrows=" + arrows + ", eqs="
-				+ eqs + "]";
+		return "SignatureDecl [nodes=" + nodes + ", arrows=" + arrows
+				+ ", attrs=" + attrs + ", eqs=" + eqs + "]";
 	}
 
 	public List<String> nodes;

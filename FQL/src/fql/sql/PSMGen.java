@@ -24,6 +24,7 @@ import fql.decl.Edge;
 import fql.decl.Environment;
 import fql.decl.EvalDSPInstanceDecl;
 import fql.decl.EvalInstanceDecl;
+import fql.decl.ExternalDecl;
 import fql.decl.Instance;
 import fql.decl.Int;
 import fql.decl.Mapping;
@@ -31,10 +32,10 @@ import fql.decl.Node;
 import fql.decl.Path;
 import fql.decl.Program;
 import fql.decl.Query;
+import fql.decl.RelationalizeDecl;
 import fql.decl.Signature;
 import fql.decl.Type;
 import fql.decl.Varchar;
-import fql.parse.ExternalDecl;
 
 /**
  * 
@@ -237,6 +238,13 @@ public class PSMGen {
 				ret.addAll(addInstance(env, (EvalDSPInstanceDecl) d));
 			} else if (d instanceof ExternalDecl) {
 				ret.addAll(addInstance(env, (ExternalDecl)d));
+			} else if (d instanceof RelationalizeDecl) {
+				RelationalizeDecl rd = (RelationalizeDecl) d;
+					Signature s = env.signatures.get(rd.type);
+					//sig, outname, inname
+					ret.addAll(Relationalizer.compile(s, d.name, rd.inst, false));
+			} else {
+				// cannot throw - must ignore mappings, schemas, etc, throw new RuntimeException();
 			}
 		}
 		return ret;
@@ -317,12 +325,7 @@ public class PSMGen {
 		String inst = d.inst;
 		String name = d.name;
 		
-		if (d.kind.equals("relationalize")) {
-			Signature s = env.signatures.get(d.type);
-			//sig, outname, inname
-			return Relationalizer.compile(s, d.name, d.mapping, false);
-		}
-
+		
 		Mapping f = env.getMapping(d.mapping);
 
 		if (d.kind.equals("delta")) {

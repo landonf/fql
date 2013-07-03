@@ -57,7 +57,7 @@ public class Examples {
 			+ "\ninstance I = delta F I"
 			+ "\ninstance I = sigma F I"
 			+ "\ninstance I = pi F I"  */
-			  "See the People example for a tutorial."
+			  "See the People example for a tutorial, and the Empty example for all possible FQL syntax."
 			+ "\n"
 			+ "\nFor sigma/pi query generation, signatures must be finite."
 			+ "\n"
@@ -69,6 +69,7 @@ public class Examples {
 			+ "\n"
 			+ "\nMany features are disabled in applets, such as copy/paste,save,all menu items."
 			+ "\n"
+			+ "Use Try Control-shift-space after schema, instance, mapping, query for code completion. "
 			+ "\nProject webpage: wisnesky.net/fql.html\n"
 			;
 	

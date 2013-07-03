@@ -25,11 +25,15 @@ import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import org.codehaus.jparsec.error.ParserException;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
+import org.fife.ui.rsyntaxtextarea.CodeTemplateManager;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.folding.CurlyFoldParser;
 import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
+import org.fife.ui.rsyntaxtextarea.templates.CodeTemplate;
+import org.fife.ui.rsyntaxtextarea.templates.StaticCodeTemplate;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
@@ -40,7 +44,7 @@ import fql.FQLException;
 import fql.decl.Environment;
 import fql.decl.Program;
 import fql.examples.Example;
-import fql.parse.FqlParsers;
+import fql.parse.FqlParser;
 import fql.sql.PSMGen;
 
 /**
@@ -252,6 +256,35 @@ public class CodeEditor extends JPanel {
 		topArea.setSyntaxEditingStyle("text/fql");
 		topArea.setText(content);
 		topArea.setCaretPosition(0);
+		topArea.setAutoscrolls(true);
+		RSyntaxTextArea.setTemplatesEnabled(true);
+		
+		   CodeTemplateManager ctm = RSyntaxTextArea.getCodeTemplateManager();
+		      CodeTemplate ct = new StaticCodeTemplate("schema", "schema ",
+		    		  " = {\n\tnodes;\n\tattributes;\n\tarrows;\n\tequations;\n}");
+		      ctm.addTemplate(ct);
+		      
+			       ct = new StaticCodeTemplate("mapping", "mapping ",
+			    		  " : -> = {\n\tnodes;\n\tattributes;\n\tarrows;\n}");
+			      ctm.addTemplate(ct);
+			      
+			      ct = new StaticCodeTemplate("instance", "instance ",
+			    		  " :  = {\n\tnodes;\n\tattributes;\n\tarrows;\n}");
+			      ctm.addTemplate(ct);
+			      
+			      ct = new StaticCodeTemplate("query", "query ",
+			    		  " : -> = delta pi sigma");
+			      ctm.addTemplate(ct);
+		      
+			
+		      
+		//topArea.setBracketMatchingEnabled(true);
+	//	topArea.setAutoIndentEnabled(true);
+	//	topArea.setAnimateBracketMatching(true);
+		topArea.setCloseCurlyBraces(true);
+		//topArea.setFadeCurrentLineHighlight(true);
+	//	topArea.setHighlightCurrentLine(true);
+
 
 		// topArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
 		// topArea.setSyn
@@ -261,7 +294,7 @@ public class CodeEditor extends JPanel {
 
 		// topArea.setS
 		topArea.setCodeFoldingEnabled(true);
-		topArea.setAntiAliasingEnabled(true);
+//		topArea.setAntiAliasingEnabled(true);
 		RTextScrollPane sp = new RTextScrollPane(topArea);
 		sp.setFoldIndicatorEnabled(true);
 		// add(sp);
@@ -341,15 +374,22 @@ public class CodeEditor extends JPanel {
 		// String view = bottomArea.getText();
 
 		try {
+			Program parsed_program;
 			try {
-				FqlParsers.program.parse(program);
-			} catch (Exception e) {
+				parsed_program = FqlParser.program(program);
+			} catch (ParserException e) {
+				int col = e.getLocation().column;
+				int line = e.getLocation().line;
+				topArea.requestFocusInWindow();
+				//int startOffset = topArea.viewToModel(new Point(col, line));
+				topArea.setCaretPosition(topArea.getDocument().getDefaultRootElement().getElement(line-1).getStartOffset() + (col-1) );  
+				//				topArea.setCaretPosition(startOffset);
+				//topArea.repaint();
 				String s = e.getMessage();
-				s.substring(s.indexOf(" "));
+				String t = s.substring(s.indexOf(" "));
+				t.split("\\s+");
 				throw new FQLException("Syntax Error: " + s);
 			}
-
-			Program parsed_program = Program.parse(program);
 			
 			Environment cp = new Environment(parsed_program);
 

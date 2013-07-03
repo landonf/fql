@@ -13,19 +13,25 @@ public class EmptyExample extends Example {
 	}
 
 	String s = 
-			"schema C = { nodes; attributes; arrows; equations; }"
+			"//illustrates all possible FQL declarations"
 					+ "\n"
-					+ "\ninstance I : C = { nodes; attributes; arrows; }"
+					+ "\nschema C = { nodes; attributes; arrows; equations; }"
 					+ "\n"
 					+ "\nmapping F : C -> C = id C"
-					+ "\n"
-					+ "\ninstance I1 : C = delta F I"
-					+ "\n"
-					+ "\ninstance I2 : C = pi F I"
-					+ "\n"
-					+ "\ninstance I3 : C = sigma F I"
+					+ "\nmapping G : C -> C = F then F"
+					+ "\nmapping H : C -> C = { nodes; attributes; arrows;}"
 					+ "\n"
 					+ "\nquery q : C -> C = delta F pi F sigma F"
-					+ "\nquery p : C -> C = q then q";
+					+ "\nquery p : C -> C = q then q"
+					+ "\n"
+					+ "\ninstance I : C = { nodes; attributes; arrows; }"
+					+ "\ninstance I1 : C = delta F I"
+					+ "\ninstance I2 : C = pi F I"
+					+ "\ninstance I3 : C = sigma F I"
+					+ "\ninstance I4 : C = relationalize I"
+					+ "\ninstance I5 : C = SIGMA F I"
+					+ "\ninstance I6 : C = external"
+					+ "\ninstance I7 : C = eval q I";
+
 
 }

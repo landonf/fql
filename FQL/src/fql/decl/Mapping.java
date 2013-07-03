@@ -2,7 +2,6 @@ package fql.decl;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -62,7 +61,8 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 
 	boolean ALLOW_WF_CHECK = true;
 
-	public Mapping(String name, Signature src, Signature dst, Map<Node, Node> nm, Map<Edge, Path> em) {
+	public Mapping(String name, Signature src, Signature dst,
+			Map<Node, Node> nm, Map<Edge, Path> em) {
 		ALLOW_WF_CHECK = false;
 		this.name = name;
 		this.source = src;
@@ -83,7 +83,6 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 						+ " does not preserve typing on " + a + " and " + b);
 			}
 		}
-		
 
 		// should be checked by knuth-bendix
 
@@ -118,27 +117,32 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			throws FQLException {
 		this.name = name;
 		switch (md.kind) {
-		// case COMPOSE :
-		// Mapping m1 = env.getMapping(md.source);
-		// Mapping m2 = env.getMapping(md.target);
-		//
-		// if (!m2.target.equals(m1.source)) {
-		// throw new FQLException("Ill-typed: " + md);
-		// }
-		// this.source = m2.source;
-		// this.target = m1.target;
-		// for (Node k : m1.source.nodes) {
-		// Node v = m1.nm.get(k);
-		// nm.put(k, m2.nm.get(v));
-		// }
-		// for (Edge k : m1.source.edges) {
-		// Path v = m1.em.get(k);
-		// Path p0 = expand(v, m2.nm, m2.em);
-		// em.put(k, p0);
-		// }
-		//
-		//
-		// break;
+		case COMPOSE:
+			Mapping m1 = env.mappings.get(md.m1);
+			Mapping m2 = env.mappings.get(md.m2);
+
+			if (m1 == null) {
+				throw new FQLException("For " + name + ", cannot find mapping " + md.m1);
+			}
+			if (m2 == null) {
+				throw new FQLException("For " + name + ", cannot find mapping " + md.m2);
+			}
+			if (!m2.target.equals(m1.source)) {
+				throw new FQLException("Ill-typed: " + md);
+			}
+			this.source = m2.source;
+			this.target = m1.target;
+			for (Node k : m1.source.nodes) {
+				Node v = m1.nm.get(k);
+				nm.put(k, m2.nm.get(v));
+			}
+			for (Edge k : m1.source.edges) {
+				Path v = m1.em.get(k);
+				Path p0 = expand(v, m2.nm, m2.em);
+				em.put(k, p0);
+			}
+
+			break;
 		case ID:
 			Signature s = env.getSchema(md.schema);
 			if (!(md.schema.equals(md.source) && md.schema.equals(md.target))) {
@@ -152,6 +156,8 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			initialize(env.getSchema(md.source), env.getSchema(md.target),
 					md.objs, md.atts, md.arrows);
 			break;
+		default:
+			throw new RuntimeException();
 		}
 		validate();
 	}
@@ -167,24 +173,24 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			} else if (source.isNode(p.first) && target.isNode(p.second)) {
 				ret2.add(p);
 			} else {
-				throw new FQLException("Bad mapping: " + p + "\n in " + name);
+				throw new FQLException("Bad mapping: " + p + " in " + name);
 			}
 		}
 
 		return new Pair<>(ret2, ret);
 	}
 
-//	private Path expand(Path v, Map<Node, Node> nm2, Map<Edge, Path> em2) {
-//		Node newhead = nm2.get(v.source);
-//		Node newtarget = nm2.get(v.target);
-//		List<Edge> newedges = new LinkedList<Edge>();
-//		for (Edge e : v.path) {
-//			Path p = em2.get(e);
-//			newedges.addAll(p.path);
-//			newtarget = p.target;
-//		}
-//		return new Path(newhead, newtarget, newedges);
-//	}
+	private Path expand(Path v, Map<Node, Node> nm2, Map<Edge, Path> em2) {
+		Node newhead = nm2.get(v.source);
+		Node newtarget = nm2.get(v.target);
+		List<Edge> newedges = new LinkedList<Edge>();
+		for (Edge e : v.path) {
+			Path p = em2.get(e);
+			newedges.addAll(p.path);
+			newtarget = p.target;
+		}
+		return new Path(newhead, newtarget, newedges);
+	}
 
 	public Mapping(Environment env, Signature s) throws FQLException {
 		identity(env, s);
@@ -195,8 +201,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	 * Constructs a new mapping.
 	 */
 	public Mapping(String name, Signature source, Signature target,
-			List<Pair<String, String>> objs,
-			List<Pair<String, String>> atts,
+			List<Pair<String, String>> objs, List<Pair<String, String>> atts,
 			List<Pair<String, List<String>>> arrows) throws FQLException {
 		this.name = name;
 		initialize(source, target, objs, atts, arrows);
@@ -242,15 +247,14 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	 * Does most of the work of the constructor.
 	 */
 	private void initialize(Signature source, Signature target,
-			List<Pair<String, String>> objs,
-			List<Pair<String, String>> attrs,
+			List<Pair<String, String>> objs, List<Pair<String, String>> attrs,
 			List<Pair<String, List<String>>> arrows) throws FQLException {
 		this.source = source;
 		this.target = target;
 
 		Pair<List<Pair<String, String>>, List<Pair<String, String>>> s = filter(objs);
 		objs = s.first;
-	//	List<Pair<String, String>> attrs = s.second;
+		// List<Pair<String, String>> attrs = s.second;
 		for (Pair<String, String> p : objs) {
 			Node sn = this.source.getNode(p.first);
 			Node tn = this.target.getNode(p.second);
@@ -263,24 +267,30 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 				em.put(e, p);
 			}
 		} catch (FQLException e) {
-			throw new FQLException("In mapping " + name + ", bad path mapping: " + e.toString());
+			throw new FQLException("In mapping " + name
+					+ ", bad path mapping: " + e.toString());
 		}
-		//System.out.println("INIT \n" + this);
+		// System.out.println("INIT \n" + this);
 		for (Pair<String, String> a : attrs) {
 			Attribute<Node> a1 = source.getAttr(a.first);
 			Attribute<Node> a2 = target.getAttr(a.second);
 			if (a1 == null) {
-				throw new FQLException("In mapping " + name + ", cannot find source attr " + a.first + " in " + source.name0);
+				throw new FQLException("In mapping " + name
+						+ ", cannot find source attr " + a.first + " in "
+						+ source.name0);
 			}
 			if (a2 == null) {
-				throw new FQLException("In mapping " + name + ", cannot find target attr " + a.second + " in " + target.name0);
+				throw new FQLException("In mapping " + name
+						+ ", cannot find target attr " + a.second + " in "
+						+ target.name0);
 			}
-				if (a1.target.equals(a2.target)) {
-					am.put(a1, a2);
-				} else {
-					throw new FQLException("Incompatible attribute mapping types " + a);
-				}
+			if (a1.target.equals(a2.target)) {
+				am.put(a1, a2);
+			} else {
+				throw new FQLException("Incompatible attribute mapping types "
+						+ a);
 			}
+		}
 		for (Node n : this.source.nodes) {
 			if (nm.get(n) == null) {
 				throw new FQLException("Missing node mapping from " + n
@@ -640,11 +650,12 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			arrowMapping.put(new Arr<>(arrow, arrow.source, arrow.target),
 					dstCat0.second.of(mapped));
 		}
-		
-		FinFunctor<Node, Path, Node, Path> F = new FinFunctor<>(objMapping, arrowMapping, srcCat, dstCat);
-		
+
+		FinFunctor<Node, Path, Node, Path> F = new FinFunctor<>(objMapping,
+				arrowMapping, srcCat, dstCat);
+
 		F.am = am;
-		
+
 		return new Triple<>(F, srcCat0, dstCat0);
 	}
 
@@ -901,12 +912,12 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			Path p = l.em.get(e);
 			yyy.add(new Pair<>(e.name, r.appy(p).asList()));
 		}
-		
+
 		for (Attribute<Node> a : l.source.attrs) {
 			Attribute<Node> b = l.am.get(a);
 			zzz.add(new Pair<>(a.name, r.am.get(b).name));
 		}
-		
+
 		return new Mapping(string, l.source, r.target, xxx, zzz, yyy);
 	}
 
@@ -994,7 +1005,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	public JPanel groth() throws FQLException {
 		return null;
 	}
-	
+
 	public void okForPi() throws FQLException {
 		for (Attribute<Node> n : target.attrs) {
 			boolean found = false;
@@ -1002,7 +1013,8 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 				Attribute<Node> c = am.get(a);
 				if (c.equals(n)) {
 					if (found) {
-						throw new FQLException("Not attribute bijection " + name);
+						throw new FQLException("Not attribute bijection "
+								+ name);
 					}
 					found = true;
 				}
@@ -1011,24 +1023,23 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 				throw new FQLException("Not attribute bijection " + name);
 			}
 		}
-		
+
 	}
-	
+
 	public void okForSigma() throws FQLException {
 		for (Node n : source.nodes) {
 			List<Attribute<Node>> nattrs = source.attrsFor(n);
-			
+
 			List<Attribute<Node>> mattrs = target.attrsFor(nm.get(n));
-			
+
 			if (!isBijection(nattrs, mattrs, am)) {
 				throw new FQLException("Not union compatible " + name);
 			}
 		}
-		
+
 	}
 
-	private <X> boolean isBijection(List<X> l, List<X> r,
-			Map<X, X> f) {
+	private <X> boolean isBijection(List<X> l, List<X> r, Map<X, X> f) {
 
 		for (X x : l) {
 			if (f.get(x) == null) {
@@ -1038,7 +1049,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 				return false;
 			}
 		}
-		
+
 		for (X x : r) {
 			boolean found = false;
 			for (X y : l) {
@@ -1053,7 +1064,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -1065,10 +1076,10 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	@Override
 	public JPanel constraint() {
 		List<EmbeddedDependency> l = toED();
-		
-		JPanel ret = new JPanel(new GridLayout(1,1));
-		
-		String s = "";
+
+		JPanel ret = new JPanel(new GridLayout(1, 1));
+
+		String s = "(note: these are speculative)\n\n";
 		int i = 0;
 		for (EmbeddedDependency d : l) {
 			if (i++ > 0) {
@@ -1088,7 +1099,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 
 	public List<EmbeddedDependency> toED() {
 		List<EmbeddedDependency> ret = new LinkedList<>();
-		
+
 		int v = 0;
 		for (Node n : source.nodes) {
 			List<String> forall = new LinkedList<>();
@@ -1097,17 +1108,18 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			List<Triple<String, String, String>> tgd = new LinkedList<>();
 			List<Triple<String, String, String>> not = new LinkedList<>();
 			List<Pair<String, String>> egd = new LinkedList<>();
-			
+
 			String u = "v" + Integer.toString(v);
 			forall.add(u);
 			where.add(new Triple<>(source.name0 + "." + n.string, u, u));
 			tgd.add(new Triple<>(target.name0 + "." + nm.get(n).string, u, u));
 
-			EmbeddedDependency ed = new EmbeddedDependency(forall, exists, where, tgd, not, egd);
+			EmbeddedDependency ed = new EmbeddedDependency(forall, exists,
+					where, tgd, not, egd);
 			ret.add(ed);
 			v++;
 		}
-		
+
 		for (Attribute<Node> a : source.attrs) {
 			List<String> forall = new LinkedList<>();
 			List<String> exists = new LinkedList<>();
@@ -1115,18 +1127,18 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			List<Triple<String, String, String>> tgd = new LinkedList<>();
 			List<Pair<String, String>> egd = new LinkedList<>();
 			List<Triple<String, String, String>> not = new LinkedList<>();
-			
-			
+
 			String u = "v" + Integer.toString(v);
 			forall.add(u);
 			where.add(new Triple<>(source.name0 + "." + a.name, u, u));
 			tgd.add(new Triple<>(target.name0 + "." + am.get(a).name, u, u));
 
-			EmbeddedDependency ed = new EmbeddedDependency(forall, exists, where, tgd, not, egd);
+			EmbeddedDependency ed = new EmbeddedDependency(forall, exists,
+					where, tgd, not, egd);
 			ret.add(ed);
 			v++;
 		}
-		
+
 		for (Edge e : source.edges) {
 			List<String> forall = new LinkedList<>();
 			List<String> exists = new LinkedList<>();
@@ -1134,31 +1146,34 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			List<Triple<String, String, String>> tgd = new LinkedList<>();
 			List<Pair<String, String>> egd = new LinkedList<>();
 			List<Triple<String, String, String>> not = new LinkedList<>();
-			
-			
+
 			String u = "v" + Integer.toString(v);
 			v++;
 			String w = "v" + Integer.toString(v);
 			forall.add(u);
 			forall.add(w);
 			where.add(new Triple<>(source.name0 + "." + e.name, u, w));
-			
-			tgd.add(new Triple<>(target.name0 + "." + nm.get(e.source).string, u, u));
+
+			tgd.add(new Triple<>(target.name0 + "." + nm.get(e.source).string,
+					u, u));
 			Path p = em.get(e);
 			for (Edge E : p.path) {
 				exists.add("v" + v);
-				tgd.add(new Triple<>(target.name0 + "." + E.name, "v" + (v-1), "v" + v));
+				tgd.add(new Triple<>(target.name0 + "." + E.name,
+						"v" + (v - 1), "v" + v));
 				v++;
 			}
-			//v++;
-			
-//			tgd.add(new Triple<>(target.name0 + "." + nm.get(e.target).string, w, w));
+			// v++;
 
-			EmbeddedDependency ed = new EmbeddedDependency(forall, exists, where, tgd, not , egd);
-			
+			// tgd.add(new Triple<>(target.name0 + "." +
+			// nm.get(e.target).string, w, w));
+
+			EmbeddedDependency ed = new EmbeddedDependency(forall, exists,
+					where, tgd, not, egd);
+
 			ret.add(ed);
 		}
-		
+
 		return ret;
 	}
 

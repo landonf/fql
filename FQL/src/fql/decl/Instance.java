@@ -28,7 +28,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
-import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import org.apache.commons.collections15.Transformer;
@@ -153,13 +152,11 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 				if (!contained(p1.first, data.get(e.source.string))) {
 					throw new FQLException("Domain has non foreign key: "
-							+ s.name0 + " in " + s + " and " + this);
+							+ p1.first + " in " + e.source.string);
 				}
 				if (!contained(p1.second, data.get(e.target.string))) {
-					throw new FQLException("Range has non foreign key: \n"
-							+ p1.second + "\n\n " + data.get(e.target.string)
-							+ "\n\n " + s.name0 + " \n\n " + s + " \n\n "
-							+ this);
+					throw new FQLException("Range has non foreign key: "
+							+ p1.second + " in " + e.target.string);
 				}
 			}
 		}
@@ -168,7 +165,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			Set<Pair<Object, Object>> rhs = evaluate(eq.rhs);
 			if (!lhs.equals(rhs)) {
 				throw new FQLException("Violates constraints: " + s.name0
-						+ " in " + s + " and " + this + "\n\n eq is " + eq
+						+ " in " + s + "\n\n eq is " + eq
 						+ "\nlhs is " + lhs + "\n\nrhs is " + rhs);
 			}
 		}

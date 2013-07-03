@@ -254,6 +254,7 @@ public class CategoryOfElements {
 			this.cards = cards;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public <T> Component getVertexLabelRendererComponent(JComponent arg0,
 				Object arg1, Font arg2, boolean arg3, T arg4) {

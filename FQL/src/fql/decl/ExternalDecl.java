@@ -1,4 +1,4 @@
-package fql.parse;
+package fql.decl;
 
 import fql.decl.InstanceDecl;
 

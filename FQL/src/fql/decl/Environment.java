@@ -12,7 +12,6 @@ import fql.FQLException;
 import fql.Pair;
 import fql.Triple;
 import fql.gui.Viewable;
-import fql.parse.ExternalDecl;
 import fql.sql.PSM;
 import fql.sql.PSMGen;
 import fql.sql.PSMInterp;
@@ -42,7 +41,7 @@ public class Environment {
 		// Map<String, Signature> it = new HashMap<>();
 		for (Decl d : p.decls) {
 			if (names.contains(d.name)) {
-				throw new FQLException("Duplicate schema: " + d.name);
+				throw new FQLException("Duplicate declaration: " + d.name);
 			}
 			names.add(d.name);
 
@@ -59,14 +58,17 @@ public class Environment {
 			} else if (d instanceof EvalInstanceDecl) {
 				check((EvalInstanceDecl) d);
 				if (signatures.get(((EvalInstanceDecl) d).type) == null) {
-					throw new RuntimeException();
+					throw new FQLException("In " + d.name + ", cannot find "
+							+ ((EvalInstanceDecl) d).type);
 				}
 				instance_types.put(d.name,
 						signatures.get(((EvalInstanceDecl) d).type));
 			} else if (d instanceof EvalDSPInstanceDecl) {
 				check((EvalDSPInstanceDecl) d);
 				if (signatures.get(((EvalDSPInstanceDecl) d).type) == null) {
-					throw new RuntimeException();
+					throw new FQLException("In " + d.name + ", cannot find "
+							+ ((EvalDSPInstanceDecl) d).type);
+
 				}
 				instance_types.put(d.name,
 						signatures.get(((EvalDSPInstanceDecl) d).type));
@@ -74,8 +76,21 @@ public class Environment {
 				instance_types.put(d.name,
 						signatures.get(((ConstantInstanceDecl) d).type));
 				if (signatures.get(((ConstantInstanceDecl) d).type) == null) {
-					throw new RuntimeException();
+					throw new FQLException("In " + d.name + ", cannot find "
+							+ ((ConstantInstanceDecl) d).type);
 				}
+			} else if (d instanceof RelationalizeDecl) {
+				if (signatures.get(((RelationalizeDecl) d).type) == null) {
+					throw new FQLException("In " + d.name + ", cannot find "
+							+ ((RelationalizeDecl) d).type);
+				}
+				if (instance_types.get(((RelationalizeDecl) d).inst) == null) {
+					throw new FQLException("Cannot find instance " + ((RelationalizeDecl) d).inst);
+				}	
+				if (!signatures.get(((RelationalizeDecl) d).type).name0.equals(instance_types.get(((RelationalizeDecl) d).inst).name0)) {
+					throw new FQLException("Relativize must have same input and output schemas on " + d.name); //, not " + signatures.get(((RelationalizeDecl) d).inst).name0 + " and " + instance_types.get(d.mapping).name0);
+				}
+
 			}
 
 			else {
@@ -85,9 +100,9 @@ public class Environment {
 
 		List<PSM> psm = PSMGen.compile0(this, p);
 		Map<String, Set<Map<String, Object>>> output0 = PSMInterp.interp(psm);
-		
-//		System.out.println("output is");
-//		System.out.println(output0);
+
+		// System.out.println("output is");
+		// System.out.println(output0);
 
 		for (Decl d : p.decls) {
 			if (d instanceof InstanceDecl) {
@@ -154,17 +169,9 @@ public class Environment {
 	}
 
 	private void check(EvalDSPInstanceDecl d) throws FQLException {
-		if (d.kind.equals("relationalize")) {
-			if (instance_types.get(d.mapping) == null) {
-				throw new FQLException("Cannot find type instance " + d.mapping);
-			}	
-			if (!signatures.get(d.type).name0.equals(instance_types.get(d.mapping).name0)) {
-				throw new FQLException("Relativize must have same input and output schemas, not " + signatures.get(d.type).name0 + " and " + instance_types.get(d.mapping).name0);
-			}
-			return;
-		}
 		if (signatures.get(d.type) == null) {
-			throw new FQLException("Cannot find schema " + d.type + " for instance " + d.name);
+			throw new FQLException("Cannot find schema " + d.type
+					+ " for instance " + d.name);
 		}
 		if (mappings.get(d.mapping) == null) {
 			throw new FQLException("Cannot find mapping " + d.mapping);
@@ -280,9 +287,8 @@ public class Environment {
 		Mapping m = new Mapping(mappingDecl.name, this, mappingDecl);
 		mappings.put(mappingDecl.name, m);
 	}
-	
-	public void addInstance(Instance i)
-			throws FQLException {
+
+	public void addInstance(Instance i) throws FQLException {
 		Signature thesig = signatures.get(i.thesig.name0);
 		instance_types.put(i.name, thesig);
 		instances.put(i.name, i);

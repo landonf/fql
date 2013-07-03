@@ -17,7 +17,7 @@ import fql.Pair;
 public class FqlTokenizer implements Tokens {
 
 	private List<String> words;
-	private List<String> lines;
+	//private List<String> lines;
 	
 	private String[] symbols = new String[] { ",", ":", ";", "->", ".", "{",
 			"}", "(", ")", "=", "[", "]" };
@@ -33,7 +33,7 @@ public class FqlTokenizer implements Tokens {
 	private String carriagereturn = "\r";
 
 	private FqlTokenizer(List<String> s, List<String> t) {
-		words = s; lines = t;
+		words = s; //lines = t;
 	}
 
 	public FqlTokenizer(String s) throws BadSyntax {
