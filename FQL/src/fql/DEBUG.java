@@ -209,7 +209,7 @@ public class DEBUG {
 	
 	static String about = "FQL IDE Copyright (C) 2013 David Spivak and Ryan Wisnesky"
 			              + "\nLicense: Creative-Commons Attribution-NonCommercial-NoDerivs 3.0 Unported"
-			 	          + "\n\nLibraries used:\n\nJetty (servlets)\nJUNG (graph visualization)\nRSyntaxTextArea (code editor)";
+			 	          + "\n\nLibraries used:\n\nJParsec (parsing)\nJUNG (graph visualization)\nRSyntaxTextArea (code editor)";
 
 
 	

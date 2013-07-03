@@ -35,6 +35,8 @@ public interface Viewable<X> {
 
 	public JPanel json();
 	
+	public JPanel constraint();
+	
 	public JPanel observables();
 
 }

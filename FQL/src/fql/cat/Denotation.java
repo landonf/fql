@@ -101,6 +101,9 @@ public class Denotation {
 		Fn<Path, Arr<Node, Path>> r2 = new Fn<Path, Arr<Node, Path>>() {
 			@Override
 			public Arr<Node, Path> of(Path x) {
+				if (fn2.get(fn.of(x)) == null) {
+					throw new RuntimeException("Given path " + x + ", transforms to " + fn.of(x) + ", which is not in " + fn2 );
+				}
 				return new Arr<>(fn2.get(fn.of(x)), x.source, x.target);
 			}
 		};

@@ -9,7 +9,7 @@ package fql.parse;
  * 
  *            interface for parser combinators
  */
-public interface Parser<T> {
+public interface RyanParser<T> {
 
 	public Partial<T> parse(Tokens s) throws BadSyntax, IllTyped;
 

@@ -9,7 +9,7 @@ import fql.decl.EvalDSPInstanceDecl;
  * 
  *         Parser for instances given by delta, sigma, pi
  */
-public class DSPInstanceDeclParser implements Parser<Decl> {
+public class DSPInstanceDeclParser implements RyanParser<Decl> {
 
 	@Override
 	public Partial<Decl> parse(Tokens s0) throws BadSyntax, IllTyped {
@@ -42,13 +42,13 @@ public class DSPInstanceDeclParser implements Parser<Decl> {
 			IllTyped {
 		Tokens s = s0;
 
-		Parser<?> pre = new KeywordParser("instance");
+		RyanParser<?> pre = new KeywordParser("instance");
 
-		Parser<?> e = new KeywordParser("=");
-		Parser<?> ev = new KeywordParser(kind);
-		Parser<String> p1 = new StringParser();
-		Parser<String> p2 = new StringParser();
-		Parser<String> p3 = new StringParser();
+		RyanParser<?> e = new KeywordParser("=");
+		RyanParser<?> ev = new KeywordParser(kind);
+		RyanParser<String> p1 = new StringParser();
+		RyanParser<String> p2 = new StringParser();
+		RyanParser<String> p3 = new StringParser();
 		String s1, s2, s3;
 
 		Partial<?> x = pre.parse(s);
@@ -58,8 +58,8 @@ public class DSPInstanceDeclParser implements Parser<Decl> {
 		s1 = y.value;
 
 		String type;
-		Parser<String> typ = new StringParser();
-		Parser<String> typ0 = ParserUtils.seq(new KeywordParser(":"), typ);
+		RyanParser<String> typ = new StringParser();
+		RyanParser<String> typ0 = ParserUtils.seq(new KeywordParser(":"), typ);
 		y = typ0.parse(s);
 		s = y.tokens;
 		type = y.value;

@@ -6,7 +6,7 @@ package fql.parse;
  *
  * Parser for quoted strings.
  */
-public class QuotedParser implements Parser<String> {
+public class QuotedParser implements RyanParser<String> {
 
 	@Override
 	public Partial<String> parse(Tokens s) throws BadSyntax, IllTyped {

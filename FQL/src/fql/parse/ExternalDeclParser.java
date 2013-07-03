@@ -8,16 +8,16 @@ import fql.decl.Decl;
  * 
  *         Parser for external instances.
  */
-public class ExternalDeclParser implements Parser<Decl> {
+public class ExternalDeclParser implements RyanParser<Decl> {
 
 	@Override
 	public Partial<Decl> parse(Tokens s) throws BadSyntax, IllTyped {
 		String name;
 		String type;
 
-		Parser<?> pre = new KeywordParser("instance");
-		Parser<?> q = new KeywordParser(":");
-		Parser<?> e = new KeywordParser("=");
+		RyanParser<?> pre = new KeywordParser("instance");
+		RyanParser<?> q = new KeywordParser(":");
+		RyanParser<?> e = new KeywordParser("=");
 
 		Partial<?> x = pre.parse(s);
 		s = x.tokens;

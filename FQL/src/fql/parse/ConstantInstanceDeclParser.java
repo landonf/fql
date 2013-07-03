@@ -13,16 +13,16 @@ import fql.decl.Decl;
  * 
  *         Parser for explicit instances.
  */
-public class ConstantInstanceDeclParser implements Parser<Decl> {
+public class ConstantInstanceDeclParser implements RyanParser<Decl> {
 
-	Parser<List<Pair<String, List<Pair<String, String>>>>> make(String name,
+	RyanParser<List<Pair<String, List<Pair<String, String>>>>> make(String name,
 			boolean refl) {
-		Parser<?> sep = new KeywordParser(",");
-		Parser<Pair<String, List<Pair<String, String>>>> p1 = new TableDeclParser();
+		RyanParser<?> sep = new KeywordParser(",");
+		RyanParser<Pair<String, List<Pair<String, String>>>> p1 = new TableDeclParser();
 		if (refl) {
 			p1 = new TableDeclParser2();
 		}
-		Parser<List<Pair<String, List<Pair<String, String>>>>> u = ParserUtils
+		RyanParser<List<Pair<String, List<Pair<String, String>>>>> u = ParserUtils
 				.manySep(p1, sep);
 		return ParserUtils.outside(new KeywordParser(name), u,
 				new KeywordParser(";"));
@@ -34,9 +34,9 @@ public class ConstantInstanceDeclParser implements Parser<Decl> {
 		String name;
 		String type;
 
-		Parser<?> pre = new KeywordParser("instance");
-		Parser<?> q = new KeywordParser(":");
-		Parser<?> e = new KeywordParser("=");
+		RyanParser<?> pre = new KeywordParser("instance");
+		RyanParser<?> q = new KeywordParser(":");
+		RyanParser<?> e = new KeywordParser("=");
 
 		// Parser<?> sep = new KeywordParser(",");
 		// Parser<Pair<String, List<Pair<String, String>>>> p1 = new

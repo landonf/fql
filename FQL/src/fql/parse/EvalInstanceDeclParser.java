@@ -9,23 +9,23 @@ import fql.decl.EvalInstanceDecl;
  *
  * Parser for instances given by query evaluation.
  */
-public class EvalInstanceDeclParser implements Parser<Decl> {
+public class EvalInstanceDeclParser implements RyanParser<Decl> {
 
 	@Override
 	public Partial<Decl> parse(Tokens s) throws BadSyntax, IllTyped {
-		Parser<?> pre = new KeywordParser("instance");
+		RyanParser<?> pre = new KeywordParser("instance");
 		
 		
-		Parser<?> e = new KeywordParser("=");
-		Parser<?> ev = new KeywordParser("eval");
-		Parser<String> p1 = new StringParser();
-		Parser<String> p2 = new StringParser();
-		Parser<String> p3 = new StringParser();
+		RyanParser<?> e = new KeywordParser("=");
+		RyanParser<?> ev = new KeywordParser("eval");
+		RyanParser<String> p1 = new StringParser();
+		RyanParser<String> p2 = new StringParser();
+		RyanParser<String> p3 = new StringParser();
 		String s1, s2, s3;
 		
 		String type;
-		Parser<String> typ = new StringParser();
-		Parser<String> typ0 = ParserUtils.seq(new KeywordParser(":"), typ);
+		RyanParser<String> typ = new StringParser();
+		RyanParser<String> typ0 = ParserUtils.seq(new KeywordParser(":"), typ);
 		
 		Partial<?> x = pre.parse(s);
 		s = x.tokens;

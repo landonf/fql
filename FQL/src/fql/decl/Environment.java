@@ -163,11 +163,14 @@ public class Environment {
 			}
 			return;
 		}
+		if (signatures.get(d.type) == null) {
+			throw new FQLException("Cannot find schema " + d.type + " for instance " + d.name);
+		}
 		if (mappings.get(d.mapping) == null) {
 			throw new FQLException("Cannot find mapping " + d.mapping);
 		}
 		if (instance_types.get(d.inst) == null) {
-			throw new FQLException("Cannot find type for instance " + d.inst);
+			throw new FQLException("Cannot find instance " + d.inst);
 		}
 		if (d.kind.equals("delta")) {
 			if (!mappings.get(d.mapping).source.name0.equals(d.type)) {

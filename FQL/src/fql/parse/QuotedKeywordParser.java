@@ -8,7 +8,7 @@ import fql.Unit;
  *
  * Parser for quoted keywords, for JSON.
  */
-public class QuotedKeywordParser implements Parser<Unit> {
+public class QuotedKeywordParser implements RyanParser<Unit> {
 
 	String p;
 	

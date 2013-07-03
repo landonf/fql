@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import fql.FQLException;
+
 /**
  * 
  * @author ryan
@@ -23,13 +25,13 @@ public class InsertKeygen extends PSM {
 		
 	}
 	
-	public InsertKeygen(String name, String col, String r, List<String> attrs) {
+	public InsertKeygen(String name, String col, String r, List<String> attrs) throws FQLException {
 		this.col = col;
 		this.r = r;
 		this.name = name;
 		this.attrs = attrs;
 		if (attrs.size() == 0) {
-			throw new RuntimeException();
+			throw new FQLException("Empty attrs in " + this);
 		}
 	}
 

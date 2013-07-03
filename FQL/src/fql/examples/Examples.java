@@ -37,8 +37,9 @@ public class Examples {
 	public static Example typedemployees = new TypedEmployeesExample();
 	public static Example typedsigma = new TypedSigmaExample();
 	public static Example relative = new RelationalizerExample();
+	public static Example sotgd = new EDExample();
 	
-	public static Example[] examples = { people, external, typeddelta, delta, pi, typedPi, typedsigma, sigma, full, employess, typedemployees, composition, tcomp, iso, triangle, cyclicgroup, dihedral, /* one, */ empty, foil, typedFoil, sql2fql, weird, typedWeird, relative };
+	public static Example[] examples = { people, external, typeddelta, delta, pi, typedPi, typedsigma, sigma, full, employess, typedemployees, composition, tcomp, iso, triangle, cyclicgroup, dihedral, /* one, */ empty, foil, typedFoil, sql2fql, weird, typedWeird, relative, sotgd };
 	
 	public static final Example INIT_EXAMPLE = typeddelta;
 	

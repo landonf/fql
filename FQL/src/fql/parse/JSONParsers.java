@@ -30,33 +30,33 @@ public class JSONParsers {
 		}
 	}
 
-	public static class JSONMappingParser implements Parser<Mapping> {
+	public static class JSONMappingParser implements RyanParser<Mapping> {
 
 		@Override
 		public Partial<Mapping> parse(Tokens s) throws BadSyntax, IllTyped {
 
-			Parser<Signature> src = ParserUtils.seq(new QuotedKeywordParser(
+			RyanParser<Signature> src = ParserUtils.seq(new QuotedKeywordParser(
 					"source"), ParserUtils.seq(new KeywordParser(":"),
 					new JSONSigParser(false)));
 
-			Parser<Signature> dst = ParserUtils.seq(new QuotedKeywordParser(
+			RyanParser<Signature> dst = ParserUtils.seq(new QuotedKeywordParser(
 					"target"), ParserUtils.seq(new KeywordParser(":"),
 					new JSONSigParser(false)));
 
-			Parser<List<Pair<String, String>>> onObjects = new MappingObjectParser();
+			RyanParser<List<Pair<String, String>>> onObjects = new MappingObjectParser();
 
-			Parser<List<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>>> onGens = new MappingGeneratorParser();
+			RyanParser<List<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>>> onGens = new MappingGeneratorParser();
 
-			Parser<Pair<Signature, Signature>> a = ParserUtils.inside(src,
+			RyanParser<Pair<Signature, Signature>> a = ParserUtils.inside(src,
 					new KeywordParser(","), dst);
 
-			Parser<Pair<List<Pair<String, String>>, List<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>>>> b = ParserUtils
+			RyanParser<Pair<List<Pair<String, String>>, List<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>>>> b = ParserUtils
 					.inside(onObjects, new KeywordParser(","), onGens);
 
-			Parser<Pair<Pair<Signature, Signature>, Pair<List<Pair<String, String>>, List<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>>>>> u = ParserUtils
+			RyanParser<Pair<Pair<Signature, Signature>, Pair<List<Pair<String, String>>, List<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>>>>> u = ParserUtils
 					.inside(a, new KeywordParser(","), b);
 
-			Parser<Pair<Pair<Signature, Signature>, Pair<List<Pair<String, String>>, List<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>>>>> xxx = ParserUtils
+			RyanParser<Pair<Pair<Signature, Signature>, Pair<List<Pair<String, String>>, List<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>>>>> xxx = ParserUtils
 					.outside(new KeywordParser("{"), u, new KeywordParser("}"));
 
 			Partial<Pair<Pair<Signature, Signature>, Pair<List<Pair<String, String>>, List<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>>>>> zzz = xxx
@@ -77,20 +77,20 @@ public class JSONParsers {
 	}
 
 	public static class MappingObjectParser implements
-			Parser<List<Pair<String, String>>> {
+			RyanParser<List<Pair<String, String>>> {
 
 		@Override
 		public Partial<List<Pair<String, String>>> parse(Tokens s)
 				throws BadSyntax, IllTyped {
 
-			Parser<Pair<String, String>> q = ParserUtils.inside(
+			RyanParser<Pair<String, String>> q = ParserUtils.inside(
 					new QuotedParser(), new KeywordParser(":"),
 					new QuotedParser());
-			Parser<List<Pair<String, String>>> u = ParserUtils.manySep(q,
+			RyanParser<List<Pair<String, String>>> u = ParserUtils.manySep(q,
 					new KeywordParser(","));
-			Parser<List<Pair<String, String>>> p = ParserUtils.outside(
+			RyanParser<List<Pair<String, String>>> p = ParserUtils.outside(
 					new KeywordParser("{"), u, new KeywordParser("}"));
-			Parser<List<Pair<String, String>>> zzz = ParserUtils.seq(
+			RyanParser<List<Pair<String, String>>> zzz = ParserUtils.seq(
 					new QuotedKeywordParser("onObjects"),
 					ParserUtils.seq(new KeywordParser(":"), p));
 			return zzz.parse(s);
@@ -98,23 +98,23 @@ public class JSONParsers {
 
 	}
 
-	public static class JSONInstParser implements Parser<Instance> {
+	public static class JSONInstParser implements RyanParser<Instance> {
 
 		@Override
 		public Partial<Instance> parse(Tokens s) throws BadSyntax, IllTyped {
 
-			Parser<Pair<List<Pair<String, List<String>>>, List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>>> r = ParserUtils
+			RyanParser<Pair<List<Pair<String, List<String>>>, List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>>> r = ParserUtils
 					.inside(new instanceObjParser(), new KeywordParser(","),
 							new onMorphismsParser2());
 
-			Parser<Pair<Signature, Pair<List<Pair<String, List<String>>>, List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>>>> u = ParserUtils
+			RyanParser<Pair<Signature, Pair<List<Pair<String, List<String>>>, List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>>>> u = ParserUtils
 					.inside(ParserUtils.seq(
 							new QuotedKeywordParser("ontology"), ParserUtils
 									.seq(new KeywordParser(":"),
 											new JSONSigParser(false))),
 							new KeywordParser(","), r);
 
-			Parser<Pair<Signature, Pair<List<Pair<String, List<String>>>, List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>>>> ret = ParserUtils
+			RyanParser<Pair<Signature, Pair<List<Pair<String, List<String>>>, List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>>>> ret = ParserUtils
 					.outside(new KeywordParser("{"), u, new KeywordParser("}"));
 
 			Partial<Pair<Signature, Pair<List<Pair<String, List<String>>>, List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>>>> xxx = ret
@@ -156,21 +156,21 @@ public class JSONParsers {
 	}
 
 	public static class instanceObjParser implements
-			Parser<List<Pair<String, List<String>>>> {
+			RyanParser<List<Pair<String, List<String>>>> {
 
 		@Override
 		public Partial<List<Pair<String, List<String>>>> parse(Tokens s)
 				throws BadSyntax, IllTyped {
-			Parser<List<String>> h = ParserUtils.manySep(new QuotedParser(),
+			RyanParser<List<String>> h = ParserUtils.manySep(new QuotedParser(),
 					new KeywordParser(","));
 
-			Parser<List<String>> r = ParserUtils.outside(
+			RyanParser<List<String>> r = ParserUtils.outside(
 					new KeywordParser("["), h, new KeywordParser("]"));
 
-			Parser<Pair<String, List<String>>> u = ParserUtils.inside(
+			RyanParser<Pair<String, List<String>>> u = ParserUtils.inside(
 					new QuotedParser(), new KeywordParser(":"), r);
 
-			Parser<List<Pair<String, List<String>>>> x = ParserUtils.seq(
+			RyanParser<List<Pair<String, List<String>>>> x = ParserUtils.seq(
 					new QuotedKeywordParser("onObjects"), ParserUtils.seq(
 							new KeywordParser(":"), ParserUtils.outside(
 									new KeywordParser("{"),
@@ -184,21 +184,21 @@ public class JSONParsers {
 	// { arrow : -, map : { } }
 	public static class onMorphismsParser2
 			implements
-			Parser<List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>> {
+			RyanParser<List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>> {
 
 		@Override
 		public Partial<List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>> parse(
 				Tokens s) throws BadSyntax, IllTyped {
 
-			Parser<Pair<Pair<String, String>, String>> arrP = ParserUtils.seq(
+			RyanParser<Pair<Pair<String, String>, String>> arrP = ParserUtils.seq(
 					new QuotedKeywordParser("arrow"),
 					ParserUtils.seq(new KeywordParser(":"), new ArrowParser()));
 
-			Parser<Pair<String, String>> foo = ParserUtils.inside(
+			RyanParser<Pair<String, String>> foo = ParserUtils.inside(
 					new QuotedParser(), new KeywordParser(":"),
 					new QuotedParser());
 
-			Parser<List<Pair<String, String>>> mP = ParserUtils.seq(
+			RyanParser<List<Pair<String, String>>> mP = ParserUtils.seq(
 					new QuotedKeywordParser("map"), ParserUtils.seq(
 							new KeywordParser(":"), ParserUtils.outside(
 									new KeywordParser("{"), ParserUtils
@@ -206,14 +206,14 @@ public class JSONParsers {
 													new KeywordParser(",")),
 									new KeywordParser("}"))));
 
-			Parser<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>> xxx = ParserUtils
+			RyanParser<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>> xxx = ParserUtils
 					.outside(new KeywordParser("{"), ParserUtils.inside(arrP,
 							new KeywordParser(","), mP), new KeywordParser("}"));
 
-			Parser<List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>> u = ParserUtils
+			RyanParser<List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>> u = ParserUtils
 					.manySep(xxx, new KeywordParser(","));
 
-			Parser<List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>> x = ParserUtils
+			RyanParser<List<Pair<Pair<Pair<String, String>, String>, List<Pair<String, String>>>>> x = ParserUtils
 					.seq(new QuotedKeywordParser("onMorphisms"), ParserUtils
 							.seq(new KeywordParser(":"), ParserUtils.outside(
 									new KeywordParser("["), u,
@@ -267,22 +267,22 @@ public class JSONParsers {
 	// }
 	// }
 
-	public static class MapParser implements Parser<Pair<String, String>> {
+	public static class MapParser implements RyanParser<Pair<String, String>> {
 
 		@Override
 		public Partial<Pair<String, String>> parse(Tokens s) throws BadSyntax,
 				IllTyped {
 
-			Parser<String> a = ParserUtils
+			RyanParser<String> a = ParserUtils
 					.seq(new QuotedKeywordParser("input"), ParserUtils.seq(
 							new KeywordParser(":"), new QuotedParser()));
-			Parser<String> b = ParserUtils
+			RyanParser<String> b = ParserUtils
 					.seq(new QuotedKeywordParser("output"), ParserUtils.seq(
 							new KeywordParser(":"), new QuotedParser()));
-			Parser<Pair<String, String>> u = ParserUtils.inside(a,
+			RyanParser<Pair<String, String>> u = ParserUtils.inside(a,
 					new KeywordParser(","), b);
 
-			Parser<Pair<String, String>> x = ParserUtils.outside(
+			RyanParser<Pair<String, String>> x = ParserUtils.outside(
 					new KeywordParser("{"), u, new KeywordParser("}"));
 
 			return x.parse(s);
@@ -292,37 +292,37 @@ public class JSONParsers {
 
 	public static class MappingGeneratorParser
 			implements
-			Parser<List<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>>> {
+			RyanParser<List<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>>> {
 
 		@Override
 		public Partial<List<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>>> parse(
 				Tokens s) throws BadSyntax, IllTyped {
 
-			Parser<Pair<Pair<String, String>, String>> a = ParserUtils.seq(
+			RyanParser<Pair<Pair<String, String>, String>> a = ParserUtils.seq(
 					new QuotedKeywordParser("arrow"),
 					ParserUtils.seq(new KeywordParser(":"), new ArrowParser()));
 
-			Parser<List<Pair<Pair<String, String>, String>>> b = ParserUtils
+			RyanParser<List<Pair<Pair<String, String>, String>>> b = ParserUtils
 					.seq(new QuotedKeywordParser("path"), ParserUtils.seq(
 							new KeywordParser(":"), new PathParser()));
 
-			Parser<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>> e = ParserUtils
+			RyanParser<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>> e = ParserUtils
 					.inside(a, new KeywordParser(","), b);
 
-			Parser<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>> g = ParserUtils
+			RyanParser<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>> g = ParserUtils
 					.outside(new KeywordParser("{"), e, new KeywordParser("}"));
 
-			Parser<List<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>>> h = ParserUtils
+			RyanParser<List<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>>> h = ParserUtils
 					.manySep(g, new KeywordParser(","));
 
-			Parser<List<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>>> r = ParserUtils
+			RyanParser<List<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>>> r = ParserUtils
 					.outside(new KeywordParser("["), h, new KeywordParser("]"));
 
 			// Parser<Pair<String, List<Pair<Pair<Pair<String, String>, String>,
 			// List<Pair<Pair<String, String>, String>>>>>> u = ParserUtils
 			// .inside(new QuotedParser(), new KeywordParser(":"), r);
 
-			Parser<List<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>>> x = ParserUtils
+			RyanParser<List<Pair<Pair<Pair<String, String>, String>, List<Pair<Pair<String, String>, String>>>>> x = ParserUtils
 					.seq(new QuotedKeywordParser("onGenerators"),
 							ParserUtils.seq(new KeywordParser(":"), r));
 
@@ -331,7 +331,7 @@ public class JSONParsers {
 		}
 	}
 
-	public static class JSONSigParser implements Parser<Signature> {
+	public static class JSONSigParser implements RyanParser<Signature> {
 
 		boolean outerparens;
 
@@ -345,14 +345,14 @@ public class JSONParsers {
 			List<Pair<List<Pair<Pair<String, String>, String>>, List<Pair<Pair<String, String>, String>>>> eqs;
 			List<String> obs;
 
-			Parser<List<String>> ob = ParserUtils.seq(new QuotedKeywordParser(
+			RyanParser<List<String>> ob = ParserUtils.seq(new QuotedKeywordParser(
 					"objects"), ParserUtils.seq(new KeywordParser(":"),
 					ParserUtils.outside(new KeywordParser("["),
 							ParserUtils.manySep(new QuotedParser(),
 									new KeywordParser(",")), new KeywordParser(
 									"]"))));
 
-			Parser<List<Pair<Pair<String, String>, String>>> arrs = ParserUtils
+			RyanParser<List<Pair<Pair<String, String>, String>>> arrs = ParserUtils
 					.seq(new QuotedKeywordParser("arrows"), ParserUtils.seq(
 							new KeywordParser(":"), ParserUtils.outside(
 									new KeywordParser("["), ParserUtils
@@ -360,7 +360,7 @@ public class JSONParsers {
 													new KeywordParser(",")),
 									new KeywordParser("]"))));
 
-			Parser<List<Pair<List<Pair<Pair<String, String>, String>>, List<Pair<Pair<String, String>, String>>>>> rel = ParserUtils
+			RyanParser<List<Pair<List<Pair<Pair<String, String>, String>>, List<Pair<Pair<String, String>, String>>>>> rel = ParserUtils
 					.seq(new QuotedKeywordParser("relations"), ParserUtils.seq(
 							new KeywordParser(":"), ParserUtils.outside(
 									new KeywordParser("["), ParserUtils
@@ -368,13 +368,13 @@ public class JSONParsers {
 													new KeywordParser(",")),
 									new KeywordParser("]"))));
 
-			Parser<Pair<List<String>, List<Pair<Pair<String, String>, String>>>> oa = ParserUtils
+			RyanParser<Pair<List<String>, List<Pair<Pair<String, String>, String>>>> oa = ParserUtils
 					.inside(ob, new KeywordParser(","), arrs);
 
-			Parser<Pair<Pair<List<String>, List<Pair<Pair<String, String>, String>>>, List<Pair<List<Pair<Pair<String, String>, String>>, List<Pair<Pair<String, String>, String>>>>>> u = ParserUtils
+			RyanParser<Pair<Pair<List<String>, List<Pair<Pair<String, String>, String>>>, List<Pair<List<Pair<Pair<String, String>, String>>, List<Pair<Pair<String, String>, String>>>>>> u = ParserUtils
 					.inside(oa, new KeywordParser(","), rel);
 
-			Parser<Pair<Pair<List<String>, List<Pair<Pair<String, String>, String>>>, List<Pair<List<Pair<Pair<String, String>, String>>, List<Pair<Pair<String, String>, String>>>>>> ret = u;
+			RyanParser<Pair<Pair<List<String>, List<Pair<Pair<String, String>, String>>>, List<Pair<List<Pair<Pair<String, String>, String>>, List<Pair<Pair<String, String>, String>>>>>> ret = u;
 
 			// if (outerparens) {
 			ret = ParserUtils.outside(new KeywordParser("{"), u,
@@ -401,15 +401,15 @@ public class JSONParsers {
 
 	public static class RelationParser
 			implements
-			Parser<Pair<List<Pair<Pair<String, String>, String>>, List<Pair<Pair<String, String>, String>>>> {
+			RyanParser<Pair<List<Pair<Pair<String, String>, String>>, List<Pair<Pair<String, String>, String>>>> {
 
 		@Override
 		public Partial<Pair<List<Pair<Pair<String, String>, String>>, List<Pair<Pair<String, String>, String>>>> parse(
 				Tokens s) throws BadSyntax, IllTyped {
-			Parser<List<Pair<Pair<String, String>, String>>> u1 = ParserUtils
+			RyanParser<List<Pair<Pair<String, String>, String>>> u1 = ParserUtils
 					.seq(new QuotedKeywordParser("left"), ParserUtils.seq(
 							new KeywordParser(":"), new PathParser()));
-			Parser<List<Pair<Pair<String, String>, String>>> u2 = ParserUtils
+			RyanParser<List<Pair<Pair<String, String>, String>>> u2 = ParserUtils
 					.seq(new QuotedKeywordParser("right"), ParserUtils.seq(
 							new KeywordParser(":"), new PathParser()));
 
@@ -421,7 +421,7 @@ public class JSONParsers {
 	}
 
 	public static class PathParser implements
-			Parser<List<Pair<Pair<String, String>, String>>> {
+			RyanParser<List<Pair<Pair<String, String>, String>>> {
 
 		@Override
 		public Partial<List<Pair<Pair<String, String>, String>>> parse(Tokens s)
@@ -435,27 +435,27 @@ public class JSONParsers {
 	}
 
 	public static class ArrowParser implements
-			Parser<Pair<Pair<String, String>, String>> {
+			RyanParser<Pair<Pair<String, String>, String>> {
 		@Override
 		public Partial<Pair<Pair<String, String>, String>> parse(Tokens s)
 				throws BadSyntax, IllTyped {
-			Parser<?> p1 = new QuotedKeywordParser("source");
-			Parser<?> p2 = new QuotedKeywordParser("target");
-			Parser<?> p3 = new QuotedKeywordParser("label");
+			RyanParser<?> p1 = new QuotedKeywordParser("source");
+			RyanParser<?> p2 = new QuotedKeywordParser("target");
+			RyanParser<?> p3 = new QuotedKeywordParser("label");
 
-			Parser<String> q1 = ParserUtils
+			RyanParser<String> q1 = ParserUtils
 					.seq(p1, ParserUtils.seq(new KeywordParser(":"),
 							new QuotedParser()));
-			Parser<String> q2 = ParserUtils
+			RyanParser<String> q2 = ParserUtils
 					.seq(p2, ParserUtils.seq(new KeywordParser(":"),
 							new QuotedParser()));
-			Parser<String> q3 = ParserUtils
+			RyanParser<String> q3 = ParserUtils
 					.seq(p3, ParserUtils.seq(new KeywordParser(":"),
 							new QuotedParser()));
 
-			Parser<Pair<String, String>> l = ParserUtils.inside(q1,
+			RyanParser<Pair<String, String>> l = ParserUtils.inside(q1,
 					new KeywordParser(","), q2);
-			Parser<Pair<Pair<String, String>, String>> u = ParserUtils.inside(
+			RyanParser<Pair<Pair<String, String>, String>> u = ParserUtils.inside(
 					l, new KeywordParser(","), q3);
 			return ParserUtils.outside(new KeywordParser("{"), u,
 					new KeywordParser("}")).parse(s);

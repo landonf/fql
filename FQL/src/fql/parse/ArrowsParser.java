@@ -11,15 +11,15 @@ import fql.Triple;
  *         Parses arrows
  */
 public class ArrowsParser implements
-		Parser<List<Triple<String, String, String>>> {
+		RyanParser<List<Triple<String, String, String>>> {
 
 	@Override
 	public Partial<List<Triple<String, String, String>>> parse(Tokens s)
 			throws BadSyntax, IllTyped {
-		Parser<Triple<String, String, String>> ap = new ArrowParser();
+		RyanParser<Triple<String, String, String>> ap = new ArrowParser();
 
-		Parser<?> sep = new KeywordParser(",");
-		Parser<List<Triple<String, String, String>>> p = ParserUtils.manySep(
+		RyanParser<?> sep = new KeywordParser(",");
+		RyanParser<List<Triple<String, String, String>>> p = ParserUtils.manySep(
 				ap, sep);
 
 		return p.parse(s);

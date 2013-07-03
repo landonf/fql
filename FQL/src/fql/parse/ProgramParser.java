@@ -11,11 +11,11 @@ import fql.decl.Program;
  * 
  *         Parser for programs.
  */
-public class ProgramParser implements Parser<Program> {
+public class ProgramParser implements RyanParser<Program> {
 
 	@Override
 	public Partial<Program> parse(Tokens s) throws BadSyntax, IllTyped {
-		Parser<List<Decl>> p = ParserUtils.many(new DeclParser());
+		RyanParser<List<Decl>> p = ParserUtils.many(new DeclParser());
 		Partial<List<Decl>> x = p.parse(s);
 
 		Program ret = new Program(x.value);

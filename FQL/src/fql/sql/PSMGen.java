@@ -44,7 +44,7 @@ import fql.parse.ExternalDecl;
  */
 public class PSMGen {
 
-	public static List<PSM> guidify(String pre0, Signature sig) {	
+	public static List<PSM> guidify(String pre0, Signature sig) throws FQLException {	
 		// System.out.println("GUIDifying " + pre0);
 		List<PSM> ret = new LinkedList<>();
 
@@ -563,7 +563,9 @@ public class PSMGen {
 					tn.add(q);
 				}
 			}
-
+			if (tn.size() == 0) {
+				continue;
+			}
 			SQL y = foldUnion(tn);
 			ret.add(new InsertSQL(pre + "_" + e.name, y));
 		}
@@ -580,6 +582,9 @@ public class PSMGen {
 				}
 			}
 
+			if (tn.size() == 0) {
+				continue;
+			}
 			SQL y = foldUnion(tn);
 			ret.add(new InsertSQL(pre + "_" + a.name, y));
 		}
@@ -672,6 +677,10 @@ public class PSMGen {
 				ret.add(new InsertEmptyKeygen(dst + "_" + d0.string + "_limit"));
 				ret.add(new InsertSQL(dst + "_" + d0.string, new SquishFlower(dst
 						+ "_" + d0.string + "_limit")));
+				
+				@SuppressWarnings("unchecked")
+				Triple<Node, Node, Arr<Node, Path>>[] cols = new Triple[0];
+				colmap.put(d0.string, cols);
 				continue;
 			}
 			
@@ -730,6 +739,10 @@ public class PSMGen {
 
 			Triple<Node, Node, Arr<Node, Path>>[] q2cols = colmap.get(q2);
 			Triple<Node, Node, Arr<Node, Path>>[] q1cols = colmap.get(q1);
+			
+			if (q2cols == null) {
+				throw new RuntimeException("Cannot find " + q2 + " in " + colmap);
+			}
 
 			// List<Pair<Pair<String, String>, Pair<String, String>>> where =
 			// subset(dst, q1cols, q2cols, q1, q2);

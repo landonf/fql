@@ -8,7 +8,7 @@ import java.util.List;
  * 
  *         Parser for paths.
  */
-public class PathParser implements Parser<List<String>> {
+public class PathParser implements RyanParser<List<String>> {
 
 	public Partial<List<String>> parse(Tokens s) throws BadSyntax, IllTyped {
 		Partial<List<String>> ret = ParserUtils.manySep(new StringParser(),

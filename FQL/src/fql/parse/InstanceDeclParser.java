@@ -8,11 +8,11 @@ import fql.decl.Decl;
  *
  * Parser for various kinds of instances.
  */
-public class InstanceDeclParser implements Parser<Decl> {
+public class InstanceDeclParser implements RyanParser<Decl> {
 
 	@Override
 	public Partial<Decl> parse(Tokens s) throws BadSyntax, IllTyped {
-		Parser<Decl> p;
+		RyanParser<Decl> p;
 		try {
 			p = new ConstantInstanceDeclParser();
 			return p.parse(s);

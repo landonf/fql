@@ -12,7 +12,7 @@ public class RelationalizerExample extends Example {
 		return s;
 	}
 	
-	String s ="//Illustrates the papers relationalize operation\n"
+	String s ="//Illustrates the paper's relationalize operation\n"
 			+ "\nschema C={nodes A;attributes a:A->string;arrows f:A->A;equations A.f.f.f.f=A.f.f;}"
 			+ "\n"
 			+ "\ninstance I:C={"

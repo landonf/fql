@@ -10,13 +10,13 @@ import fql.Pair;
  *
  * Parser for path equalities
  */
-public class EqParser implements Parser<Pair<List<String>, List<String>>> {
+public class EqParser implements RyanParser<Pair<List<String>, List<String>>> {
 
 	@Override
 	public Partial<Pair<List<String>, List<String>>> parse(Tokens s)
 			throws BadSyntax, IllTyped {
-		Parser<List<String>> p = new PathParser();
-		Parser<?> e = new KeywordParser("=");
+		RyanParser<List<String>> p = new PathParser();
+		RyanParser<?> e = new KeywordParser("=");
 		
 		Partial<List<String>> x = p.parse(s);
 		

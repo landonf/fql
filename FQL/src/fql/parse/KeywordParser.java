@@ -8,7 +8,7 @@ import fql.Unit;
  * 
  *         parses a keyword
  */
-public class KeywordParser implements Parser<Unit> {
+public class KeywordParser implements RyanParser<Unit> {
 
 	String word;
 

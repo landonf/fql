@@ -58,7 +58,7 @@ public class TypedDeltaExample extends Example {
 					+ "\n nodes "
 					+ "\n	T -> { XF667,XF891,XF221 } ; "
 					+ "\n attributes"
-					+ "\n	ssn0    -> { (XF667,115-234),(XF891,112-988),(XF221,198-887) },"
+					+ "\n	ssn0    -> { (XF667, \"115-234\"),(XF891,\"112-988\"),(XF221,\"198-887\") },"
 					+ "\n	first0  -> { (XF667,Bob),(XF891,Sue),(XF221,Alice) },"
 					+ "\n	last0   -> { (XF667,Smith),(XF891,Smith),(XF221,Jones) },"
 					+ "\n	salary0 -> { (XF667,250),(XF891,300),(XF221,100) };"

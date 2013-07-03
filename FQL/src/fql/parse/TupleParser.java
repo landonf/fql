@@ -8,22 +8,22 @@ import fql.Pair;
  * 
  *         Parser for tuples.
  */
-public class TupleParser implements Parser<Pair<String, String>> {
+public class TupleParser implements RyanParser<Pair<String, String>> {
 
 	@Override
 	public Partial<Pair<String, String>> parse(Tokens s) throws BadSyntax,
 			IllTyped {
 		try {
-			Parser<?> l = new KeywordParser("(");
-			Parser<?> r = new KeywordParser(")");
+			RyanParser<?> l = new KeywordParser("(");
+			RyanParser<?> r = new KeywordParser(")");
 
-			Parser<?> c = new KeywordParser(",");
+			RyanParser<?> c = new KeywordParser(",");
 
-			Parser<String> d = new LongStringParser();
-			Parser<String> e = new LongStringParser();
+			RyanParser<String> d = new LongStringParser();
+			RyanParser<String> e = new LongStringParser();
 
-			Parser<Pair<String, String>> p = ParserUtils.inside(d, c, e);
-			Parser<Pair<String, String>> q = ParserUtils.outside(l, p, r);
+			RyanParser<Pair<String, String>> p = ParserUtils.inside(d, c, e);
+			RyanParser<Pair<String, String>> q = ParserUtils.outside(l, p, r);
 
 			Partial<Pair<String, String>> xxx = q.parse(s);
 			if (xxx.value.first.equals("}")) {

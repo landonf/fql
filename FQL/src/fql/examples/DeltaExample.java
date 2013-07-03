@@ -60,13 +60,13 @@ public class DeltaExample extends Example {
 					+ "\ninstance J : D = {"
 					+ "\n nodes"
 					+ "\n	T -> { XF667,XF891,XF221 },"
-					+ "\n	SSN -> { 115-234,112-988,198-887 },"
+					+ "\n	SSN -> { 115234,112988,198887 },"
 					+ "\n	First  -> { Bob,Sue,Alice },"
 					+ "\n	Last   -> { Smith,Jones},"
 					+ "\n	Salary -> { 250,300,100 };"
 					+ "\n attributes;"
 					+ "\n arrows"
-					+ "\n	ssn0 -> { (XF667,115-234),(XF891,112-988),(XF221,198-887) },"
+					+ "\n	ssn0 -> { (XF667,115234),(XF891,112988),(XF221,198887) },"
 					+ "\n	first0 -> { (XF667,Bob),(XF891,Sue),(XF221,Alice) },"
 					+ "\n	last0 -> { (XF667,Smith),(XF891,Smith),(XF221,Jones) },"
 					+ "\n	salary0 -> { (XF667,250),(XF891,300),(XF221,100) };"
@@ -74,7 +74,7 @@ public class DeltaExample extends Example {
 					+ "\n"
 					+ "\ninstance I  : C = delta F J"
 					+ "\n"
-					+ "\ninstance J' : D = pi F I";
+					+ "\ninstance J0 : D = pi F I";
 
 
 

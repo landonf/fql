@@ -6,6 +6,8 @@ import java.io.StringReader;
 import java.util.LinkedList;
 import java.util.List;
 
+import fql.Pair;
+
 /**
  * 
  * @author ryan
@@ -15,7 +17,8 @@ import java.util.List;
 public class FqlTokenizer implements Tokens {
 
 	private List<String> words;
-
+	private List<String> lines;
+	
 	private String[] symbols = new String[] { ",", ":", ";", "->", ".", "{",
 			"}", "(", ")", "=", "[", "]" };
 
@@ -29,8 +32,8 @@ public class FqlTokenizer implements Tokens {
 	private String linefeed = "\n";
 	private String carriagereturn = "\r";
 
-	private FqlTokenizer(List<String> s) {
-		words = s;
+	private FqlTokenizer(List<String> s, List<String> t) {
+		words = s; lines = t;
 	}
 
 	public FqlTokenizer(String s) throws BadSyntax {
@@ -54,16 +57,17 @@ public class FqlTokenizer implements Tokens {
 			throw new RuntimeException();
 		}
 
-		words = tokenize(sb.toString());
+		words = tokenize(sb.toString()).first;
 	}
 
 	private static enum State {
 		IN_QUOTE, IN_COMMENT, NORMAL
 	};
 
-	private List<String> tokenize(String input) throws BadSyntax {
+	private Pair<List<String>, List<String>> tokenize(String input) throws BadSyntax {
 		List<String> ret = new LinkedList<>();
-
+		List<String> ret2 = new LinkedList<>();
+		
 		State state = State.NORMAL;
 		String quote_state = "";
 		String comment_state = "";
@@ -82,8 +86,9 @@ public class FqlTokenizer implements Tokens {
 				case NORMAL:
 					if (token_state.length() != 0) {
 						ret.add(token_state);
+						//ret2.add()
 					}
-					return ret;
+					return new Pair<>(ret, ret2);
 				case IN_QUOTE:
 					throw new BadSyntax(this, "Unfinished quote: "
 							+ quote_state);
@@ -334,13 +339,15 @@ public class FqlTokenizer implements Tokens {
 	}
 
 	public Tokens pop() throws BadSyntax {
-		List<String> ret = new LinkedList<String>(words);
+		List<String> ret = new LinkedList<>(words);
+		List<String> ret2 = new LinkedList<>();
 		try {
 			ret.remove(0);
+		//	ret2.remove(0);
 		} catch (IndexOutOfBoundsException e) {
 			throw new BadSyntax(this, "Premature end of input");
 		}
-		return new FqlTokenizer(ret);
+		return new FqlTokenizer(ret, ret2);
 	}
 
 	public String toString() {

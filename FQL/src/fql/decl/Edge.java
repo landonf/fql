@@ -24,6 +24,9 @@ public class Edge implements Jsonable {
 		this.name = name;
 		this.source = source;
 		this.target = target;
+		if (source == null || target == null || name == null) {
+			throw new RuntimeException();
+		}
 	}
 
 	@Override

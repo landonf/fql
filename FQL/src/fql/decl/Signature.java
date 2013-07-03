@@ -2,6 +2,7 @@ package fql.decl;
 
 import java.awt.BasicStroke;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Stroke;
@@ -42,6 +43,7 @@ import fql.cat.Denotation;
 import fql.cat.FinCat;
 import fql.gui.Viewable;
 import fql.parse.PrettyPrinter;
+import fql.sql.EmbeddedDependency;
 
 /**
  * 
@@ -971,5 +973,118 @@ public class Signature implements Viewable<Signature> {
 	@Override
 	public JPanel observables() {
 		return null;
+	}
+	
+	@Override
+	public JPanel constraint() {
+		List<EmbeddedDependency> l = toED();
+		
+		JPanel ret = new JPanel(new GridLayout(1,1));
+		
+		String s = "";
+		int i = 0;
+		for (EmbeddedDependency d : l) {
+			if (i++ > 0) {
+				s += "\n\n";
+			}
+			s += d.toString();
+		}
+		JTextArea area = new JTextArea(s);
+		area.setFont(new Font("Courier", Font.PLAIN, 13));
+		JScrollPane jsp = new JScrollPane(area);
+		area.setWrapStyleWord(true);
+		area.setLineWrap(true);
+		jsp.setBorder(BorderFactory.createEmptyBorder());
+		ret.add(jsp);
+		return ret;
+	}
+
+	public List<EmbeddedDependency> toED() {
+		List<EmbeddedDependency> ret = new LinkedList<>();
+		
+		
+		int v = 0;
+		for (Node n : nodes) {
+			List<String> forall = new LinkedList<>();
+			List<String> exists = new LinkedList<>();
+			List<Triple<String, String, String>> where = new LinkedList<>();
+			List<Triple<String, String, String>> tgd = new LinkedList<>();
+			List<Pair<String, String>> egd = new LinkedList<>();
+			List<Triple<String, String, String>> not = new LinkedList<>();
+			
+			String u = "v" + (v++);
+			String w = "v" + (v++);
+			
+			forall.add(u);
+			forall.add(w);
+			where.add(new Triple<>(name0 + "." + n.string, u, w));
+			egd.add(new Pair<>(u, w));
+			
+			for (Node m : nodes) {
+				if (n.equals(m)) {
+					continue;
+				}
+				not.add(new Triple<>(name0 + "." + m.string, u, w));
+			}
+
+			EmbeddedDependency ed = new EmbeddedDependency(forall, exists, where, tgd, not, egd);
+			ret.add(ed);
+		}
+		
+		for (Edge e : edges) {
+			List<String> forall = new LinkedList<>();
+			List<String> exists = new LinkedList<>();
+			List<Triple<String, String, String>> where = new LinkedList<>();
+			List<Triple<String, String, String>> tgd = new LinkedList<>();
+			List<Pair<String, String>> egd = new LinkedList<>();
+			List<Triple<String, String, String>> not = new LinkedList<>();
+		
+			String u = "v" + (v++);
+			String w = "v" + (v++);
+			
+			forall.add(u);
+			forall.add(w);
+			where.add(new Triple<>(name0 + "." + e.name, u, w));
+			tgd.add(new Triple<>(name0 + "." + e.source.string, u, u));
+			tgd.add(new Triple<>(name0 + "." + e.target.string, w, w));
+			
+			EmbeddedDependency ed = new EmbeddedDependency(forall, exists, where, tgd, not, egd);
+			ret.add(ed);
+			
+			forall = new LinkedList<>();
+			exists = new LinkedList<>();
+			where = new LinkedList<>();
+			tgd = new LinkedList<>();
+			egd = new LinkedList<>();
+			not = new LinkedList<>();
+			
+			String x = "v" + (v++);
+			forall.add(u); forall.add(w); forall.add(x);
+			where.add(new Triple<>(name0 + "." + e.name, u, w));
+			where.add(new Triple<>(name0 + "." + e.name, u, x));
+			egd.add(new Pair<>(w,x));
+			
+			ed = new EmbeddedDependency(forall, exists, where, tgd, not, egd);
+			ret.add(ed);
+			
+			forall = new LinkedList<>();
+			exists = new LinkedList<>();
+			where = new LinkedList<>();
+			tgd = new LinkedList<>();
+			egd = new LinkedList<>();
+			not = new LinkedList<>();
+			forall.add(x);
+			where.add(new Triple<>(name0 + "." + e.source.string, x, x));
+			String z = "v" + (v++);
+			exists.add(z);
+			tgd.add(new Triple<>(name0 + "." + e.name, x, z));
+
+			ed = new EmbeddedDependency(forall, exists, where, tgd, not, egd);
+			ret.add(ed);
+			
+		}
+		
+		
+		return ret;
 	}
 }

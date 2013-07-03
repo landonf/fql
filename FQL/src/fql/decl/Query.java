@@ -972,5 +972,10 @@ boolean isId;
 		return null;
 	}
 
+	@Override
+	public JPanel constraint() {
+		return null;
+	}
+
 
 }

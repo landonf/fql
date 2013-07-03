@@ -90,7 +90,12 @@ public class Display {
 				if (rel != null) {
 					px.add("Observables", new JScrollPane(rel));
 				}
-					
+				
+				JPanel map = view.constraint();
+				if (map != null) {
+					px.add("Embedded Dependency", new JScrollPane(map));
+				}
+				
 				JPanel top = new JPanel(new GridLayout(1,1));
 				top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 				top.add(px);

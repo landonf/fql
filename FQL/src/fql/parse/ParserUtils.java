@@ -13,8 +13,8 @@ import fql.Pair;
  */
 public class ParserUtils {
 
-	public static <T> Parser<List<T>> many(final Parser<T> p) {
-		return new Parser<List<T>>() {
+	public static <T> RyanParser<List<T>> many(final RyanParser<T> p) {
+		return new RyanParser<List<T>>() {
 			public Partial<List<T>> parse(Tokens s) throws BadSyntax, IllTyped {
 				List<T> ret = new ArrayList<T>();
 				try {
@@ -38,8 +38,8 @@ public class ParserUtils {
 	 * @param p2
 	 * @return a parser that matches and ignores p1, followed by p2
 	 */
-	public static <T> Parser<T> seq(final Parser<?> p1, final Parser<T> p2) {
-		return new Parser<T>() {
+	public static <T> RyanParser<T> seq(final RyanParser<?> p1, final RyanParser<T> p2) {
+		return new RyanParser<T>() {
 			public Partial<T> parse(Tokens s) throws BadSyntax, IllTyped {
 				Partial<?> x = p1.parse(s);
 				Partial<T> y = p2.parse(x.tokens);
@@ -48,15 +48,15 @@ public class ParserUtils {
 		};
 	}
 
-	public static <T> Parser<List<T>> manySep(final Parser<T> p,
-			final Parser<?> sep) {
-		return new Parser<List<T>>() {
+	public static <T> RyanParser<List<T>> manySep(final RyanParser<T> p,
+			final RyanParser<?> sep) {
+		return new RyanParser<List<T>>() {
 			public Partial<List<T>> parse(Tokens s) throws BadSyntax, IllTyped {
 				try {
 					Partial<T> x = p.parse(s);
 
-					Parser<T> pair_p = seq(sep, p);
-					Parser<List<T>> pr = many(pair_p);
+					RyanParser<T> pair_p = seq(sep, p);
+					RyanParser<List<T>> pr = many(pair_p);
 					Partial<List<T>> y = pr.parse(x.tokens);
 
 					y.value.add(0, x.value);
@@ -76,9 +76,9 @@ public class ParserUtils {
 	 * @param r
 	 * @return a parser that matches l u r and returns (l,r)
 	 */
-	public static <T, U> Parser<Pair<T, U>> inside(final Parser<T> l,
-			final Parser<?> u, final Parser<U> r) {
-		return new Parser<Pair<T, U>>() {
+	public static <T, U> RyanParser<Pair<T, U>> inside(final RyanParser<T> l,
+			final RyanParser<?> u, final RyanParser<U> r) {
+		return new RyanParser<Pair<T, U>>() {
 			public Partial<Pair<T, U>> parse(Tokens s) throws BadSyntax,
 					IllTyped {
 				Partial<? extends T> l0 = l.parse(s);
@@ -97,9 +97,9 @@ public class ParserUtils {
 	 * @param r
 	 * @return a parser that matches l u r and returns u
 	 */
-	public static <T> Parser<T> outside(final Parser<?> l, final Parser<T> u,
-			final Parser<?> r) {
-		return new Parser<T>() {
+	public static <T> RyanParser<T> outside(final RyanParser<?> l, final RyanParser<T> u,
+			final RyanParser<?> r) {
+		return new RyanParser<T>() {
 			public Partial<T> parse(Tokens s) throws BadSyntax, IllTyped {
 				Partial<?> l0 = l.parse(s);
 				Partial<? extends T> u0 = u.parse(l0.tokens);

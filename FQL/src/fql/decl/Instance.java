@@ -452,7 +452,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			}
 			first = false;
 			sb.append(k.string);
-			sb.append(" = { ");
+			sb.append(" -> { ");
 			sb.append(printNode(v));
 			sb.append(" }");
 		}
@@ -467,7 +467,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			}
 			first = false;
 			sb.append(k.name);
-			sb.append(" = { ");
+			sb.append(" -> { ");
 			sb.append(printSet(v));
 			sb.append(" }");
 		}
@@ -482,12 +482,12 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			}
 			first = false;
 			sb.append(k.name);
-			sb.append(" = { ");
+			sb.append(" -> { ");
 			sb.append(printSet(v));
 			sb.append(" }");
 		}
 
-		sb.append("\n}");
+		sb.append(";\n}");
 		return sb.toString();
 
 	}
@@ -1560,6 +1560,11 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			ret.add(m);
 		}
 		return ret;
+	}
+
+	@Override
+	public JPanel constraint() {
+		return null;
 	}
 
 }

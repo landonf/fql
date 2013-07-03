@@ -26,12 +26,14 @@ public class PSMInterp {
 			Map<String, Set<Map<String, Object>>> state) {
 		// System.out.println(prog);
 		for (PSM cmd : prog) {
-			// System.out.println("Executing ");
-			// System.out.println(cmd);
+	//	 System.out.println("Executing ");
+		//	 System.out.println(cmd);
 			// System.out.println(state);
+			
 			cmd.exec(state);
-			// System.out.println("RESULT " + state);
-			// System.out.println("DONE EXECUTING");
+	//		 System.out.println("RESULT " + state);
+		//	 System.out.println("DONE EXECUTING");
+		
 			checkFunctions(state);
 		}
 		// System.out.println("RESULT " + state);

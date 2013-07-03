@@ -104,7 +104,7 @@ public class Relationalizer {
 
 			}
 			if (select.size() == 0 && !suppress) {
-				throw new RuntimeException("No observable for " + n.string
+				throw new FQLException("No observable for " + n.string
 						+ " in " + sig.name0);
 			} else if (select.size() == 0 && suppress) {
 				continue;

@@ -9,23 +9,23 @@ import fql.decl.QueryDecl;
  * 
  *         Parser for query declarations.
  */
-public class QueryDeclParser implements Parser<Decl> {
+public class QueryDeclParser implements RyanParser<Decl> {
 
 	@Override
 	public Partial<Decl> parse(Tokens s) throws BadSyntax, IllTyped {
 		Tokens olds = new FqlTokenizer(s.toString());
 
 		try {
-			Parser<?> p1 = new KeywordParser("query");
-			Parser<?> p2 = new KeywordParser("=");
-			Parser<?> p3 = new KeywordParser("id");
-			Parser<String> p4 = new StringParser();
-			Parser<String> p5 = new StringParser();
+			RyanParser<?> p1 = new KeywordParser("query");
+			RyanParser<?> p2 = new KeywordParser("=");
+			RyanParser<?> p3 = new KeywordParser("id");
+			RyanParser<String> p4 = new StringParser();
+			RyanParser<String> p5 = new StringParser();
 
-			Parser<?> colon = new KeywordParser(":");
-			Parser<String> type1 = new StringParser();
-			Parser<String> type2 = new StringParser();
-			Parser<?> arrow = new KeywordParser("->");
+			RyanParser<?> colon = new KeywordParser(":");
+			RyanParser<String> type1 = new StringParser();
+			RyanParser<String> type2 = new StringParser();
+			RyanParser<?> arrow = new KeywordParser("->");
 
 			String ret1;
 			Partial<?> p;
@@ -59,17 +59,17 @@ public class QueryDeclParser implements Parser<Decl> {
 		}
 		try {
 			s = olds;
-			Parser<?> p1 = new KeywordParser("query");
-			Parser<?> p2 = new KeywordParser("=");
-			Parser<?> p3 = new KeywordParser("then");
-			Parser<String> p4 = new StringParser();
-			Parser<String> p5 = new StringParser();
-			Parser<String> p6 = new StringParser();
+			RyanParser<?> p1 = new KeywordParser("query");
+			RyanParser<?> p2 = new KeywordParser("=");
+			RyanParser<?> p3 = new KeywordParser("then");
+			RyanParser<String> p4 = new StringParser();
+			RyanParser<String> p5 = new StringParser();
+			RyanParser<String> p6 = new StringParser();
 
-			Parser<?> colon = new KeywordParser(":");
-			Parser<String> type1 = new StringParser();
-			Parser<String> type2 = new StringParser();
-			Parser<?> arrow = new KeywordParser("->");
+			RyanParser<?> colon = new KeywordParser(":");
+			RyanParser<String> type1 = new StringParser();
+			RyanParser<String> type2 = new StringParser();
+			RyanParser<?> arrow = new KeywordParser("->");
 
 			String ret1, ret2, ret3;
 			Partial<?> p;
@@ -110,21 +110,21 @@ public class QueryDeclParser implements Parser<Decl> {
 		}
 		try {
 			s = olds;
-			Parser<?> p1 = new KeywordParser("query");
-			Parser<?> p2 = new KeywordParser("=");
-			Parser<?> p3 = new KeywordParser("delta");
-			Parser<?> p7 = new KeywordParser("pi");
-			Parser<?> p8 = new KeywordParser("sigma");
+			RyanParser<?> p1 = new KeywordParser("query");
+			RyanParser<?> p2 = new KeywordParser("=");
+			RyanParser<?> p3 = new KeywordParser("delta");
+			RyanParser<?> p7 = new KeywordParser("pi");
+			RyanParser<?> p8 = new KeywordParser("sigma");
 
-			Parser<?> colon = new KeywordParser(":");
-			Parser<String> type1 = new StringParser();
-			Parser<String> type2 = new StringParser();
-			Parser<?> arrow = new KeywordParser("->");
+			RyanParser<?> colon = new KeywordParser(":");
+			RyanParser<String> type1 = new StringParser();
+			RyanParser<String> type2 = new StringParser();
+			RyanParser<?> arrow = new KeywordParser("->");
 
-			Parser<String> p4 = new StringParser();
-			Parser<String> p5 = new StringParser();
-			Parser<String> p6 = new StringParser();
-			Parser<String> p9 = new StringParser();
+			RyanParser<String> p4 = new StringParser();
+			RyanParser<String> p5 = new StringParser();
+			RyanParser<String> p6 = new StringParser();
+			RyanParser<String> p9 = new StringParser();
 
 			String ret1, ret2, ret3, ret4;
 			Partial<?> p;

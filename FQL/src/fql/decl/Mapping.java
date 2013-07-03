@@ -2,7 +2,9 @@ package fql.decl;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Stroke;
@@ -45,6 +47,7 @@ import fql.gui.Viewable;
 import fql.parse.FqlTokenizer;
 import fql.parse.JSONParsers.JSONMappingParser;
 import fql.parse.Jsonable;
+import fql.sql.EmbeddedDependency;
 import fql.sql.PSM;
 import fql.sql.PSMGen;
 import fql.sql.RA;
@@ -80,8 +83,9 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 						+ " does not preserve typing on " + a + " and " + b);
 			}
 		}
+		
 
-		// should be check by knuth-bendix
+		// should be checked by knuth-bendix
 
 		if (!DEBUG.ALLOW_INFINITES && !name.equals("")) {
 
@@ -221,7 +225,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		for (Node n : this.source.nodes) {
 			if (nm.get(n) == null) {
 				throw new FQLException("Missing node mapping from " + n
-						+ " in " + name + "\n" + this);
+						+ " in " + name);
 			}
 		}
 		for (Edge e : this.source.edges) {
@@ -252,10 +256,14 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			Node tn = this.target.getNode(p.second);
 			nm.put(sn, tn);
 		}
-		for (Pair<String, List<String>> arrow : arrows) {
-			Edge e = this.source.getEdge(arrow.first);
-			Path p = new Path(this.target, arrow.second);
-			em.put(e, p);
+		try {
+			for (Pair<String, List<String>> arrow : arrows) {
+				Edge e = this.source.getEdge(arrow.first);
+				Path p = new Path(this.target, arrow.second);
+				em.put(e, p);
+			}
+		} catch (FQLException e) {
+			throw new FQLException("In mapping " + name + ", bad path mapping: " + e.toString());
 		}
 		//System.out.println("INIT \n" + this);
 		for (Pair<String, String> a : attrs) {
@@ -267,23 +275,12 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			if (a2 == null) {
 				throw new FQLException("In mapping " + name + ", cannot find target attr " + a.second + " in " + target.name0);
 			}
-			try {
 				if (a1.target.equals(a2.target)) {
 					am.put(a1, a2);
 				} else {
 					throw new FQLException("Incompatible attribute mapping types " + a);
 				}
-			} catch (NullPointerException npe) {
-				System.out.println(this);
-				System.out.println(a.first);
-				System.out.println(a1);
-				System.out.println(a.second);
-				System.out.println(a2);
-				System.out.println(source);
-				System.out.println(target);
-				throw npe;
 			}
-		}
 		for (Node n : this.source.nodes) {
 			if (nm.get(n) == null) {
 				throw new FQLException("Missing node mapping from " + n
@@ -1063,6 +1060,106 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	@Override
 	public JPanel observables() {
 		return null;
+	}
+
+	@Override
+	public JPanel constraint() {
+		List<EmbeddedDependency> l = toED();
+		
+		JPanel ret = new JPanel(new GridLayout(1,1));
+		
+		String s = "";
+		int i = 0;
+		for (EmbeddedDependency d : l) {
+			if (i++ > 0) {
+				s += "\n\n";
+			}
+			s += d.toString();
+		}
+		JTextArea area = new JTextArea(s);
+		area.setFont(new Font("Courier", Font.PLAIN, 13));
+		JScrollPane jsp = new JScrollPane(area);
+		area.setWrapStyleWord(true);
+		area.setLineWrap(true);
+		jsp.setBorder(BorderFactory.createEmptyBorder());
+		ret.add(jsp);
+		return ret;
+	}
+
+	public List<EmbeddedDependency> toED() {
+		List<EmbeddedDependency> ret = new LinkedList<>();
+		
+		int v = 0;
+		for (Node n : source.nodes) {
+			List<String> forall = new LinkedList<>();
+			List<String> exists = new LinkedList<>();
+			List<Triple<String, String, String>> where = new LinkedList<>();
+			List<Triple<String, String, String>> tgd = new LinkedList<>();
+			List<Triple<String, String, String>> not = new LinkedList<>();
+			List<Pair<String, String>> egd = new LinkedList<>();
+			
+			String u = "v" + Integer.toString(v);
+			forall.add(u);
+			where.add(new Triple<>(source.name0 + "." + n.string, u, u));
+			tgd.add(new Triple<>(target.name0 + "." + nm.get(n).string, u, u));
+
+			EmbeddedDependency ed = new EmbeddedDependency(forall, exists, where, tgd, not, egd);
+			ret.add(ed);
+			v++;
+		}
+		
+		for (Attribute<Node> a : source.attrs) {
+			List<String> forall = new LinkedList<>();
+			List<String> exists = new LinkedList<>();
+			List<Triple<String, String, String>> where = new LinkedList<>();
+			List<Triple<String, String, String>> tgd = new LinkedList<>();
+			List<Pair<String, String>> egd = new LinkedList<>();
+			List<Triple<String, String, String>> not = new LinkedList<>();
+			
+			
+			String u = "v" + Integer.toString(v);
+			forall.add(u);
+			where.add(new Triple<>(source.name0 + "." + a.name, u, u));
+			tgd.add(new Triple<>(target.name0 + "." + am.get(a).name, u, u));
+
+			EmbeddedDependency ed = new EmbeddedDependency(forall, exists, where, tgd, not, egd);
+			ret.add(ed);
+			v++;
+		}
+		
+		for (Edge e : source.edges) {
+			List<String> forall = new LinkedList<>();
+			List<String> exists = new LinkedList<>();
+			List<Triple<String, String, String>> where = new LinkedList<>();
+			List<Triple<String, String, String>> tgd = new LinkedList<>();
+			List<Pair<String, String>> egd = new LinkedList<>();
+			List<Triple<String, String, String>> not = new LinkedList<>();
+			
+			
+			String u = "v" + Integer.toString(v);
+			v++;
+			String w = "v" + Integer.toString(v);
+			forall.add(u);
+			forall.add(w);
+			where.add(new Triple<>(source.name0 + "." + e.name, u, w));
+			
+			tgd.add(new Triple<>(target.name0 + "." + nm.get(e.source).string, u, u));
+			Path p = em.get(e);
+			for (Edge E : p.path) {
+				exists.add("v" + v);
+				tgd.add(new Triple<>(target.name0 + "." + E.name, "v" + (v-1), "v" + v));
+				v++;
+			}
+			//v++;
+			
+//			tgd.add(new Triple<>(target.name0 + "." + nm.get(e.target).string, w, w));
+
+			EmbeddedDependency ed = new EmbeddedDependency(forall, exists, where, tgd, not , egd);
+			
+			ret.add(ed);
+		}
+		
+		return ret;
 	}
 
 }

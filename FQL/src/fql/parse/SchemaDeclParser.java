@@ -14,7 +14,7 @@ import fql.decl.SignatureDecl;
  *
  * Parser for schema declarations
  */
-public class SchemaDeclParser implements Parser<Decl> {
+public class SchemaDeclParser implements RyanParser<Decl> {
 
 	
 
@@ -22,17 +22,17 @@ public class SchemaDeclParser implements Parser<Decl> {
 	@Override
 	public Partial<Decl> parse(Tokens s) throws BadSyntax, IllTyped {
 		
-		Parser<Unit> sp = new KeywordParser("schema");
+		RyanParser<Unit> sp = new KeywordParser("schema");
 		Partial<Unit> p1 = sp.parse(s);
 		
-		Parser<String> strp = new StringParser();
+		RyanParser<String> strp = new StringParser();
 		Partial<String> p2 = strp.parse(p1.tokens);
 		
 		String name = p2.value;
 		
 		//System.out.println("EEEE");
 		
-		Parser<Unit> sp2 = new KeywordParser("=");
+		RyanParser<Unit> sp2 = new KeywordParser("=");
 		Partial<Unit> p3 = sp2.parse(p2.tokens);
 		
 		sp2 = new KeywordParser("{");
@@ -40,9 +40,9 @@ public class SchemaDeclParser implements Parser<Decl> {
 		
 		//System.out.println("ZZZZ");
 		
-		Parser<Unit> xxx1 = new KeywordParser("nodes");
+		RyanParser<Unit> xxx1 = new KeywordParser("nodes");
 		p3 = xxx1.parse(p3.tokens);
-		Parser<List<String>> x = ParserUtils.manySep(new StringParser(), new KeywordParser(","));
+		RyanParser<List<String>> x = ParserUtils.manySep(new StringParser(), new KeywordParser(","));
 		Partial<List<String>> y = x.parse(p3.tokens);
 		sp2 = new KeywordParser(";");
 		p3 = sp2.parse(y.tokens);
@@ -52,7 +52,7 @@ public class SchemaDeclParser implements Parser<Decl> {
 		p3 = sp2.parse(p3.tokens);
 		//System.out.println("BBBB");
 		
-		Parser<List<Triple<String, String, String>>> ap = new ArrowsParser();
+		RyanParser<List<Triple<String, String, String>>> ap = new ArrowsParser();
 		Partial<List<Triple<String, String, String>>> ap2 = ap.parse(p3.tokens);
 		List<Triple<String, String, String>> attrs = ap2.value;
 		//System.out.println("CCCCC");
@@ -78,7 +78,7 @@ public class SchemaDeclParser implements Parser<Decl> {
 		sp2 = new KeywordParser("equations");
 		p3 = sp2.parse(p3.tokens);
 		
-		Parser<List<Pair<List<String>, List<String>>>> ep = new EqsParser();
+		RyanParser<List<Pair<List<String>, List<String>>>> ep = new EqsParser();
 		Partial<List<Pair<List<String>, List<String>>>> ep2 = ep.parse(p3.tokens);
 		List<Pair<List<String>, List<String>>> eqs = ep2.value;
 		

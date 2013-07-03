@@ -36,9 +36,11 @@ import org.fife.ui.rtextarea.SearchEngine;
 
 import fql.DEBUG;
 import fql.DEBUG.Intermediate;
+import fql.FQLException;
 import fql.decl.Environment;
 import fql.decl.Program;
 import fql.examples.Example;
+import fql.parse.FqlParsers;
 import fql.sql.PSMGen;
 
 /**
@@ -339,7 +341,16 @@ public class CodeEditor extends JPanel {
 		// String view = bottomArea.getText();
 
 		try {
+			try {
+				FqlParsers.program.parse(program);
+			} catch (Exception e) {
+				String s = e.getMessage();
+				s.substring(s.indexOf(" "));
+				throw new FQLException("Syntax Error: " + s);
+			}
+
 			Program parsed_program = Program.parse(program);
+			
 			Environment cp = new Environment(parsed_program);
 
 			List<String> commands = new LinkedList<>();

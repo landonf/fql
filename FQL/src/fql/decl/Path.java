@@ -52,15 +52,31 @@ public class Path implements Jsonable {
 
 		String head = strings.get(0);
 		source = schema.getNode(head);
-		assert (source != null);
+		if (source == null) {
+			throw new FQLException("bad path: " + strings + " in " + schema.name0);
+		}
 
 		target = source;
 		for (int i = 1; i < strings.size(); i++) {
 			String string = strings.get(i);
 			Edge e = schema.getEdge(string);
+			if (e == null) {
+				throw new FQLException("bad path: " + strings + " in " + schema.name0);
+			}
+			if (schema.getNode(source.string) == null) {
+				throw new FQLException("bad path: " + strings + " in " + schema.name0);
+			}
+			if (schema.getNode(target.string) == null) {
+				throw new FQLException("bad path: " + strings + " in " + schema.name0);
+			}
+			if (!e.source.equals(target)) {
+				throw new FQLException("bad path: " + strings+ " in " + schema.name0);
+			}
 			path.add(e);
 			target = e.target;
-			assert (target != null);
+			if (target == null) {
+				throw new FQLException("bad path: " + strings+ " in " + schema.name0);
+			}
 		}
 	}
 

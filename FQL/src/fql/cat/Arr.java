@@ -26,6 +26,9 @@ public class Arr<Obj, Arrow> {
 
 	public Arr(Arrow arr, Obj src, Obj dst) {
 		super();
+		if (arr == null) {
+			throw new RuntimeException();
+		}
 		this.arr = arr;
 		this.src = src;
 		this.dst = dst;

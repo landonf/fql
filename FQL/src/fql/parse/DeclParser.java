@@ -8,7 +8,7 @@ import fql.decl.Decl;
  * 
  *         Parser for declarations.
  */
-public class DeclParser implements Parser<Decl> {
+public class DeclParser implements RyanParser<Decl> {
 
 	@Override
 	public Partial<Decl> parse(Tokens s) throws BadSyntax, IllTyped {

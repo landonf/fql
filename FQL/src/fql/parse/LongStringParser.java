@@ -2,7 +2,7 @@ package fql.parse;
 
 import fql.parse.BadSyntax;
 import fql.parse.IllTyped;
-import fql.parse.Parser;
+import fql.parse.RyanParser;
 import fql.parse.Partial;
 import fql.parse.QuotedParser;
 import fql.parse.StringParser;
@@ -14,7 +14,7 @@ import fql.parse.Tokens;
  *
  * parses a potentially quoted string
  */
-public class LongStringParser implements Parser<String> {
+public class LongStringParser implements RyanParser<String> {
 
 	@Override
 	public Partial<String> parse(Tokens s) throws BadSyntax, IllTyped {

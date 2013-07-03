@@ -8,19 +8,19 @@ import fql.Triple;
  * 
  *         Parses an arrow
  */
-public class ArrowParser implements Parser<Triple<String, String, String>> {
+public class ArrowParser implements RyanParser<Triple<String, String, String>> {
 
 	@Override
 	public Partial<Triple<String, String, String>> parse(Tokens s)
 			throws BadSyntax, IllTyped {
 		try {
-			Parser<String> p = new StringParser();
+			RyanParser<String> p = new StringParser();
 
 			Partial<String> x = p.parse(s);
 			String a = x.value;
 
-			Parser<?> colon = new KeywordParser(":");
-			Parser<?> arrow = new KeywordParser("->");
+			RyanParser<?> colon = new KeywordParser(":");
+			RyanParser<?> arrow = new KeywordParser("->");
 
 			Partial<?> temp1 = colon.parse(x.tokens);
 

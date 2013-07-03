@@ -13,22 +13,22 @@ import fql.decl.MappingDecl;
  *
  * Parser for mapping declarations.
  */
-public class MappingDeclParser implements Parser<Decl> {
+public class MappingDeclParser implements RyanParser<Decl> {
 
 	@Override
 	public Partial<Decl> parse(Tokens s) throws BadSyntax, IllTyped {
 		Tokens olds = new FqlTokenizer(s.toString());
 		try {
-			Parser<?> p1 = new KeywordParser("mapping");
+			RyanParser<?> p1 = new KeywordParser("mapping");
 			
-			Parser<?> colon = new KeywordParser(":");
-			Parser<String> type1 = new StringParser();
-			Parser<String> type2 = new StringParser();
-			Parser<?> arrow = new KeywordParser("->");
-			Parser<?> p2 = new KeywordParser("=");
-			Parser<?> p3 = new KeywordParser("id");
-			Parser<String> p4 = new StringParser();
-			Parser<String> p5 = new StringParser();
+			RyanParser<?> colon = new KeywordParser(":");
+			RyanParser<String> type1 = new StringParser();
+			RyanParser<String> type2 = new StringParser();
+			RyanParser<?> arrow = new KeywordParser("->");
+			RyanParser<?> p2 = new KeywordParser("=");
+			RyanParser<?> p3 = new KeywordParser("id");
+			RyanParser<String> p4 = new StringParser();
+			RyanParser<String> p5 = new StringParser();
 
 			String ret1;
 			Partial<?> p;
@@ -111,38 +111,38 @@ public class MappingDeclParser implements Parser<Decl> {
 	//	}
 	try {
 			s = olds;
-			Parser<?> mapping = new KeywordParser("mapping");
-			Parser<?> equals = new KeywordParser("=");
-			Parser<?> colon = new KeywordParser(":");
-			Parser<String> name = new StringParser();
-			Parser<?> arr = new KeywordParser("->");
-			Parser<?> comma = new KeywordParser(",");
+			RyanParser<?> mapping = new KeywordParser("mapping");
+			RyanParser<?> equals = new KeywordParser("=");
+			RyanParser<?> colon = new KeywordParser(":");
+			RyanParser<String> name = new StringParser();
+			RyanParser<?> arr = new KeywordParser("->");
+			RyanParser<?> comma = new KeywordParser(",");
 		//	Parser<?> lparen = new KeywordParser("(");
 		//	Parser<?> rparen = new KeywordParser(")");
-			Parser<?> semi = new KeywordParser(";");
-			Parser<?> lbracket = new KeywordParser("{");
-			Parser<?> rbracket = new KeywordParser("}");
+			RyanParser<?> semi = new KeywordParser(";");
+			RyanParser<?> lbracket = new KeywordParser("{");
+			RyanParser<?> rbracket = new KeywordParser("}");
 			
-			Parser<Pair<String,String>> type = 
+			RyanParser<Pair<String,String>> type = 
 						ParserUtils.inside(name, arr, name);
 			
-			Parser<List<String>> path = new PathParser();
+			RyanParser<List<String>> path = new PathParser();
 			
-			Parser<List<Pair<String, String>>> nm = 
+			RyanParser<List<Pair<String, String>>> nm = 
 					ParserUtils.seq(new KeywordParser("nodes"),
 					ParserUtils.manySep(
 				/*	ParserUtils.outside(lparen, 
 				*/		ParserUtils.inside(name, arr, name), 
 					/*	rparen) , */ comma));
 			
-			Parser<List<Pair<String, String>>> am = 
+			RyanParser<List<Pair<String, String>>> am = 
 					ParserUtils.seq(new KeywordParser("attributes"),
 					ParserUtils.manySep(
 				/*	ParserUtils.outside(lparen, 
 				*/		ParserUtils.inside(name, arr, name), 
 					/*	rparen) , */ comma));
 		
-			Parser<List<Pair<String, List<String>>>> em = 
+			RyanParser<List<Pair<String, List<String>>>> em = 
 					ParserUtils.outside(new KeywordParser("arrows"), 
 					ParserUtils.manySep(
 				/*	ParserUtils.outside(lparen, 
