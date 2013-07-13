@@ -9,7 +9,7 @@ public class IsoExample extends Example {
 
 	@Override
 	public String getText() {
-		return s; 
+		return s + t; 
 	}
 
 	String s = "schema C = { "
@@ -18,5 +18,11 @@ public class IsoExample extends Example {
 			+ "\n arrows f : A -> B , g : B -> A;"
 			+ "\n equations A.f.g = A, B.g.f = B; "
 			+ "\n}";
+	
+	String t = "\n\ninstance I : C  = {"
+			+"\n nodes A -> {1,2}, B -> {a,b};"
+			+"\n attributes;"
+			+"\n arrows f -> {(1,a),(2,b)}, g -> {(a,1),(b,2)};\n}";
+		
 
 }

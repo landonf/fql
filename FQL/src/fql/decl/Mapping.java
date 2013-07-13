@@ -3,7 +3,6 @@ package fql.decl;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Stroke;
@@ -17,8 +16,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
@@ -122,10 +123,12 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			Mapping m2 = env.mappings.get(md.m2);
 
 			if (m1 == null) {
-				throw new FQLException("For " + name + ", cannot find mapping " + md.m1);
+				throw new FQLException("For " + name + ", cannot find mapping "
+						+ md.m1);
 			}
 			if (m2 == null) {
-				throw new FQLException("For " + name + ", cannot find mapping " + md.m2);
+				throw new FQLException("For " + name + ", cannot find mapping "
+						+ md.m2);
 			}
 			if (!m2.target.equals(m1.source)) {
 				throw new FQLException("Ill-typed: " + md);
@@ -235,7 +238,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		}
 		for (Edge e : this.source.edges) {
 			if (em.get(e) == null) {
-				throw new FQLException("Missing edge mapping from " + e
+				throw new FQLException("Missing arrow mapping from " + e
 						+ " in " + name);
 			}
 		}
@@ -1075,106 +1078,170 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 
 	@Override
 	public JPanel constraint() {
-		List<EmbeddedDependency> l = toED();
-
 		JPanel ret = new JPanel(new GridLayout(1, 1));
+		try {
+			Triple<Signature, Signature, Signature> x = toEDs();
 
-		String s = "(note: these are speculative)\n\n";
-		int i = 0;
-		for (EmbeddedDependency d : l) {
-			if (i++ > 0) {
-				s += "\n\n";
-			}
-			s += d.toString();
+			JTabbedPane t = new JTabbedPane();
+			t.addTab("Sigma", quickView(x.second));
+			t.addTab("Pi", quickView(x.third));
+			t.addTab("Delta", quickView(x.first));
+
+			ret.add(t);
+
+		} catch (FQLException e) {
+			 e.printStackTrace();
+			ret.add(new JScrollPane(new JTextArea(e.getMessage())));
 		}
-		JTextArea area = new JTextArea(s);
-		area.setFont(new Font("Courier", Font.PLAIN, 13));
-		JScrollPane jsp = new JScrollPane(area);
-		area.setWrapStyleWord(true);
-		area.setLineWrap(true);
-		jsp.setBorder(BorderFactory.createEmptyBorder());
-		ret.add(jsp);
 		return ret;
 	}
 
-	public List<EmbeddedDependency> toED() {
-		List<EmbeddedDependency> ret = new LinkedList<>();
+	public Triple<Signature, Signature, Signature> toEDs() throws FQLException {
+		// List<EmbeddedDependency> l = new //toED();
 
-		int v = 0;
-		for (Node n : source.nodes) {
-			List<String> forall = new LinkedList<>();
-			List<String> exists = new LinkedList<>();
-			List<Triple<String, String, String>> where = new LinkedList<>();
-			List<Triple<String, String, String>> tgd = new LinkedList<>();
-			List<Triple<String, String, String>> not = new LinkedList<>();
-			List<Pair<String, String>> egd = new LinkedList<>();
+		Signature sigma = Signature.sum("src", "dst", source, target);
+		Signature pi = Signature.sum("src", "dst", source, target);
+		Signature delta = Signature.sum("src", "dst", source, target);
 
-			String u = "v" + Integer.toString(v);
-			forall.add(u);
-			where.add(new Triple<>(source.name0 + "." + n.string, u, u));
-			tgd.add(new Triple<>(target.name0 + "." + nm.get(n).string, u, u));
-
-			EmbeddedDependency ed = new EmbeddedDependency(forall, exists,
-					where, tgd, not, egd);
-			ret.add(ed);
-			v++;
+		Map<Node, Edge> m_map = new HashMap<>();
+		Map<Node, Edge> l_map = new HashMap<>();
+		for (Node c : source.nodes) {
+			Edge m = new Edge("m_src_" + c.string,
+					new Node("dst_" + nm.get(c)), new Node("src_" + c));
+			Edge l = new Edge("l_src_" + c.string, new Node("src_" + c),
+					new Node("dst_" + nm.get(c)));
+			pi.edges.add(m);
+			sigma.edges.add(l);
+			delta.edges.add(m);
+			delta.edges.add(l);
+			m_map.put(c, m);
+			l_map.put(c, l);
+			delta.eqs
+					.add(new Eq(Path.append2(delta, new Path(delta, l),
+							new Path(delta, m)), new Path(delta, new Node(
+							"dst_" + nm.get(c)))));
+			delta.eqs
+					.add(new Eq(Path.append2(delta, new Path(delta, m),
+							new Path(delta, l)), new Path(delta, new Node(
+							"src_" + c))));
 		}
+		for (Edge f : source.edges) {
+			Edge fX = new Edge("src_" + f.name, new Node("src_"
+					+ f.source.string), new Node("src_" + f.target.string));
 
-		for (Attribute<Node> a : source.attrs) {
-			List<String> forall = new LinkedList<>();
-			List<String> exists = new LinkedList<>();
-			List<Triple<String, String, String>> where = new LinkedList<>();
-			List<Triple<String, String, String>> tgd = new LinkedList<>();
-			List<Pair<String, String>> egd = new LinkedList<>();
-			List<Triple<String, String, String>> not = new LinkedList<>();
-
-			String u = "v" + Integer.toString(v);
-			forall.add(u);
-			where.add(new Triple<>(source.name0 + "." + a.name, u, u));
-			tgd.add(new Triple<>(target.name0 + "." + am.get(a).name, u, u));
-
-			EmbeddedDependency ed = new EmbeddedDependency(forall, exists,
-					where, tgd, not, egd);
-			ret.add(ed);
-			v++;
-		}
-
-		for (Edge e : source.edges) {
-			List<String> forall = new LinkedList<>();
-			List<String> exists = new LinkedList<>();
-			List<Triple<String, String, String>> where = new LinkedList<>();
-			List<Triple<String, String, String>> tgd = new LinkedList<>();
-			List<Pair<String, String>> egd = new LinkedList<>();
-			List<Triple<String, String, String>> not = new LinkedList<>();
-
-			String u = "v" + Integer.toString(v);
-			v++;
-			String w = "v" + Integer.toString(v);
-			forall.add(u);
-			forall.add(w);
-			where.add(new Triple<>(source.name0 + "." + e.name, u, w));
-
-			tgd.add(new Triple<>(target.name0 + "." + nm.get(e.source).string,
-					u, u));
-			Path p = em.get(e);
-			for (Edge E : p.path) {
-				exists.add("v" + v);
-				tgd.add(new Triple<>(target.name0 + "." + E.name,
-						"v" + (v - 1), "v" + v));
-				v++;
+			Edge e1 = m_map.get(f.source);
+			Edge e2 = m_map.get(f.target);
+			Path pX = em.get(f);
+			List<String> x = new LinkedList<>();
+			x.add("dst_" + pX.source.string);
+			for (Edge y : pX.path) {
+				x.add("dst_" + y.name);
 			}
-			// v++;
+			Path p = new Path(pi, x);
 
-			// tgd.add(new Triple<>(target.name0 + "." +
-			// nm.get(e.target).string, w, w));
+			Path lhs = Path.append(pi, p, new Path(pi, e2));
+			Path rhs = Path.append(pi, new Path(pi, e1), new Path(pi, fX));
+			pi.eqs.add(new Eq(lhs, rhs));
 
-			EmbeddedDependency ed = new EmbeddedDependency(forall, exists,
-					where, tgd, not, egd);
+			Edge e10 = l_map.get(f.target);
+			Edge e20 = l_map.get(f.source);
+			Path pX0 = em.get(f);
+			x = new LinkedList<>();
+			x.add("dst_" + pX0.source.string);
+			for (Edge y : pX0.path) {
+				x.add("dst_" + y.name);
+			}
+			Path p0 = new Path(sigma, x);
 
-			ret.add(ed);
+			Path lhs0 = Path.append(sigma, new Path(sigma, e20), p0);
+			Path rhs0 = Path.append(sigma, new Path(sigma, fX), new Path(sigma,
+					e10));
+			sigma.eqs.add(new Eq(lhs0, rhs0));
+
+			lhs = Path.append(delta, p, new Path(delta, e2));
+			rhs = Path.append(delta, new Path(delta, e1), new Path(delta, fX));
+			delta.eqs.add(new Eq(lhs, rhs));
+
+			lhs0 = Path.append(delta, new Path(delta, e20), p0);
+			rhs0 = Path
+					.append(delta, new Path(delta, fX), new Path(delta, e10));
+			delta.eqs.add(new Eq(lhs0, rhs0));
+
 		}
+		sigma.name0 = source.name0 + "_plus_sigma_" + target.name0;
+		pi.name0 = source.name0 + "_plus_pi_" + target.name0;
+		delta.name0 = source.name0 + "_plus_delta_" + target.name0;
+
+		// TODO: check deltas, sigmas, pis, obey EDs
+
+		return new Triple<>(delta, sigma, pi);
+		/*
+		 * String s = "(note: these are speculative)\n\n"; int i = 0; for
+		 * (EmbeddedDependency d : l) { if (i++ > 0) { s += "\n\n"; } s +=
+		 * d.toString(); } JTextArea area = new JTextArea(s); area.setFont(new
+		 * Font("Courier", Font.PLAIN, 13)); JScrollPane jsp = new
+		 * JScrollPane(area); area.setWrapStyleWord(true);
+		 * area.setLineWrap(true);
+		 * jsp.setBorder(BorderFactory.createEmptyBorder()); ret.add(jsp);
+		 * return ret;
+		 */
+	}
+
+	/*
+	 * public List<EmbeddedDependency> toED() { List<EmbeddedDependency> ret =
+	 * new LinkedList<>();
+	 * 
+	 * int v = 0; for (Node n : source.nodes) { List<String> forall = new
+	 * LinkedList<>(); List<String> exists = new LinkedList<>();
+	 * List<Triple<String, String, String>> where = new LinkedList<>();
+	 * List<Triple<String, String, String>> tgd = new LinkedList<>();
+	 * List<Triple<String, String, String>> not = new LinkedList<>();
+	 * List<Pair<String, String>> egd = new LinkedList<>();
+	 * 
+	 * String u = "v" + Integer.toString(v); forall.add(u); where.add(new
+	 * Triple<>(source.name0 + "." + n.string, u, u)); tgd.add(new
+	 * Triple<>(target.name0 + "." + nm.get(n).string, u, u));
+	 * 
+	 * EmbeddedDependency ed = new EmbeddedDependency(forall, exists, where,
+	 * tgd, not, egd); ret.add(ed); v++; }
+	 * 
+	 * for (Attribute<Node> a : source.attrs) { List<String> forall = new
+	 * LinkedList<>(); List<String> exists = new LinkedList<>();
+	 * List<Triple<String, String, String>> where = new LinkedList<>();
+	 * List<Triple<String, String, String>> tgd = new LinkedList<>();
+	 * List<Pair<String, String>> egd = new LinkedList<>(); List<Triple<String,
+	 * String, String>> not = new LinkedList<>();
+	 * 
+	 * String u = "v" + Integer.toString(v); forall.add(u); where.add(new
+	 * Triple<>(source.name0 + "." + a.name, u, u)); tgd.add(new
+	 * Triple<>(target.name0 + "." + am.get(a).name, u, u));
+	 * 
+	 * EmbeddedDependency ed = new EmbeddedDependency(forall, exists, where,
+	 * tgd, not, egd); ret.add(ed); v++; }
+	 * 
+	 * 
+	 * 
+	 * return ret; }
+	 */
+
+	private JComponent quickView(Signature X) {
+		JTabbedPane ret = new JTabbedPane();
+
+		ret.addTab("Signature", new JScrollPane(new JTextArea(X.toString())));
+		ret.addTab("Embedded Dependencies", new JScrollPane(new JTextArea(
+				quickConv(X.toED("")))));
 
 		return ret;
+	}
+
+	private String quickConv(List<EmbeddedDependency> ed) {
+		String ret = "";
+		for (EmbeddedDependency d : ed) {
+			ret += d.toString();
+			ret += "\n\n";
+		}
+
+		return ret.trim();
 	}
 
 }

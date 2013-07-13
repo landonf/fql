@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,6 +38,7 @@ import fql.FQLBackEnd;
 import fql.Pair;
 import fql.examples.Example;
 import fql.examples.Examples;
+import fql.sql.Chase;
 
 @SuppressWarnings("serial")
 /**
@@ -143,7 +145,7 @@ public class GUI extends JPanel {
 		MenuShortcut q = new MenuShortcut(ctrlQ.getKeyCode());
 		exitItem.setShortcut(q);
 
-		Menu webMenu = new Menu("Web");
+//		Menu webMenu = new Menu("Web");
 		//MenuItem serverItem = new MenuItem("Start Local Server");
 //		webMenu.add(serverItem);
 //		serverItem.addActionListener(new ActionListener() {
@@ -151,20 +153,29 @@ public class GUI extends JPanel {
 //				serverAction();
 //			}
 //		});
-		MenuItem jsonItem = new MenuItem("JSON Input");
-		webMenu.add(jsonItem);
-		jsonItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JsonPanel.showPanel(new FQLBackEnd());
-			}
-		});
-
+		
 		// Menu optionsMenu = new Menu("Options");
 		MenuItem optionsItem = new MenuItem("Show Options");
 		editMenu.add(optionsItem);
 		optionsItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				DEBUG.showOptions();
+			}
+		});
+		
+		MenuItem chaseItem = new MenuItem("Run Chase");
+		editMenu.add(chaseItem);
+		chaseItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Chase.dostuff();
+			}
+		});
+
+		MenuItem jsonItem = new MenuItem("JSON Input");
+		editMenu.add(jsonItem);
+		jsonItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JsonPanel.showPanel(new FQLBackEnd());
 			}
 		});
 
@@ -222,7 +233,7 @@ public class GUI extends JPanel {
 		menuBar.add(editMenu);
 		// menuBar.add(optionsMenu);
 
-		menuBar.add(webMenu);
+//		menuBar.add(webMenu);
 		menuBar.add(helpMenu);
 
 		// JSplitPane p = new FQLSplit(.8, JSplitPane.HORIZONTAL_SPLIT);
@@ -285,6 +296,7 @@ public class GUI extends JPanel {
 
 		// toolBar temp1 = new JPanel();
 		JLabel l = new JLabel("Load Example:", JLabel.RIGHT);
+		Arrays.sort(Examples.examples);
 		final JComboBox<Example> box = new JComboBox<>(Examples.examples);
 		box.setSelectedIndex(-1);
 		box.addActionListener(new ActionListener() {
@@ -364,6 +376,9 @@ public class GUI extends JPanel {
 
 	protected static void doExample(Example e) {
 		// int i = untitled_count;
+		if (e == null) {
+			return;
+		}
 		newAction(e.getName(), e.getText());
 	}
 

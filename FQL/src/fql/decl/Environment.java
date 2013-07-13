@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import fql.DEBUG;
 import fql.FQLException;
 import fql.Pair;
 import fql.Triple;
 import fql.gui.Viewable;
+import fql.sql.Chase;
 import fql.sql.PSM;
 import fql.sql.PSMGen;
 import fql.sql.PSMInterp;
@@ -85,10 +87,18 @@ public class Environment {
 							+ ((RelationalizeDecl) d).type);
 				}
 				if (instance_types.get(((RelationalizeDecl) d).inst) == null) {
-					throw new FQLException("Cannot find instance " + ((RelationalizeDecl) d).inst);
-				}	
-				if (!signatures.get(((RelationalizeDecl) d).type).name0.equals(instance_types.get(((RelationalizeDecl) d).inst).name0)) {
-					throw new FQLException("Relativize must have same input and output schemas on " + d.name); //, not " + signatures.get(((RelationalizeDecl) d).inst).name0 + " and " + instance_types.get(d.mapping).name0);
+					throw new FQLException("Cannot find instance "
+							+ ((RelationalizeDecl) d).inst);
+				}
+				if (!signatures.get(((RelationalizeDecl) d).type).name0
+						.equals(instance_types
+								.get(((RelationalizeDecl) d).inst).name0)) {
+					throw new FQLException(
+							"Relativize must have same input and output schemas on "
+									+ d.name); // , not
+												// " + signatures.get(((RelationalizeDecl) d).inst).name0 + "
+												// and " +
+												// instance_types.get(d.mapping).name0);
 				}
 
 			}
@@ -116,33 +126,75 @@ public class Environment {
 			}
 		}
 
-		// try {
-		// for (Decl d : p.decls) { //double check pi
-		// if (d instanceof EvalDSPInstanceDecl) {
-		// EvalDSPInstanceDecl x = (EvalDSPInstanceDecl) d;
-		// if (x.kind.equals("pi")) {
-		// Mapping m = mappings.get(x.mapping);
-		// Instance i = instances.get(x.inst);
-		//
-		// // FinFunctor<Object, Object, Object, Object> F;
-		// //Inst<Object, Object, Object, Object> inst;
-		//
-		// Inst<Node, Path, Object, Object> res = FDM.pi(m.toFunctor2().first,
-		// i.toFunctor2());
-		//
-		// //System.out.println("**********" + d.name);
-		// //System.out.println(res);
-		// }
-		// }
-		// } } catch (Throwable e) {
-		// e.printStackTrace();
-		// }
+		// double check sigmas
+		if (DEBUG.VALIDATE_WITH_EDS) {
+			try {
+				for (Decl d : p.decls) { // double check pi
+					if (d instanceof EvalDSPInstanceDecl) {
+						EvalDSPInstanceDecl x = (EvalDSPInstanceDecl) d;
+						Mapping m = mappings.get(x.mapping);
+						Instance i = instances.get(x.inst);
+						Instance j = instances.get(x.name);
 
-		// go through instance decls, looking up in output as necessary
+						if (x.kind.equals("sigma") || x.kind.equals("SIGMA")) {
 
-		for (String s : signatures.keySet()) {
-			colors.put(s, nextColor());
+							Instance j0 = Chase.sigma(m, i);
+							if (!Instance.quickCompare(j, j0)) {
+								throw new FQLException("Comparison failed");
+							} 
+							  else { System.out.println("normal\n" + j);
+							  System.out.println("\n\n\n computed " + j0); }
+							 
+						} else if (x.kind.equals("delta")) {
+							Instance j0 = Chase.delta(m, i);
+							if (!Instance.quickCompare(j, j0)) {
+								throw new FQLException("Comparison failed");
+							} else { System.out.println("normal\n" + j);
+							  System.out.println("\n\n\n computed " + j0); }
+						} else {
+							// TODO pi with EDs
+							/* Instance j0 = Chase.pi(m, i);
+							
+							if (!Instance.quickCompare(j, j0)) {
+								throw new FQLException("Comparison failed");
+							} else { System.out.println("normal\n" + j);
+							  System.out.println("\n\n\n computed " + j0); }
+							*/
+						}
+					}
+				}
+
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+
+			// try {
+			// for (Decl d : p.decls) { //double check pi
+			// if (d instanceof EvalDSPInstanceDecl) {
+			// EvalDSPInstanceDecl x = (EvalDSPInstanceDecl) d;
+			// if (x.kind.equals("pi")) {
+			// Mapping m = mappings.get(x.mapping);
+			// Instance i = instances.get(x.inst);
+			//
+			// // FinFunctor<Object, Object, Object, Object> F;
+			// //Inst<Object, Object, Object, Object> inst;
+			//
+			// Inst<Node, Path, Object, Object> res =
+			// FDM.pi(m.toFunctor2().first,
+			// i.toFunctor2());
+			//
+			// //System.out.println("**********" + d.name);
+			// //System.out.println(res);
+			// }
+			// }
+			// } } catch (Throwable e) {
+			// e.printStackTrace();
+			// }
 		}
+			for (String s : signatures.keySet()) {
+				colors.put(s, nextColor());
+			}
+		
 
 	}
 

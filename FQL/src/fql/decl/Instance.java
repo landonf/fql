@@ -41,6 +41,7 @@ import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.VertexLabelRenderer;
+import fql.DEBUG;
 import fql.FQLException;
 import fql.Pair;
 import fql.cat.Arr;
@@ -54,6 +55,8 @@ import fql.parse.FqlTokenizer;
 import fql.parse.JSONParsers;
 import fql.parse.Jsonable;
 import fql.parse.PrettyPrinter;
+import fql.sql.ED;
+import fql.sql.EmbeddedDependency;
 import fql.sql.PSM;
 import fql.sql.PSMInterp;
 import fql.sql.Relationalizer;
@@ -64,7 +67,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	// return s + " data";
 	// }
 
-	String name;
+	public String name;
 	
 	
 	
@@ -170,7 +173,19 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			}
 		}
 
+		if (DEBUG.VALIDATE_WITH_EDS) {
+			validateUsingEDs();
+		}
 		// toFunctor();
+	}
+
+	private void validateUsingEDs() throws FQLException {
+		//System.out.println("Validating " + this);
+		for (EmbeddedDependency ed : thesig.toED("")) {
+			if (!ED.from(ed).holds(data)) {
+				throw new FQLException("ED constraint violation in " + name + ": " + ed + "\n" + ED.from(ed) + "\n" + ED.conv(data));
+			}
+		}		
 	}
 
 	public Set<Pair<Object, Object>> evaluate(Path p) {
@@ -1472,11 +1487,17 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 	@Override
 	public JPanel observables() {
+		
+		
 		JTabbedPane t = new JTabbedPane();
 
 		Map<String, Set<Map<String, Object>>> state = shred(name);
 		//System.out.println(state);
 		try {
+			if (thesig.attrs.size() == 0) {
+				throw new FQLException("Cannot generate observables - no attributes");
+			}
+			
 			List<PSM> prog = Relationalizer.compile(thesig, "output", name, true);
 			Map<String, Set<Map<String, Object>>> res = PSMInterp.interpX(prog, state);
 						
@@ -1562,6 +1583,25 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	@Override
 	public JPanel constraint() {
 		return null;
+	}
+
+	/**
+	 * Quickly compares two instances by checking the counts
+	 * of tuples in all the rows.
+	 */
+	public static boolean quickCompare(Instance i, Instance j) throws FQLException {
+		if (!i.data.keySet().equals(j.data.keySet())) {
+			throw new RuntimeException(i.data.keySet() + "\n\n" + j.data.keySet());
+		}
+		for (String k : i.data.keySet()) {
+			Set<Pair<Object, Object>> v = i.data.get(k);
+			Set<Pair<Object, Object>> v0 = j.data.get(k);
+			if (v.size() != v0.size()) {
+				return false;
+			}
+		}
+		
+		return true;
 	}
 
 }

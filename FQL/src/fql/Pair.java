@@ -54,5 +54,8 @@ public class Pair<T1, T2> {
 			return false;
 		return true;
 	}
+	public Pair<T2, T1> reverse() {
+		return new Pair<>(second, first);
+	}
 	
 }

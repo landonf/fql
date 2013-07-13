@@ -38,6 +38,7 @@ public class DEBUG {
 	
 	public static boolean ALL_GR_PATHS = false;
 
+	public static boolean VALIDATE_WITH_EDS = false;
 	
 	//public static int MAX_JOIN_SIZE = 1024;
 	
@@ -59,7 +60,13 @@ public class DEBUG {
 	static String label8text = "Sets the size of Strings in the SQL output (used for ID columns and string columns).";
 	static String labelMtext = "Allows multiple viewers for the same editor.";
 	public static void showOptions() {
-		JPanel p = new JPanel(new GridLayout(11, 2));
+		JPanel p = new JPanel(new GridLayout(12, 2));
+	
+		JCheckBox ed = new JCheckBox("", VALIDATE_WITH_EDS);
+		ed.setToolTipText("Validates Data Migration using Embedded Dependencies");
+		JLabel edL = new JLabel("Validate using EDs:");
+		p.add(edL);
+		p.add(ed);
 		
 		JCheckBox gr = new JCheckBox("", ALL_GR_PATHS);
 		gr.setToolTipText("Show all paths in category of elements");
@@ -178,6 +185,7 @@ public class DEBUG {
 			} catch (NumberFormatException nfe) {
 				return;
 			}
+			VALIDATE_WITH_EDS = ed.isSelected();
 			ALL_GR_PATHS = gr.isSelected();
 			ALLOW_INFINITES = jcb0.isSelected();
 			VALIDATE = jcb.isSelected();
@@ -210,6 +218,8 @@ public class DEBUG {
 	static String about = "FQL IDE Copyright (C) 2013 David Spivak and Ryan Wisnesky"
 			              + "\nLicense: Creative-Commons Attribution-NonCommercial-NoDerivs 3.0 Unported"
 			 	          + "\n\nLibraries used:\n\nJParsec (parsing)\nJUNG (graph visualization)\nRSyntaxTextArea (code editor)";
+
+	public static int chase_limit = 32;
 
 
 	

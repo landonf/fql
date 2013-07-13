@@ -403,7 +403,7 @@ public class Signature implements Viewable<Signature> {
 				return node;
 			}
 		}
-		throw new FQLException("Unknown node: " + string);
+		throw new FQLException("Unknown node: " + string + " in " + this);
 	}
 
 	@Override
@@ -550,7 +550,7 @@ public class Signature implements Viewable<Signature> {
 		sb.append("\n ;\n");
 
 		first = true;
-		sb.append("edges\n");
+		sb.append("arrows\n");
 		for (Edge e : edges) {
 			if (!first) {
 				sb.append(",\n");
@@ -977,7 +977,7 @@ public class Signature implements Viewable<Signature> {
 	
 	@Override
 	public JPanel constraint() {
-		List<EmbeddedDependency> l = toED();
+		List<EmbeddedDependency> l = toED("");
 		
 		JPanel ret = new JPanel(new GridLayout(1,1));
 		
@@ -999,7 +999,7 @@ public class Signature implements Viewable<Signature> {
 		return ret;
 	}
 
-	public List<EmbeddedDependency> toED() {
+	public List<EmbeddedDependency> toED(String pre) {
 		List<EmbeddedDependency> ret = new LinkedList<>();
 		
 		
@@ -1010,28 +1010,81 @@ public class Signature implements Viewable<Signature> {
 			List<Triple<String, String, String>> where = new LinkedList<>();
 			List<Triple<String, String, String>> tgd = new LinkedList<>();
 			List<Pair<String, String>> egd = new LinkedList<>();
-			List<Triple<String, String, String>> not = new LinkedList<>();
+		//	List<Triple<String, String, String>> not = new LinkedList<>();
 			
 			String u = "v" + (v++);
 			String w = "v" + (v++);
 			
 			forall.add(u);
 			forall.add(w);
-			where.add(new Triple<>(name0 + "." + n.string, u, w));
+			where.add(new Triple<>(pre + n.string, u, w));
 			egd.add(new Pair<>(u, w));
 			
-			for (Node m : nodes) {
-				if (n.equals(m)) {
-					continue;
-				}
-				not.add(new Triple<>(name0 + "." + m.string, u, w));
-			}
+//			for (Node m : nodes) {
+//				if (n.equals(m)) {
+//					continue;
+//				}
+//				not.add(new Triple<>(name0 + "." + m.string, u, w));
+//			}
 
-			EmbeddedDependency ed = new EmbeddedDependency(forall, exists, where, tgd, not, egd);
+			EmbeddedDependency ed = new EmbeddedDependency(forall, exists, where, tgd, egd);
 			ret.add(ed);
 		}
 		
 		for (Edge e : edges) {
+			List<String> forall = new LinkedList<>();
+			List<String> exists = new LinkedList<>();
+			List<Triple<String, String, String>> where = new LinkedList<>();
+			List<Triple<String, String, String>> tgd = new LinkedList<>();
+			List<Pair<String, String>> egd = new LinkedList<>();
+		//	List<Triple<String, String, String>> not = new LinkedList<>();
+		
+			String u = "v" + (v++);
+			String w = "v" + (v++);
+			
+			forall.add(u);
+			forall.add(w);
+			where.add(new Triple<>(pre + e.name, u, w));
+			tgd.add(new Triple<>(pre + e.source.string, u, u));
+			tgd.add(new Triple<>(pre + e.target.string, w, w));
+			
+			EmbeddedDependency ed = new EmbeddedDependency(forall, exists, where, tgd, egd);
+			ret.add(ed);
+			
+			forall = new LinkedList<>();
+			exists = new LinkedList<>();
+			where = new LinkedList<>();
+			tgd = new LinkedList<>();
+			egd = new LinkedList<>();
+		//	not = new LinkedList<>();
+			
+			String x = "v" + (v++);
+			forall.add(u); forall.add(w); forall.add(x);
+			where.add(new Triple<>(pre + e.name, u, w));
+			where.add(new Triple<>(pre + e.name, u, x));
+			egd.add(new Pair<>(w,x));
+			
+			ed = new EmbeddedDependency(forall, exists, where, tgd, egd);
+			ret.add(ed);
+			
+			forall = new LinkedList<>();
+			exists = new LinkedList<>();
+			where = new LinkedList<>();
+			tgd = new LinkedList<>();
+			egd = new LinkedList<>();
+		//	not = new LinkedList<>();
+			forall.add(x);
+			where.add(new Triple<>(pre + e.source.string, x, x));
+			String z = "v" + (v++);
+			exists.add(z);
+			tgd.add(new Triple<>(pre + e.name, x, z));
+
+			ed = new EmbeddedDependency(forall, exists, where, tgd, egd);
+			ret.add(ed);
+			
+		}
+		
+		for (Attribute<Node> e : attrs) {
 			List<String> forall = new LinkedList<>();
 			List<String> exists = new LinkedList<>();
 			List<Triple<String, String, String>> where = new LinkedList<>();
@@ -1044,11 +1097,11 @@ public class Signature implements Viewable<Signature> {
 			
 			forall.add(u);
 			forall.add(w);
-			where.add(new Triple<>(name0 + "." + e.name, u, w));
-			tgd.add(new Triple<>(name0 + "." + e.source.string, u, u));
-			tgd.add(new Triple<>(name0 + "." + e.target.string, w, w));
+			where.add(new Triple<>(pre + e.name, u, w));
+			tgd.add(new Triple<>(pre + e.source.string, u, u));
+	//		tgd.add(new Triple<>(name0 + "." + e.target., w, w));
 			
-			EmbeddedDependency ed = new EmbeddedDependency(forall, exists, where, tgd, not, egd);
+			EmbeddedDependency ed = new EmbeddedDependency(forall, exists, where, tgd, egd);
 			ret.add(ed);
 			
 			forall = new LinkedList<>();
@@ -1060,11 +1113,11 @@ public class Signature implements Viewable<Signature> {
 			
 			String x = "v" + (v++);
 			forall.add(u); forall.add(w); forall.add(x);
-			where.add(new Triple<>(name0 + "." + e.name, u, w));
-			where.add(new Triple<>(name0 + "." + e.name, u, x));
+			where.add(new Triple<>(pre + e.name, u, w));
+			where.add(new Triple<>(pre + e.name, u, x));
 			egd.add(new Pair<>(w,x));
 			
-			ed = new EmbeddedDependency(forall, exists, where, tgd, not, egd);
+			ed = new EmbeddedDependency(forall, exists, where, tgd, egd);
 			ret.add(ed);
 			
 			forall = new LinkedList<>();
@@ -1074,17 +1127,75 @@ public class Signature implements Viewable<Signature> {
 			egd = new LinkedList<>();
 			not = new LinkedList<>();
 			forall.add(x);
-			where.add(new Triple<>(name0 + "." + e.source.string, x, x));
+			where.add(new Triple<>(pre + e.source.string, x, x));
 			String z = "v" + (v++);
 			exists.add(z);
-			tgd.add(new Triple<>(name0 + "." + e.name, x, z));
+			tgd.add(new Triple<>(pre + e.name, x, z));
 
-			ed = new EmbeddedDependency(forall, exists, where, tgd, not, egd);
-			ret.add(ed);
-			
+			ed = new EmbeddedDependency(forall, exists, where, tgd, egd);
+			ret.add(ed);	
 		}
 		
+		for (Eq eq : eqs) {
+			ret.add(EmbeddedDependency.eq(pre, eq.lhs, eq.rhs));
+			ret.add(EmbeddedDependency.eq(pre, eq.rhs, eq.lhs));
+		}
 		
 		return ret;
 	}
+
+	public static Signature sum(String c, String d, Signature C, Signature D) throws FQLException {
+		String n = c + "_plus_" + d; 
+		List<String> o = new LinkedList<>();
+		for (Node node : C.nodes) {
+			o.add(c + "_" + node.string);
+		}
+		for (Node node : D.nodes) {
+			o.add(d + "_" + node.string);
+		}
+		
+		List<Triple<String, String, String>> a = new LinkedList<>();
+		if (C.attrs.size() > 0 || D.attrs.size() > 0) {
+			throw new FQLException("Cannot have attributes in signature sum");
+		}
+		List<Triple<String, String, String>> e = new LinkedList<>();
+		for (Edge edge : C.edges) {
+			e.add(new Triple<>(c + "_" + edge.name, c + "_" + edge.source.string, c + "_" + edge.target.string));
+		}
+		for (Edge edge : D.edges) {
+			e.add(new Triple<>(d + "_" + edge.name, d + "_" + edge.source.string, d + "_" + edge.target.string));
+		}
+		
+		List<Pair<List<String>, List<String>>> cc = new LinkedList<>();
+		for (Eq eq : C.eqs) {
+			List<String> lhs = new LinkedList<>();
+			lhs.add(c + "_" + eq.lhs.source.string);
+			for (Edge edge : eq.lhs.path) {
+				lhs.add(c + "_" + edge.name);
+			}
+			List<String> rhs = new LinkedList<>();
+			rhs.add(c + "_" + eq.rhs.source.string);
+			for (Edge edge : eq.rhs.path) {
+				rhs.add(c + "_" + edge.name);
+			}
+			cc.add(new Pair<>(lhs, rhs));
+		}
+		for (Eq eq : D.eqs) {
+			List<String> lhs = new LinkedList<>();
+			lhs.add(d + "_" + eq.lhs.source.string);
+			for (Edge edge : eq.lhs.path) {
+				lhs.add(d + "_" + edge.name);
+			}
+			List<String> rhs = new LinkedList<>();
+			rhs.add(d + "_" + eq.rhs.source.string);
+			for (Edge edge : eq.rhs.path) {
+				rhs.add(d + "_" + edge.name);
+			}
+			cc.add(new Pair<>(lhs, rhs));
+		}
+		
+		return new Signature(n, o, a, e, cc);
+	}
+
+	
 }

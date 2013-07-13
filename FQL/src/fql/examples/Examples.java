@@ -1,5 +1,7 @@
 package fql.examples;
 
+import java.util.Arrays;
+
 
 
 
@@ -39,8 +41,8 @@ public class Examples {
 	public static Example relative = new RelationalizerExample();
 	public static Example sotgd = new EDExample();
 	
-	public static Example[] examples = { people, external, typeddelta, delta, pi, typedPi, typedsigma, sigma, full, employess, typedemployees, composition, tcomp, iso, triangle, cyclicgroup, dihedral, /* one, */ empty, foil, typedFoil, sql2fql, weird, typedWeird, relative, sotgd };
-	
+	public static Example[] examples = new Example[] { people, external, typeddelta, delta, pi, typedPi, typedsigma, sigma, full, employess, typedemployees, composition, tcomp, iso, triangle, cyclicgroup, dihedral, /* one, */ empty, foil, typedFoil, sql2fql, weird, typedWeird, relative, sotgd };
+
 	public static final Example INIT_EXAMPLE = typeddelta;
 	
 	public static final String helpString = 

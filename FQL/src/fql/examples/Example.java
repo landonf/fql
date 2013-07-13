@@ -1,7 +1,7 @@
 package fql.examples;
 
 
-public abstract class Example {
+public abstract class Example implements Comparable<Example> {
 	
 	public abstract String getName();
 	
@@ -12,5 +12,9 @@ public abstract class Example {
 		return getName();
 	}
 	
+	@Override 
+	public int compareTo(Example e) {
+		return toString().compareTo(e.toString());
+	}
 	
 }

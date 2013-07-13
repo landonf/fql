@@ -93,7 +93,7 @@ public class Display {
 				
 				JPanel map = view.constraint();
 				if (map != null) {
-					px.add("Embedded Dependency", new JScrollPane(map));
+					px.add("Embedded Dependency",map);
 				}
 				
 				JPanel top = new JPanel(new GridLayout(1,1));

@@ -8,8 +8,8 @@ import fql.Pair;
 /**
  * 
  * @author ryan
- *
- * Combine parsers to make new parsers
+ * 
+ *         Combine parsers to make new parsers
  */
 public class ParserUtils {
 
@@ -38,7 +38,8 @@ public class ParserUtils {
 	 * @param p2
 	 * @return a parser that matches and ignores p1, followed by p2
 	 */
-	public static <T> RyanParser<T> seq(final RyanParser<?> p1, final RyanParser<T> p2) {
+	public static <T> RyanParser<T> seq(final RyanParser<?> p1,
+			final RyanParser<T> p2) {
 		return new RyanParser<T>() {
 			public Partial<T> parse(Tokens s) throws BadSyntax, IllTyped {
 				Partial<?> x = p1.parse(s);
@@ -97,8 +98,8 @@ public class ParserUtils {
 	 * @param r
 	 * @return a parser that matches l u r and returns u
 	 */
-	public static <T> RyanParser<T> outside(final RyanParser<?> l, final RyanParser<T> u,
-			final RyanParser<?> r) {
+	public static <T> RyanParser<T> outside(final RyanParser<?> l,
+			final RyanParser<T> u, final RyanParser<?> r) {
 		return new RyanParser<T>() {
 			public Partial<T> parse(Tokens s) throws BadSyntax, IllTyped {
 				Partial<?> l0 = l.parse(s);
@@ -107,6 +108,24 @@ public class ParserUtils {
 				return new Partial<T>(r0.tokens, u0.value);
 			}
 		};
+	}
+
+	public static RyanParser<Object> or(final RyanParser p, final RyanParser q) {
+
+		return new RyanParser<Object>() {
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public Partial<Object> parse(Tokens s) throws BadSyntax, IllTyped {
+				try {
+					return p.parse(s);
+				} catch (Exception e) {
+				}
+					return q.parse(s);
+			}
+
+		};
+
 	}
 
 }
