@@ -219,7 +219,7 @@ public class DEBUG {
 			              + "\nLicense: Creative-Commons Attribution-NonCommercial-NoDerivs 3.0 Unported"
 			 	          + "\n\nLibraries used:\n\nJParsec (parsing)\nJUNG (graph visualization)\nRSyntaxTextArea (code editor)";
 
-	public static int chase_limit = 32;
+	public static int chase_limit = 64;
 
 
 	

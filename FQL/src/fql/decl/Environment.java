@@ -128,7 +128,7 @@ public class Environment {
 
 		// double check sigmas
 		if (DEBUG.VALIDATE_WITH_EDS) {
-			try {
+			//try {
 				for (Decl d : p.decls) { // double check pi
 					if (d instanceof EvalDSPInstanceDecl) {
 						EvalDSPInstanceDecl x = (EvalDSPInstanceDecl) d;
@@ -140,7 +140,7 @@ public class Environment {
 
 							Instance j0 = Chase.sigma(m, i);
 							if (!Instance.quickCompare(j, j0)) {
-								throw new FQLException("Comparison failed");
+								throw new FQLException("Comparison failed \n\n" + j + "\n\n----------------\n\n" + j0);
 							} 
 							  else { System.out.println("normal\n" + j);
 							  System.out.println("\n\n\n computed " + j0); }
@@ -148,25 +148,26 @@ public class Environment {
 						} else if (x.kind.equals("delta")) {
 							Instance j0 = Chase.delta(m, i);
 							if (!Instance.quickCompare(j, j0)) {
-								throw new FQLException("Comparison failed");
+								throw new FQLException("Comparison failed \n\n" + j + "\n\n----------------\n\n" + j0);
 							} else { System.out.println("normal\n" + j);
 							  System.out.println("\n\n\n computed " + j0); }
 						} else {
 							// TODO pi with EDs
-							/* Instance j0 = Chase.pi(m, i);
+							/*
+							 Instance j0 = Chase.pi(m, i);
 							
 							if (!Instance.quickCompare(j, j0)) {
-								throw new FQLException("Comparison failed");
+								throw new FQLException("Comparison failed\n\n" + j + "\n\n----------------\n\n" + j0);
 							} else { System.out.println("normal\n" + j);
 							  System.out.println("\n\n\n computed " + j0); }
-							*/
+						*/	
 						}
 					}
 				}
 
-			} catch (Throwable e) {
-				e.printStackTrace();
-			}
+			//} catch (Throwable e) {
+			//	e.printStackTrace();
+			//}
 
 			// try {
 			// for (Decl d : p.decls) { //double check pi

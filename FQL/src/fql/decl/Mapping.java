@@ -1086,7 +1086,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			t.addTab("Sigma", quickView(x.second));
 			t.addTab("Pi", quickView(x.third));
 			t.addTab("Delta", quickView(x.first));
-
+			
 			ret.add(t);
 
 		} catch (FQLException e) {
@@ -1175,16 +1175,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		// TODO: check deltas, sigmas, pis, obey EDs
 
 		return new Triple<>(delta, sigma, pi);
-		/*
-		 * String s = "(note: these are speculative)\n\n"; int i = 0; for
-		 * (EmbeddedDependency d : l) { if (i++ > 0) { s += "\n\n"; } s +=
-		 * d.toString(); } JTextArea area = new JTextArea(s); area.setFont(new
-		 * Font("Courier", Font.PLAIN, 13)); JScrollPane jsp = new
-		 * JScrollPane(area); area.setWrapStyleWord(true);
-		 * area.setLineWrap(true);
-		 * jsp.setBorder(BorderFactory.createEmptyBorder()); ret.add(jsp);
-		 * return ret;
-		 */
+	
 	}
 
 	/*

@@ -315,7 +315,7 @@ public class EmbeddedDependency {
 		}
 		
 		ret += " -> ";
-		if (exists.size() > 0) {
+		//if (exists.size() > 0) {
 			ret += "exists ";
 			i = 0;
 			for (String s : exists) {
@@ -325,7 +325,7 @@ public class EmbeddedDependency {
 				ret += s;
 			}
 			ret += ", ";
-		}
+		//}
 		
 		i = 0;
 		for (Pair<String, String> s : egd) {

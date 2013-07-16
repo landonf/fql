@@ -142,11 +142,11 @@ public class Signature implements Viewable<Signature> {
 			Path rhs = new Path(this, equiv.second);
 			if (!lhs.source.equals(rhs.source)) {
 				throw new FQLException("source object mismatch " + lhs
-						+ " and " + rhs);
+						+ " and " + rhs + " in " + name0);
 			}
 			if (!lhs.target.equals(rhs.target)) {
 				throw new FQLException("target object mismatch " + lhs
-						+ " and " + rhs);
+						+ " and " + rhs + " in " + name0);
 			}
 			Eq eq = new Eq(lhs, rhs);
 			eqs.add(eq);
@@ -1135,6 +1135,7 @@ public class Signature implements Viewable<Signature> {
 			ed = new EmbeddedDependency(forall, exists, where, tgd, egd);
 			ret.add(ed);	
 		}
+		
 		
 		for (Eq eq : eqs) {
 			ret.add(EmbeddedDependency.eq(pre, eq.lhs, eq.rhs));
