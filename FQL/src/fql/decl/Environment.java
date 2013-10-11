@@ -311,14 +311,19 @@ public class Environment {
 		return colors0[index++];
 	}
 
-	private void addSchema(SignatureDecl schemaDecl) throws FQLException {
-		List<Triple<String, String, String>> arrows = schemaDecl.arrows;
-		String name = schemaDecl.name;
-		List<Pair<List<String>, List<String>>> eqs = schemaDecl.eqs;
+	private void addSchema(SignatureDecl schemaDecl0) throws FQLException {
+		if (schemaDecl0 instanceof SignatureDeclConst) {
+			SignatureDeclConst schemaDecl = (SignatureDeclConst) schemaDecl0;
+			List<Triple<String, String, String>> arrows = schemaDecl.arrows;
+			String name = schemaDecl.name;
+			List<Pair<List<String>, List<String>>> eqs = schemaDecl.eqs;
 
-		Signature signature = new Signature(schemaDecl.name, schemaDecl.nodes,
+			Signature signature = new Signature(schemaDecl.name, schemaDecl.nodes,
 				schemaDecl.attrs, arrows, eqs);
-		signatures.put(name, signature);
+			signatures.put(name, signature);
+		} else {
+			throw new RuntimeException();
+		}
 	}
 
 	private void addQuery(QueryDecl queryDecl) throws FQLException {
