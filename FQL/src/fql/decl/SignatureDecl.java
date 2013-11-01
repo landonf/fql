@@ -1,10 +1,5 @@
 package fql.decl;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import fql.Pair;
-import fql.Triple;
 
 /**
  * 

@@ -18,21 +18,16 @@ import fql.cat.CommaCat;
 import fql.cat.FinCat;
 import fql.cat.FinFunctor;
 import fql.decl.Attribute;
-import fql.decl.ConstantInstanceDecl;
-import fql.decl.Decl;
 import fql.decl.Edge;
 import fql.decl.Environment;
 import fql.decl.EvalDSPInstanceDecl;
-import fql.decl.EvalInstanceDecl;
 import fql.decl.ExternalDecl;
 import fql.decl.Instance;
 import fql.decl.Int;
 import fql.decl.Mapping;
+import fql.decl.NewestFQLProgram;
 import fql.decl.Node;
 import fql.decl.Path;
-import fql.decl.Program;
-import fql.decl.Query;
-import fql.decl.RelationalizeDecl;
 import fql.decl.Signature;
 import fql.decl.Type;
 import fql.decl.Varchar;
@@ -43,16 +38,18 @@ import fql.decl.Varchar;
  *
  * PSM generator.
  */
-public class PSMGen {
+public class PSMGen  /* implements PolyVisitor<Poly<Unit, NewSigConst>, NewInstConst, List<PSM>, Unit>, 
+	NewInstConstVisitor<List<PSM>, Signature> */
+{
 
 	public static List<PSM> guidify(String pre0, Signature sig) throws FQLException {	
 		// System.out.println("GUIDifying " + pre0);
 		List<PSM> ret = new LinkedList<>();
 
-		if (DEBUG.DO_NOT_GUIDIFY) {
-			return ret;
-		}
-		
+//		if (DEBUG.DO_NOT_GUIDIFY) {
+//			return ret;
+//		}
+//		
 		Map<String, String> guid_attrs = new HashMap<>();
 		Map<String, String> twocol_attrs = new HashMap<>();
 
@@ -224,9 +221,10 @@ public class PSMGen {
 		return new Flower(select, from, where);
 	}
 
-	public static List<PSM> compile0(Environment env, Program prog)
+	public static List<PSM> compile0(Environment env, NewestFQLProgram init)
 			throws FQLException {
 		List<PSM> ret = new LinkedList<>();
+		/*
 		for (Decl d : prog.decls) {
 			if (d instanceof ConstantInstanceDecl) {
 				ret.addAll(addInstance(env, (ConstantInstanceDecl) d));
@@ -247,15 +245,16 @@ public class PSMGen {
 				// cannot throw - must ignore mappings, schemas, etc, throw new RuntimeException();
 			}
 		}
+		*/
 		return ret;
 	}
 
-	public static String compile(Environment env, Program prog)
+	public static String compile(Environment env, NewestFQLProgram init)
 			throws FQLException {
-		return DEBUG.prelude + "\n\n" + prettyPrint(compile0(env, prog));
+		return DEBUG.prelude + "\n\n" + prettyPrint(compile0(env, init));
 	}
 
-	private static String prettyPrint(List<PSM> l) {
+	public static String prettyPrint(List<PSM> l) {
 		String ret = "";
 		for (PSM p : l) {
 			String s = p.toPSM();
@@ -266,9 +265,9 @@ public class PSMGen {
 		}
 		return ret;
 	}
-
+/*
 	private static List<PSM> addInstance(Environment env, EvalInstanceDecl d) throws FQLException {
-		List<PSM> ret = new LinkedList<>();
+/*		List<PSM> ret = new LinkedList<>();
 
 		String inst = d.inst;
 		String name = d.name;
@@ -278,31 +277,31 @@ public class PSMGen {
 		Mapping proj = q.project;
 		Mapping join = q.join;
 		Mapping un = q.union;
-		
+		*/
 		//System.out.println(q);
 		
-		EvalDSPInstanceDecl delta = new EvalDSPInstanceDecl(name + "_tempdelta", "delta", proj.name, inst, proj.source.name0);
-		EvalDSPInstanceDecl pi = new EvalDSPInstanceDecl(name + "_temppi", "pi", join.name, name + "_tempdelta", join.target.name0);
-		EvalDSPInstanceDecl sigma = new EvalDSPInstanceDecl(name, "sigma", un.name, name + "_temppi", un.target.name0);
-		
+	//	EvalDSPInstanceDecl delta = new EvalDSPInstanceDecl(name + "_tempdelta", "delta", proj.name, inst, proj.source.name0);
+//		EvalDSPInstanceDecl pi = new EvalDSPInstanceDecl(name + "_temppi", "pi", join.name, name + "_tempdelta", join.target.name0);
+	//	EvalDSPInstanceDecl sigma = new EvalDSPInstanceDecl(name, "sigma", un.name, name + "_temppi", un.target.name0);
+	/*	throw new RuntimeException();
 		
 //		System.out.println(delta);
 //		System.out.println(pi);
 //		System.out.println(sigma);
 //		//ret.addAll(makeTables(name + "_tempdelta", proj.source));
-		ret.addAll(addInstance(env, delta));
+		//ret.addAll(addInstance(env, delta));
 		//ret.addAll(makeTables(name + "_temppi", join.target));
-		ret.addAll(addInstance(env, pi));
+		//ret.addAll(addInstance(env, pi));
 		//ret.addAll(makeTables(name, un.target));
-		ret.addAll(addInstance(env, sigma));
-		ret.addAll(dropTables(name + "_tempdelta", proj.source));
-		ret.addAll(dropTables(name + "_temppi", join.target));
-		ret.addAll(dropTables(name + "_tempsigma", un.target));
+	//	ret.addAll(addInstance(env, sigma));
+//		ret.addAll(dropTables(name + "_tempdelta", proj.source));
+	//	ret.addAll(dropTables(name + "_temppi", join.target));
+	//	ret.addAll(dropTables(name + "_tempsigma", un.target));
 		//System.out.println("zzzzzzz" + ret);
-		return ret;
+		//return ret;
 	}
-
-	private static List<PSM> dropTables(String name, Signature sig) {
+*/
+	public static List<PSM> dropTables(String name, Signature sig) {
 		List<PSM> ret = new LinkedList<>();
 
 		for (Node n : sig.nodes) {		
@@ -317,7 +316,7 @@ public class PSMGen {
 
 		return ret;
 	}
-
+/*
 	private static List<PSM> addInstance(Environment env, EvalDSPInstanceDecl d)
 			throws FQLException {
 		List<PSM> ret = new LinkedList<>();
@@ -354,51 +353,63 @@ public class PSMGen {
 
 		return ret;
 	}
-
-	private static List<PSM> addInstance(Environment env, ConstantInstanceDecl d)
+*/
+	public static List<PSM> doConst(String dst, Signature sig, List<Pair<String, List<Pair<Object, Object>>>> data)
 			throws FQLException {
 		List<PSM> ret = new LinkedList<>();
 
-		Signature sig = env.signatures.get(d.type);
-		Instance inst = new Instance(d.name, sig, d.data);
+//		Signature sig = env.signatures.get(d.type);
+	//	Instance inst = new Instance(sig, d.data);
 
-		ret.addAll(makeTables(d.name, sig, false));
+	//	ret.addAll(makeTables(dst, sig, false));
 
 		for (Node n : sig.nodes) {
-			ret.add(populateTable(d.name, n.string, inst.data.get(n.string)));
+			ret.add(populateTable(dst, n.string, lookup(data, n.string)));
 		}
 		for (Edge e : sig.edges) {
-			ret.add(populateTable(d.name, e.name, inst.data.get(e.name)));
+			ret.add(populateTable(dst, e.name, lookup(data, e.name)));
 		}
 		for (Attribute<Node> a : sig.attrs) {
-			ret.add(populateTable(d.name, a.name, inst.data.get(a.name)));
+			ret.add(populateTable(dst, a.name, lookup(data, a.name)));
 		}
 
-		 ret.addAll(guidify(d.name, sig));
+		 ret.addAll(guidify(dst, sig));
 
 		return ret;
 	}
+	
+	public static Set<Pair<Object, Object>> lookup(List<Pair<String, List<Pair<Object, Object>>>> data, String str) {
+		for (Pair<String, List<Pair<Object, Object>>> k : data) {
+			if (k.first.equals(str)) {
+				return new HashSet<>(k.second);
+			}
+		}
+		throw new RuntimeException();
+	}
+	
+	//TODO remove validate using EDs
 
-	private static List<PSM> addInstance(Environment env, ExternalDecl d)
+	public static List<PSM> doExternal(Signature sig, String in, String out)
 			throws FQLException {
 		List<PSM> ret = new LinkedList<>();
 
-		Signature sig = env.signatures.get(d.type);
-		Instance inst = new Instance(d.name, sig);
+		Instance inst = new Instance(sig);
 
-		ret.addAll(makeTables(d.name, sig, true));
-
+		System.out.println("externaml " + in + " out " + out);
+		ret.addAll(makeTables(in, sig, true));
+		//ret.addAll(makeTables(out, sig, false));
+		
 		for (Node n : sig.nodes) {
-			ret.add(populateTable(d.name, n.string, inst.data.get(n.string)));
+			ret.add(new InsertSQL(out + "_" + n.string, new CopyFlower(in + "_" + n.string)));
 		}
 		for (Edge e : sig.edges) {
-			ret.add(populateTable(d.name, e.name, inst.data.get(e.name)));
+			ret.add(new InsertSQL(out + "_" + e.name, new CopyFlower(in + "_" + e.name)));
 		}
 		for (Attribute<Node> a : sig.attrs) {
-			ret.add(populateTable(d.name, a.name, inst.data.get(a.name)));
+			ret.add(new InsertSQL(out + "_" + a.name, new CopyFlower(in + "_" + a.name)));
 		}
 
-		 ret.addAll(guidify(d.name, sig));
+		ret.addAll(guidify(out, sig));
 
 		return ret;
 	}
@@ -421,7 +432,7 @@ public class PSMGen {
 		return new InsertValues(iname + "_" + tname, attrs, values);
 	}
 
-	private static List<PSM> makeTables(String name, Signature sig, boolean suppress) {
+	public static List<PSM> makeTables(String name, Signature sig, boolean suppress) {
 		List<PSM> ret = new LinkedList<>();
 
 		for (Node n : sig.nodes) {
@@ -522,7 +533,7 @@ public class PSMGen {
 		return new Flower(select, from, where);
 	}
 
-	public static List<PSM> SIGMA(Environment env, Mapping F, String pre, String inst)
+	public static List<PSM> SIGMA(Mapping F, String pre, String inst)
 			throws FQLException {
 		List<PSM> ret = new LinkedList<>();
 		
@@ -537,7 +548,7 @@ public class PSMGen {
 		List<PSM> ret = new LinkedList<>();
 
 		if (!FinFunctor.isDiscreteOpFib(F.toFunctor2().first)) {
-			throw new FQLException("Not a discrete op-fibration: " + F.name);
+			throw new FQLException("Not a discrete op-fibration" /* + F */);
 		}
 
 		for (Node d : D.nodes) {
@@ -1047,6 +1058,105 @@ public class PSMGen {
 		return ret;
 	}
 
+	/*
+	@Override
+	public List<PSM> visit(Unit env,
+			Zero<Poly<Unit, NewSigConst>, NewInstConst> e) {
+		throw new RuntimeException();
+	}
+
+	@Override
+	public List<PSM> visit(Unit env,
+			One<Poly<Unit, NewSigConst>, NewInstConst> e) {
+		throw new RuntimeException();
+	}
+
+	@Override
+	public List<PSM> visit(Unit env,
+			Plus<Poly<Unit, NewSigConst>, NewInstConst> e) {
+		throw new RuntimeException();
+	}
+
+	@Override
+	public List<PSM> visit(Unit env,
+			Times<Poly<Unit, NewSigConst>, NewInstConst> e) {
+		throw new RuntimeException();
+	}
+
+	@Override
+	public List<PSM> visit(Unit env,
+			Exp<Poly<Unit, NewSigConst>, NewInstConst> e) {
+		throw new RuntimeException();
+	}
+
+	@Override
+	public List<PSM> visit(Unit env,
+			Two<Poly<Unit, NewSigConst>, NewInstConst> e) {
+		throw new RuntimeException();
+	}
+
+	@Override
+	public List<PSM> visit(Unit env,
+			Var<Poly<Unit, NewSigConst>, NewInstConst> e) {
+		return new LinkedList<>();
+	}
+
+	@Override
+	public List<PSM> visit(Unit env,
+			Const<Poly<Unit, NewSigConst>, NewInstConst> e) {
+		return e.c.accept(e.t.accept(new Unit(), new ToSigVisitor()), PSMGen.this);
+	}
+
+	@Override
+	public List<PSM> visit(Signature env, Fin e) {
+		//e.
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<PSM> visit(Signature env, Delta e) {
+		//e.
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<PSM> visit(Signature env, Sigma e) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<PSM> visit(Signature env, Pi e) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<PSM> visit(Signature env, fql.decl.NewFQLProgram.FullSigma e) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<PSM> visit(Signature env, Relationalize e) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<PSM> visit(Signature env, External e) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	*/
+
+	//
+	
+	
+
 	// private static Map<Triple<Node, Node, Arr<Node, Path>>, String> deltaObj(
 	// FinFunctor<Triple<Node, Node, Arr<Node, Path>>, Pair<Arr<Node, Path>,
 	// Arr<Node, Path>>, Node, Path> projB) {
@@ -1073,5 +1183,40 @@ public class PSMGen {
 	//
 	// return ret;
 	// }
+	
+	private static List<Pair<Object, Object>> gather0(Set<Map<String, Object>> v) {
+		List<Pair<Object, Object>> ret = new LinkedList<>();
+
+		for (Map<String, Object> o : v) {
+			ret.add(new Pair<>(o.get("c0"), o.get("c1")));
+		}
+
+		return ret;
+	}
+
+	public static List<Pair<String, List<Pair<Object, Object>>>> gather(
+			String pre, Signature sig,
+			Map<String, Set<Map<String, Object>>> state) {
+		List<Pair<String, List<Pair<Object, Object>>>> ret = new LinkedList<>();
+
+		for (Node n : sig.nodes) {
+			Set<Map<String, Object>> v = state.get(pre + "_" + n.string);
+			if (v == null) {
+				throw new RuntimeException("Missing: " + pre + "_" + n.string
+						+ " in " + state);
+			}
+			ret.add(new Pair<>(n.string, gather0(v)));
+		}
+		for (Edge e : sig.edges) {
+			Set<Map<String, Object>> v = state.get(pre + "_" + e.name);
+			ret.add(new Pair<>(e.name, gather0(v)));
+		}
+		for (Attribute<Node> a : sig.attrs) {
+			Set<Map<String, Object>> v = state.get(pre + "_" + a.name);
+			ret.add(new Pair<>(a.name, gather0(v)));
+		}
+
+		return ret;
+	}
 
 }

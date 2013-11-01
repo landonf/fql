@@ -18,7 +18,7 @@ import fql.decl.Signature;
  *         parsers for json
  */
 public class JSONParsers {
-
+/*
 	public static void main(String[] args) {
 		try {
 			String s = JOptionPane.showInputDialog(" foo ");
@@ -330,7 +330,7 @@ public class JSONParsers {
 
 		}
 	}
-
+/*
 	public static class JSONSigParser implements RyanParser<Signature> {
 
 		boolean outerparens;
@@ -398,7 +398,8 @@ public class JSONParsers {
 
 		}
 	}
-
+*/
+	/*
 	public static class RelationParser
 			implements
 			RyanParser<Pair<List<Pair<Pair<String, String>, String>>, List<Pair<Pair<String, String>, String>>>> {
@@ -462,5 +463,5 @@ public class JSONParsers {
 		}
 
 	}
-
+*/
 }

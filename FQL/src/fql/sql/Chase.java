@@ -992,7 +992,7 @@ public class Chase {
 			res0.put(n.name, res.get("dst_" + n.name));
 		}
 
-		Instance ret = new Instance("chased_" + i.name, m.target, res0);
+		Instance ret = new Instance(m.target, res0);
 
 		return ret;
 
@@ -1034,7 +1034,7 @@ public class Chase {
 			res0.put(n.name, res.get("src_" + n.name));
 		}
 
-		Instance ret = new Instance("chased_" + i.name, m.source, res0);
+		Instance ret = new Instance(m.source, res0);
 
 		return ret;
 

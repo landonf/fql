@@ -1,11 +1,8 @@
 package fql.decl;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.Paint;
-import java.awt.Stroke;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -15,14 +12,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
-import javax.swing.SwingConstants;
-
-import org.apache.commons.collections15.Transformer;
 
 import edu.uci.ics.jung.algorithms.layout.ISOMLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
@@ -33,8 +24,6 @@ import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
-import fql.DEBUG;
-import fql.DEBUG.Intermediate;
 import fql.FQLException;
 import fql.Fn;
 import fql.Pair;
@@ -51,7 +40,6 @@ import fql.cat.SetFunTrans;
 import fql.cat.Value;
 import fql.cat.Value.VALUETYPE;
 import fql.gui.Viewable;
-import fql.sql.PSMGen;
 
 /**
  * 
@@ -101,7 +89,7 @@ public class Query implements Viewable<Query> {
 		this.name = name;
 		switch (d.kind) {
 		case COMPOSE : 
-			isId = false;
+/*			isId = false;
 			Query m1 = env.getQuery(d.q1);
 			Query m2 = env.getQuery(d.q2);
 //			System.out.println("composing " + m1 + " and " + m2);
@@ -125,7 +113,8 @@ public class Query implements Viewable<Query> {
 			this.name = q.name;
 			join.okForPi();
 			union.okForSigma();
-			break; 
+			break;  */
+			throw new RuntimeException();
 		case ID : 
 			isId = true;
 			Signature s = env.getSchema(d.schema);
@@ -161,7 +150,7 @@ boolean isId;
 	public JPanel view() throws FQLException {
 		JPanel p = new JPanel(new GridLayout(3,1));
 		p.setBorder(BorderFactory.createEmptyBorder());
-		
+		/*
 		JPanel q  = project.view();
 		q.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), "Delta " + project.name + " : " + project.target.name0 + " -> " + project.source.name0));
 		p.add(q);
@@ -173,7 +162,7 @@ boolean isId;
 		q = union.view();
 		q.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), "Sigma " + union.name + " : " + union.source.name0 + " -> " + union.target.name0));
 		p.add(q);
-		
+		*/
 		return p;
 	}
 
@@ -182,7 +171,7 @@ boolean isId;
 			String ret = toString();
 			
 			JPanel tap = new JPanel(new GridLayout(2,2));
-
+/*
 			JTextArea ta = new JTextArea(ret);
 			ta.setWrapStyleWord(true);
 			ta.setLineWrap(true);
@@ -241,18 +230,19 @@ boolean isId;
 			p4.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "Sigma " + union.name + " : " + union.source.name0 + " -> " + union.target.name0));
 			p4.add(xxx4);
 			tap.add(p4);	
-	
+	*/
 			return tap;
 	}
 
 
 	@Override
 	public String toString() {
-		String s = "query " + name + " : " + getSource().name0 + " -> " + getTarget().name0 + " = ";
-		if (isId) {
-			return s + "id " + getSource().name0;
-		}
-		return s + "delta " + project.name + " pi " + join.name + " sigma " + union.name;
+//		String s = "query " + name + " : " + getSource().name0 + " -> " + getTarget().name0 + " = ";
+//		if (isId) {
+//			return s + "id " + getSource().name0;
+//		}
+		throw new RuntimeException();
+//		return "delta " + project + " pi " + join + " sigma " + union;
 	}
 
 	/**
@@ -311,6 +301,7 @@ boolean isId;
 	public Graph<String, String> legend() {
 		Graph<String, String> ret = new DirectedSparseMultigraph<String, String>();
 		
+		/*
 		ret.addVertex(getSource().name0);
 		ret.addVertex(getTarget().name0);
 		ret.addVertex(join.source.name0);
@@ -319,7 +310,7 @@ boolean isId;
 		ret.addEdge(project.name, join.source.name0, getSource().name0); 
 		ret.addEdge(join.name, join.source.name0, join.target.name0); 
 		ret.addEdge(union.name, join.target.name0, union.target.name0); 
-		
+		*/
 		return ret;
 	}
 	
@@ -336,15 +327,15 @@ boolean isId;
 		VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(layout);
 		vv.setPreferredSize(new Dimension(500, 100));
 		// Setup up a new vertex to paint transformer...
-		Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
-			public Paint transform(String i) {
-				return which(i);
-			}
-
-			private Color which(String t) {
-				return env.colors.get(t);
-			}
-		};
+//		Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
+//			public Paint transform(String i) {
+//				return which(i);
+//			}
+//
+//			private Color which(String t) {
+//				return env.colors.get(t);
+//			}
+//		};
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
         gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
         vv.setGraphMouse(gm);
@@ -353,7 +344,7 @@ boolean isId;
         vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller<String>());
         vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<String>());
         
-		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+	//	vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 		//vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
 		
 		
@@ -366,7 +357,7 @@ boolean isId;
 	
 	public JPanel lowerComp(final Environment env) {
 		JPanel pan = new JPanel(new GridLayout(1,4));
-		
+/*		
 		JLabel l1 = new JLabel(getSource().name0 + "    <-----");
 		l1.setBackground(env.colors.get(getSource().name0));
 		l1.setOpaque(true);
@@ -393,6 +384,8 @@ boolean isId;
 		pan.add(l1);
 		
 //		pan.setMa`
+ 
+ */
 		return pan;
 	}
 	@Override
@@ -423,6 +416,8 @@ boolean isId;
 	}
 	
 	public  JPanel doView(final Environment env, Graph<String,String> sgv) {
+		return null;
+		/*
 		// Layout<V, E>, BasicVisualizationServer<V,E>
 		//Layout<String, String> layout = new FRLayout<>(sgv);
 		//Layout<String, String> layout = new KKLayout(sgv);
@@ -517,6 +512,7 @@ boolean isId;
 	//	vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
 		
 		return vv;
+		*/
 	}
 	
 	public Graph<String,String> build() {
@@ -535,6 +531,7 @@ boolean isId;
 		for (Node n : union.target.nodes) {
 			g2.addVertex("@union_target" + "." + n.string);
 		}
+		/*
 		if (DEBUG.SHOW_QUERY_PATHS) {
 			for (Edge e : project.target.edges) {
 				g2.addEdge("@project_target" + "." + e.name, "@project_target" + "." + e.source.string, "@project_target" + "." + e.target.string);
@@ -550,7 +547,7 @@ boolean isId;
 			}
 			
 		}
-		
+		*/
 				
 		for (Node n : project.nm.keySet()) {
 			Node m = project.nm.get(n);
@@ -806,13 +803,13 @@ boolean isId;
 				
 		SemQuery<Triple<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, Pair<Arr<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>>, Arr<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>>>, ObjS, ArrowS, Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjC, ArrowC>, ObjU, ArrowU> ret = new SemQuery<>(project, join, union);
 
-		if (DEBUG.INTERMEDIATE == Intermediate.ALL) {
-			env.signatures.put("Aprime", Aprime.toSig("Aprime").first);
-			env.signatures.put("Bprime", Bprime.toSig("Bprime").first);
-			env.signatures.put("N", N.toSig("Nprime").first);
-			env.signatures.put("Dprime", Dprime.toSig("Dprime").first);
-			env.signatures.put("M", M.toSig("MMM").first);
-		}
+//		if (DEBUG.INTERMEDIATE == Intermediate.ALL) {
+//			env.signatures.put("Aprime", Aprime.toSig("Aprime").first);
+//			env.signatures.put("Bprime", Bprime.toSig("Bprime").first);
+//			env.signatures.put("N", N.toSig("Nprime").first);
+//			env.signatures.put("Dprime", Dprime.toSig("Dprime").first);
+//			env.signatures.put("M", M.toSig("MMM").first);
+//		}
 		
 		return ret;
 	}
@@ -898,7 +895,7 @@ boolean isId;
 //		System.out.println(yyy);
 //		System.out.println(proj1.first.target);
 //		System.out.println(q1.getSource());
-		Mapping xyz = new Mapping(name + "iso1",proj1.first.target, q1.getSource(),  xxx, zzz, yyy);
+		Mapping xyz = new Mapping(/* name + "iso1", */proj1.first.target, q1.getSource(),  xxx, zzz, yyy);
 		
 	//	System.out.println("qdelta from " + proj1.first + "\nand\n" + xyz);
 		Mapping newproj = Mapping.compose(name + "_delta", proj1.first, xyz);
@@ -932,7 +929,7 @@ boolean isId;
 //			}
 			yyy.add(new Pair<>(e.name, x2.arr.asList()));
 		}
-		xyz = new Mapping(name + "iso2",union1.first.target, q2.getTarget(),  xxx, zzz, yyy);
+		xyz = new Mapping(/*name + "iso2",*/union1.first.target, q2.getTarget(),  xxx, zzz, yyy);
 		
 		Mapping newunion = Mapping.compose(name + "_sigma", union1.first, xyz);
 		env.mappings.put(name + "_sigma", newunion);
@@ -945,11 +942,12 @@ boolean isId;
 	public JPanel join() {
 		return null;
 	}
-
+/*
 	@Override
 	public JPanel json() {
 		return null;
 	}
+	*/
 
 	@Override
 	public JPanel denotation() throws FQLException {

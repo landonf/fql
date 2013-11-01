@@ -4,7 +4,6 @@ import java.awt.BasicStroke;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.Paint;
 import java.awt.Stroke;
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,7 +18,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.UIManager;
 
 import org.apache.commons.collections15.Transformer;
 
@@ -37,12 +35,10 @@ import fql.FQLException;
 import fql.Fn;
 import fql.Pair;
 import fql.Triple;
-import fql.Unit;
 import fql.cat.Arr;
 import fql.cat.Denotation;
 import fql.cat.FinCat;
 import fql.gui.Viewable;
-import fql.parse.PrettyPrinter;
 import fql.sql.EmbeddedDependency;
 
 /**
@@ -51,33 +47,33 @@ import fql.sql.EmbeddedDependency;
  * 
  *         Signatures.
  */
-public class Signature implements Viewable<Signature> {
+public class Signature  {
 
 	public List<Node> nodes;
 	public List<Edge> edges;
 	public List<Attribute<Node>> attrs;
 
 	public Set<Eq> eqs;
-	public String name0;
+//	public String name0;
 
-	public Signature clone(String newname) {
+	public Signature clone() {
 		Signature s = new Signature();
 		s.nodes = new LinkedList<>(nodes);
 		s.edges = new LinkedList<>(edges);
 		s.attrs = new LinkedList<>(attrs);
 		s.eqs = new HashSet<>(eqs);
-		s.name0 = newname;
+	//	s.name0 = newname;
 		return s;
 	}
 	
-	public Signature(String n, List<String> nodes_str,
+	public Signature(/* String n, */ List<String> nodes_str,
 			List<Triple<String, String, String>> attrs_str,
 			List<Triple<String, String, String>> arrows,
 			List<Pair<List<String>, List<String>>> equivs) throws FQLException {
 		Set<Node> nodesA = new HashSet<>();
 		Set<Edge> edgesA = new HashSet<>();
 		Set<Attribute<Node>> attrsA = new HashSet<>();
-		name0 = n;
+	//	name0 = n;
 
 		Set<String> seen = new HashSet<String>();
 		for (String s : nodes_str) {
@@ -100,11 +96,11 @@ public class Signature implements Viewable<Signature> {
 
 			Node source_node = lookup(source, nodesA);
 			if (source_node == null) {
-				throw new FQLException("Missing node " + source + " in " + n);
+				throw new FQLException("Missing node " + source /* + " in " + n */);
 			}
 			Node target_node = lookup(target, nodesA);
 			if (target_node == null) {
-				throw new FQLException("Missing node " + target + " in " + n);
+				throw new FQLException("Missing node " + target /* + " in " + n */);
 			}
 			// nodesA.add(target_node);
 			Edge e = new Edge(name, source_node, target_node);
@@ -123,7 +119,7 @@ public class Signature implements Viewable<Signature> {
 
 			Node source_node = lookup(source, nodesA);
 			if (source_node == null) {
-				throw new FQLException("Missing node " + source + " in " + n);
+				throw new FQLException("Missing node " + source /* + " in " + n */);
 			}
 
 			Attribute<Node> a = new Attribute<>(name, source_node, tryParseType(target));
@@ -142,20 +138,22 @@ public class Signature implements Viewable<Signature> {
 			Path rhs = new Path(this, equiv.second);
 			if (!lhs.source.equals(rhs.source)) {
 				throw new FQLException("source object mismatch " + lhs
-						+ " and " + rhs + " in " + name0);
+						+ " and " + rhs ); //+ " in " + name0);
 			}
 			if (!lhs.target.equals(rhs.target)) {
 				throw new FQLException("target object mismatch " + lhs
-						+ " and " + rhs + " in " + name0);
+						+ " and " + rhs ); //+ " in " + name0);
 			}
 			Eq eq = new Eq(lhs, rhs);
 			eqs.add(eq);
 		}
+		
+		//System.out.println(this);
 		if (!DEBUG.ALLOW_INFINITES) {
 			toCategory2();
 		}
 	}
-
+/*
 	public Signature(String n, List<Triple<String, String, String>> arrows,
 			List<Pair<List<String>, List<String>>> equivs) throws FQLException {
 		Set<Node> nodesA = new HashSet<>();
@@ -226,7 +224,7 @@ public class Signature implements Viewable<Signature> {
 			toCategory2();
 		}
 	}
-
+*/
 	private Type tryParseType(String s) {
 		if (s.equals("string")) {
 			return new Varchar();
@@ -235,7 +233,7 @@ public class Signature implements Viewable<Signature> {
 		}
 		return null;
 	}
-
+/*
 	// for json
 	public Signature(
 			List<String> obs,
@@ -319,10 +317,10 @@ public class Signature implements Viewable<Signature> {
 		}
 
 	}
-
-	public Signature(String s, List<Node> n, List<Edge> e, List<Attribute<Node>> a,
+*/
+	public Signature(List<Node> n, List<Edge> e, List<Attribute<Node>> a,
 			Set<Eq> ee) {
-		name0 = s;
+	//	name0 = s;
 		nodes = n;
 		edges = e;
 		eqs = ee;
@@ -403,10 +401,9 @@ public class Signature implements Viewable<Signature> {
 				return node;
 			}
 		}
-		throw new FQLException("Unknown node: " + string + " in " + this);
+		throw new FQLException("Unknown node: " + string);
 	}
 
-	@Override
 	public JPanel view() {
 		Object[][] arr = new Object[eqs.size()][2];
 		int i = 0;
@@ -525,7 +522,7 @@ public class Signature implements Viewable<Signature> {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer("schema " + name0 + " = {\n");
+		StringBuffer sb = new StringBuffer("{\n");
 
 		boolean first = true;
 		sb.append("nodes\n");
@@ -589,7 +586,6 @@ public class Signature implements Viewable<Signature> {
 	// return true;
 	// }
 
-	@Override
 	public JPanel text() {
 		// String s = toString().replace(";", "\n\n;\n\n");
 		// String[] t = s.split(",");
@@ -774,7 +770,7 @@ public class Signature implements Viewable<Signature> {
 				layout);
 		vv.setPreferredSize(new Dimension(600, 400));
 		// Setup up a new vertex to paint transformer...
-		Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
+		/* Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
 			public Paint transform(String i) {
 				if (!isAttribute(i)) {
 					return env.colors.get(name0);
@@ -782,7 +778,7 @@ public class Signature implements Viewable<Signature> {
 					return UIManager.getColor("Panel.background");
 				}
 			}
-		};
+		}; */
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
@@ -806,7 +802,7 @@ public class Signature implements Viewable<Signature> {
 				return bs;
 			}
 		};
-		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+//		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 		vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
 		vv.getRenderContext().setVertexLabelTransformer(
 				new ToStringLabeller<String>());
@@ -851,33 +847,28 @@ public class Signature implements Viewable<Signature> {
 		return false;
 	}
 
-	@Override
 	public JPanel pretty(final Environment env) throws FQLException {
 		return makeViewer(env);
 	}
 
-	@Override
-	public String type() {
-		return "schema";
-	}
+//	public String type() {
+//		return "schema";
+//	}
 
 	@Override
 	/**
 	 * Name-based equality
 	 */
 	public boolean equals(Object o) {
-		if (!(o instanceof Signature)) {
-			return false;
-		}
-		Signature s = (Signature) o;
-		return (s.name0.equals(name0));
+		throw new RuntimeException();
+//		if (!(o instanceof Signature)) {
+//			return false;
+//		}
+//		Signature s = (Signature) o;
+//		return (s.name0.equals(name0));
 	}
 
-	@Override
-	public JPanel join() {
-		return null;
-	}
-
+/*
 	public String tojson() {
 		String ns = PrettyPrinter.sep(",", "[", "]", nodes);
 		String es = PrettyPrinter.sep(",\n", "[", "]", edges);
@@ -895,11 +886,12 @@ public class Signature implements Viewable<Signature> {
 
 		return ret;
 	}
+	*/
 
 	public Instance terminal(String g) throws FQLException {
 		return Instance.terminal(this, g);
 	}
-
+/*
 	@Override
 	public JPanel json() {
 		JTextArea q = new JTextArea(tojson());
@@ -911,10 +903,10 @@ public class Signature implements Viewable<Signature> {
 		p.add(jsc);
 		return p;
 	}
+	*/
 
 	JPanel den = null;
 
-	@Override
 	public JPanel denotation() throws FQLException {
 		if (den == null) {
 			den = new Denotation(this).view();
@@ -923,7 +915,7 @@ public class Signature implements Viewable<Signature> {
 	}
 
 	public Signature onlyObjects() {
-		return new Signature("Obj(" + name0 + ")", nodes,
+		return new Signature(nodes,
 				new LinkedList<Edge>(), new LinkedList<Attribute<Node>>(),
 				new HashSet<Eq>());
 	}
@@ -946,7 +938,7 @@ public class Signature implements Viewable<Signature> {
 		return a;
 	}
 
-	@Override
+	/*
 	public JPanel initial() throws FQLException {
 		List<Pair<String, List<Pair<Object, Object>>>> b = new LinkedList<>();
 		for (Node n : nodes) {
@@ -964,18 +956,9 @@ public class Signature implements Viewable<Signature> {
 		Instance i = new Instance("", this, b);
 		return i.join();
 	}
+	*/
 
-	@Override
-	public JPanel groth() throws FQLException {
-		return null;
-	}
-
-	@Override
-	public JPanel observables() {
-		return null;
-	}
 	
-	@Override
 	public JPanel constraint() {
 		List<EmbeddedDependency> l = toED("");
 		
@@ -1195,7 +1178,7 @@ public class Signature implements Viewable<Signature> {
 			cc.add(new Pair<>(lhs, rhs));
 		}
 		
-		return new Signature(n, o, a, e, cc);
+		return new Signature(/*n, */o, a, e, cc);
 	}
 
 	

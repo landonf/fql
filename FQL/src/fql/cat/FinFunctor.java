@@ -203,7 +203,7 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 //		System.out.println("am0 is " + am0);
 //		System.out.println("srcSig is " + srcSig);
 //		System.out.println("dstSig is " + dstSig);
-		Mapping m = new Mapping(n, srcSig, dstSig, nm, am0, em);
+		Mapping m = new Mapping(/*n,*/ srcSig, dstSig, nm, am0, em);
 		return new Triple<>(m, src, dst);
 	}
 

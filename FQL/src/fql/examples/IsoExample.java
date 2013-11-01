@@ -22,7 +22,7 @@ public class IsoExample extends Example {
 	String t = "\n\ninstance I : C  = {"
 			+"\n nodes A -> {1,2}, B -> {a,b};"
 			+"\n attributes;"
-			+"\n arrows f -> {(1,a),(2,b)}, g -> {(a,1),(b,2)};\n}";
+			+"\n arrows f -> {(1,a),(2,b)}, g -> {(a,1),(b,2)};\n} C";
 		
 
 }

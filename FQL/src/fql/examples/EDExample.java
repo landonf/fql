@@ -30,13 +30,13 @@ public class EDExample extends Example {
 + "\nnodes S -> T1;"
 + "\nattributes;"
 + "\narrows;"
-+ "\n}"
++ "\n} S T"
 + "\n"
 + "\ninstance I : S = {"
 + "\nnodes S -> {1,2,3};"
 + "\nattributes;"
 + "\narrows;"
-+ "\n}"
++ "\n} S"
 + "\n"
 + "\ninstance J : T = pi F I"
 + "\n/*"
@@ -51,7 +51,7 @@ public class EDExample extends Example {
 + "\n ;"
 + "\narrows"
 + "\nf -> { (6,4), (5,4), (7,4) };"
-+ "\n}"
++ "\n} T"
 + "\n*/"
 + "\n"
 + "\ninstance K : T = SIGMA F I"
@@ -67,7 +67,7 @@ public class EDExample extends Example {
 + "\narrows"
 + "\nf -> { (27,24), (25,23), (26,22) };"
 + "\n}"
-+ "\n*/";
++ "\n T*/";
 
 	
 //	String s = "/* "

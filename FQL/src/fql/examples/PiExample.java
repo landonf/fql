@@ -31,7 +31,7 @@ public class PiExample extends Example {
 					+ "\n arrows"
 					+ "\n	c ->  { (c1A,c2x), (c1B,c2x), (c1C,c2x) },"
 					+ "\n	cc -> { (c1A,c2x), (c1B,c2x), (c1C,c2y) };"
-					+ "\n}"
+					+ "\n} C"
 					+ "\n"
 					+ "\nschema D = { "
 					+ "\n nodes"
@@ -54,7 +54,7 @@ public class PiExample extends Example {
 					+ "\n  arrows"
 					+ "\n  c  -> D1.d.ddd,"
 					+ "\n  cc -> D1.dd.ddd;"
-					+ "\n}"
+					+ "\n} C D"
 					+ "\n"
 					+ "\ninstance J : D = pi F I";
 

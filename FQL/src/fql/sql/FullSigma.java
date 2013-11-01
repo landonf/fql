@@ -9,8 +9,8 @@ import java.util.Set;
 import fql.FQLException;
 import fql.Pair;
 import fql.cat.Denotation;
+import fql.decl.Driver;
 import fql.decl.Edge;
-import fql.decl.Environment;
 import fql.decl.Instance;
 import fql.decl.Mapping;
 import fql.decl.Node;
@@ -43,11 +43,17 @@ public class FullSigma extends PSM {
 	public void exec(Map<String, Set<Map<String, Object>>> state) {
 		Signature C = f.source;
 		Signature D = f.target;
-		List<Pair<String, List<Pair<Object, Object>>>> I0 = Environment.gather(inst, C, state);
+		List<Pair<String, List<Pair<Object, Object>>>> I0 = PSMGen.gather(inst, C, state);
 
 		try {
-			Instance I = new Instance(pre, C, I0);
-			Instance J = new Denotation(f, I).sigma();
+			Instance I = new Instance(C, I0);
+			Denotation d = new Denotation(f, I);
+		//	System.out.println("Exucuting fs on " + I);
+			//System.out.println("GUID is " + PSMInterp.guid);
+//			System.out.println(d);
+			Instance J = d.sigma();
+		//	System.out.println("done " + J);
+			//System.out.println("GUID is " + PSMInterp.guid);
 
 			for (Node n : D.nodes) {
 				state.put(pre + "_" + n.string, conv(J.data.get(n.string)));

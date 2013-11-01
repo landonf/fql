@@ -37,7 +37,7 @@ public class TypedPiExample extends Example {
 					+ "\n	att2 -> { (1,Spivak), (2,Wisnesky) },"
 					+ "\n	att3 -> { (1,MIT), (2,Harvard),(3,Leslie) };"
 					+ "\n arrows;"
-					+ "\n}"
+					+ "\n} C"
 					+ "\n"
 					+ "\nschema D = {"
 					+ "\n nodes "
@@ -59,7 +59,7 @@ public class TypedPiExample extends Example {
 					+ "\n	att2 -> a2,"
 					+ "\n	att3 -> a3;"
 					+ "\n arrows;"
-					+ "\n}"
+					+ "\n} C D"
 					+ "\n"
 					+ "\ninstance J : D = pi F I";
 }

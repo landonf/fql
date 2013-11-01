@@ -243,7 +243,7 @@ public class FinCat<Obj, Arrow> {
 //		 System.out.println(attM);
 //		 System.out.println("$$$$$$$$$$$$$$$$$$$$$");
 		
-		Signature ret2 = new Signature(n, objs, attrs0, arrs, 
+		Signature ret2 = new Signature(/*n,*/ objs, attrs0, arrs, 
 				eqs);
 
 		

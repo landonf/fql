@@ -16,6 +16,7 @@ import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
@@ -170,7 +171,7 @@ public class Denotation {
 			}
 		}
 		PSMInterp.guid = _FRESH + 1;
-		return new Instance("result", sig, data);
+		return new Instance(sig, data);
 	}
 	
 	private Set<Pair<Object, Object>> conc(Map<Integer, Integer> t) {
@@ -191,14 +192,14 @@ public class Denotation {
 		 
 		this.sig = f.target;
 		 
-		Signature A = f.source.clone("A");
+		Signature A = f.source.clone();
 		for (Node n : A.nodes) {
 			Edge e = new Edge(n.string + " id", n, n);
 			A.edges.add(e);
 			A.eqs.add(new Eq(new Path(A, n), new Path(A, e)));
 			data.put(n.string + " id", data.get(n.string));
 		}
-		Signature B = f.target.clone("B");
+		Signature B = f.target.clone();
 		for (Node n : B.nodes) {
 			Edge e = new Edge(n.string + " id", n, n);
 			B.edges.add(e);
@@ -213,20 +214,22 @@ public class Denotation {
 		
 		this.A = A;
 		this.B = B;
-		this.F = new Mapping("F", A, B, f.nm, ff); 
-		this.X = new Instance("X", A, data);
+		this.F = new Mapping(A, B, f.nm, ff); 
+		this.X = new Instance(A, data); 
 		this.R = B.eqs;
 		
 		
 		initTables();
 		makeJTables();
 		
-//		JPanel p = view();
-//		JFrame fr = new JFrame("Full Sigma");
-//		fr.setContentPane(p);
-//		fr.pack();
-//		//fr.setSize(600,400);
-//		fr.setVisible(true);
+		/*
+		JPanel p = view();
+		JFrame fr = new JFrame("Full Sigma");
+		fr.setContentPane(p);
+		fr.pack();
+		fr.setSize(600,400);
+		fr.setVisible(true);
+		*/
 		
 		
 	}
@@ -249,7 +252,7 @@ public class Denotation {
 		for (Node n : a.nodes) {
 			obm.add(new Pair<>(n.string, n.string));
 		}
-		return new Mapping("", a, b, obm, new LinkedList<Pair<String, String>>(),
+		return new Mapping(true, a, b, obm, new LinkedList<Pair<String, String>>(),
 				new LinkedList<Pair<String, List<String>>>());
 	}
 
@@ -474,12 +477,14 @@ public class Denotation {
 				throw new RuntimeException();
 			}
 			for (Integer[] row : v) {
-				if (row[n - 1] != row[c.length - 1] && row[n - 1] != null
-						&& row[c.length - 1] != null) {
+				if ( row[n - 1] != null 
+						&& row[c.length - 1] != null && !row[n - 1].equals(row[c.length - 1]) ) {
 					if (row[n - 1] < row[c.length - 1]) {
+						//TODO 1
 						SA.get(a)
 								.add(new Pair<>(row[n - 1], row[c.length - 1]));
 					} else {
+						//TODO 2
 						SA.get(a)
 								.add(new Pair<>(row[c.length - 1], row[n - 1]));
 					}
@@ -502,10 +507,11 @@ public class Denotation {
 				throw new RuntimeException();
 			}
 			for (Integer[] row : v) {
-				if (row[n - 1] != row[c.length - 1] && row[n - 1] != null
-						&& row[c.length - 1] != null) {
+				if (row[n - 1] != null 
+						&& row[c.length - 1] != null && !(row[n - 1].equals(row[c.length - 1]))) {
 					if (row[n - 1] < row[c.length - 1]) {
 		//				System.out.println("AAAA");
+						//TODO X
 						SA.get(a)
 								.add(new Pair<>(row[n - 1], row[c.length - 1]));
 					} else {
@@ -707,6 +713,7 @@ public class Denotation {
 	private void delete(Node n, Map<Node, Set<Pair<Integer, Integer>>> m,
 			Pair<Integer, Integer> uv) {
 
+//		System.out.println("deleting node " + n + " pair " + uv);
 		Pair<Integer, Integer> vw;
 		while ((vw = getfrom(n, m, uv)) != null) {
 			m.get(n).remove(vw);
@@ -736,11 +743,16 @@ public class Denotation {
 
 	private Pair<Integer, Integer> getfrom(Node n,
 			Map<Node, Set<Pair<Integer, Integer>>> m, Pair<Integer, Integer> uv) {
+		//System.out.println("get from " + uv);
 		for (Pair<Integer, Integer> p : m.get(n)) {
+			//System.out.println("p is " + p);
 			if (p.first.equals(uv.second)) {
-				if (p.second.equals(uv.first)) {
+				//System.out.println("hit");
+				 if (p.second.equals(uv.first)) {
+	//				 continue; doesn't work
+					 // return p gives infinite loop
 					throw new RuntimeException();
-				}
+				} 
 				return p;
 			}
 		}

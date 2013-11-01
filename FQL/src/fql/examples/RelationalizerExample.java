@@ -19,7 +19,7 @@ public class RelationalizerExample extends Example {
 			+ "\n	nodes A->{1,2,3,4,5,6,7};"
 			+ "\n	attributes a->{(1,1),(2,2),(3,3),(4,1),(5,5),(6,3),(7,5)};"
 			+ "\n	arrows f->{(1,2),(2,3),(3,5),(4,2),(5,3),(6,7),(7,6)};"
-			+ "\n	}"
+			+ "\n	} C"
 			+ "\n"
 			+ "\ninstance RelI:C=relationalize I";
 

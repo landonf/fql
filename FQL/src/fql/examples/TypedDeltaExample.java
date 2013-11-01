@@ -52,7 +52,7 @@ public class TypedDeltaExample extends Example {
 					+ "\n	t2_last   -> last0,"
 					+ "\n	t2_salary -> salary0;"
 					+ "\n arrows;"
-					+ "\n}"
+					+ "\n} C D"
 					+ "\n"
 					+ "\ninstance J : D = {"
 					+ "\n nodes "
@@ -63,8 +63,9 @@ public class TypedDeltaExample extends Example {
 					+ "\n	last0   -> { (XF667,Smith),(XF891,Smith),(XF221,Jones) },"
 					+ "\n	salary0 -> { (XF667,250),(XF891,300),(XF221,100) };"
 					+ "\n arrows;"
-					+ "\n}"
+					+ "\n} D"
 					+ "\n"
-					+ "\ninstance I : C = delta F J";
+					+ "\ninstance I : C = delta F J"
+					+ "\n";
 
 }

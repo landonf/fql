@@ -4,8 +4,8 @@ public abstract class Poly<T, C> {
 
 	
 	public static class Const<T, C> extends Poly<T, C> {
-		C c;
-		T t;
+		public C c;
+		public T t;
 		public Const(C c, T t) {
 			this.c = c;
 			this.t = t;
@@ -41,7 +41,7 @@ public abstract class Poly<T, C> {
 		}
 		@Override
 		public String toString() {
-			return c.toString();
+			return (c + " " + t).trim();
 		}
 		@Override
 		public <R, E> R accept(E env, PolyVisitor<T, C, R, E> v) {
@@ -53,6 +53,10 @@ public abstract class Poly<T, C> {
 		String v;
 		
 		public Var(String v) {
+			if (v.contains(" ")) {
+				
+				throw new RuntimeException();
+			}
 			this.v = v;
 		}
 		
@@ -122,8 +126,9 @@ public abstract class Poly<T, C> {
 			return true;
 		}
 		
-		@Override public String toString() {
-			return "zero";
+		@Override
+		public String toString() {
+			return ("void " + t).trim();
 		}
 		@Override
 		public <R, E> R accept(E env, PolyVisitor<T, C, R, E> v) {
@@ -135,6 +140,9 @@ public abstract class Poly<T, C> {
 		T t;
 		public One(T t) {
 			this.t = t;
+			if (t == null) {
+				throw new RuntimeException();
+			}
 		}
 		
 		@Override
@@ -162,8 +170,9 @@ public abstract class Poly<T, C> {
 			return true;
 		}
 		
-		@Override public String toString() {
-			return "one";
+		@Override
+		public String toString() {
+			return ("unit " + t).trim();
 		}
 		@Override
 		public <R, E> R accept(E env, PolyVisitor<T, C, R, E> v) {
@@ -201,7 +210,7 @@ public abstract class Poly<T, C> {
 		}
 		
 		@Override public String toString() {
-			return "prop";
+			return ("prop " + t).trim();
 		}
 		@Override
 		public <R, E> R accept(E env, PolyVisitor<T, C, R, E> v) {

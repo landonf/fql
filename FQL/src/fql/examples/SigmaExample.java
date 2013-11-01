@@ -64,7 +64,7 @@ public class SigmaExample extends Example {
 					+ "\n  h1 -> A.H, "
 					+ "\n  h2 -> A.H, "
 					+ "\n  h3 -> A.H;"
-					+ "\n}"
+					+ "\n} C D"
 					+ "\n"
 					+ "\n"
 					+ "\ninstance I : C = {"
@@ -91,7 +91,7 @@ public class SigmaExample extends Example {
 					+ "\n 	h3 -> {(1,f),(2,g)},"
 					+ "\n 	h2 -> {(3,i),(4,j),(5,j)},"
 					+ "\n 	h1 -> {(6,k)};"
-					+ "\n}"
+					+ "\n} C"
 					+ "\n"
 					+ "\ninstance J : D = sigma F I";
 

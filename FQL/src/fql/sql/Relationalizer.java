@@ -22,8 +22,10 @@ public class Relationalizer {
 
 	public static Map<Node, List<String>> attrs;
 
-	public static List<PSM> compile(Signature sig, String out, String in,
-			boolean suppress) throws FQLException {
+	//suppress = true in the jpanel, so we can leave the observables table around
+	//suppress = false for the compiler, since we just want the relationalized result
+	public static List<PSM> compile(Signature sig, String out, String in ,
+			boolean suppress ) throws FQLException {
 		attrs = new HashMap<Node, List<String>>();
 		List<PSM> ret = new LinkedList<>();
 		Map<String, String> edge_types = new HashMap<>();
@@ -104,8 +106,7 @@ public class Relationalizer {
 
 			}
 			if (select.size() == 0 && !suppress) {
-				throw new FQLException("No observable for " + n.string
-						+ " in " + sig.name0);
+				throw new FQLException("No observable for " + n.string);
 			} else if (select.size() == 0 && suppress) {
 				continue;
 			}
@@ -287,7 +288,7 @@ public class Relationalizer {
 			Map<String, String> attrs = new HashMap<>();
 			attrs.put("c0", PSM.VARCHAR());
 			attrs.put("c1", PSM.VARCHAR());
-			ret.add(new CreateTable(out + "_" + n.string, attrs, false));
+		//	ret.add(new CreateTable(out + "_" + n.string, attrs, false));
 			ret.add(new InsertSQL(out + "_" + n.string, new CopyFlower(in + "_"
 					+ n.string)));
 		}
@@ -295,7 +296,7 @@ public class Relationalizer {
 			Map<String, String> attrs = new HashMap<>();
 			attrs.put("c0", PSM.VARCHAR());
 			attrs.put("c1", n.target.toString());
-			ret.add(new CreateTable(out + "_" + n.name, attrs, false));
+		//	ret.add(new CreateTable(out + "_" + n.name, attrs, false));
 			ret.add(new InsertSQL(out + "_" + n.name, new CopyFlower(in + "_"
 					+ n.name)));
 		}
@@ -303,7 +304,7 @@ public class Relationalizer {
 			Map<String, String> attrs = new HashMap<>();
 			attrs.put("c0", PSM.VARCHAR());
 			attrs.put("c1", PSM.VARCHAR());
-			ret.add(new CreateTable(out + "_" + n.name, attrs, false));
+		//	ret.add(new CreateTable(out + "_" + n.name, attrs, false));
 			ret.add(new InsertSQL(out + "_" + n.name, new CopyFlower(in + "_"
 					+ n.name)));
 		}

@@ -37,6 +37,7 @@ import fql.decl.NewFQLProgram.NewInstConst;
 import fql.decl.NewFQLProgram.NewMapConst;
 import fql.decl.NewFQLProgram.NewSigConst;
 import fql.decl.NewFQLProgram.NewTransConst;
+import fql.decl.NewProgram;
 import fql.decl.Poly;
 
 public class NewFqlParser {
@@ -51,12 +52,12 @@ public class NewFqlParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|" };
 
-	static String[] res = new String[] { "nodes", "attributes", "schema", "transform",
-			"dist1", "dist2", "arrows", "equations", "id", "delta", "sigma",
-			"pi", "SIGMA", "apply", "eq", "relationalize", "external", "then",
-			"query", "instance", "fst", "snd", "inl", "inr", "curry",
-			"mapping", "eval", "string", "int", "void", "unit", "prop", "tt",
-			"ff" };
+	static String[] res = new String[] { "nodes", "attributes", "schema",
+			"transform", "dist1", "dist2", "arrows", "equations", "id",
+			"delta", "sigma", "pi", "SIGMA", "apply", "eq", "relationalize",
+			"external", "then", "query", "instance", "fst", "snd", "inl",
+			"inr", "curry", "mapping", "eval", "string", "int", "void", "unit",
+			"prop", "tt", "ff" };
 	// private static final Terminals OPERATORS = Terminals.operators(ops);
 	// //",", ".", ";", ":", "{", "}", "(", ")", "=", "->");
 
@@ -107,25 +108,46 @@ public class NewFqlParser {
 						ty(sig(), Parsers.always())), term("=")),
 				caml(mappingConst(), ty(sig(), Parsers.always())));
 	}
-	
+
 	private static Parser<?> transform() {
 		return Parsers.tuple(
 				term("transform"),
 				ident(),
 				Parsers.tuple(term(":"), Parsers.tuple(
-						ty(instanceConst(), ty(sig(), Parsers.always())), term("->"),
-						ty(instanceConst(), ty(sig(), Parsers.always()))), term("=")),
-				caml(transformConst(), ty(instanceConst(), ty(sig(), Parsers.always()))));
+						ty(instanceConst(), ty(sig(), Parsers.always())),
+						term("->"),
+						ty(instanceConst(), ty(sig(), Parsers.always()))),
+						term("=")),
+				caml(transformConst(),
+						ty(instanceConst(), ty(sig(), Parsers.always()))));
 	}
-	
+
 	private static Parser<?> instance() {
 		return Parsers.tuple(term("instance"), ident(), Parsers.tuple(
 				term(":"), ty(sig(), Parsers.always()), term("=")),
-				ty(instanceConst(), ty(sig(), Parsers.always())));
+				ty2(instanceConst(), ty(sig(), Parsers.always())));
 
 		// return ty(instanceConst(), ty());
 	}
+	
+	public static Parser<?> ty2(Parser<?> c, Parser<?> t) {
+		Reference ref = Parser.newReference();
 
+		Parser plusTy = Parsers.between(term("("),
+				Parsers.tuple(ref.lazy(), term("+"), ref.lazy()), term(")"));
+		Parser prodTy = Parsers.between(term("("),
+				Parsers.tuple(ref.lazy(), term("*"), ref.lazy()), term(")"));
+		Parser expTy = Parsers.between(term("("),
+				Parsers.tuple(ref.lazy(), term("^"), ref.lazy()), term(")"));
+
+		Parser a = Parsers.or(new Parser[] { Parsers.tuple(term("prop"), t),
+				Parsers.tuple(term("void"), t), Parsers.tuple(term("unit"), t),
+				plusTy, prodTy, expTy, ident(), c });
+
+		ref.set(a);
+
+		return a;
+	}
 
 	@SuppressWarnings("unchecked")
 	public static Parser<?> caml(Parser<?> c, Parser<?> t) {
@@ -168,21 +190,20 @@ public class NewFqlParser {
 	}
 
 	private static Parser<?> program() {
-		return Parsers.or(Parsers.tuple(schema().source().peek(), schema()), 
-				          Parsers.tuple(instance().source().peek(), instance()), 
-				          Parsers.tuple(mapping().source().peek(), mapping()),
-				          Parsers.tuple(transform().source().peek(), transform()),
-				          Parsers.tuple(query().source().peek(), query())).many();
-//				          Parsers.tuple(query(), query()).many();
+		return Parsers.or(Parsers.tuple(schema().source().peek(), schema()),
+				Parsers.tuple(instance().source().peek(), instance()),
+				Parsers.tuple(mapping().source().peek(), mapping()),
+				Parsers.tuple(transform().source().peek(), transform()),
+				Parsers.tuple(query().source().peek(), query())).many();
+		// Parsers.tuple(query(), query()).many();
 
-//		return Parsers.or(schema(), instance(), mapping(), query()).many();
+		// return Parsers.or(schema(), instance(), mapping(), query()).many();
 	}
 
 	private static Parser<?> string() {
 		return Parsers.or(Terminals.StringLiteral.PARSER,
 				Terminals.IntegerLiteral.PARSER, Terminals.Identifier.PARSER);
 	}
-
 
 	private static Parser<?> transformConst() {
 		Parser<?> arrow = Parsers.tuple(
@@ -195,8 +216,9 @@ public class NewFqlParser {
 								term(")")).sepBy(term(",")), term("}")));
 		return arrow.sepBy(term(",")).between(term("{"), term("}"));
 	}
+
 	private static Parser<?> instanceConst() {
-		Parser<?> external = term("external");
+		Parser<?> external = Parsers.tuple(term("external"), ident(), ty(sig(), Parsers.always()));
 		Parser<?> delta = Parsers.tuple(term("delta"), ident(), ident());
 		Parser<?> sigma = Parsers.tuple(term("sigma"), ident(), ident());
 		Parser<?> pi = Parsers.tuple(term("pi"), ident(), ident());
@@ -218,7 +240,8 @@ public class NewFqlParser {
 
 		Parser<?> xxx = Parsers.tuple(section("nodes", node),
 				section("attributes", arrow), section("arrows", arrow));
-		Parser<?> constant = Parsers.between(term("{"), xxx, term("}"));
+		Parser<?> constant = Parsers.tuple(
+				Parsers.between(term("{"), xxx, term("}")), ty(sig(), Parsers.always()));
 
 		Parser<?> p = Parsers.or(external, constant, dssp, relationalize, eval);
 
@@ -245,13 +268,16 @@ public class NewFqlParser {
 	}
 
 	private static Parser<?> query() {
-		
-		Parser<?> d_p = Parsers.tuple(term("delta"), caml(mappingConst(), ty(sig(), Parsers.always())));
-		Parser<?> s_p = Parsers.tuple(term("sigma"), caml(mappingConst(), ty(sig(), Parsers.always())));
-		Parser<?> p_p = Parsers.tuple(term("pi"), caml(mappingConst(), ty(sig(), Parsers.always())));
+
+		Parser<?> d_p = Parsers.tuple(term("delta"),
+				caml(mappingConst(), ty(sig(), Parsers.always())));
+		Parser<?> s_p = Parsers.tuple(term("sigma"),
+				caml(mappingConst(), ty(sig(), Parsers.always())));
+		Parser<?> p_p = Parsers.tuple(term("pi"),
+				caml(mappingConst(), ty(sig(), Parsers.always())));
 		Parser<?> dsp = Parsers.tuple(d_p, p_p, s_p);
 		Parser<?> p = Parsers.tuple(dsp, term("then"), dsp);
-		
+
 		return Parsers.tuple(term("query"), ident(), term(":"),
 				Parsers.tuple(ident(), term("->"), ident(), term("=")), p);
 
@@ -265,66 +291,30 @@ public class NewFqlParser {
 	public static final Parser<?> program = program().from(TOKENIZER, IGNORED);
 
 	// public static final Parser<?> ty = ty().from(TOKENIZER, IGNORED);
-
-	public static void main(String[] args) {
-		JFrame f = new JFrame();
-		JPanel p = new JPanel(new BorderLayout());
-		final JTextArea topT = new JTextArea(
-				"\n\n\n\n\n\n\n\n\n\n\n\n                                         ");
-		final JTextArea botT = new JTextArea();
-		JScrollPane top = new JScrollPane(topT);
-		JScrollPane bot = new JScrollPane(botT);
-		JSplitPane jsp = new JSplitPane(JSplitPane.VERTICAL_SPLIT, top, bot);
-		p.add(jsp, BorderLayout.CENTER);
-		JPanel btns = new JPanel(new GridLayout(1, 1));
-		JButton btn = new JButton("GO");
-		btns.add(btn);
-		btn.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					NewFQLProgram p = program(topT.getText());
-					botT.setText(p.toString());
-				} catch (Exception ee) {
-					botT.setText(ee.toString());
-					ee.printStackTrace();
-				}
-			}
-
-		});
-		p.add(btns, BorderLayout.SOUTH);
-		f.setContentPane(p);
-		f.pack();
-		f.setVisible(true);
-
-	}
-
-
+	/*
+	 * public static void main(String[] args) { JFrame f = new JFrame(); JPanel
+	 * p = new JPanel(new BorderLayout()); final JTextArea topT = new JTextArea(
+	 * "\n\n\n\n\n\n\n\n\n\n\n\n                                         ");
+	 * final JTextArea botT = new JTextArea(); JScrollPane top = new
+	 * JScrollPane(topT); JScrollPane bot = new JScrollPane(botT); JSplitPane
+	 * jsp = new JSplitPane(JSplitPane.VERTICAL_SPLIT, top, bot); p.add(jsp,
+	 * BorderLayout.CENTER); JPanel btns = new JPanel(new GridLayout(1, 1));
+	 * JButton btn = new JButton("GO"); btns.add(btn); btn.addActionListener(new
+	 * ActionListener() {
+	 * 
+	 * @Override public void actionPerformed(ActionEvent e) { try {
+	 * NewFQLProgram p = program(topT.getText()); botT.setText(p.toString()); }
+	 * catch (Exception ee) { botT.setText(ee.toString()); ee.printStackTrace();
+	 * } }
+	 * 
+	 * }); p.add(btns, BorderLayout.SOUTH); f.setContentPane(p); f.pack();
+	 * f.setVisible(true);
+	 * 
+	 * }
+	 */
 
 	public static <T, C, D> Caml<T, C, D> toCaml(Fn<Object, T> f1,
 			Fn<Object, C> f2, Fn<Object, D> f3, Object o) {
-
-		// try {
-		// Tuple5 p = (Tuple5) o;
-		// String p1 = p.a.toString();
-		// Object p2 = p.b;
-		// Object p3 = p.c;
-		// Object p4 = p.d;
-		// Object p5 = p.e;
-		// if (p3.equals("then")) {
-		// return new Caml.Comp<>(toCaml(f1, f2, f3, p2), toCaml(f1, f2, f3,
-		// p4));
-		// } else if (p3.equals(",")) {
-		// return new Caml.Prod<>(toCaml(f1, f2, f3, p2), toCaml(f1, f2, f3,
-		// p4));
-		// } else if (p3.equals("|")) {
-		// return new Caml.Case<>(toCaml(f1, f2, f3, p2), toCaml(f1, f2, f3,
-		// p4));
-		// }
-		// } catch (RuntimeException re) {
-		//
-		// }
 
 		try {
 			Tuple4 p = (Tuple4) o;
@@ -355,9 +345,6 @@ public class NewFqlParser {
 			Object p2 = p.b;
 			Object p3 = p.c;
 			Object o1 = p.a;
-			if (!(o instanceof String)) {
-				return new Caml.Const<T, C, D>(toTy(f1, f2, p2), toTy(f1, f2, p3), f3.of(o1));
-			}
 			String p1 = p.a.toString();
 
 			if (p1.equals("fst")) {
@@ -371,16 +358,28 @@ public class NewFqlParser {
 			} else if (p1.equals("apply")) {
 				return new Caml.Apply<>(toTy(f1, f2, p2), toTy(f1, f2, p3));
 			} else if (p2.toString().equals("then")) {
-				return new Caml.Comp<>(toCaml(f1, f2, f3, p1), toCaml(f1, f2,
+				System.out.println("then");
+				return new Caml.Comp<>(toCaml(f1, f2, f3, o1), toCaml(f1, f2,
 						f3, p3));
 			} else if (p2.toString().equals(",")) {
-				return new Caml.Prod<>(toCaml(f1, f2, f3, p1), toCaml(f1, f2,
+				return new Caml.Prod<>(toCaml(f1, f2, f3, o1), toCaml(f1, f2,
 						f3, p3));
 			} else if (p2.toString().equals("|")) {
-				return new Caml.Case<>(toCaml(f1, f2, f3, p1), toCaml(f1, f2,
+				return new Caml.Case<>(toCaml(f1, f2, f3, o1), toCaml(f1, f2,
 						f3, p3));
 			}
-			
+
+		} catch (RuntimeException re) {
+		}
+
+		try {
+			Tuple3 p = (Tuple3) o;
+
+			Object p2 = p.b;
+			Object p3 = p.c;
+			Object o1 = p.a;
+			return new Caml.Const<T, C, D>(toTy(f1, f2, p2), toTy(f1, f2, p3),
+					f3.of(o1));
 		} catch (RuntimeException re) {
 		}
 
@@ -403,31 +402,39 @@ public class NewFqlParser {
 
 		}
 
-			if (o instanceof String) {
-				return new Caml.Var<>(o.toString());				
-			}
-			
+		if (o instanceof String) {
+			return new Caml.Var<>(o.toString());
+		}
 
 		System.out.println(o);
 		System.out.println(o.getClass());
 		throw new RuntimeException();
 
 	}
-//(((delta, f), (pi, f), (sigma, f)), then, ((delta, f), (pi, f), (sigma, f))))
+
+	// (((delta, f), (pi, f), (sigma, f)), then, ((delta, f), (pi, f), (sigma,
+	// f))))
 	public static DSP toDSP(Object o) {
 		Tuple3 a = (Tuple3) o;
 		Tuple3 x = (Tuple3) a.a;
 		Tuple3 y = (Tuple3) a.c;
-		
-		Caml<Unit, NewSigConst, NewMapConst> s1 = toCaml(f2, f1, f3, ((org.codehaus.jparsec.functors.Pair<?, ?>)x.a).b);
-		Caml<Unit, NewSigConst, NewMapConst>  s2 = toCaml(f2, f1, f3, ((org.codehaus.jparsec.functors.Pair<?, ?>)x.b).b);
-		Caml<Unit, NewSigConst, NewMapConst>  s3 = toCaml(f2, f1, f3, ((org.codehaus.jparsec.functors.Pair<?, ?>)x.c).b);
-		Caml<Unit, NewSigConst, NewMapConst>  s1x = toCaml(f2, f1, f3, ((org.codehaus.jparsec.functors.Pair<?, ?>)y.a).b);
-		Caml<Unit, NewSigConst, NewMapConst>  s2x = toCaml(f2, f1, f3, ((org.codehaus.jparsec.functors.Pair<?, ?>)y.b).b);
-		Caml<Unit, NewSigConst, NewMapConst>  s3x = toCaml(f2, f1, f3, ((org.codehaus.jparsec.functors.Pair<?, ?>)y.c).b);
+
+		Caml<Unit, NewSigConst, NewMapConst> s1 = toCaml(f2, f1, f3,
+				((org.codehaus.jparsec.functors.Pair<?, ?>) x.a).b);
+		Caml<Unit, NewSigConst, NewMapConst> s2 = toCaml(f2, f1, f3,
+				((org.codehaus.jparsec.functors.Pair<?, ?>) x.b).b);
+		Caml<Unit, NewSigConst, NewMapConst> s3 = toCaml(f2, f1, f3,
+				((org.codehaus.jparsec.functors.Pair<?, ?>) x.c).b);
+		Caml<Unit, NewSigConst, NewMapConst> s1x = toCaml(f2, f1, f3,
+				((org.codehaus.jparsec.functors.Pair<?, ?>) y.a).b);
+		Caml<Unit, NewSigConst, NewMapConst> s2x = toCaml(f2, f1, f3,
+				((org.codehaus.jparsec.functors.Pair<?, ?>) y.b).b);
+		Caml<Unit, NewSigConst, NewMapConst> s3x = toCaml(f2, f1, f3,
+				((org.codehaus.jparsec.functors.Pair<?, ?>) y.c).b);
 
 		return new DSP(s1, s2, s3, s1x, s2x, s3x);
 	}
+
 	public static <X, Y> Poly<X, Y> toTy(Fn<Object, X> f1, Fn<Object, Y> f2,
 			Object o) {
 
@@ -451,21 +458,33 @@ public class NewFqlParser {
 
 		try {
 			org.codehaus.jparsec.functors.Pair t = (org.codehaus.jparsec.functors.Pair) o;
+			if (t instanceof Tuple3) {
+				throw new RuntimeException();
+			}
 			if (t.a.toString().equals("unit")) {
-				return new Poly.One<X, Y>((X) t.b);
+				return new Poly.One<X, Y>(f1.of(t.b));
 			} else if (t.a.toString().equals("void")) {
-				return new Poly.Zero<X, Y>((X) t.b);
+				return new Poly.Zero<X, Y>(f1.of(t.b));
 			} else if (t.a.toString().equals("prop")) {
-				return new Poly.Two<X, Y>((X) t.b);
+				return new Poly.Two<X, Y>(f1.of(t.b));
 			}
 			throw new RuntimeException();
 		} catch (RuntimeException cce) {
 		}
 
 		try {
-			return new Poly.Const<X, Y>(f2.of(o), f1.of(o));
+			org.codehaus.jparsec.functors.Pair t = (org.codehaus.jparsec.functors.Pair) o;
+			if (t instanceof Tuple3) {
+				throw new RuntimeException();
+			}
+			// System.out.println("ta is " + t.a);
+			// System.out.println("tb is " + t.b);
+			return new Poly.Const<X, Y>(f2.of(t.a), f1.of(t.b));
 		} catch (RuntimeException cce) {
-
+			// System.out.println(o);
+			// System.out.println(f1.of(o));
+			// System.out.println(f2.of(o));
+			// cce.printStackTrace();
 		}
 
 		return new Poly.Var<X, Y>(o.toString());
@@ -517,7 +536,8 @@ public class NewFqlParser {
 	static Fn<Object, Poly<Unit, NewSigConst>> f2x = new Fn<Object, Poly<Unit, NewSigConst>>() {
 		@Override
 		public Poly<Unit, NewSigConst> of(Object x) {
-			return null; // new Unit();
+			System.out.println("input is " + x);
+			return toTy(f2, f1, x);
 		}
 	};//
 	static Fn<Object, NewTransConst> f3x = new Fn<Object, NewTransConst>() {
@@ -526,7 +546,7 @@ public class NewFqlParser {
 			return toTrans(x);
 		}
 	};
-	
+
 	static Fn<Object, NewMapConst> f3 = new Fn<Object, NewMapConst>() {
 		@Override
 		public NewMapConst of(Object x) {
@@ -535,7 +555,8 @@ public class NewFqlParser {
 	};
 
 	@SuppressWarnings("rawtypes")
-	public static final NewFQLProgram program(String s) {
+	public static final NewProgram<NewSigConst, NewMapConst, NewInstConst, NewTransConst> program(
+			String s) {
 		List<NewDecl> ret = new LinkedList<>();
 		List decls = (List) NewFqlParser.program.parse(s);
 
@@ -547,8 +568,8 @@ public class NewFqlParser {
 			if (idx < 0) {
 				throw new RuntimeException();
 			}
-			//System.out.println("whasabi  " + s.indexOf(txt));
-//			s.indexOf(txt);
+			// System.out.println("whasabi  " + s.indexOf(txt));
+			// s.indexOf(txt);
 			Tuple3 t = (Tuple3) decl;
 			String kind = ((Token) t.a).toString();
 			switch (kind) {
@@ -567,8 +588,19 @@ public class NewFqlParser {
 				name = (String) t.b;
 
 				Tuple3 xxx = (Tuple3) tt0.c;
-				ret.add(NewFQLProgram.NewDecl.instDecl(name, idx,
-						toTy(f2x, f1x, xxx.b), toTy(f2, f1, tt0.d)));
+
+				System.out.println("trying on " + tt0.d);
+				Poly<Poly<Unit, NewSigConst>, NewInstConst> aaa = toTy(f2x,
+						f1x, tt0.d);
+				System.out.println(">>>" + aaa);
+
+				Poly<Unit, NewSigConst> bbb = toTy(f2, f1, xxx.b);
+				System.out.println("<<<" + bbb);
+
+				NewDecl toAdd = NewFQLProgram.NewDecl.instDecl(name, idx, aaa,
+						bbb);
+				ret.add(toAdd);
+
 				break;
 			case "mapping":
 				// System.out.println(t.getClass());
@@ -591,25 +623,27 @@ public class NewFqlParser {
 				name = (String) t.b;
 
 				xxx = (Tuple3) tt0.c;
-				 yyy = (Tuple3) xxx.b;
-				 t1 = yyy.a;
-				 t2 = yyy.c;
-				 o = tt0.d;
-				ret.add(NewFQLProgram.NewDecl.transDecl(name, idx, toCaml(f2x, f1x, f3x, o), 
-						new Pair<>(toTy(f2x, f1x, t1), toTy(f2x, f1x, t2))));
-				// ret.add(mappingDecl(decl));
-				
+				yyy = (Tuple3) xxx.b;
+				t1 = yyy.a;
+				t2 = yyy.c;
+				o = tt0.d;
+				ret.add(NewFQLProgram.NewDecl.transDecl(name, idx,
+						toCaml(f2x, f1x, f3x, o), new Pair<>(
+								toTy(f2x, f1x, t1), toTy(f2x, f1x, t2))));
+				break;
+			// ret.add(mappingDecl(decl));
+
 			case "query":
-				 System.out.println(t.getClass());
-				 System.out.println(t);
+				System.out.println(t.getClass());
+				System.out.println(t);
 				Tuple5 tt1 = (Tuple5) decl;
 				name = (String) t.b;
 
 				Tuple4 xxx0 = (Tuple4) tt1.d;
-				 t1 = xxx0.a;
-				 t2 = xxx0.c;
-				 o = tt1.e;
-				ret.add(NewFQLProgram.NewDecl.queryDecl(name, idx, toDSP(o), 
+				t1 = xxx0.a;
+				t2 = xxx0.c;
+				o = tt1.e;
+				ret.add(NewFQLProgram.NewDecl.queryDecl(name, idx, toDSP(o),
 						new Pair<>(toTy(f2, f1, t1), toTy(f2, f1, t2))));
 				break;
 			// case "query":
@@ -620,7 +654,7 @@ public class NewFqlParser {
 			}
 		}
 
-		return new NewFQLProgram(ret);
+		return NewFQLProgram.make(ret);
 	}
 
 	// // tuple 5
@@ -655,132 +689,107 @@ public class NewFqlParser {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static NewTransConst toTrans(Object decl) {
-	
+
 		List<Pair<String, List<Pair<String, String>>>> data = new LinkedList<>();
-		
+
 		System.out.println(decl);
 		System.out.println(decl.getClass());
-		
-		 return new NewFQLProgram.NewTransConst(data);
+
+		return new NewFQLProgram.NewTransConst(data);
 
 	}
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static NewMapConst toMap(Object decl) {
 		// return null;
 		Tuple3 x = (Tuple3) decl;
 
+		List<Pair<String, String>> objs = new LinkedList<>();
+		List<Pair<String, String>> attrs = new LinkedList<>();
+		List<Pair<String, List<String>>> arrows = new LinkedList<>();
 
-			List<Pair<String, String>> objs = new LinkedList<>();
-			List<Pair<String, String>> attrs = new LinkedList<>();
-			List<Pair<String, List<String>>> arrows = new LinkedList<>();
+		Tuple3 a = (Tuple3) x.a;
+		Tuple3 b = (Tuple3) x.b;
+		Tuple3 c = (Tuple3) x.c;
 
-			Tuple3 a = (Tuple3) x.a;
-			Tuple3 b = (Tuple3) x.b;
-			Tuple3 c = (Tuple3) x.c;
+		List a0 = (List) a.b;
+		for (Object o : a0) {
+			Tuple3 z = (Tuple3) o;
+			String p = (String) z.a;
+			String q = (String) z.c;
+			objs.add(new Pair<>(p, q));
+		}
 
-			List a0 = (List) a.b;
-			for (Object o : a0) {
-				Tuple3 z = (Tuple3) o;
-				String p = (String) z.a;
-				String q = (String) z.c;
-				objs.add(new Pair<>(p, q));
-			}
+		List b0 = (List) b.b;
+		for (Object o : b0) {
+			Tuple3 z = (Tuple3) o;
+			String p = (String) z.a;
+			String q = (String) z.c;
+			attrs.add(new Pair<>(p, q));
+		}
 
-			List b0 = (List) b.b;
-			for (Object o : b0) {
-				Tuple3 z = (Tuple3) o;
-				String p = (String) z.a;
-				String q = (String) z.c;
-				attrs.add(new Pair<>(p, q));
-			}
+		List c0 = (List) c.b;
+		for (Object o : c0) {
+			Tuple3 z = (Tuple3) o;
+			String p = (String) z.a;
+			List<String> q = (List<String>) z.c;
+			arrows.add(new Pair<>(p, q));
+		}
 
-			List c0 = (List) c.b;
-			for (Object o : c0) {
-				Tuple3 z = (Tuple3) o;
-				String p = (String) z.a;
-				List<String> q = (List<String>) z.c;
-				arrows.add(new Pair<>(p, q));
-			}
+		return new NewFQLProgram.NewMapConst(objs, attrs, arrows);
 
-			 return new NewFQLProgram.NewMapConst(objs, attrs, arrows);
-		
 	}
 
 	// @SuppressWarnings("rawtypes")
 	private static NewInstConst toInst(Object decl) {
-		Tuple4 t = (Tuple4) decl;
-		String name = (String) t.b;
+		org.codehaus.jparsec.functors.Pair y = (org.codehaus.jparsec.functors.Pair) decl;
+		Tuple3 x = (Tuple3) y.a;
 
-		String type = (String) ((Tuple3) t.c).b;
+		List<Pair<String, List<Pair<Object, Object>>>> data = new LinkedList<>();
 
-		if (t.d instanceof Token) {
-			return new NewFQLProgram.External(toTy(f2, f1, type));
-		} else if (t.d instanceof Tuple3) {
-			Tuple3 x = (Tuple3) t.d;
+		Tuple3 nodes = (Tuple3) x.a;
+		Tuple3 attrs = (Tuple3) x.b;
+		Tuple3 arrows = (Tuple3) x.c;
 
-			if (x.a instanceof Tuple3) {
-				// constant
-				List<Pair<String, List<Pair<Object, Object>>>> data = new LinkedList<>();
+		List nodes0 = (List) nodes.b;
+		List attrs0 = (List) attrs.b;
+		List arrows0 = (List) arrows.b;
 
-				Tuple3 nodes = (Tuple3) x.a;
-				Tuple3 attrs = (Tuple3) x.b;
-				Tuple3 arrows = (Tuple3) x.c;
-
-				List nodes0 = (List) nodes.b;
-				List attrs0 = (List) attrs.b;
-				List arrows0 = (List) arrows.b;
-
-				for (Object o : nodes0) {
-					Tuple3 u = (Tuple3) o;
-					String n = (String) u.a;
-					List m = (List) u.c;
-					List<Pair<Object, Object>> l = new LinkedList<>();
-					for (Object h : m) {
-						l.add(new Pair<>(h, h));
-					}
-					data.add(new Pair<>(n, l));
-				}
-
-				for (Object o : attrs0) {
-					Tuple3 u = (Tuple3) o;
-					String n = (String) u.a;
-					List m = (List) u.c;
-					List<Pair<Object, Object>> l = new LinkedList<>();
-					for (Object h : m) {
-						Tuple3 k = (Tuple3) h;
-						l.add(new Pair<>(k.a, k.c));
-					}
-					data.add(new Pair<>(n, l));
-				}
-
-				for (Object o : arrows0) {
-					Tuple3 u = (Tuple3) o;
-					String n = (String) u.a;
-					List m = (List) u.c;
-					List<Pair<Object, Object>> l = new LinkedList<>();
-					for (Object h : m) {
-						Tuple3 k = (Tuple3) h;
-						l.add(new Pair<>(k.a, k.c));
-					}
-					data.add(new Pair<>(n, l));
-				}
-				return new NewFQLProgram.Fin(toTy(f2, f1, type), data);
-
+		for (Object o : nodes0) {
+			Tuple3 u = (Tuple3) o;
+			String n = (String) u.a;
+			List m = (List) u.c;
+			List<Pair<Object, Object>> l = new LinkedList<>();
+			for (Object h : m) {
+				l.add(new Pair<>(h, h));
 			}
-
+			data.add(new Pair<>(n, l));
 		}
 
-		throw new RuntimeException();
+		for (Object o : attrs0) {
+			Tuple3 u = (Tuple3) o;
+			String n = (String) u.a;
+			List m = (List) u.c;
+			List<Pair<Object, Object>> l = new LinkedList<>();
+			for (Object h : m) {
+				Tuple3 k = (Tuple3) h;
+				l.add(new Pair<>(k.a, k.c));
+			}
+			data.add(new Pair<>(n, l));
+		}
 
-		/*
-		 * else { // delta, sigma, pi, SIGMA, eval String kind = ((Token)
-		 * x.a).toString(); String mapping = (String) x.b; String inst =
-		 * (String) x.c; if (kind.equals("eval")) { return new
-		 * EvalInstanceDecl(name, mapping, inst, type); } else { return new
-		 * EvalDSPInstanceDecl(name, kind, mapping, inst, type); } } } else {
-		 * return new RelationalizeDecl(name, type, (String)
-		 * ((org.codehaus.jparsec.functors.Pair) t.d).b); }
-		 */
+		for (Object o : arrows0) {
+			Tuple3 u = (Tuple3) o;
+			String n = (String) u.a;
+			List m = (List) u.c;
+			List<Pair<Object, Object>> l = new LinkedList<>();
+			for (Object h : m) {
+				Tuple3 k = (Tuple3) h;
+				l.add(new Pair<>(k.a, k.c));
+			}
+			data.add(new Pair<>(n, l));
+		}
+		return new NewFQLProgram.Fin(toTy(f2, f1, y.b), data);
 
 	}
 

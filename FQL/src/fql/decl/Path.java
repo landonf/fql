@@ -53,7 +53,7 @@ public class Path implements Jsonable {
 		String head = strings.get(0);
 		source = schema.getNode(head);
 		if (source == null) {
-			throw new FQLException("bad path: " + strings + " in " + schema.name0);
+			throw new FQLException("bad path: " + strings);
 		}
 
 		target = source;
@@ -61,21 +61,21 @@ public class Path implements Jsonable {
 			String string = strings.get(i);
 			Edge e = schema.getEdge(string);
 			if (e == null) {
-				throw new FQLException("bad path: " + strings + " in " + schema.name0);
+				throw new FQLException("bad path: " + strings);
 			}
 			if (schema.getNode(source.string) == null) {
-				throw new FQLException("bad path: " + strings + " in " + schema.name0);
+				throw new FQLException("bad path: " + strings);
 			}
 			if (schema.getNode(target.string) == null) {
-				throw new FQLException("bad path: " + strings + " in " + schema.name0);
+				throw new FQLException("bad path: " + strings);
 			}
 			if (!e.source.equals(target)) {
-				throw new FQLException("bad path: " + strings+ " in " + schema.name0);
+				throw new FQLException("bad path: " + strings);
 			}
 			path.add(e);
 			target = e.target;
 			if (target == null) {
-				throw new FQLException("bad path: " + strings+ " in " + schema.name0);
+				throw new FQLException("bad path: " + strings);
 			}
 		}
 	}

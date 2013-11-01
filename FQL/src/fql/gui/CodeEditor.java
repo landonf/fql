@@ -5,10 +5,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.sql.Date;
 import java.text.DateFormat;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -39,12 +37,13 @@ import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 
 import fql.DEBUG;
-import fql.DEBUG.Intermediate;
-import fql.FQLException;
+import fql.LineException;
+import fql.Pair;
+import fql.decl.Driver;
 import fql.decl.Environment;
-import fql.decl.Program;
+import fql.decl.NewestFQLProgram;
 import fql.examples.Example;
-import fql.parse.FqlParser;
+import fql.parse.NewestFQLParser;
 import fql.sql.PSMGen;
 
 /**
@@ -258,33 +257,30 @@ public class CodeEditor extends JPanel {
 		topArea.setCaretPosition(0);
 		topArea.setAutoscrolls(true);
 		RSyntaxTextArea.setTemplatesEnabled(true);
-		
-		   CodeTemplateManager ctm = RSyntaxTextArea.getCodeTemplateManager();
-		      CodeTemplate ct = new StaticCodeTemplate("schema", "schema ",
-		    		  " = {\n\tnodes;\n\tattributes;\n\tarrows;\n\tequations;\n}");
-		      ctm.addTemplate(ct);
-		      
-			       ct = new StaticCodeTemplate("mapping", "mapping ",
-			    		  " :  ->  = {\n\tnodes;\n\tattributes;\n\tarrows;\n}");
-			      ctm.addTemplate(ct);
-			      
-			      ct = new StaticCodeTemplate("instance", "instance ",
-			    		  " :  = {\n\tnodes;\n\tattributes;\n\tarrows;\n}");
-			      ctm.addTemplate(ct);
-			      
-			      ct = new StaticCodeTemplate("query", "query ",
-			    		  " :  ->  = delta pi sigma");
-			      ctm.addTemplate(ct);
-		      
-			
-		      
-		//topArea.setBracketMatchingEnabled(true);
-	//	topArea.setAutoIndentEnabled(true);
-	//	topArea.setAnimateBracketMatching(true);
-		topArea.setCloseCurlyBraces(true);
-		//topArea.setFadeCurrentLineHighlight(true);
-	//	topArea.setHighlightCurrentLine(true);
 
+		CodeTemplateManager ctm = RSyntaxTextArea.getCodeTemplateManager();
+		CodeTemplate ct = new StaticCodeTemplate("schema", "schema ",
+				" = {\n\tnodes;\n\tattributes;\n\tarrows;\n\tequations;\n}");
+		ctm.addTemplate(ct);
+
+		ct = new StaticCodeTemplate("mapping", "mapping ",
+				" :  ->  = {\n\tnodes;\n\tattributes;\n\tarrows;\n}");
+		ctm.addTemplate(ct);
+
+		ct = new StaticCodeTemplate("instance", "instance ",
+				" :  = {\n\tnodes;\n\tattributes;\n\tarrows;\n}");
+		ctm.addTemplate(ct);
+
+		ct = new StaticCodeTemplate("query", "query ",
+				" :  ->  = delta pi sigma");
+		ctm.addTemplate(ct);
+
+		// topArea.setBracketMatchingEnabled(true);
+		// topArea.setAutoIndentEnabled(true);
+		// topArea.setAnimateBracketMatching(true);
+		topArea.setCloseCurlyBraces(true);
+		// topArea.setFadeCurrentLineHighlight(true);
+		// topArea.setHighlightCurrentLine(true);
 
 		// topArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
 		// topArea.setSyn
@@ -294,7 +290,7 @@ public class CodeEditor extends JPanel {
 
 		// topArea.setS
 		topArea.setCodeFoldingEnabled(true);
-//		topArea.setAntiAliasingEnabled(true);
+		// topArea.setAntiAliasingEnabled(true);
 		RTextScrollPane sp = new RTextScrollPane(topArea);
 		sp.setFoldIndicatorEnabled(true);
 		// add(sp);
@@ -331,27 +327,8 @@ public class CodeEditor extends JPanel {
 	}
 
 	protected void findAction() {
-
 		makeSearchVisible();
-
 	}
-
-	// public static void main(String[] args) {
-	// // Start all Swing applications on the EDT.
-	// SwingUtilities.invokeLater(new Runnable() {
-	// public void run() {
-	//
-	// setContentPane(cp);
-	// setTitle("Text Editor Demo");
-	// setDefaultCloseOperation(EXIT_ON_CLOSE);
-	// pack();
-	// setLocationRelativeTo(null);
-	// new Test("foo", "bar").setVisible(true);
-	// }
-	// });
-	// }
-
-	// static String program = Examples.INIT_EXAMPLE.getText();
 
 	protected void doExample(Example e) {
 		if (abortBecauseDirty()) {
@@ -360,7 +337,6 @@ public class CodeEditor extends JPanel {
 		String program = e.getText();
 		topArea.setText(program);
 		topArea.setCaretPosition(0);
-		// bottomArea.setText(Examples.employeesCommands);
 		respArea.setText("");
 		GUI.setDirty(CodeEditor.this.id, false);
 		if (display != null) {
@@ -371,92 +347,87 @@ public class CodeEditor extends JPanel {
 
 	void runAction() {
 		String program = topArea.getText();
-		// String view = bottomArea.getText();
+
+		NewestFQLProgram init;
+		Environment env; // = Driver.intemp1;
+		String env2;
+		try {
+			init = NewestFQLParser.program(program);
+		} catch (ParserException e) {
+			int col = e.getLocation().column;
+			int line = e.getLocation().line;
+			topArea.requestFocusInWindow();
+			// int startOffset = topArea.viewToModel(new Point(col, line));
+			topArea.setCaretPosition(topArea.getDocument()
+					.getDefaultRootElement().getElement(line - 1)
+					.getStartOffset()
+					+ (col - 1));
+			// topArea.setCaretPosition(startOffset);
+			// topArea.repaint();
+			String s = e.getMessage();
+			String t = s.substring(s.indexOf(" "));
+			t.split("\\s+");
+
+			respArea.setText("Syntax error: " + e.getLocalizedMessage());
+			e.printStackTrace();
+			return;
+		}
 
 		try {
-			Program parsed_program;
-			try {
-				parsed_program = FqlParser.program(program);
-			} catch (ParserException e) {
-				int col = e.getLocation().column;
-				int line = e.getLocation().line;
-				topArea.requestFocusInWindow();
-				//int startOffset = topArea.viewToModel(new Point(col, line));
-				topArea.setCaretPosition(topArea.getDocument().getDefaultRootElement().getElement(line-1).getStartOffset() + (col-1) );  
-				//				topArea.setCaretPosition(startOffset);
-				//topArea.repaint();
-				String s = e.getMessage();
-				String t = s.substring(s.indexOf(" "));
-				t.split("\\s+");
-				throw new FQLException("Syntax Error: " + s);
+			Driver.check(init);
+			Pair<Environment, String> envX = Driver.makeEnv(init);
+			env = envX.first;
+			env2 = envX.second;
+		} catch (LineException e) {
+			respArea.setText("Error in " + e.kind + " " + e.decl + ": "
+					+ e.getLocalizedMessage());
+			e.printStackTrace();
+			topArea.requestFocusInWindow();
+			Integer theLine;
+			if (e.kind.equals("schema")) {
+				theLine = init.sigs_lines.get(e.decl);
+			} else if (e.kind.equals("instance")) {
+				theLine = init.insts_lines.get(e.decl);
+			} else if (e.kind.equals("mapping")) {
+				theLine = init.maps_lines.get(e.decl);
+			} else {
+				throw new RuntimeException();
 			}
-			
-			Environment cp = new Environment(parsed_program);
+			topArea.setCaretPosition(theLine);
+			return;
+		} catch (Throwable re) {
+			respArea.setText(re.getLocalizedMessage());
+			re.printStackTrace();
+			return;
+		}
 
-			List<String> commands = new LinkedList<>();
-			for (String s : parsed_program.inorder()) {
-				if (parsed_program.isMapping(s)
-						|| parsed_program.isSignature(s)) {
-					if (!parsed_program.hasKey(s)
-							&& DEBUG.INTERMEDIATE == Intermediate.NONE) {
-						continue;
-					}
-				}
-				if (parsed_program.isMapping(s)) {
-					if (DEBUG.INTERMEDIATE == Intermediate.NONE
-							|| DEBUG.INTERMEDIATE == Intermediate.SOME) {
-						if (parsed_program.isId(s)) {
-							// System.out.println("skipping " + s);
-							continue;
-						}
-					}
-				}
-
-				commands.add(s);
-			}
-			
-			for (String m : cp.mappings.keySet()) {
-				if (parsed_program.isMapping(m)) {
-					continue;
-				}
-				if (DEBUG.INTERMEDIATE == Intermediate.ALL) {
-					commands.add(m);
-				}
-			}
-			for (String m : cp.signatures.keySet()) {
-				if (parsed_program.isSignature(m)) {
-					continue;
-				}
-				if (DEBUG.INTERMEDIATE == Intermediate.ALL) {
-					commands.add(m);
-				}
-			}
-			
-
-			// Commands parsed_view = Commands.parse(view);
+		try {
 			if (display != null && !DEBUG.MultiView) {
 				display.close();
 			}
 			DateFormat format = DateFormat.getTimeInstance();
-			display = new Display(cp, commands);
+			// try {
+			display = new Display(init, env);
 			String foo = GUI.getTitle(id);
 			if (DEBUG.MultiView) {
-				foo += " - " + format.format(new Date(System.currentTimeMillis()));
+				foo += " - "
+						+ format.format(new Date(System.currentTimeMillis()));
 			}
-			display.display(foo, commands);
+			display.display(foo, init.order);
 
-			String psm = PSMGen.compile(cp, parsed_program);
-			respArea.setText(psm);
-
-			//List<PSM> psm0 = PSMGen.compile0(cp, parsed_program);
-			//String output0 = PSMInterp.interp0(psm0);
-			// System.out.println(output0);
-			// respArea.setText(output0 + "\n\n---------------\n\n" + psm);
-
-		} catch (Exception e) {
-			respArea.setText(e.toString());
-			e.printStackTrace();
+		//	String psm = PSMGen.compile(env, init);
+			respArea.setText(env2);
+		} catch (Exception ee) {
+			respArea.setText(ee.toString());
+			ee.printStackTrace();
+			return;
 		}
+		/*
+		 * //List<PSM> psm0 = PSMGen.compile0(cp, parsed_program); //String
+		 * output0 = PSMInterp.interp0(psm0); // System.out.println(output0); //
+		 * respArea.setText(output0 + "\n\n---------------\n\n" + psm);
+		 */
+
 	}
 
 	public boolean abortBecauseDirty() {

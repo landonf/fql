@@ -43,10 +43,6 @@ import fql.Triple;
 import fql.cat.Arr;
 import fql.cat.FinCat;
 import fql.cat.FinFunctor;
-import fql.gui.Viewable;
-import fql.parse.FqlTokenizer;
-import fql.parse.JSONParsers.JSONMappingParser;
-import fql.parse.Jsonable;
 import fql.sql.EmbeddedDependency;
 import fql.sql.PSM;
 import fql.sql.PSMGen;
@@ -58,14 +54,16 @@ import fql.sql.RA;
  * 
  *         Implementation of signature morphisms
  */
-public class Mapping implements Viewable<Mapping>, Jsonable {
+public class Mapping  {
 
 	boolean ALLOW_WF_CHECK = true;
+	public boolean flag = false;
+	
 
-	public Mapping(String name, Signature src, Signature dst,
+	public Mapping(Signature src, Signature dst,
 			Map<Node, Node> nm, Map<Edge, Path> em) {
 		ALLOW_WF_CHECK = false;
-		this.name = name;
+	//	this.name = name;
 		this.source = src;
 		this.target = dst;
 		this.nm = nm;
@@ -76,18 +74,18 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		for (Attribute<Node> a : source.attrs) {
 			Attribute<Node> b = am.get(a);
 			if (b == null) {
-				throw new FQLException("Mapping " + name
+				throw new FQLException("Mapping " /* + name */
 						+ " does not map attribute " + a);
 			}
 			if (!a.target.equals(b.target)) {
-				throw new FQLException("Mapping " + name
+				throw new FQLException("Mapping " /* + name */
 						+ " does not preserve typing on " + a + " and " + b);
 			}
 		}
 
 		// should be checked by knuth-bendix
 
-		if (!DEBUG.ALLOW_INFINITES && !name.equals("")) {
+		if (!DEBUG.ALLOW_INFINITES  && !flag ) {
 
 			Triple<FinFunctor<Node, Path, Node, Path>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>> zzz = toFunctor2();
 
@@ -96,7 +94,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 
 				if (!zzz.third.second.of(appy(x.lhs)).equals(
 						zzz.third.second.of(appy(x.rhs)))) {
-					throw new FQLException("On " + name + ", equivalence " + x
+					throw new FQLException("On " + this + "\n\n equivalence " + x
 							+ " not respected on \n\n" + x + "\n and \n"
 							+ appy(x.lhs) + "\n\n" + appy(x.rhs));
 
@@ -111,9 +109,9 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	public Map<Attribute<Node>, Attribute<Node>> am = new HashMap<>();
 	public Signature source;
 	public Signature target;
-	public String name;
-	public boolean isId = false;
-
+//	public String name;
+//	public boolean isId = false;
+/*
 	public Mapping(String name, Environment env, MappingDecl md)
 			throws FQLException {
 		this.name = name;
@@ -164,6 +162,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		}
 		validate();
 	}
+	*/
 
 	private Pair<List<Pair<String, String>>, List<Pair<String, String>>> filter(
 			List<Pair<String, String>> objs) throws FQLException {
@@ -176,7 +175,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			} else if (source.isNode(p.first) && target.isNode(p.second)) {
 				ret2.add(p);
 			} else {
-				throw new FQLException("Bad mapping: " + p + " in " + name);
+				throw new FQLException("Bad mapping: " + p + " in " + this);
 			}
 		}
 
@@ -203,14 +202,21 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	/**
 	 * Constructs a new mapping.
 	 */
-	public Mapping(String name, Signature source, Signature target,
+	public Mapping(Signature source, Signature target,
 			List<Pair<String, String>> objs, List<Pair<String, String>> atts,
 			List<Pair<String, List<String>>> arrows) throws FQLException {
-		this.name = name;
 		initialize(source, target, objs, atts, arrows);
 		validate();
 	}
 
+	public Mapping(boolean b, Signature source, Signature target,
+			List<Pair<String, String>> objs, List<Pair<String, String>> atts,
+			List<Pair<String, List<String>>> arrows) throws FQLException {
+		this.flag = b;
+		initialize(source, target, objs, atts, arrows);
+		validate();
+	}
+	
 	public Mapping(
 			Signature source,
 			Signature target,
@@ -233,13 +239,13 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		for (Node n : this.source.nodes) {
 			if (nm.get(n) == null) {
 				throw new FQLException("Missing node mapping from " + n
-						+ " in " + name);
+						/* + " in " + name */);
 			}
 		}
 		for (Edge e : this.source.edges) {
 			if (em.get(e) == null) {
 				throw new FQLException("Missing arrow mapping from " + e
-						+ " in " + name);
+						/* + " in " + name */);
 			}
 		}
 
@@ -249,7 +255,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 	/**
 	 * Does most of the work of the constructor.
 	 */
-	private void initialize(Signature source, Signature target,
+	private void initialize (Signature source, Signature target,
 			List<Pair<String, String>> objs, List<Pair<String, String>> attrs,
 			List<Pair<String, List<String>>> arrows) throws FQLException {
 		this.source = source;
@@ -270,7 +276,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 				em.put(e, p);
 			}
 		} catch (FQLException e) {
-			throw new FQLException("In mapping " + name
+			throw new FQLException("In mapping " + this
 					+ ", bad path mapping: " + e.toString());
 		}
 		// System.out.println("INIT \n" + this);
@@ -278,14 +284,12 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			Attribute<Node> a1 = source.getAttr(a.first);
 			Attribute<Node> a2 = target.getAttr(a.second);
 			if (a1 == null) {
-				throw new FQLException("In mapping " + name
-						+ ", cannot find source attr " + a.first + " in "
-						+ source.name0);
+				throw new FQLException("In mapping " + this
+						+ ", cannot find source attr " + a.first);
 			}
 			if (a2 == null) {
-				throw new FQLException("In mapping " + name
-						+ ", cannot find target attr " + a.second + " in "
-						+ target.name0);
+				throw new FQLException("In mapping " + this
+						+ ", cannot find target attr " + a.second);
 			}
 			if (a1.target.equals(a2.target)) {
 				am.put(a1, a2);
@@ -297,19 +301,19 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		for (Node n : this.source.nodes) {
 			if (nm.get(n) == null) {
 				throw new FQLException("Missing node mapping from " + n
-						+ " in " + name + "\n" + this);
+						+ " in " + this + "\n" + this);
 			}
 		}
 		for (Edge e : this.source.edges) {
 			if (em.get(e) == null) {
 				throw new FQLException("Missing edge mapping from " + e
-						+ " in " + name);
+						+ " in " + this);
 			}
 		}
 		for (Attribute<Node> a : this.source.attrs) {
 			if (am.get(a) == null) {
 				throw new FQLException("Missing attribute mapping from " + a
-						+ " in " + name);
+						+ " in " + this);
 			}
 		}
 	}
@@ -329,10 +333,9 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		}
 		this.source = s;
 		this.target = s;
-		isId = true;
+		//isId = true;
 	}
 
-	@Override
 	/**
 	 * The viewer for mappings.
 	 */
@@ -351,8 +354,8 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		});
 
 		JTable nmC = new JTable(arr, new Object[] {
-				"Source node in " + source.name0,
-				"Target node in " + target.name0 });
+				"Source node"/* + source.name0 */,
+				"Target node" /* + target.name0 */ });
 
 		Object[][] arr2 = new Object[em.size()][2];
 		int i2 = 0;
@@ -368,8 +371,8 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		});
 
 		JTable emC = new JTable(arr2, new Object[] {
-				"Source edge in " + source.name0,
-				"Target path in " + target.name0 });
+				"Source edge" /* + source.name0 */,
+				"Target path" /* + target.name0 */});
 
 		Object[][] arr3 = new Object[am.size()][2];
 		int i3 = 0;
@@ -384,8 +387,8 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			}
 		});
 		JTable amC = new JTable(arr3, new Object[] {
-				"Source attribute in " + source.name0,
-				"Target attribute in " + target.name0 });
+				"Source attribute" /* + source.name0 */,
+				"Target attribute" /* + target.name0 */});
 
 		JPanel p = new JPanel(new GridLayout(2, 2));
 
@@ -423,7 +426,6 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		return s;
 	}
 
-	@Override
 	/**
 	 * Text view for mappings.
 	 */
@@ -442,9 +444,9 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		ta.setLineWrap(true);
 		JScrollPane xxx = new JScrollPane(ta);
 		JPanel p = new JPanel(new GridLayout(1, 1));
-		p.setBorder(BorderFactory.createTitledBorder(
-				BorderFactory.createEmptyBorder(), "Mapping " + name + " : "
-						+ source.name0 + " -> " + target.name0));
+		p.setBorder( BorderFactory.createTitledBorder( 
+				BorderFactory.createEmptyBorder() , "Mapping" /*  + " : "
+						+ source + " -> " + target  */) );
 		p.add(xxx);
 		tap.add(p);
 
@@ -475,8 +477,8 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		JScrollPane xxx2 = new JScrollPane(ta2);
 		JPanel p2 = new JPanel(new GridLayout(1, 1));
 		p2.setBorder(BorderFactory.createTitledBorder(
-				BorderFactory.createEmptyBorder(), "Delta " + name + " : "
-						+ target.name0 + " -> " + source.name0));
+				BorderFactory.createEmptyBorder(), "Delta"   /* + " : "
+						+ target.name0 + " -> " + source.name0 */));
 		p2.add(xxx2);
 		tap.add(p2);
 
@@ -486,8 +488,8 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		JScrollPane xxx3 = new JScrollPane(ta3);
 		JPanel p3 = new JPanel(new GridLayout(1, 1));
 		p3.setBorder(BorderFactory.createTitledBorder(
-				BorderFactory.createEmptyBorder(), "Pi " + name + " : "
-						+ source.name0 + " -> " + target.name0));
+				BorderFactory.createEmptyBorder(), "Pi"   /* + " : "
+						+ source.name0 + " -> " + target.name0 */));
 		p3.add(xxx3);
 		tap.add(p3);
 
@@ -497,8 +499,8 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		JScrollPane xxx4 = new JScrollPane(ta4);
 		JPanel p4 = new JPanel(new GridLayout(1, 1));
 		p4.setBorder(BorderFactory.createTitledBorder(
-				BorderFactory.createEmptyBorder(), "Sigma " + name + " : "
-						+ source.name0 + " -> " + target.name0));
+				BorderFactory.createEmptyBorder(), "Sigma" /* + " : "
+						+ source.name0 + " -> " + target.name0 */));
 		p4.add(xxx4);
 		tap.add(p4);
 
@@ -515,14 +517,14 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer("mapping " + name + " : "
-				+ source.name0 + " -> " + target.name0 + " = ");
-		if (isId) {
-			sb.append("id " + source.name0);
-			return sb.toString();
-		} else {
+		StringBuffer sb = new StringBuffer(); //"mapping " + name + " : "
+	//			+ source + " -> " + target + " = ");
+//		if (isId) {
+//			sb.append("id " + source.name0);
+//			return sb.toString();
+//		} else {
 			sb.append("{\n");
-		}
+		//}
 
 		boolean first = true;
 		sb.append("nodes\n");
@@ -568,6 +570,9 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			// sb.append(")");
 		}
 		sb.append("\n ;\n}");
+		//sb.append(source.toString());
+		//sb.append(" \n\n ");
+		//sb.append(target.toString());
 		return sb.toString();
 	}
 
@@ -732,7 +737,6 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		return Query.convert(i1);
 	}
 
-	@Override
 	public JPanel pretty(final Environment env) throws FQLException {
 		Graph<String, String> g = build();
 		if (g.getVertexCount() == 0) {
@@ -741,10 +745,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		return doView(env, g);
 	}
 
-	@Override
-	public String type() {
-		return "mapping";
-	}
+	
 
 	public Graph<String, String> build() {
 		// Graph<V, E> where V is the type of the vertices
@@ -837,9 +838,11 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 					return UIManager.getColor("Panel.background");
 				}
 				if (p.equals("@source")) {
-					return env.colors.get(source.name0);
+					return Color.RED;
+					//return env.colors.get(source.name0);
 				}
-				return env.colors.get(target.name0);
+				return Color.BLUE;
+				//return env.colors.get(target.name0);
 			}
 		};
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
@@ -869,30 +872,33 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 					public String transform(String t) {
 						int i = t.indexOf(".");
 						String j = t.substring(i + 1);
-						String p = t.substring(0, i);
+						//String p = t.substring(0, i);
+						return j;
+						/*
 						if (p.equals("@source")) {
-							j = source.name0 + "." + j;
+							j =  source.name0 + "." + j;
 						} else {
-							j = target.name0 + "." + j;
+							j =  target.name0 + "." + j;
 						}
 						return j;
+						*/
 					}
 				});
-		vv.getRenderContext().setEdgeLabelTransformer(
-				new ToStringLabeller<String>() {
-
-					@Override
-					public String transform(String t) {
-						// if (t.contains(" ")) {
-						// return "";
-						// }
-						// return t;
-						return "";
-					}
-				});
-		// vv.getRenderer().getVertexRenderer().
-		// vv.getRenderContext().setLabelOffset(20);
-		// vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
+//		vv.getRenderContext().setEdgeLabelTransformer(
+//				new ToStringLabeller<String>() {
+//
+//					@Override
+//					public String transform(String t) {
+//						 if (t.contains(" ")) {
+//						 return "";
+//						 }
+//						 return t;
+////						return "";
+//					}
+//				});
+//		 vv.getRenderer().getVertexRenderer();
+//		 vv.getRenderContext().setLabelOffset(20);
+//		 vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
 
 		return vv;
 	}
@@ -921,14 +927,11 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			zzz.add(new Pair<>(a.name, r.am.get(b).name));
 		}
 
-		return new Mapping(string, l.source, r.target, xxx, zzz, yyy);
+		return new Mapping(l.source, r.target, xxx, zzz, yyy);
 	}
 
-	@Override
-	public JPanel join() {
-		return null;
-	}
-
+	
+/*
 	@Override
 	public String tojson() {
 		String ret = "{\n" + "\"source\" : " + source.tojson() + ",\n"
@@ -943,7 +946,8 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		// }
 		return ret;
 	}
-
+	*/
+/*
 	private String jsonEdges() {
 		String s = "[";
 
@@ -989,25 +993,14 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		p.add(jsc);
 		return p;
 	}
-
+	*/
+/*
 	public static Mapping fromjson(String mapping) throws Exception {
 		return new JSONMappingParser().parse(new FqlTokenizer(mapping)).value;
 	}
+	*/
 
-	@Override
-	public JPanel denotation() throws FQLException {
-		return null;
-	}
 
-	@Override
-	public JPanel initial() throws FQLException {
-		return null;
-	}
-
-	@Override
-	public JPanel groth() throws FQLException {
-		return null;
-	}
 
 	public void okForPi() throws FQLException {
 		for (Attribute<Node> n : target.attrs) {
@@ -1017,13 +1010,13 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 				if (c.equals(n)) {
 					if (found) {
 						throw new FQLException("Not attribute bijection "
-								+ name);
+								+ this);
 					}
 					found = true;
 				}
 			}
 			if (!found) {
-				throw new FQLException("Not attribute bijection " + name);
+				throw new FQLException("Not attribute bijection " + this);
 			}
 		}
 
@@ -1036,7 +1029,7 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			List<Attribute<Node>> mattrs = target.attrsFor(nm.get(n));
 
 			if (!isBijection(nattrs, mattrs, am)) {
-				throw new FQLException("Not union compatible " + name);
+				throw new FQLException("Not union compatible " + this);
 			}
 		}
 
@@ -1071,12 +1064,8 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 		return true;
 	}
 
-	@Override
-	public JPanel observables() {
-		return null;
-	}
+	
 
-	@Override
 	public JPanel constraint() {
 		JPanel ret = new JPanel(new GridLayout(1, 1));
 		try {
@@ -1168,11 +1157,11 @@ public class Mapping implements Viewable<Mapping>, Jsonable {
 			delta.eqs.add(new Eq(lhs0, rhs0));
 
 		}
-		sigma.name0 = source.name0 + "_plus_sigma_" + target.name0;
-		pi.name0 = source.name0 + "_plus_pi_" + target.name0;
-		delta.name0 = source.name0 + "_plus_delta_" + target.name0;
+//		sigma.name0 = source.name0 + "_plus_sigma_" + target.name0;
+	//	pi.name0 = source.name0 + "_plus_pi_" + target.name0;
+	//	delta.name0 = source.name0 + "_plus_delta_" + target.name0;
 
-		// TODO: check deltas, sigmas, pis, obey EDs
+		
 
 		return new Triple<>(delta, sigma, pi);
 	

@@ -28,10 +28,22 @@ import fql.sql.PSMInterp;
  */
 public class Environment {
 
-	final Map<String, Color> colors = new HashMap<>();
-	final Map<String, Object> graphs = new HashMap<>();
+//	final Map<String, Color> colors = new HashMap<>();
+//	final Map<String, Object> graphs = new HashMap<>();
+/*
+ * 		public Map<String, Signature> signatures;
+		public Map<String, Mapping> mappings;
+		public Map<String, Query> queries;
+		public Map<String, Instance> instances;
 
-	public Environment(Program p) throws FQLException {
+ */
+	//public Environment(NewFQLProgram p) throws FQLException {
+	
+
+//	}
+	
+	//public Environment(Program p) throws FQLException {
+		/*
 		signatures = new HashMap<>();
 		mappings = new HashMap<>();
 		queries = new HashMap<>();
@@ -125,7 +137,7 @@ public class Environment {
 				}
 			}
 		}
-
+//TODO validate with EDs
 		// double check sigmas
 		if (DEBUG.VALIDATE_WITH_EDS) {
 			//try {
@@ -152,7 +164,6 @@ public class Environment {
 							} else { System.out.println("normal\n" + j);
 							  System.out.println("\n\n\n computed " + j0); }
 						} else {
-							// TODO pi with EDs
 							/*
 							 Instance j0 = Chase.pi(m, i);
 							
@@ -160,7 +171,7 @@ public class Environment {
 								throw new FQLException("Comparison failed\n\n" + j + "\n\n----------------\n\n" + j0);
 							} else { System.out.println("normal\n" + j);
 							  System.out.println("\n\n\n computed " + j0); }
-						*/	
+							
 						}
 					}
 				}
@@ -196,15 +207,15 @@ public class Environment {
 				colors.put(s, nextColor());
 			}
 		
+*/
+//	}
 
-	}
-
-	private void check(ExternalDecl d) throws FQLException {
-		if (signatures.get(d.type) == null) {
-			throw new FQLException("Cannot find type for instance " + d.name);
-		}
-	}
-
+//	private void check(ExternalDecl d) throws FQLException {
+//		if (signatures.get(d.type) == null) {
+//			throw new FQLException("Cannot find type for instance " + d.name);
+//		}
+//	}
+/*
 	private void check(EvalInstanceDecl d) throws FQLException {
 		if (queries.get(d.query) == null) {
 			throw new FQLException("Cannot find query " + d.query);
@@ -219,8 +230,8 @@ public class Environment {
 				.get(d.inst).name0)) {
 			throw new FQLException("Ill-typed input  : " + d.name);
 		}
-	}
-
+	}*/
+/*
 	private void check(EvalDSPInstanceDecl d) throws FQLException {
 		if (signatures.get(d.type) == null) {
 			throw new FQLException("Cannot find schema " + d.type
@@ -261,71 +272,47 @@ public class Environment {
 		}
 
 	}
+	*/
 
-	public static List<Pair<String, List<Pair<Object, Object>>>> gather(
-			String pre, Signature sig,
-			Map<String, Set<Map<String, Object>>> state) {
-		List<Pair<String, List<Pair<Object, Object>>>> ret = new LinkedList<>();
+	
+	public Environment(Map<String, Signature> signatures,
+		Map<String, Mapping> mappings,
+		Map<String, Instance> instances) {
+	super();
+	this.signatures = signatures;
+	this.mappings = mappings;
+	this.instances = instances;
+}
 
-		for (Node n : sig.nodes) {
-			Set<Map<String, Object>> v = state.get(pre + "_" + n.string);
-			if (v == null) {
-				throw new RuntimeException("Missing: " + pre + "_" + n.string
-						+ " in " + state);
-			}
-			ret.add(new Pair<>(n.string, gather0(v)));
-		}
-		for (Edge e : sig.edges) {
+	
 
-			Set<Map<String, Object>> v = state.get(pre + "_" + e.name);
+//	int index = 0;
+//	static Color[] colors0 = new Color[] { Color.YELLOW, Color.GREEN,
+//			Color.BLUE, Color.RED, Color.GRAY, Color.ORANGE, Color.PINK,
+//			Color.WHITE, Color.DARK_GRAY, Color.CYAN, Color.MAGENTA, Color.PINK };
+//
+//	private Color nextColor() {
+//		if (index == colors0.length) {
+//			index = 0;
+//		}
+//		return colors0[index++];
+//	}
 
-			ret.add(new Pair<>(e.name, gather0(v)));
-		}
-		for (Attribute<Node> a : sig.attrs) {
-			Set<Map<String, Object>> v = state.get(pre + "_" + a.name);
-			ret.add(new Pair<>(a.name, gather0(v)));
-		}
-
-		return ret;
-	}
-
-	private static List<Pair<Object, Object>> gather0(Set<Map<String, Object>> v) {
-		List<Pair<Object, Object>> ret = new LinkedList<>();
-
-		for (Map<String, Object> o : v) {
-			ret.add(new Pair<>(o.get("c0"), o.get("c1")));
-		}
-
-		return ret;
-	}
-
-	int index = 0;
-	static Color[] colors0 = new Color[] { Color.YELLOW, Color.GREEN,
-			Color.BLUE, Color.RED, Color.GRAY, Color.ORANGE, Color.PINK,
-			Color.WHITE, Color.DARK_GRAY, Color.CYAN, Color.MAGENTA, Color.PINK };
-
-	private Color nextColor() {
-		if (index == colors0.length) {
-			index = 0;
-		}
-		return colors0[index++];
-	}
-
-	private void addSchema(SignatureDecl schemaDecl0) throws FQLException {
-		if (schemaDecl0 instanceof SignatureDeclConst) {
-			SignatureDeclConst schemaDecl = (SignatureDeclConst) schemaDecl0;
-			List<Triple<String, String, String>> arrows = schemaDecl.arrows;
-			String name = schemaDecl.name;
-			List<Pair<List<String>, List<String>>> eqs = schemaDecl.eqs;
-
-			Signature signature = new Signature(schemaDecl.name, schemaDecl.nodes,
-				schemaDecl.attrs, arrows, eqs);
-			signatures.put(name, signature);
-		} else {
-			throw new RuntimeException();
-		}
-	}
-
+//	private void addSchema(SignatureDecl schemaDecl0) throws FQLException {
+//		if (schemaDecl0 instanceof SignatureDeclConst) {
+//			SignatureDeclConst schemaDecl = (SignatureDeclConst) schemaDecl0;
+//			List<Triple<String, String, String>> arrows = schemaDecl.arrows;
+//			String name = schemaDecl.name;
+//			List<Pair<List<String>, List<String>>> eqs = schemaDecl.eqs;
+//
+//			Signature signature = new Signature(/* schemaDecl.name, */schemaDecl.nodes,
+//				schemaDecl.attrs, arrows, eqs);
+//			signatures.put(name, signature);
+//		} else {
+//			throw new RuntimeException();
+//		}
+//	}
+/*
 	private void addQuery(QueryDecl queryDecl) throws FQLException {
 		Query q = new Query(queryDecl.name, this, queryDecl);
 		if (!q.getSource().name0.equals(queryDecl.source)) {
@@ -340,7 +327,8 @@ public class Environment {
 		}
 		queries.put(queryDecl.name, q);
 	}
-
+	*/
+/*
 	private void addMapping(MappingDecl mappingDecl) throws FQLException {
 		Mapping m = new Mapping(mappingDecl.name, this, mappingDecl);
 		mappings.put(mappingDecl.name, m);
@@ -351,28 +339,28 @@ public class Environment {
 		instance_types.put(i.name, thesig);
 		instances.put(i.name, i);
 	}
-
-	private void addInstance(ConstantInstanceDecl instanceDecl)
-			throws FQLException {
-		Signature thesig = signatures.get(instanceDecl.type);
-		instance_types.put(instanceDecl.name, thesig);
-		instances.put(instanceDecl.name, new Instance(instanceDecl.name,
-				thesig, instanceDecl.data));
-	}
-
-	private void addInstance(String name, String type) throws FQLException {
-		Signature thesig = signatures.get(type);
-		instance_types.put(name, thesig);
-		instances.put(name, new Instance(name, thesig));
-	}
+*/
+//	private void addInstance(ConstantInstanceDecl instanceDecl)
+//			throws FQLException {
+//		Signature thesig = signatures.get(instanceDecl.type);
+//		instance_types.put(instanceDecl.name, thesig);
+//		instances.put(instanceDecl.name, new Instance(instanceDecl.name,
+//				thesig, instanceDecl.data));
+//	}
+//
+//	private void addInstance(String name, String type) throws FQLException {
+//		Signature thesig = signatures.get(type);
+//		instance_types.put(name, thesig);
+//		instances.put(name, new Instance(name, thesig));
+//	}
 
 	public Map<String, Signature> signatures;
 	public Map<String, Mapping> mappings;
-	public Map<String, Query> queries;
+	//public Map<String, Query> queries;
 	public Map<String, Instance> instances;
 
-	public Map<String, Signature> instance_types;
-
+//	public Map<String, Signature> instance_types;
+/*
 	public Viewable<?> get(String name) throws FQLException {
 		Viewable<?> v = null;
 
@@ -386,10 +374,10 @@ public class Environment {
 			return v;
 		}
 
-		v = queries.get(name);
-		if (v != null) {
-			return v;
-		}
+//		v = queries.get(name);
+//		if (v != null) {
+//			return v;
+//		}
 
 		v = instances.get(name);
 		if (v != null) {
@@ -398,6 +386,7 @@ public class Environment {
 
 		throw new FQLException("Cannot find " + name);
 	}
+	*/
 
 	public Signature getSchema(String s0) throws FQLException {
 		Signature s = signatures.get(s0);
@@ -416,13 +405,13 @@ public class Environment {
 		return s;
 	}
 
-	public Query getQuery(String s0) throws FQLException {
-		Query s = queries.get(s0);
-		if (s == null) {
-			throw new FQLException("Cannot find query " + s0);
-		}
-		return s;
-
-	}
+//	public Query getQuery(String s0) throws FQLException {
+//		Query s = queries.get(s0);
+//		if (s == null) {
+//			throw new FQLException("Cannot find query " + s0);
+//		}
+//		return s;
+//
+//	}
 
 }

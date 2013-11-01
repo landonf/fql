@@ -8,4 +8,17 @@ package fql;
  */
 public class Unit {
 
+	@Override
+	public String toString() {
+		return "";
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof Unit) {
+			return true;
+		}
+		return false;
+	}
+
 }

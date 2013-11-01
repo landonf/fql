@@ -6,7 +6,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.Paint;
 import java.awt.Stroke;
 import java.util.Collections;
 import java.util.Comparator;
@@ -27,7 +26,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.UIManager;
 import javax.swing.table.TableRowSorter;
 
 import org.apache.commons.collections15.Transformer;
@@ -51,23 +49,21 @@ import fql.cat.Inst;
 import fql.cat.Value;
 import fql.gui.CategoryOfElements;
 import fql.gui.Viewable;
-import fql.parse.FqlTokenizer;
-import fql.parse.JSONParsers;
 import fql.parse.Jsonable;
-import fql.parse.PrettyPrinter;
 import fql.sql.ED;
 import fql.sql.EmbeddedDependency;
 import fql.sql.PSM;
+import fql.sql.PSMGen;
 import fql.sql.PSMInterp;
 import fql.sql.Relationalizer;
 
-public class Instance implements Viewable<Instance>, Jsonable {
+public class Instance implements Viewable<Instance> {
 
 	// public static String data(String s) {
 	// return s + " data";
 	// }
 
-	public String name;
+//	public String name;
 	
 	
 	
@@ -76,12 +72,12 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			Set<Pair<Object, Object>> i = data.get(n.string);
 			if (i == null) {
 				throw new FQLException("Missing node table " + n.string
-						+ " in " + name);
+						+ " in " + this);
 			}
 			for (Pair<Object, Object> p : i) {
 				if (!p.first.equals(p.second)) {
-					throw new FQLException("Not reflexive: " + s.name0 + " in "
-							+ s + " and " + name);
+					throw new FQLException("Not reflexive: " 
+							+ s + " and " + this);
 				}
 			}
 		}
@@ -89,7 +85,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			Set<Pair<Object, Object>> i = data.get(a.name);
 			if (i == null) {
 				throw new FQLException("Missing Attribute<Node> table " + a.name
-						+ " in " + name);
+						+ " in " + this);
 			}
 
 			HashSet<Object> x = new HashSet<>();
@@ -98,14 +94,14 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			}
 			if (data.get(a.source.string).size() != x.size()) {
 				throw new RuntimeException(
-						"Instance " + name + " does not map all domain values in " + a.name);
+						"Instance " + this + " does not map all domain values in " + a.name);
 			}
 
 			for (Pair<Object, Object> p1 : i) {
 				for (Pair<Object, Object> p2 : i) {
 					if (p1.first.equals(p2.first)) {
 						if (!p2.second.equals(p2.second)) {
-							throw new FQLException("In " + name + ", not functional: " + s.name0
+							throw new FQLException("In " + this + ", not functional: "
 									+ " in " + s);
 						}
 					}
@@ -114,7 +110,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 				if (!contained(p1.first, data.get(a.source.string))) {
 					throw new FQLException("Domain has non foreign key: "
-							+ s.name0 + " in " + s + " and " + this);
+							+ s + " and " + this);
 				}
 				if (a.target instanceof Int) {
 					try {
@@ -146,7 +142,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 				for (Pair<Object, Object> p2 : i) {
 					if (p1.first.equals(p2.first)) {
 						if (!p2.second.equals(p2.second)) {
-							throw new FQLException("Not functional: " + s.name0
+							throw new FQLException("Not functional: " 
 									+ " in " + s + " and " + this);
 						}
 					}
@@ -167,8 +163,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			Set<Pair<Object, Object>> lhs = evaluate(eq.lhs);
 			Set<Pair<Object, Object>> rhs = evaluate(eq.rhs);
 			if (!lhs.equals(rhs)) {
-				throw new FQLException("Violates constraints: " + s.name0
-						+ " in " + s + "\n\n eq is " + eq
+				throw new FQLException("Violates constraints: " + s + "\n\n eq is " + eq
 						+ "\nlhs is " + lhs + "\n\nrhs is " + rhs);
 			}
 		}
@@ -183,7 +178,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		//System.out.println("Validating " + this);
 		for (EmbeddedDependency ed : thesig.toED("")) {
 			if (!ED.from(ed).holds(data)) {
-				throw new FQLException("ED constraint violation in " + name + ": " + ed + "\n" + ED.from(ed) + "\n" + ED.conv(data));
+				throw new FQLException("ED constraint violation in " + this + ": " + ed + "\n" + ED.from(ed) + "\n" + ED.conv(data));
 			}
 		}		
 	}
@@ -231,9 +226,9 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 	public Signature thesig;
 
-	public Instance(String n, Signature thesig,
+	public Instance(Signature thesig,
 			Map<String, Set<Pair<Object, Object>>> data) throws FQLException {
-		this(n, thesig, degraph(data));
+		this(thesig, degraph(data));
 	}
 
 	private static List<Pair<String, List<Pair<Object, Object>>>> degraph(
@@ -252,8 +247,8 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		return external;
 	}
 
-	public Instance(String n, Signature thesig) throws FQLException {
-		this.name = n;
+	public Instance(Signature thesig) throws FQLException {
+		//this.name = n;
 		this.data = new HashMap<>();
 		this.external = true;
 		for (Node node : thesig.nodes) {
@@ -267,15 +262,15 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		}
 		this.thesig = thesig;
 		if (!typeCheck(thesig)) {
-			throw new FQLException("Type-checking failure " + n);
+			throw new FQLException("Type-checking failure " + this);
 		}
 		conformsTo(thesig);
 	}
 
-	public Instance(String n, Signature thesig,
+	public Instance(Signature thesig,
 			List<Pair<String, List<Pair<Object, Object>>>> data)
 			throws FQLException {
-		this.name = n;
+		//this.name = n;
 		this.data = new HashMap<>();
 		for (Node node : thesig.nodes) {
 			this.data.put(node.string, makeFirst(node.string, data));
@@ -289,7 +284,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		}
 		this.thesig = thesig;
 		if (!typeCheck(thesig)) {
-			throw new FQLException("Type-checking failure " + n);
+			throw new FQLException("Type-checking failure " + this);
 		}
 		conformsTo(thesig);
 	}
@@ -302,7 +297,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			}
 		}
 		throw new RuntimeException("cannot find " + string + " in " + data2
-				+ " in " + name);
+				+ " in " + this);
 	}
 
 	private Set<Pair<Object, Object>> secol(List<Pair<Object, Object>> second) {
@@ -321,7 +316,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 				return new HashSet<>(p.second);
 			}
 		}
-		throw new FQLException("cannot find " + n + " in " + name);
+		throw new FQLException("cannot find " + n + " in " + this);
 	}
 
 	// public Instance(String name, Query thequery, Instance theinstance)
@@ -373,15 +368,15 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	// }
 
 	// this is the json one
-	public Instance(
+/*	public Instance(
 			Signature sig,
 			List<Pair<String, List<Object>>> ob,
 			List<Pair<Pair<Pair<Object, Object>, String>, List<Pair<Object, Object>>>> mo)
 			throws FQLException {
 
 		this(null, sig, jsonmap(ob, mo));
-	}
-
+	} */
+/*
 	private static Map<String, Set<Pair<Object, Object>>> jsonmap(
 			List<Pair<String, List<Object>>> ob,
 			List<Pair<Pair<Pair<Object, Object>, String>, List<Pair<Object, Object>>>> mo) {
@@ -402,7 +397,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		}
 		return map;
 	}
-
+*/
 	private static <X> Set<Pair<X, X>> dupl(List<X> x) {
 		Set<Pair<X, X>> ret = new HashSet<>();
 		for (X s : x) {
@@ -452,8 +447,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer("instance " + name + " : "
-				+ thesig.name0 + " = {\n");
+		StringBuffer sb = new StringBuffer("{\n");
 
 		boolean first = true;
 		sb.append("nodes\n");
@@ -956,7 +950,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 					sub.get(e.source.string), sub.get(e.target.string))));
 		}
 
-		return new Instance(null, thesig, ret);
+		return new Instance(thesig, ret);
 	}
 
 	private static List<Pair<Object, Object>> apply(
@@ -1056,14 +1050,14 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		vv.setPreferredSize(new Dimension(600, 400));
 		// vv.getRenderContext().setEdgeLabelRerderer(new MyEdgeT());
 		// Setup up a new vertex to paint transformer...
-		Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
+		/* Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
 			public Paint transform(String i) {
 				if (!thesig.isAttribute(i)) {
 					return env.colors.get(thesig.name0);
 				}
 				return UIManager.getColor("Panel.background");
 			}
-		};
+		}; */
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		// gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
@@ -1084,7 +1078,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		// return edgeStroke;
 		// }
 		// };
-		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+		//vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 		// vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
 		vv.getRenderContext().setVertexLabelRenderer(new MyVertexT());
 		// vv.getRenderContext().setVertexLabelTransformer(new
@@ -1122,7 +1116,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			}
 		};
 
-		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+	//	vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 		vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
 		vv.getRenderContext().setVertexLabelTransformer(
 				new ToStringLabeller<String>());
@@ -1326,7 +1320,8 @@ public class Instance implements Viewable<Instance>, Jsonable {
 			ret.add(new Pair<>(e.name, tuples));
 		}
 
-		return new Instance(s.name0 + "_terminal", s, ret);
+//		return null;
+		return new Instance(s, ret);
 	}
 
 	public Inst<Node, Path, Object, Object> toFunctor2() throws FQLException {
@@ -1395,7 +1390,7 @@ public class Instance implements Viewable<Instance>, Jsonable {
 	JPanel vwr = new JPanel();
 	CardLayout cards = new CardLayout();
 	Map<String, JTable> joined;
-
+/*
 	@Override
 	public String tojson() {
 		List<String> l = new LinkedList<String>();
@@ -1452,7 +1447,8 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		return ret;
 
 	}
-
+	*/
+/*
 	@Override
 	public JPanel json() {
 		JTextArea q = new JTextArea(tojson());
@@ -1464,12 +1460,13 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		p.add(jsc);
 		return p;
 	}
-
+	*/
+/*
 	public static Instance fromjson(String instance) throws Exception {
 		return new JSONParsers.JSONInstParser()
 				.parse(new FqlTokenizer(instance)).value;
 	}
-
+*/
 	@Override
 	public JPanel denotation() throws FQLException {
 		return null;
@@ -1491,14 +1488,17 @@ public class Instance implements Viewable<Instance>, Jsonable {
 		
 		JTabbedPane t = new JTabbedPane();
 
-		Map<String, Set<Map<String, Object>>> state = shred(name);
+		String name = "obsinput"; //dont use 'input' here - it conflicts
+		Map<String, Set<Map<String, Object>>> state = shred( name );
 		//System.out.println(state);
 		try {
 			if (thesig.attrs.size() == 0) {
 				throw new FQLException("Cannot generate observables - no attributes");
 			}
-			
-			List<PSM> prog = Relationalizer.compile(thesig, "output", name, true);
+
+			List<PSM> prog = (PSMGen.makeTables("output", thesig, false));
+
+			 prog.addAll(Relationalizer.compile(thesig, "output", name, true));
 			Map<String, Set<Map<String, Object>>> res = PSMInterp.interpX(prog, state);
 						
 			for (Node n : thesig.nodes) {

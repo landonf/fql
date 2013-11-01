@@ -318,7 +318,7 @@ public abstract class RA {
 		try {
 			Triple<FinFunctor<Node, Path, Node, Path>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>> func = F.toFunctor2();
 			if (!FinFunctor.isDiscreteOpFib(func.first)) {
-				throw new FQLException("Not a discrete op-fibration: " + F.name);
+				throw new FQLException("Not a discrete op-fibration" /* + F.name */);
 			}
 
 		} catch (RuntimeException e) {

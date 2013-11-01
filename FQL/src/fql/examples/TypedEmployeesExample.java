@@ -42,7 +42,7 @@ public class TypedEmployeesExample extends Example {
 					+ "\n	manager -> { (101, 103), (102, 102), (103, 103) },"
 					+ "\n	worksIn -> { (101, q10), (102, x02), (103, q10) },"
 					+ "\n	secretary -> { (q10, 101), (x02, 102) };"
-					+ "\n}";
+					+ "\n} S";
 
 
 
