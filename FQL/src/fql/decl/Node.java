@@ -1,6 +1,5 @@
 package fql.decl;
 
-import fql.parse.Jsonable;
 
 /**
  * 
@@ -8,7 +7,7 @@ import fql.parse.Jsonable;
  * 
  *         Nodes in a signature.
  */
-public class Node implements Jsonable {
+public class Node {
 
 	public String toString() {
 		return string;

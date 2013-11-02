@@ -44,7 +44,6 @@ import fql.decl.Environment;
 import fql.decl.NewestFQLProgram;
 import fql.examples.Example;
 import fql.parse.NewestFQLParser;
-import fql.sql.PSMGen;
 
 /**
  * 
@@ -264,15 +263,15 @@ public class CodeEditor extends JPanel {
 		ctm.addTemplate(ct);
 
 		ct = new StaticCodeTemplate("mapping", "mapping ",
-				" :  ->  = {\n\tnodes;\n\tattributes;\n\tarrows;\n}");
+				" = {\n\tnodes;\n\tattributes;\n\tarrows;\n} :  -> ");
 		ctm.addTemplate(ct);
 
 		ct = new StaticCodeTemplate("instance", "instance ",
-				" :  = {\n\tnodes;\n\tattributes;\n\tarrows;\n}");
+				" = {\n\tnodes;\n\tattributes;\n\tarrows;\n} :  -> ");
 		ctm.addTemplate(ct);
 
 		ct = new StaticCodeTemplate("query", "query ",
-				" :  ->  = delta pi sigma");
+				" = delta pi sigma");
 		ctm.addTemplate(ct);
 
 		// topArea.setBracketMatchingEnabled(true);

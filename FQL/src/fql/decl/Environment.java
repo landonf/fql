@@ -1,22 +1,8 @@
 package fql.decl;
 
-import java.awt.Color;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import fql.DEBUG;
 import fql.FQLException;
-import fql.Pair;
-import fql.Triple;
-import fql.gui.Viewable;
-import fql.sql.Chase;
-import fql.sql.PSM;
-import fql.sql.PSMGen;
-import fql.sql.PSMInterp;
 
 /**
  * 

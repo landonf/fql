@@ -39,7 +39,6 @@ import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.VertexLabelRenderer;
-import fql.DEBUG;
 import fql.FQLException;
 import fql.Pair;
 import fql.cat.Arr;
@@ -48,16 +47,12 @@ import fql.cat.FinCat;
 import fql.cat.Inst;
 import fql.cat.Value;
 import fql.gui.CategoryOfElements;
-import fql.gui.Viewable;
-import fql.parse.Jsonable;
-import fql.sql.ED;
-import fql.sql.EmbeddedDependency;
 import fql.sql.PSM;
 import fql.sql.PSMGen;
 import fql.sql.PSMInterp;
 import fql.sql.Relationalizer;
 
-public class Instance implements Viewable<Instance> {
+public class Instance  {
 
 	// public static String data(String s) {
 	// return s + " data";
@@ -167,13 +162,14 @@ public class Instance implements Viewable<Instance> {
 						+ "\nlhs is " + lhs + "\n\nrhs is " + rhs);
 			}
 		}
-
+/*
 		if (DEBUG.VALIDATE_WITH_EDS) {
 			validateUsingEDs();
 		}
+		*/
 		// toFunctor();
 	}
-
+/*
 	private void validateUsingEDs() throws FQLException {
 		//System.out.println("Validating " + this);
 		for (EmbeddedDependency ed : thesig.toED("")) {
@@ -182,6 +178,7 @@ public class Instance implements Viewable<Instance> {
 			}
 		}		
 	}
+	*/
 
 	public Set<Pair<Object, Object>> evaluate(Path p) {
 		Set<Pair<Object, Object>> x = data.get(p.source.string);
@@ -398,6 +395,7 @@ public class Instance implements Viewable<Instance> {
 		return map;
 	}
 */
+	/*
 	private static <X> Set<Pair<X, X>> dupl(List<X> x) {
 		Set<Pair<X, X>> ret = new HashSet<>();
 		for (X s : x) {
@@ -405,6 +403,7 @@ public class Instance implements Viewable<Instance> {
 		}
 		return ret;
 	}
+	*/
 
 	private boolean typeCheck(Signature thesig2) {
 		for (String s : data.keySet()) {
@@ -536,7 +535,6 @@ public class Instance implements Viewable<Instance> {
 		return s;
 	}
 
-	@Override
 	public JPanel view() throws FQLException {
 		List<JPanel> panels = new LinkedList<JPanel>();
 		// Map<String, Set<Pair<String,String>>> data;
@@ -599,7 +597,6 @@ public class Instance implements Viewable<Instance> {
 		return panel;
 	}
 
-	@Override
 	public JPanel join() throws FQLException {
 		// Map<String, Set<Pair<String,String>>> data;
 
@@ -796,7 +793,6 @@ public class Instance implements Viewable<Instance> {
 		return ret;
 	}
 
-	@Override
 	public JPanel text() {
 		JTextArea ta = new JTextArea(toString());
 		JPanel tap = new JPanel(new GridLayout(1, 1));
@@ -999,15 +995,10 @@ public class Instance implements Viewable<Instance> {
 		}
 	}
 
-	@Override
 	public JPanel pretty(Environment env) throws FQLException {
 		return makeViewer(env);
 	}
 
-	@Override
-	public String type() {
-		return "instance";
-	}
 
 	public Graph<String, String> build() {
 		// Graph<V, E> where V is the type of the vertices
@@ -1467,22 +1458,11 @@ public class Instance implements Viewable<Instance> {
 				.parse(new FqlTokenizer(instance)).value;
 	}
 */
-	@Override
-	public JPanel denotation() throws FQLException {
-		return null;
-	}
-
-	@Override
-	public JPanel initial() throws FQLException {
-		return null;
-	}
-
-	@Override
+	
 	public JPanel groth() throws FQLException {
 		return CategoryOfElements.makePanel(this);
 	}
 
-	@Override
 	public JPanel observables() {
 		
 		
@@ -1580,10 +1560,6 @@ public class Instance implements Viewable<Instance> {
 		return ret;
 	}
 
-	@Override
-	public JPanel constraint() {
-		return null;
-	}
 
 	/**
 	 * Quickly compares two instances by checking the counts

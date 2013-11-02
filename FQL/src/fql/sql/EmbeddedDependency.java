@@ -1,7 +1,6 @@
 package fql.sql;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -219,7 +218,7 @@ public class EmbeddedDependency {
 			List<Triple<String, String, String>> tgd = telescope(pre, "x", "y", rhs, exists);
 						
 			List<Pair<String, String>> egd = new LinkedList<>();
-			List<Triple<String, String, String>> not = new LinkedList<>();
+		//	List<Triple<String, String, String>> not = new LinkedList<>();
 		
 			EmbeddedDependency ed = new EmbeddedDependency(forall, exists,
 					where, tgd, egd);

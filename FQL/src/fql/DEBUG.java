@@ -3,12 +3,10 @@ package fql;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 
-import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 /**
@@ -42,7 +40,7 @@ public class DEBUG {
 	
 	public static boolean ALL_GR_PATHS = false;
 
-	public static boolean VALIDATE_WITH_EDS = false;
+//	public static boolean VALIDATE_WITH_EDS = false;
 	
 	//public static int MAX_JOIN_SIZE = 1024;
 	
@@ -84,14 +82,14 @@ public class DEBUG {
 	static String labelMtext = "Allows multiple viewers for the same editor.";
 	
 	public static void showOptions() {
-		JPanel p = new JPanel(new GridLayout(12, 2));
-	
+		JPanel p = new JPanel(new GridLayout(11, 2));
+	/*
 		JCheckBox ed = new JCheckBox("", VALIDATE_WITH_EDS);
 		ed.setToolTipText("Validates Data Migration using Embedded Dependencies");
 		JLabel edL = new JLabel("Validate using EDs:");
 		p.add(edL);
 		p.add(ed);
-		
+		*/
 		JCheckBox gr = new JCheckBox("", ALL_GR_PATHS);
 		gr.setToolTipText("Show all paths in category of elements");
 		JLabel grL = new JLabel("Show all paths in Grothendieck:");
@@ -264,7 +262,7 @@ public class DEBUG {
 			} catch (NumberFormatException nfe) {
 				return;
 			}
-			VALIDATE_WITH_EDS = ed.isSelected();
+//			VALIDATE_WITH_EDS = ed.isSelected();
 			ALL_GR_PATHS = gr.isSelected();
 			ALLOW_INFINITES = jcb0.isSelected();
 			VALIDATE = jcb.isSelected();

@@ -23,5 +23,5 @@ public class TriangleExample extends Example {
 					+ "\n	A.a.b.c = A,"
 					+ "\n	B.b.c.a = B,"
 					+ "\n	C.c.a.b = C;"
-					+ "\n}";
+					+ "\n}\n";
 }

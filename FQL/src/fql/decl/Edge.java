@@ -1,6 +1,5 @@
 package fql.decl;
 
-import fql.parse.Jsonable;
 
 /**
  * 
@@ -8,7 +7,7 @@ import fql.parse.Jsonable;
  * 
  *         Class for edges in a signature.
  */
-public class Edge implements Jsonable {
+public class Edge {
 
 	public String toString() {
 		return name + " : " + source + " -> " + target;

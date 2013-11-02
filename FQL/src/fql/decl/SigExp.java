@@ -6,7 +6,6 @@ import java.util.Map;
 import fql.Pair;
 import fql.Triple;
 import fql.Unit;
-import fql.decl.NewFQLProgram.NewSigConst;
 
 public abstract class SigExp {
 
@@ -48,7 +47,7 @@ public abstract class SigExp {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			NewSigConst other = (NewSigConst) obj;
+			Const other = (Const) obj;
 			if (arrows == null) {
 				if (other.arrows != null)
 					return false;

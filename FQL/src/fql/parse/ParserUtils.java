@@ -110,6 +110,7 @@ public class ParserUtils {
 		};
 	}
 
+	@SuppressWarnings("rawtypes")
 	public static RyanParser<Object> or(final RyanParser p, final RyanParser q) {
 
 		return new RyanParser<Object>() {

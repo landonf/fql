@@ -21,7 +21,7 @@ public class FqlTokenMaker extends AbstractJFlexCTokenMaker {
   public static final int YYEOF = -1;
 
   /** initial size of the lookahead buffer */
-  private static final int ZZ_BUFFERSIZE = 16384;
+  //private static final int ZZ_BUFFERSIZE = 16384;
 
   /** lexical states */
   public static final int EOL_COMMENT = 4;
@@ -417,7 +417,8 @@ public class FqlTokenMaker extends AbstractJFlexCTokenMaker {
   private int zzMarkedPos;
 
   /** the textposition at the last state to be included in yytext */
-  private int zzPushbackPos;
+  @SuppressWarnings("unused")
+private int zzPushbackPos;
 
   /** the current text position in the buffer */
   private int zzCurrentPos;
@@ -430,21 +431,22 @@ public class FqlTokenMaker extends AbstractJFlexCTokenMaker {
   private int zzEndRead;
 
   /** number of newlines encountered up to the start of the matched text */
-  private int yyline;
+  //private int yyline;
 
   /** the number of characters up to the start of the matched text */
-  private int yychar;
+  //private int yychar;
 
   /**
    * the number of characters from the last newline up to the start of the 
    * matched text
    */
-  private int yycolumn;
+  //private int yycolumn;
 
   /** 
    * zzAtBOL == true <=> the scanner is currently at the beginning of a line
    */
-  private boolean zzAtBOL = true;
+  @SuppressWarnings("unused")
+private boolean zzAtBOL = true;
 
   /** zzAtEOF == true <=> the scanner is at the EOF */
   private boolean zzAtEOF;

@@ -20,9 +20,6 @@ import fql.cat.FinFunctor;
 import fql.decl.Attribute;
 import fql.decl.Edge;
 import fql.decl.Environment;
-import fql.decl.EvalDSPInstanceDecl;
-import fql.decl.ExternalDecl;
-import fql.decl.Instance;
 import fql.decl.Int;
 import fql.decl.Mapping;
 import fql.decl.NewestFQLProgram;
@@ -38,8 +35,7 @@ import fql.decl.Varchar;
  *
  * PSM generator.
  */
-public class PSMGen  /* implements PolyVisitor<Poly<Unit, NewSigConst>, NewInstConst, List<PSM>, Unit>, 
-	NewInstConstVisitor<List<PSM>, Signature> */
+public class PSMGen 
 {
 
 	public static List<PSM> guidify(String pre0, Signature sig) throws FQLException {	
@@ -373,7 +369,6 @@ public class PSMGen  /* implements PolyVisitor<Poly<Unit, NewSigConst>, NewInstC
 			ret.add(populateTable(dst, a.name, lookup(data, a.name)));
 		}
 
-		 ret.addAll(guidify(dst, sig));
 
 		return ret;
 	}
@@ -387,15 +382,14 @@ public class PSMGen  /* implements PolyVisitor<Poly<Unit, NewSigConst>, NewInstC
 		throw new RuntimeException();
 	}
 	
-	//TODO remove validate using EDs
 
 	public static List<PSM> doExternal(Signature sig, String in, String out)
 			throws FQLException {
 		List<PSM> ret = new LinkedList<>();
 
-		Instance inst = new Instance(sig);
+		//Instance inst = new Instance(sig);
 
-		System.out.println("externaml " + in + " out " + out);
+		//System.out.println("externaml " + in + " out " + out);
 		ret.addAll(makeTables(in, sig, true));
 		//ret.addAll(makeTables(out, sig, false));
 		
@@ -409,7 +403,6 @@ public class PSMGen  /* implements PolyVisitor<Poly<Unit, NewSigConst>, NewInstC
 			ret.add(new InsertSQL(out + "_" + a.name, new CopyFlower(in + "_" + a.name)));
 		}
 
-		ret.addAll(guidify(out, sig));
 
 		return ret;
 	}
@@ -1058,132 +1051,6 @@ public class PSMGen  /* implements PolyVisitor<Poly<Unit, NewSigConst>, NewInstC
 		return ret;
 	}
 
-	/*
-	@Override
-	public List<PSM> visit(Unit env,
-			Zero<Poly<Unit, NewSigConst>, NewInstConst> e) {
-		throw new RuntimeException();
-	}
-
-	@Override
-	public List<PSM> visit(Unit env,
-			One<Poly<Unit, NewSigConst>, NewInstConst> e) {
-		throw new RuntimeException();
-	}
-
-	@Override
-	public List<PSM> visit(Unit env,
-			Plus<Poly<Unit, NewSigConst>, NewInstConst> e) {
-		throw new RuntimeException();
-	}
-
-	@Override
-	public List<PSM> visit(Unit env,
-			Times<Poly<Unit, NewSigConst>, NewInstConst> e) {
-		throw new RuntimeException();
-	}
-
-	@Override
-	public List<PSM> visit(Unit env,
-			Exp<Poly<Unit, NewSigConst>, NewInstConst> e) {
-		throw new RuntimeException();
-	}
-
-	@Override
-	public List<PSM> visit(Unit env,
-			Two<Poly<Unit, NewSigConst>, NewInstConst> e) {
-		throw new RuntimeException();
-	}
-
-	@Override
-	public List<PSM> visit(Unit env,
-			Var<Poly<Unit, NewSigConst>, NewInstConst> e) {
-		return new LinkedList<>();
-	}
-
-	@Override
-	public List<PSM> visit(Unit env,
-			Const<Poly<Unit, NewSigConst>, NewInstConst> e) {
-		return e.c.accept(e.t.accept(new Unit(), new ToSigVisitor()), PSMGen.this);
-	}
-
-	@Override
-	public List<PSM> visit(Signature env, Fin e) {
-		//e.
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<PSM> visit(Signature env, Delta e) {
-		//e.
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<PSM> visit(Signature env, Sigma e) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<PSM> visit(Signature env, Pi e) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<PSM> visit(Signature env, fql.decl.NewFQLProgram.FullSigma e) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<PSM> visit(Signature env, Relationalize e) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<PSM> visit(Signature env, External e) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	*/
-
-	//
-	
-	
-
-	// private static Map<Triple<Node, Node, Arr<Node, Path>>, String> deltaObj(
-	// FinFunctor<Triple<Node, Node, Arr<Node, Path>>, Pair<Arr<Node, Path>,
-	// Arr<Node, Path>>, Node, Path> projB) {
-	// Map<Triple<Node, Node, Arr<Node, Path>>, String> ret = new HashMap<>();
-	// for (Entry<Triple<Node, Node, Arr<Node, Path>>, Node> p :
-	// projB.objMapping
-	// .entrySet()) {
-	// ret.put(p.getKey(), new Relvar(p.getKey().second.string));
-	// }
-	// return ret;
-	// }
-	//
-	// /** these bastardized versions of delta only works in support of pi
-	// */
-	// private static Map<Pair<Arr<Node, Path>, Arr<Node, Path>>, RA> deltaArr(
-	// FinFunctor<Triple<Node, Node, Arr<Node, Path>>, Pair<Arr<Node, Path>,
-	// Arr<Node, Path>>, Node, Path> projB) {
-	// Map<Pair<Arr<Node, Path>, Arr<Node, Path>>, RA> ret = new HashMap<>();
-	// for (Entry<Arr<Triple<Node, Node, Arr<Node, Path>>, Pair<Arr<Node, Path>,
-	// Arr<Node, Path>>>, Arr<Node, Path>> p : projB.arrowMapping.entrySet()) {
-	// Path x = p.getKey().arr.second.arr;
-	// ret.put(p.getKey().arr, compose(x));
-	// }
-	//
-	// return ret;
-	// }
-	
 	private static List<Pair<Object, Object>> gather0(Set<Map<String, Object>> v) {
 		List<Pair<Object, Object>> ret = new LinkedList<>();
 

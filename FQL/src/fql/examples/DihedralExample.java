@@ -32,6 +32,6 @@ public class DihedralExample extends Example {
 					+ "\n	G.r.r = G,"
 					+ "\n	G.s.s = G,"
 					+ "\n	G.S.r.s = G.R;"
-					+ "\n}";
+					+ "\n}\n";
 
 }

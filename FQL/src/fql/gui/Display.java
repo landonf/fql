@@ -164,9 +164,9 @@ public class Display {
 			if (environment.signatures.get(c) != null) {
 				frames.add(new Pair<String, JComponent>("schema " + c, showSchema(environment, c, environment.getSchema(c))));
 			} else if (environment.mappings.get(c) != null) {
-				frames.add(new Pair<String, JComponent>("mapping " + c + " : " + p.maps_t.get(c).first + " -> " + p.maps_t.get(c).second, showMapping(environment, c, environment.getMapping(c))));
+				frames.add(new Pair<String, JComponent>("mapping " + c /* + " : " + p.maps_t.get(c).first + " -> " + p.maps_t.get(c).second */, showMapping(environment, c, environment.getMapping(c))));
 			} else if (environment.instances.get(c) != null) {
-				frames.add(new Pair<String, JComponent>("instance " + c + " : " + p.insts_t.get(c), showInst(environment, c, environment.instances.get(c))));
+				frames.add(new Pair<String, JComponent>("instance " + c /* + " : " + p.insts_t.get(c) */, showInst(environment, c, environment.instances.get(c))));
 			}
 		}
 		

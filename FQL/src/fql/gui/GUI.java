@@ -34,7 +34,6 @@ import javax.swing.KeyStroke;
 
 import fql.DEBUG;
 import fql.FQLApplet;
-import fql.FQLBackEnd;
 import fql.Pair;
 import fql.examples.Example;
 import fql.examples.Examples;
@@ -171,6 +170,7 @@ public class GUI extends JPanel {
 			}
 		});
 
+		/*
 		MenuItem jsonItem = new MenuItem("JSON Input");
 		editMenu.add(jsonItem);
 		jsonItem.addActionListener(new ActionListener() {
@@ -178,6 +178,7 @@ public class GUI extends JPanel {
 				JsonPanel.showPanel(new FQLBackEnd());
 			}
 		});
+		*/
 
 		Menu helpMenu = new Menu("About");
 		MenuItem helpItem = new MenuItem("Help");

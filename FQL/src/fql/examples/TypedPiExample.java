@@ -28,7 +28,7 @@ public class TypedPiExample extends Example {
 					+ "\n equations;"
 					+ "\n}"
 					+ "\n"
-					+ "\ninstance I : C = {"
+					+ "\ninstance I = {"
 					+ "\n nodes"
 					+ "\n	c1   -> { 1,2 },"
 					+ "\n	c2   -> { 1,2,3 };"
@@ -37,7 +37,7 @@ public class TypedPiExample extends Example {
 					+ "\n	att2 -> { (1,Spivak), (2,Wisnesky) },"
 					+ "\n	att3 -> { (1,MIT), (2,Harvard),(3,Leslie) };"
 					+ "\n arrows;"
-					+ "\n} C"
+					+ "\n} : C"
 					+ "\n"
 					+ "\nschema D = {"
 					+ "\n nodes "
@@ -50,7 +50,7 @@ public class TypedPiExample extends Example {
 					+ "\n equations;"
 					+ "\n}"
 					+ "\n"
-					+ "\nmapping F : C -> D = {"
+					+ "\nmapping F = {"
 					+ "\n nodes "
 					+ "\n 	c1 -> d,"
 					+ "\n 	c2 -> d;"
@@ -59,7 +59,7 @@ public class TypedPiExample extends Example {
 					+ "\n	att2 -> a2,"
 					+ "\n	att3 -> a3;"
 					+ "\n arrows;"
-					+ "\n} C D"
+					+ "\n} : C -> D"
 					+ "\n"
-					+ "\ninstance J : D = pi F I";
+					+ "\ninstance J = pi F I\n";
 }

@@ -23,10 +23,10 @@ public class ExternalExample extends Example {
 					+ "\nschema C = { nodes T; attributes; arrows; equations; }"
 					+ "\n"
 					+ "\n// generates CREATE TABLE I_T(c1 VARCHAR(128), c0 VARCHAR(128));"
-					+ "\ninstance I : C = { nodes T -> {}; attributes; arrows; } C"
+					+ "\ninstance I = { nodes T -> {}; attributes; arrows; } : C"
 					+ "\n"
 					+ "\n// copies given extblname into J"
-					+ "\ninstance J : C = external C extblname";
+					+ "\ninstance J = external C extblname\n";
 /*					+ "\n"
 					+ "\nmapping F : C -> C = id C"
 					+ "\n"

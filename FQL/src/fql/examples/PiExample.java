@@ -23,7 +23,7 @@ public class PiExample extends Example {
 					+ "\n equations;"
 					+ "\n}"
 					+ "\n"
-					+ "\ninstance I : C = {"
+					+ "\ninstance I = {"
 					+ "\n nodes"
 					+ "\n	C1 -> { c1A, c1B, c1C },"
 					+ "\n	C2 -> { c2x, c2y};"
@@ -31,7 +31,7 @@ public class PiExample extends Example {
 					+ "\n arrows"
 					+ "\n	c ->  { (c1A,c2x), (c1B,c2x), (c1C,c2x) },"
 					+ "\n	cc -> { (c1A,c2x), (c1B,c2x), (c1C,c2y) };"
-					+ "\n} C"
+					+ "\n} : C"
 					+ "\n"
 					+ "\nschema D = { "
 					+ "\n nodes"
@@ -46,7 +46,7 @@ public class PiExample extends Example {
 					+ "\n equations;"
 					+ "\n}"
 					+ "\n"
-					+ "\nmapping F : C -> D = {"
+					+ "\nmapping F = {"
 					+ "\n nodes"
 					+ "\n  C1 -> D1,"
 					+ "\n  C2 -> D3;"
@@ -54,9 +54,9 @@ public class PiExample extends Example {
 					+ "\n  arrows"
 					+ "\n  c  -> D1.d.ddd,"
 					+ "\n  cc -> D1.dd.ddd;"
-					+ "\n} C D"
+					+ "\n} : C -> D"
 					+ "\n"
-					+ "\ninstance J : D = pi F I";
+					+ "\ninstance J = pi F I\n";
 
 
 }

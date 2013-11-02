@@ -43,7 +43,7 @@ public class SigmaExample extends Example {
 					+ "\n equations;"
 					+ "\n}"
 					+ "\n"
-					+ "\nmapping F : C -> D = {"
+					+ "\nmapping F = {"
 					+ "\n nodes"
 					+ "\n	a1 -> A, "
 					+ "\n	a2 -> A, "
@@ -64,10 +64,10 @@ public class SigmaExample extends Example {
 					+ "\n  h1 -> A.H, "
 					+ "\n  h2 -> A.H, "
 					+ "\n  h3 -> A.H;"
-					+ "\n} C D"
+					+ "\n} : C -> D"
 					+ "\n"
 					+ "\n"
-					+ "\ninstance I : C = {"
+					+ "\ninstance I = {"
 					+ "\n nodes"
 					+ "\n	b2 -> {a,b,c},"
 					+ "\n 	b1 -> {d,e},"
@@ -91,8 +91,8 @@ public class SigmaExample extends Example {
 					+ "\n 	h3 -> {(1,f),(2,g)},"
 					+ "\n 	h2 -> {(3,i),(4,j),(5,j)},"
 					+ "\n 	h1 -> {(6,k)};"
-					+ "\n} C"
+					+ "\n} : C"
 					+ "\n"
-					+ "\ninstance J : D = sigma F I";
+					+ "\ninstance J = sigma F I\n";
 
 }

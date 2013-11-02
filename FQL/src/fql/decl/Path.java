@@ -7,10 +7,8 @@ import fql.FQLException;
 import fql.Pair;
 import fql.Unit;
 import fql.parse.FqlTokenizer;
-import fql.parse.Jsonable;
 import fql.parse.Partial;
 import fql.parse.PathParser;
-import fql.parse.PrettyPrinter;
 import fql.parse.Tokens;
 
 /**
@@ -19,7 +17,7 @@ import fql.parse.Tokens;
  * 
  *         Paths
  */
-public class Path implements Jsonable {
+public class Path  {
 
 	public Node source;
 	public Node target;
@@ -243,8 +241,5 @@ public class Path implements Jsonable {
 		return toString() + " : " + source.string + " -> " + target.string;
 	}
 
-	@Override
-	public String tojson() {
-		return PrettyPrinter.sep(",", "[", "]", path);
-	}
+	
 }

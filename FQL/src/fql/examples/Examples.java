@@ -1,6 +1,5 @@
 package fql.examples;
 
-import java.util.Arrays;
 
 /**
  * 

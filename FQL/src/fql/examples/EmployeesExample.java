@@ -30,7 +30,7 @@ public class EmployeesExample extends Example {
 					+ "\n  	Department.secretary.worksIn = Department;"
 					+ "\n}"
 					+ "\n"
-					+ "\ninstance I : S = {"
+					+ "\ninstance I = {"
 					+ "\n nodes"
 					+ "\n 	FirstName      -> { Alan, Alice,  Andrey, Camille, David },"
 					+ "\n 	LastName       -> { Arden, Hoover, Jordan, Markov, Turing },"
@@ -45,7 +45,7 @@ public class EmployeesExample extends Example {
 					+ "\n	worksIn   -> { (101, q10), (102, x02), (103, q10) },"
 					+ "\n	name      -> { (q10, AppliedMath), (x02, PureMath) },"
 					+ "\n	secretary -> { (q10, 101), (x02, 102) };"
-					+ "\n} S";
+					+ "\n} : S\n";
 
 
 }

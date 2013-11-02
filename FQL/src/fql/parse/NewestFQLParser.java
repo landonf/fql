@@ -63,11 +63,13 @@ public class NewestFQLParser {
 	public static final Parser<?> program = program().from(TOKENIZER, IGNORED);
 
 	public static final Parser<?> program() {
-		return Parsers.or(Parsers.tuple(schemaDecl().source().peek(), schemaDecl()),
+		return Parsers.or(
+				Parsers.tuple(schemaDecl().source().peek(), schemaDecl()),
 				Parsers.tuple(instanceDecl().source().peek(), instanceDecl()),
-				Parsers.tuple(mappingDecl().source().peek(), mappingDecl())).many();
+				Parsers.tuple(mappingDecl().source().peek(), mappingDecl()))
+				.many();
 	}
-	
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static final Parser<?> sig() {
 		Reference ref = Parser.newReference();
@@ -79,17 +81,18 @@ public class NewestFQLParser {
 		Parser<?> expTy = Parsers.between(term("("),
 				Parsers.tuple(ref.lazy(), term("^"), ref.lazy()), term(")"));
 
-		Parser<?> a = Parsers.or(new Parser<?>[] {
-				term("void"), term("unit"),
+		Parser<?> a = Parsers.or(new Parser<?>[] { term("void"), term("unit"),
 				plusTy, prodTy, expTy, ident(), schemaConst() });
 
 		ref.set(a);
 
 		return a;
 	}
+
 	public static final Parser<?> schemaDecl() {
 		return Parsers.tuple(term("schema"), ident(), term("="), sig());
 	}
+
 	public static final Parser<?> schemaConst() {
 		Parser<?> p1 = ident();
 		Parser<?> p2 = Parsers.tuple(ident(), term(":"), ident(), term("->"),
@@ -102,9 +105,10 @@ public class NewestFQLParser {
 				section("equations", p3));
 		return Parsers.between(term("{"), foo, term("}"));
 	}
+
 	public static final SigExp toSchema(Object o) {
 		try {
-			Tuple3 t = (Tuple3) o;
+			Tuple3<?,?,?> t = (Tuple3<?,?,?>) o;
 			Token z = (Token) t.b;
 			String y = z.toString();
 			if (y.equals("+")) {
@@ -124,7 +128,7 @@ public class NewestFQLParser {
 				return new SigExp.One();
 			} else if (o.toString().equals("void")) {
 				return new SigExp.Zero();
-			} 
+			}
 			throw new RuntimeException();
 		} catch (RuntimeException cce) {
 		}
@@ -140,10 +144,12 @@ public class NewestFQLParser {
 			// cce.printStackTrace();
 		}
 
-//		System.out.println(o.getClass());
-	//	System.out.println(o);
-		return new SigExp.Var(o.toString());	
+		// System.out.println(o.getClass());
+		// System.out.println(o);
+		return new SigExp.Var(o.toString());
 	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final SigExp toSchemaConst(Object y) {
 		List<String> nodes = new LinkedList<>();
 		List<Triple<String, String, String>> attrs = new LinkedList<>();
@@ -151,7 +157,7 @@ public class NewestFQLParser {
 		List<Pair<List<String>, List<String>>> eqs = new LinkedList<>();
 
 		Tuple4 s = (Tuple4) y;
-		
+
 		Tuple3 nodes0 = (Tuple3) s.a;
 		Tuple3 attrs0 = (Tuple3) s.b;
 		Tuple3 arrows0 = (Tuple3) s.c;
@@ -181,16 +187,11 @@ public class NewestFQLParser {
 		Const c = new Const(nodes, attrs, arrows, eqs);
 		return c;
 	}
-	
+
 	public static final Parser<?> mappingDecl() {
-		return Parsers.tuple(
-				term("mapping"),
-				ident(),
-				Parsers.tuple(term(":"), Parsers.tuple(
-						sig(), term("->"),
-						sig(), term("=")),
-				mapping()));
+		return Parsers.tuple(term("mapping"), ident(), term("="), mapping());
 	}
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final Parser<?> mapping() {
 		Reference ref = Parser.newReference();
@@ -203,22 +204,26 @@ public class NewestFQLParser {
 				Parsers.tuple(ref.lazy(), term("then"), ref.lazy()), term(")"));
 
 		Parser a = Parsers.or(new Parser[] { Parsers.tuple(term("tt"), sig()),
-				Parsers.tuple(term("ff"), sig()), Parsers.tuple(term("fst"), sig(), sig()),
+				Parsers.tuple(term("ff"), sig()),
+				Parsers.tuple(term("fst"), sig(), sig()),
 				Parsers.tuple(term("snd"), sig(), sig()),
 				Parsers.tuple(term("inl"), sig(), sig()),
 				Parsers.tuple(term("inr"), sig(), sig()),
 				Parsers.tuple(term("apply"), sig(), sig()),
 				Parsers.tuple(term("curry"), ref.lazy()),
-				Parsers.tuple(term("eq"), sig()), Parsers.tuple(term("id"), sig()),
+				Parsers.tuple(term("eq"), sig()),
+				Parsers.tuple(term("id"), sig()),
 				Parsers.tuple(term("dist1"), sig(), sig(), sig()),
-				Parsers.tuple(term("dist2"), sig(), sig(), sig()), compTy, plusTy, prodTy,
-				ident(), Parsers.tuple(mappingConst(), sig(), sig()) });
+				Parsers.tuple(term("dist2"), sig(), sig(), sig()), compTy,
+				plusTy, prodTy, ident(), mappingConst()});
+//				Parsers.tuple(, sig(), sig()) });
 
 		ref.set(a);
 
 		return a;
 
 	}
+
 	public static final Parser<?> mappingConst() {
 		Parser<?> node = Parsers.tuple(ident(), term("->"), ident());
 		Parser<?> arrow = Parsers.tuple(ident(), term("->"), path());
@@ -228,8 +233,10 @@ public class NewestFQLParser {
 
 		Parser<?> p1 = Parsers.between(term("{"), xxx, term("}"));
 
-		return p1;
+		return Parsers.tuple(p1, term(":"), sig(), term("->"), sig());
 	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final MapExp toMapConst(Object decl, SigExp t1, SigExp t2) {
 		Tuple3 x = (Tuple3) decl;
 
@@ -268,6 +275,8 @@ public class NewestFQLParser {
 		return new MapExp.Const(objs, attrs, arrows, t1, t2);
 
 	}
+
+	@SuppressWarnings("rawtypes")
 	public static final MapExp toMapping(Object o) {
 		try {
 			Tuple4 p = (Tuple4) o;
@@ -322,12 +331,12 @@ public class NewestFQLParser {
 		}
 
 		try {
-			Tuple3 p = (Tuple3) o;
+			Tuple5 p = (Tuple5) o;
 
-			Object p2 = p.b;
-			Object p3 = p.c;
+			Object p2 = p.c;
+			Object p3 = p.e;
 			Object o1 = p.a;
-			return  toMapConst(o1, toSchema(p2), toSchema(p3));
+			return toMapConst(o1, toSchema(p2), toSchema(p3));
 		} catch (RuntimeException re) {
 		}
 
@@ -348,7 +357,7 @@ public class NewestFQLParser {
 
 		}
 
-		//TODO delta, sigma, pi, SIGMA, external, relationalize
+		// TODO delta, sigma, pi, SIGMA, external, relationalize
 		if (o instanceof String) {
 			return new MapExp.Var(o.toString());
 		}
@@ -377,19 +386,23 @@ public class NewestFQLParser {
 		Parser<?> SIGMA = Parsers.tuple(term("SIGMA"), mapping(), ref.lazy());
 		Parser<?> relationalize = Parsers.tuple(term("relationalize"), ident());
 
-		Parser a = Parsers.or(new Parser[] { Parsers.tuple(term("prop"), sig()),
-				Parsers.tuple(term("void"), sig()), Parsers.tuple(term("unit"), sig()),
-				plusTy, prodTy, expTy, ident(), instanceConst(), delta, sigma, pi, SIGMA, external, relationalize });
+		Parser a = Parsers.or(new Parser[] {
+				Parsers.tuple(term("prop"), sig()),
+				Parsers.tuple(term("void"), sig()),
+				Parsers.tuple(term("unit"), sig()), plusTy, prodTy, expTy,
+				ident(), instanceConst(), delta, sigma, pi, SIGMA, external,
+				relationalize });
 
 		ref.set(a);
 
 		return a;
 	}
+
 	public static final Parser<?> instanceDecl() {
-		return Parsers.tuple(term("instance"), ident(), Parsers.tuple(
-				term(":"), sig(), term("=")),
-				instance());
+		return Parsers.tuple(term("instance"), ident(), term("="), instance());
+//				Parsers.tuple(term(":"), sig(), term("=")), instance());
 	}
+
 	public static final Parser<?> instanceConst() {
 		Parser<?> node = Parsers.tuple(ident(), term("->"), Parsers.between(
 				term("{"), string().sepBy(term(",")), term("}")));
@@ -405,11 +418,13 @@ public class NewestFQLParser {
 		Parser<?> xxx = Parsers.tuple(section("nodes", node),
 				section("attributes", arrow), section("arrows", arrow));
 		Parser<?> constant = Parsers.tuple(
-				Parsers.between(term("{"), xxx, term("}")), sig());
+				Parsers.between(term("{"), xxx, term("}")), term(":"), sig());
 		return constant;
 	}
+
+	@SuppressWarnings("rawtypes")
 	public static InstExp toInstConst(Object decl) {
-		org.codehaus.jparsec.functors.Pair y = (org.codehaus.jparsec.functors.Pair) decl;
+		Tuple3 y = (Tuple3) decl;
 		Tuple3 x = (Tuple3) y.a;
 
 		List<Pair<String, List<Pair<Object, Object>>>> data = new LinkedList<>();
@@ -456,8 +471,10 @@ public class NewestFQLParser {
 			}
 			data.add(new Pair<>(n, l));
 		}
-		return new InstExp.Const(data, toSchema(y.b));
+		return new InstExp.Const(data, toSchema(y.c));
 	}
+
+	@SuppressWarnings("rawtypes")
 	public static final InstExp toInst(Object o) {
 		try {
 			Tuple3 t = (Tuple3) o;
@@ -474,9 +491,9 @@ public class NewestFQLParser {
 			} else if (y.equals("external")) {
 				return new InstExp.External(toSchema(t.b), t.c.toString());
 			}
-		}catch (RuntimeException cce) {
+		} catch (RuntimeException cce) {
 		}
-		
+
 		try {
 			Tuple3 t = (Tuple3) o;
 			Token z = (Token) t.b;
@@ -519,14 +536,13 @@ public class NewestFQLParser {
 			// cce.printStackTrace();
 		}
 
-//		System.out.println(o.getClass());
-	//	System.out.println(o);
-		return new InstExp.Var(o.toString());	
+		// System.out.println(o.getClass());
+		// System.out.println(o);
+		return new InstExp.Var(o.toString());
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static final NewestFQLProgram program(
-			String s) {
+	public static final NewestFQLProgram program(String s) {
 		List<NewDecl> ret = new LinkedList<>();
 		List decls = (List) NewestFQLParser.program.parse(s);
 
@@ -555,33 +571,34 @@ public class NewestFQLParser {
 				Tuple4 tt0 = (Tuple4) decl;
 				name = (String) t.b;
 
-				Tuple3 xxx = (Tuple3) tt0.c;
-//
-//				System.out.println("trying on " + tt0.d);
-//				Poly<Poly<Unit, NewSigConst>, NewInstConst> aaa = toTy(f2x,
-//						f1x, tt0.d);
-//				System.out.println(">>>" + aaa);
-//
-//				Poly<Unit, NewSigConst> bbb = toTy(f2, f1, xxx.b);
-//				System.out.println("<<<" + bbb);
-//
-				NewDecl toAdd = NewestFQLProgram.NewDecl.instDecl(name, idx, toInst(tt0.d), toSchema(xxx.b));
+//				Tuple3 xxx = (Tuple3) tt0.c;
+				//
+				// System.out.println("trying on " + tt0.d);
+				// Poly<Poly<Unit, NewSigConst>, NewInstConst> aaa = toTy(f2x,
+				// f1x, tt0.d);
+				// System.out.println(">>>" + aaa);
+				//
+				// Poly<Unit, NewSigConst> bbb = toTy(f2, f1, xxx.b);
+				// System.out.println("<<<" + bbb);
+				//
+				NewDecl toAdd = NewestFQLProgram.NewDecl.instDecl(name, idx,
+						toInst(tt0.d));
 				ret.add(toAdd);
 
 				break;
 			case "mapping":
-				Tuple3 t0 = (Tuple3) decl;
+				Tuple4 t0 = (Tuple4) decl;
 				name = (String) t.b;
-
-				xxx = (Tuple3) t0.c; // :, (x, ->, x, =), stuff 
+/*
+				xxx = (Tuple3) t0.c; // :, (x, ->, x, =), stuff
 				Tuple4 yyy = (Tuple4) xxx.b;
 				Object t1 = yyy.a;
 				Object t2 = yyy.c;
 				Object o = xxx.c;
+				*/
 				ret.add(NewestFQLProgram.NewDecl.mapDecl(name, idx,
-						toMapping(o), new Pair<>(toSchema(t1),
-								toSchema(t2))));
-//				// ret.add(mappingDecl(decl));
+						toMapping(t0.d))); //, new Pair<>(toSchema(t1), toSchema(t2))));
+				// // ret.add(mappingDecl(decl));
 				break;
 			default:
 				throw new RuntimeException("Unknown decl: " + kind);
@@ -607,7 +624,5 @@ public class NewestFQLParser {
 		return Parsers.or(Terminals.StringLiteral.PARSER,
 				Terminals.IntegerLiteral.PARSER, Terminals.Identifier.PARSER);
 	}
-
-
 
 }

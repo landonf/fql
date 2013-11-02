@@ -4,7 +4,7 @@ public class TypedEmployeesExample extends Example {
 
 	@Override
 	public String getName() {
-		return "Typed employees";
+		return "Typed Employees";
 	}
 
 	@Override
@@ -30,7 +30,7 @@ public class TypedEmployeesExample extends Example {
 					+ "\n  	Employee.manager.manager = Employee.manager;"
 					+ "\n}"
 					+ "\n"
-					+ "\ninstance I : S = {"
+					+ "\ninstance I = {"
 					+ "\n nodes"
 					+ "\n	Employee -> { 101, 102, 103 },"
 					+ "\n	Department -> { q10, x02 };"
@@ -42,7 +42,7 @@ public class TypedEmployeesExample extends Example {
 					+ "\n	manager -> { (101, 103), (102, 102), (103, 103) },"
 					+ "\n	worksIn -> { (101, q10), (102, x02), (103, q10) },"
 					+ "\n	secretary -> { (q10, 101), (x02, 102) };"
-					+ "\n} S";
+					+ "\n} : S\n";
 
 
 

@@ -181,7 +181,7 @@ public class Mapping  {
 
 		return new Pair<>(ret2, ret);
 	}
-
+/*
 	private Path expand(Path v, Map<Node, Node> nm2, Map<Edge, Path> em2) {
 		Node newhead = nm2.get(v.source);
 		Node newtarget = nm2.get(v.target);
@@ -193,6 +193,7 @@ public class Mapping  {
 		}
 		return new Path(newhead, newtarget, newedges);
 	}
+	*/
 
 	public Mapping(Environment env, Signature s) throws FQLException {
 		identity(env, s);

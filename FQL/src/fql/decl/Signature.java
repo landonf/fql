@@ -38,7 +38,6 @@ import fql.Triple;
 import fql.cat.Arr;
 import fql.cat.Denotation;
 import fql.cat.FinCat;
-import fql.gui.Viewable;
 import fql.sql.EmbeddedDependency;
 
 /**
@@ -1073,7 +1072,7 @@ public class Signature  {
 			List<Triple<String, String, String>> where = new LinkedList<>();
 			List<Triple<String, String, String>> tgd = new LinkedList<>();
 			List<Pair<String, String>> egd = new LinkedList<>();
-			List<Triple<String, String, String>> not = new LinkedList<>();
+			//List<Triple<String, String, String>> not = new LinkedList<>();
 		
 			String u = "v" + (v++);
 			String w = "v" + (v++);
@@ -1092,7 +1091,7 @@ public class Signature  {
 			where = new LinkedList<>();
 			tgd = new LinkedList<>();
 			egd = new LinkedList<>();
-			not = new LinkedList<>();
+			//not = new LinkedList<>();
 			
 			String x = "v" + (v++);
 			forall.add(u); forall.add(w); forall.add(x);
@@ -1108,7 +1107,7 @@ public class Signature  {
 			where = new LinkedList<>();
 			tgd = new LinkedList<>();
 			egd = new LinkedList<>();
-			not = new LinkedList<>();
+			//not = new LinkedList<>();
 			forall.add(x);
 			where.add(new Triple<>(pre + e.source.string, x, x));
 			String z = "v" + (v++);
@@ -1129,7 +1128,7 @@ public class Signature  {
 	}
 
 	public static Signature sum(String c, String d, Signature C, Signature D) throws FQLException {
-		String n = c + "_plus_" + d; 
+		//String n = c + "_plus_" + d; 
 		List<String> o = new LinkedList<>();
 		for (Node node : C.nodes) {
 			o.add(c + "_" + node.string);

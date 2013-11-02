@@ -9,7 +9,6 @@ import java.util.Set;
 import fql.FQLException;
 import fql.Pair;
 import fql.cat.Denotation;
-import fql.decl.Driver;
 import fql.decl.Edge;
 import fql.decl.Instance;
 import fql.decl.Mapping;

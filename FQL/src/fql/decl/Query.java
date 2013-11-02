@@ -39,7 +39,6 @@ import fql.cat.SemQuery;
 import fql.cat.SetFunTrans;
 import fql.cat.Value;
 import fql.cat.Value.VALUETYPE;
-import fql.gui.Viewable;
 
 /**
  * 
@@ -47,7 +46,7 @@ import fql.gui.Viewable;
  *
  * Queries, and composition.
  */
-public class Query implements Viewable<Query> {
+public class Query  {
 
 	public Mapping project, join, union;
 	
@@ -84,11 +83,11 @@ public class Query implements Viewable<Query> {
 		join.okForPi();
 		union.okForSigma();
 	}
-	
+	/*
 	public Query(String name, Environment env, QueryDecl d) throws FQLException {
 		this.name = name;
-		switch (d.kind) {
-		case COMPOSE : 
+//		switch (d.kind) {
+	//	case COMPOSE : 
 /*			isId = false;
 			Query m1 = env.getQuery(d.q1);
 			Query m2 = env.getQuery(d.q2);
@@ -113,8 +112,8 @@ public class Query implements Viewable<Query> {
 			this.name = q.name;
 			join.okForPi();
 			union.okForSigma();
-			break;  */
-			throw new RuntimeException();
+			break;  
+//			throw new RuntimeException();
 		case ID : 
 			isId = true;
 			Signature s = env.getSchema(d.schema);
@@ -143,9 +142,10 @@ public class Query implements Viewable<Query> {
 			throw new RuntimeException("d.kind");
 		}
 	}
+	*/
 
 boolean isId;
-
+/*
 	@Override
 	public JPanel view() throws FQLException {
 		JPanel p = new JPanel(new GridLayout(3,1));
@@ -162,16 +162,17 @@ boolean isId;
 		q = union.view();
 		q.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), "Sigma " + union.name + " : " + union.source.name0 + " -> " + union.target.name0));
 		p.add(q);
-		*/
+		
 		return p;
 	}
-
+	*/
+/*
 	@Override
 	public JPanel text() {
 			String ret = toString();
 			
 			JPanel tap = new JPanel(new GridLayout(2,2));
-/*
+
 			JTextArea ta = new JTextArea(ret);
 			ta.setWrapStyleWord(true);
 			ta.setLineWrap(true);
@@ -230,9 +231,10 @@ boolean isId;
 			p4.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "Sigma " + union.name + " : " + union.source.name0 + " -> " + union.target.name0));
 			p4.add(xxx4);
 			tap.add(p4);	
-	*/
+	
 			return tap;
 	}
+	*/
 
 
 	@Override
@@ -388,7 +390,7 @@ boolean isId;
  */
 		return pan;
 	}
-	@Override
+
 	public JPanel pretty(final Environment env) throws FQLException {
 			Graph<String,String> g = build();
 			if (g.getVertexCount() == 0) {
@@ -410,10 +412,7 @@ boolean isId;
 			return retX;
 	}
 	
-	@Override
-	public String type() {
-		return "query";
-	}
+	
 	
 	public  JPanel doView(final Environment env, Graph<String,String> sgv) {
 		return null;
@@ -938,41 +937,8 @@ boolean isId;
 
 	}
 
-	@Override
-	public JPanel join() {
-		return null;
-	}
-/*
-	@Override
-	public JPanel json() {
-		return null;
-	}
-	*/
-
-	@Override
-	public JPanel denotation() throws FQLException {
-		return null;
-	}
-
-	@Override
-	public JPanel initial() throws FQLException {
-		return null;
-	}
 	
-	@Override
-	public JPanel groth() throws FQLException {
-		return null;
-	}
 
-	@Override
-	public JPanel observables() {
-		return null;
-	}
-
-	@Override
-	public JPanel constraint() {
-		return null;
-	}
 
 
 }

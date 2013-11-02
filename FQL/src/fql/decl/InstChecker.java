@@ -99,7 +99,7 @@ public class InstChecker implements InstExpVisitor<SigExp, Triple<Map<String, Si
 		seen.add(e.v);
 		InstExp i = env.third.get(e.v);
 		if (i == null) {
-			throw new RuntimeException("Unknown instance " + i);
+			throw new RuntimeException("Unknown instance " + e);
 		}
 		return i.accept(env, this);
 	}

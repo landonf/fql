@@ -62,11 +62,11 @@ public class Driver {
 		for (String k : p.maps.keySet()) {
 			try {
 				MapExp m = p.maps.get(k);
-				Pair<SigExp, SigExp> t = m.type(p.sigs, p.maps);
-				Pair<SigExp, SigExp> v = p.maps_t.get(k);
-				v.first.typeOf(p.sigs);
-				v.second.typeOf(p.sigs);
-
+				m.type(p.sigs, p.maps);
+				//Pair<SigExp, SigExp> v = p.maps_t.get(k);
+				//v.first.typeOf(p.sigs);
+				//v.second.typeOf(p.sigs);
+/*
 				if (!t.first.equals(v.first)) {
 					throw new RuntimeException(
 							"Type mismatch: at top level lhs, given " + v.first
@@ -77,6 +77,7 @@ public class Driver {
 							"Type mismatch: at top level rhs, given "
 									+ v.second + " but computed " + t.second);
 				}
+				*/
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
 				throw new LineException(ex.getLocalizedMessage(), k, "mapping");
@@ -86,14 +87,14 @@ public class Driver {
 		for (String k : p.insts.keySet()) {
 			try {
 				InstExp i = p.insts.get(k);
-				SigExp t = p.insts_t.get(k);
-				SigExp t0 = i.type(p.sigs, p.maps, p.insts);
-				t.typeOf(p.sigs);
+			//	SigExp t = p.insts_t.get(k);
+				i.type(p.sigs, p.maps, p.insts);
+			/* 	t.typeOf(p.sigs);
 				if (!(t.equals(t0))) {
 					throw new RuntimeException(
 							"Type mismatch: at top level, given " + t
 									+ " but computed " + t0);
-				}
+				} */
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
 				throw new LineException(ex.getLocalizedMessage(), k, "instance");
@@ -131,7 +132,7 @@ public class Driver {
 		for (String k : prog.insts.keySet()) {
 			InstExp v = prog.insts.get(k);
 			try {
-				psm.addAll(PSMGen.makeTables(k, prog.insts_t.get(k).accept(prog.sigs, new ToSigVisitor()), false));
+				psm.addAll(PSMGen.makeTables(k, v.type(prog.sigs, prog.maps, prog.insts).accept(prog.sigs, new ToSigVisitor()), false));
 				psm.addAll(v.accept(k, new ToInstVisitor(prog)));
 			} catch (RuntimeException re) {
 				re.printStackTrace();
@@ -143,7 +144,7 @@ public class Driver {
 		//System.out.println(res);
 		for (String k : prog.insts.keySet()) {
 			try {
-				Signature s = prog.insts_t.get(k).accept(prog.sigs, new ToSigVisitor());
+				Signature s = prog.insts.get(k).type(prog.sigs, prog.maps, prog.insts).accept(prog.sigs, new ToSigVisitor());
 				List<Pair<String, List<Pair<Object, Object>>>> b = PSMGen.gather(k, s, res);
 				insts.put(k, new Instance(s, b));
 			} catch (FQLException re) {
@@ -215,7 +216,7 @@ public class Driver {
 				List<PSM> ret = new LinkedList<>();
 				Signature sig = e.sig.accept(prog.sigs, new ToSigVisitor());
 				ret.addAll(PSMGen.doConst(dst, sig, e.data));
-				//ret.addAll(PSMGen.guidify(dst, sig)); doConst guidifies
+				ret.addAll(PSMGen.guidify(dst, sig)); 
 				return ret;
 			} catch (FQLException fe) {
 				fe.printStackTrace();
@@ -322,9 +323,11 @@ public class Driver {
 		@Override
 		public List<PSM> visit(String dst, External e) {
 			try {	
-//				String next = next();
-				return PSMGen.doExternal(e.sig.accept(prog.sigs, new ToSigVisitor()), e.name, dst);
-				//doExternal guidifies and makes table for out
+				List<PSM> ret = new LinkedList<>();
+				Signature sig = e.sig.accept(prog.sigs, new ToSigVisitor());
+				ret.addAll(PSMGen.doExternal(sig, e.name, dst));
+				ret.addAll(PSMGen.guidify(dst, sig));
+				return ret;
 			} catch (FQLException fe) {
 				fe.printStackTrace();
 				throw new RuntimeException(fe.getLocalizedMessage());

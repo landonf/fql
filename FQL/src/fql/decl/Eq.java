@@ -1,6 +1,5 @@
 package fql.decl;
 
-import fql.parse.Jsonable;
 
 /**
  * 
@@ -8,7 +7,7 @@ import fql.parse.Jsonable;
  * 
  *         Syntax for equality of paths.
  */
-public class Eq implements Jsonable {
+public class Eq  {
 
 	public Path lhs;
 	public Path rhs;
@@ -22,11 +21,6 @@ public class Eq implements Jsonable {
 		return lhs + " = " + rhs;
 	}
 
-	@Override
-	public String tojson() {
-		String s = "{\"left\" : " + lhs.tojson();
-		String r = "\"right\" : " + rhs.tojson() + "}";
-		return s + " , " + r;
-	}
+	
 
 }
