@@ -1080,7 +1080,7 @@ public class Mapping  {
 			ret.add(t);
 
 		} catch (FQLException e) {
-			 e.printStackTrace();
+			// e.printStackTrace();
 			ret.add(new JScrollPane(new JTextArea(e.getMessage())));
 		}
 		return ret;

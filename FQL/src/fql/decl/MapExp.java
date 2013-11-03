@@ -4,9 +4,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import fql.FQLException;
 import fql.Pair;
 
 public abstract class MapExp {
+
+	public Mapping toMap(Map<String, SigExp> env, Map<String, MapExp> ctx) {
+		Const e = accept(new Pair<>(env, ctx), new SigOps());
+		try {
+			return new Mapping(e.src.toSig(env), e.dst.toSig(env), e.objs, e.attrs,
+					e.arrows);
+		} catch (FQLException fe) {
+			fe.printStackTrace();
+			throw new RuntimeException(fe.getLocalizedMessage());
+		}
+	}
 
 	public abstract <R, E> R accept(E env, MapExpVisitor<R, E> v);
 
@@ -14,7 +26,8 @@ public abstract class MapExp {
 
 	public final Pair<SigExp, SigExp> type(Map<String, SigExp> env,
 			Map<String, MapExp> ctx) {
-		return accept(new Pair<>(env, ctx), new MapExpChecker(new LinkedList<String>()));
+		return accept(new Pair<>(env, ctx), new MapExpChecker(
+				new LinkedList<String>()));
 	}
 
 	public static class Id extends MapExp {
@@ -116,7 +129,6 @@ public abstract class MapExp {
 		public String toString() {
 			return "dist2";
 		}
-		
 
 	}
 
@@ -176,7 +188,6 @@ public abstract class MapExp {
 			return "dist1";
 		}
 
-		
 	}
 
 	public static class Const extends MapExp {
@@ -689,7 +700,7 @@ public abstract class MapExp {
 		public <R, E> R accept(E env, MapExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
-		
+
 	}
 
 	public static class Prod extends MapExp {
@@ -732,7 +743,7 @@ public abstract class MapExp {
 		}
 
 		public String toString() {
-			return "(" + l + " , " + r + ")";
+			return "(" + l + " * " + r + ")";
 		}
 
 		@Override
@@ -832,7 +843,7 @@ public abstract class MapExp {
 		}
 
 		public String toString() {
-			return "(" + l + " | " + r + ")";
+			return "(" + l + " + " + r + ")";
 		}
 
 		@Override

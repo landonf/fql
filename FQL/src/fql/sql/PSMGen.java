@@ -647,6 +647,7 @@ public class PSMGen
 
 	public static List<PSM> pi(Mapping F0, String src, String dst)
 			throws FQLException {
+		try {
 		tempTables = 0;
 		Signature D0 = F0.target;
 		Signature C0 = F0.source;
@@ -780,6 +781,9 @@ public class PSMGen
 		for (Attribute<Node> a : F0.target.attrs) {
 			int i = colmap.get(a.source.string).length;
 			Attribute<Node>[] y = amap.get(a.source.string);
+			if (y == null) {
+				throw new FQLException("Attribute mapping not surjective " + a.source.string);
+			}
 			//System.out.println("&&&& doing attr " + a);
 			//System.out.println("amap is ");
 //			for (Attribute z : y) {
@@ -830,6 +834,10 @@ public class PSMGen
 		}
 
 		return ret;
+		} catch (NullPointerException npe) {
+			npe.printStackTrace();
+			throw new RuntimeException();
+		}
 	}
 
 	private static List<Pair<Pair<String, String>, Pair<String, String>>> subset(

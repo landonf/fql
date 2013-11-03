@@ -197,9 +197,9 @@ public class NewestFQLParser {
 		Reference ref = Parser.newReference();
 
 		Parser plusTy = Parsers.between(term("("),
-				Parsers.tuple(ref.lazy(), term("|"), ref.lazy()), term(")"));
+				Parsers.tuple(ref.lazy(), term("+"), ref.lazy()), term(")"));
 		Parser prodTy = Parsers.between(term("("),
-				Parsers.tuple(ref.lazy(), term(","), ref.lazy()), term(")"));
+				Parsers.tuple(ref.lazy(), term("*"), ref.lazy()), term(")"));
 		Parser compTy = Parsers.between(term("("),
 				Parsers.tuple(ref.lazy(), term("then"), ref.lazy()), term(")"));
 
@@ -321,9 +321,9 @@ public class NewestFQLParser {
 				return new MapExp.Apply(toSchema(p2), toSchema(p3));
 			} else if (p2.toString().equals("then")) {
 				return new MapExp.Comp(toMapping(o1), toMapping(p3));
-			} else if (p2.toString().equals(",")) {
+			} else if (p2.toString().equals("*")) {
 				return new MapExp.Prod(toMapping(o1), toMapping(p3));
-			} else if (p2.toString().equals("|")) {
+			} else if (p2.toString().equals("+")) {
 				return new MapExp.Case(toMapping(o1), toMapping(p3));
 			}
 

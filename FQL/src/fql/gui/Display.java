@@ -27,10 +27,12 @@ import javax.swing.event.ListSelectionListener;
 import fql.DEBUG;
 import fql.FQLException;
 import fql.Pair;
+import fql.decl.Driver;
 import fql.decl.Environment;
 import fql.decl.Instance;
 import fql.decl.Mapping;
 import fql.decl.NewestFQLProgram;
+import fql.decl.SigExp;
 import fql.decl.Signature;
 
 /**
@@ -164,17 +166,17 @@ public class Display {
 			if (environment.signatures.get(c) != null) {
 				frames.add(new Pair<String, JComponent>("schema " + c, showSchema(environment, c, environment.getSchema(c))));
 			} else if (environment.mappings.get(c) != null) {
-				frames.add(new Pair<String, JComponent>("mapping " + c /* + " : " + p.maps_t.get(c).first + " -> " + p.maps_t.get(c).second */, showMapping(environment, c, environment.getMapping(c))));
+				Pair<SigExp, SigExp> xxx = p.maps.get(c).type(p.sigs, p.maps); 
+				String a = xxx.first.accept(p.sigs, new Driver.Unresolver()).toString();
+				String b = xxx.second.accept(p.sigs, new Driver.Unresolver()).toString();
+				frames.add(new Pair<String, JComponent>("mapping " + c + " : " + a + " -> " + b, showMapping(environment, c, environment.getMapping(c))));
 			} else if (environment.instances.get(c) != null) {
-				frames.add(new Pair<String, JComponent>("instance " + c /* + " : " + p.insts_t.get(c) */, showInst(environment, c, environment.instances.get(c))));
+				String xxx = p.insts.get(c).type(p.sigs, p.maps, p.insts).accept(p.sigs, new Driver.Unresolver()).toString();
+				frames.add(new Pair<String, JComponent>("instance " + c + " : " + xxx , showInst(environment, c, environment.instances.get(c))));
 			}
 		}
-		
-	
-			
-
 	}
-
+	
 
 	JFrame frame = null;
 

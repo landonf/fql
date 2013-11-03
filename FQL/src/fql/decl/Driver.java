@@ -63,21 +63,6 @@ public class Driver {
 			try {
 				MapExp m = p.maps.get(k);
 				m.type(p.sigs, p.maps);
-				//Pair<SigExp, SigExp> v = p.maps_t.get(k);
-				//v.first.typeOf(p.sigs);
-				//v.second.typeOf(p.sigs);
-/*
-				if (!t.first.equals(v.first)) {
-					throw new RuntimeException(
-							"Type mismatch: at top level lhs, given " + v.first
-									+ " but computed " + t.first);
-				}
-				if (!t.second.equals(v.second)) {
-					throw new RuntimeException(
-							"Type mismatch: at top level rhs, given "
-									+ v.second + " but computed " + t.second);
-				}
-				*/
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
 				throw new LineException(ex.getLocalizedMessage(), k, "mapping");
@@ -87,14 +72,7 @@ public class Driver {
 		for (String k : p.insts.keySet()) {
 			try {
 				InstExp i = p.insts.get(k);
-			//	SigExp t = p.insts_t.get(k);
 				i.type(p.sigs, p.maps, p.insts);
-			/* 	t.typeOf(p.sigs);
-				if (!(t.equals(t0))) {
-					throw new RuntimeException(
-							"Type mismatch: at top level, given " + t
-									+ " but computed " + t0);
-				} */
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
 				throw new LineException(ex.getLocalizedMessage(), k, "instance");
@@ -111,7 +89,7 @@ public class Driver {
 		for (String k : prog.sigs.keySet()) {
 			SigExp v = prog.sigs.get(k);
 			try {
-				sigs.put(k, v.accept(prog.sigs, new ToSigVisitor()));
+				sigs.put(k, v.toSig(prog.sigs));
 			} catch (RuntimeException re) {
 				throw new LineException(re.getLocalizedMessage(), k, "schema");
 			}
@@ -120,10 +98,9 @@ public class Driver {
 		for (String k : prog.maps.keySet()) {
 			MapExp v = prog.maps.get(k);
 			try {
-				maps.put(k, v.accept(
-						new Pair<Map<String, SigExp>, Map<String, MapExp>>(
-								prog.sigs, prog.maps), new ToMapVisitor()));
+				maps.put(k, v.toMap(prog.sigs, prog.maps));
 			} catch (RuntimeException re) {
+				re.printStackTrace();
 				throw new LineException(re.getLocalizedMessage(), k, "mapping");
 			}
 		}
@@ -132,7 +109,7 @@ public class Driver {
 		for (String k : prog.insts.keySet()) {
 			InstExp v = prog.insts.get(k);
 			try {
-				psm.addAll(PSMGen.makeTables(k, v.type(prog.sigs, prog.maps, prog.insts).accept(prog.sigs, new ToSigVisitor()), false));
+				psm.addAll(PSMGen.makeTables(k, v.type(prog.sigs, prog.maps, prog.insts).toSig(prog.sigs), false));
 				psm.addAll(v.accept(k, new ToInstVisitor(prog)));
 			} catch (RuntimeException re) {
 				re.printStackTrace();
@@ -144,7 +121,7 @@ public class Driver {
 		//System.out.println(res);
 		for (String k : prog.insts.keySet()) {
 			try {
-				Signature s = prog.insts.get(k).type(prog.sigs, prog.maps, prog.insts).accept(prog.sigs, new ToSigVisitor());
+				Signature s = prog.insts.get(k).type(prog.sigs, prog.maps, prog.insts).toSig(prog.sigs);
 				List<Pair<String, List<Pair<Object, Object>>>> b = PSMGen.gather(k, s, res);
 				insts.put(k, new Instance(s, b));
 			} catch (FQLException re) {
@@ -214,7 +191,7 @@ public class Driver {
 		public List<PSM> visit(String dst, fql.decl.InstExp.Const e) {
 			try {
 				List<PSM> ret = new LinkedList<>();
-				Signature sig = e.sig.accept(prog.sigs, new ToSigVisitor());
+				Signature sig = e.sig.toSig(prog.sigs);
 				ret.addAll(PSMGen.doConst(dst, sig, e.data));
 				ret.addAll(PSMGen.guidify(dst, sig)); 
 				return ret;
@@ -228,7 +205,7 @@ public class Driver {
 		public List<PSM> visit(String dst, Delta e) {
 				String next = next();
 				List<PSM> ret = new LinkedList<>();
-				Mapping F0 = e.F.accept(new Pair<Map<String, SigExp>, Map<String, MapExp>>(prog.sigs,  prog.maps), new ToMapVisitor());
+				Mapping F0 = e.F.toMap(prog.sigs,  prog.maps);
 								
 				ret.addAll(PSMGen.makeTables(next, F0.target, false));
 				ret.addAll(e.I.accept(next, this));
@@ -246,7 +223,7 @@ public class Driver {
 		public List<PSM> visit(String dst, Sigma e) {
 			String next = next();
 			List<PSM> ret = new LinkedList<>();
-			Mapping F0 = e.F.accept(new Pair<Map<String, SigExp>, Map<String, MapExp>>(prog.sigs,  prog.maps), new ToMapVisitor());
+			Mapping F0 = e.F.toMap(prog.sigs,  prog.maps);
 							
 			ret.addAll(PSMGen.makeTables(next, F0.source, false));
 			ret.addAll(e.I.accept(next, this));
@@ -265,7 +242,7 @@ public class Driver {
 		public List<PSM> visit(String dst, Pi e) {
 			String next = next();
 			List<PSM> ret = new LinkedList<>();
-			Mapping F0 = e.F.accept(new Pair<Map<String, SigExp>, Map<String, MapExp>>(prog.sigs,  prog.maps), new ToMapVisitor());
+			Mapping F0 = e.F.toMap(prog.sigs,  prog.maps);
 							
 			ret.addAll(PSMGen.makeTables(next, F0.source, false));
 			ret.addAll(e.I.accept(next, this));
@@ -285,7 +262,7 @@ public class Driver {
 		public List<PSM> visit(String dst, FullSigma e) {
 			String next = next();
 			List<PSM> ret = new LinkedList<>();
-			Mapping F0 = e.F.accept(new Pair<Map<String, SigExp>, Map<String, MapExp>>(prog.sigs,  prog.maps), new ToMapVisitor());
+			Mapping F0 = e.F.toMap(prog.sigs,  prog.maps);
 							
 			ret.addAll(PSMGen.makeTables(next, F0.source, false));
 			ret.addAll(e.I.accept(next, this));
@@ -305,7 +282,7 @@ public class Driver {
 		public List<PSM> visit(String dst, Relationalize e) { //out then in
 			String next = next();
 			List<PSM> ret = new LinkedList<>();
-			Signature sig = e.I.type(prog.sigs, prog.maps, prog.insts).accept(prog.sigs, new ToSigVisitor());
+			Signature sig = e.I.type(prog.sigs, prog.maps, prog.insts).toSig(prog.sigs);
 			
 			try {
 				ret.addAll(PSMGen.makeTables(next, sig, false)); //output mktable done by relationalizer
@@ -324,7 +301,7 @@ public class Driver {
 		public List<PSM> visit(String dst, External e) {
 			try {	
 				List<PSM> ret = new LinkedList<>();
-				Signature sig = e.sig.accept(prog.sigs, new ToSigVisitor());
+				Signature sig = e.sig.toSig(prog.sigs);
 				ret.addAll(PSMGen.doExternal(sig, e.name, dst));
 				ret.addAll(PSMGen.guidify(dst, sig));
 				return ret;
@@ -335,7 +312,7 @@ public class Driver {
 		}
 		
 	}
-
+/*
 	public static class ToMapVisitor
 			implements
 			MapExpVisitor<Mapping, Pair<Map<String, SigExp>, Map<String, MapExp>>> {
@@ -376,8 +353,8 @@ public class Driver {
 				Pair<Map<String, SigExp>, Map<String, MapExp>> env,
 				fql.decl.MapExp.Const e) {
 			try {
-				return new Mapping(e.src.accept(env.first, new ToSigVisitor()),
-						e.dst.accept(env.first, new ToSigVisitor()), e.objs,
+				return new Mapping(e.src.toSig(env.first),
+						e.dst.toSig(env.first), e.objs,
 						e.attrs, e.arrows);
 			} catch (FQLException fe) {
 				throw new RuntimeException(fe.getLocalizedMessage());
@@ -445,7 +422,8 @@ public class Driver {
 		}
 
 	}
-
+	*/
+/*
 	public static class ToSigVisitor implements
 			SigExpVisitor<Signature, Map<String, SigExp>> {
 
@@ -488,6 +466,51 @@ public class Driver {
 				throw new RuntimeException(fe.getLocalizedMessage());
 			}
 		}
+	}
+	*/
+	public static class Unresolver implements SigExpVisitor<SigExp, Map<String, SigExp>> {
+
+		@Override
+		public SigExp visit(Map<String, SigExp> env, Zero e) {
+			return e;
+		}
+
+		@Override
+		public SigExp visit(Map<String, SigExp> env, One e) {
+			return e;
+		}
+
+		@Override
+		public SigExp visit(Map<String, SigExp> env, Plus e) {
+			return new SigExp.Plus(e.a.accept(env, this), e.b.accept(env, this));
+		}
+
+		@Override
+		public SigExp visit(Map<String, SigExp> env, Times e) {
+			return new SigExp.Times(e.a.accept(env, this), e.b.accept(env, this));
+		}
+
+		@Override
+		public SigExp visit(Map<String, SigExp> env, Exp e) {
+			return new SigExp.Exp(e.a.accept(env, this), e.b.accept(env, this));
+		}
+
+		@Override
+		public SigExp visit(Map<String, SigExp> env, Var e) {
+			return e;
+		}
+
+		@Override
+		public SigExp visit(Map<String, SigExp> env, Const e) {
+			for (String k : env.keySet()) {
+				SigExp e0 = env.get(k);
+				if (e0.equals(e)) {
+					return new SigExp.Var(k);
+				}
+			}
+			return e;
+		}
+		
 	}
 
 }

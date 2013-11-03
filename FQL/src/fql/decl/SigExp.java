@@ -3,11 +3,22 @@ package fql.decl;
 import java.util.List;
 import java.util.Map;
 
+import fql.FQLException;
 import fql.Pair;
 import fql.Triple;
 import fql.Unit;
 
 public abstract class SigExp {
+	
+	public Signature toSig(Map<String, SigExp> env) {
+		Const e = accept(env, new SigOps());
+		try {
+			return new Signature(e.nodes, e.attrs, e.arrows, e.eqs);
+		} catch (FQLException fe) {
+			fe.printStackTrace();
+			throw new RuntimeException(fe.getLocalizedMessage());
+		}
+	}
 
 	//TODO Const equality should not matter order
 	public static class Const extends SigExp {

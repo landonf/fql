@@ -31,22 +31,31 @@ public class SigExpChecker implements SigExpVisitor<Unit, Map<String, SigExp>>{
 
 	@Override
 	public Unit visit(Map<String, SigExp> env, Plus e) {
+		List<String> s = new LinkedList<>(seen);
 		e.a.accept(env, this);
+		seen = s;
 		e.b.accept(env, this);
+		seen = s;
 		return new Unit();
 	}
 
 	@Override
 	public Unit visit(Map<String, SigExp> env, Times e) {
+		List<String> s = new LinkedList<>(seen);
 		e.a.accept(env, this);
+		seen = s;
 		e.b.accept(env, this);
+		seen = s;
 		return new Unit();
 	}
 
 	@Override
 	public Unit visit(Map<String, SigExp> env, Exp e) {
+		List<String> s = new LinkedList<>(seen);
 		e.a.accept(env, this);
+		seen = s;
 		e.b.accept(env, this);
+		seen = s;
 		return new Unit();
 	}
 
@@ -72,5 +81,7 @@ public class SigExpChecker implements SigExpVisitor<Unit, Map<String, SigExp>>{
 		}
 		return new Unit();
 	}
+	
+	//TODO take care of seen for map checker like in sig checker
 
 }

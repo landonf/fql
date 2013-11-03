@@ -169,7 +169,7 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, Pair<M
 		if (!lt.second.equals(rt.second)) {
 			throw new RuntimeException("target schema mismatch on " + e + ": " + lt.second + " and " + rt.second);
 		}
-		return new Pair<SigExp, SigExp>(new SigExp.Times(lt.first, rt.first), lt.second);
+		return new Pair<SigExp, SigExp>(new SigExp.Plus(lt.first, rt.first), lt.second);
 
 	}
 
