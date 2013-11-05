@@ -20,6 +20,7 @@ import fql.decl.InstExp;
 import fql.decl.MapExp;
 import fql.decl.NewestFQLProgram;
 import fql.decl.NewestFQLProgram.NewDecl;
+import fql.decl.QueryExp;
 import fql.decl.SigExp;
 import fql.decl.SigExp.Const;
 
@@ -40,7 +41,7 @@ public class NewestFQLParser {
 			"delta", "sigma", "pi", "SIGMA", "apply", "eq", "relationalize",
 			"external", "then", "query", "instance", "fst", "snd", "inl",
 			"inr", "curry", "mapping", "eval", "string", "int", "void", "unit",
-			"prop", "tt", "ff" };
+			"prop", /* "tt", "ff" */};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -66,7 +67,9 @@ public class NewestFQLParser {
 		return Parsers.or(
 				Parsers.tuple(schemaDecl().source().peek(), schemaDecl()),
 				Parsers.tuple(instanceDecl().source().peek(), instanceDecl()),
-				Parsers.tuple(mappingDecl().source().peek(), mappingDecl()))
+				Parsers.tuple(mappingDecl().source().peek(), mappingDecl()),
+				Parsers.tuple(queryDecl().source().peek(), queryDecl())
+				)
 				.many();
 	}
 
@@ -89,6 +92,25 @@ public class NewestFQLParser {
 		return a;
 	}
 
+	public static final Parser<?> queryDecl() {
+		return Parsers.tuple(term("query"), ident(), term("="), query());
+	}
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static final Parser<?> query() {
+		Reference ref = Parser.newReference();
+		
+		Parser p1 = Parsers.tuple(term("delta"), mapping());
+		Parser p2 = Parsers.tuple(term("pi"), mapping());
+		Parser p3 = Parsers.tuple(term("sigma"), mapping());
+		Parser ret = Parsers.or(
+				Parsers.tuple(p1, p2, p3),
+				Parsers.tuple(term("("), ref.lazy(), term("then"), ref.lazy(), term(")")), ident());
+		
+		ref.set(ret);
+		
+		return ret;
+	}
+
 	public static final Parser<?> schemaDecl() {
 		return Parsers.tuple(term("schema"), ident(), term("="), sig());
 	}
@@ -108,7 +130,7 @@ public class NewestFQLParser {
 
 	public static final SigExp toSchema(Object o) {
 		try {
-			Tuple3<?,?,?> t = (Tuple3<?,?,?>) o;
+			Tuple3<?, ?, ?> t = (Tuple3<?, ?, ?>) o;
 			Token z = (Token) t.b;
 			String y = z.toString();
 			if (y.equals("+")) {
@@ -134,18 +156,10 @@ public class NewestFQLParser {
 		}
 
 		try {
-			// System.out.println("ta is " + t.a);
-			// System.out.println("tb is " + t.b);
 			return toSchemaConst(o);
 		} catch (RuntimeException cce) {
-			// System.out.println(o);
-			// System.out.println(f1.of(o));
-			// System.out.println(f2.of(o));
-			// cce.printStackTrace();
 		}
 
-		// System.out.println(o.getClass());
-		// System.out.println(o);
 		return new SigExp.Var(o.toString());
 	}
 
@@ -203,8 +217,9 @@ public class NewestFQLParser {
 		Parser compTy = Parsers.between(term("("),
 				Parsers.tuple(ref.lazy(), term("then"), ref.lazy()), term(")"));
 
-		Parser a = Parsers.or(new Parser[] { Parsers.tuple(term("tt"), sig()),
-				Parsers.tuple(term("ff"), sig()),
+		Parser a = Parsers.or(new Parser[] {
+				Parsers.tuple(term("unit"), sig()),
+				Parsers.tuple(term("void"), sig()),
 				Parsers.tuple(term("fst"), sig(), sig()),
 				Parsers.tuple(term("snd"), sig(), sig()),
 				Parsers.tuple(term("inl"), sig(), sig()),
@@ -215,13 +230,10 @@ public class NewestFQLParser {
 				Parsers.tuple(term("id"), sig()),
 				Parsers.tuple(term("dist1"), sig(), sig(), sig()),
 				Parsers.tuple(term("dist2"), sig(), sig(), sig()), compTy,
-				plusTy, prodTy, ident(), mappingConst()});
-//				Parsers.tuple(, sig(), sig()) });
+				plusTy, prodTy, ident(), mappingConst() });
 
 		ref.set(a);
-
 		return a;
-
 	}
 
 	public static final Parser<?> mappingConst() {
@@ -348,23 +360,19 @@ public class NewestFQLParser {
 				return new MapExp.Id(toSchema(p2));
 			} else if (p1.equals("curry")) {
 				return new MapExp.Curry(toMapping(p2));
-			} else if (p1.equals("tt")) {
+			} else if (p1.equals("unit")) {
 				return new MapExp.TT(toSchema(p2));
-			} else if (p1.equals("ff")) {
+			} else if (p1.equals("void")) {
 				return new MapExp.FF(toSchema(p2));
 			}
 		} catch (RuntimeException re) {
 
 		}
 
-		// TODO delta, sigma, pi, SIGMA, external, relationalize
 		if (o instanceof String) {
 			return new MapExp.Var(o.toString());
 		}
 
-		System.out.println("tomapping");
-		System.out.println(o);
-		System.out.println(o.getClass());
 		throw new RuntimeException();
 	}
 
@@ -385,13 +393,14 @@ public class NewestFQLParser {
 		Parser<?> pi = Parsers.tuple(term("pi"), mapping(), ref.lazy());
 		Parser<?> SIGMA = Parsers.tuple(term("SIGMA"), mapping(), ref.lazy());
 		Parser<?> relationalize = Parsers.tuple(term("relationalize"), ident());
-
+		Parser<?> eval = Parsers.tuple(term("eval"), query(), ref.lazy());
+		
 		Parser a = Parsers.or(new Parser[] {
 				Parsers.tuple(term("prop"), sig()),
 				Parsers.tuple(term("void"), sig()),
 				Parsers.tuple(term("unit"), sig()), plusTy, prodTy, expTy,
 				ident(), instanceConst(), delta, sigma, pi, SIGMA, external,
-				relationalize });
+				relationalize, eval });
 
 		ref.set(a);
 
@@ -400,7 +409,6 @@ public class NewestFQLParser {
 
 	public static final Parser<?> instanceDecl() {
 		return Parsers.tuple(term("instance"), ident(), term("="), instance());
-//				Parsers.tuple(term(":"), sig(), term("=")), instance());
 	}
 
 	public static final Parser<?> instanceConst() {
@@ -490,6 +498,8 @@ public class NewestFQLParser {
 				return new InstExp.Pi(toMapping(t.b), toInst(t.c));
 			} else if (y.equals("external")) {
 				return new InstExp.External(toSchema(t.b), t.c.toString());
+			} else if (y.equals("eval")) {
+				return new InstExp.Eval(toQuery(t.b), toInst(t.c));
 			}
 		} catch (RuntimeException cce) {
 		}
@@ -540,6 +550,23 @@ public class NewestFQLParser {
 		// System.out.println(o);
 		return new InstExp.Var(o.toString());
 	}
+	
+	@SuppressWarnings("rawtypes")
+	public static QueryExp toQuery(Object o) {
+		if (o instanceof Tuple5) {
+			Tuple5 t = (Tuple5) o;			
+			return new QueryExp.Comp(toQuery(t.b), toQuery(t.d));
+		} else if (o instanceof Tuple3) {
+			Tuple3 x = (Tuple3) o;
+			org.codehaus.jparsec.functors.Pair p1 = (org.codehaus.jparsec.functors.Pair) x.a;
+			org.codehaus.jparsec.functors.Pair p2 = (org.codehaus.jparsec.functors.Pair) x.b;
+			org.codehaus.jparsec.functors.Pair p3 = (org.codehaus.jparsec.functors.Pair) x.c;
+			return new QueryExp.Const(toMapping(p1.b), toMapping(p2.b), toMapping(p3.b));
+		} else {
+			return new QueryExp.Var(o.toString());
+		}
+
+	}
 
 	@SuppressWarnings("rawtypes")
 	public static final NewestFQLProgram program(String s) {
@@ -559,9 +586,15 @@ public class NewestFQLParser {
 			Tuple3 t = (Tuple3) decl;
 			String kind = ((Token) t.a).toString();
 			switch (kind) {
+			case "query":
+				Tuple4 tta = (Tuple4) decl;
+				String name = (String) tta.b;
+				
+				ret.add(NewDecl.queryDecl(name, idx, toQuery(tta.d)));
+				break;
 			case "schema":
 				Tuple4 tt = (Tuple4) decl;
-				String name = (String) tt.b;
+				 name = (String) tt.b;
 
 				ret.add(NewestFQLProgram.NewDecl.sigDecl(name, idx,
 						toSchema(tt.d)));
@@ -571,7 +604,7 @@ public class NewestFQLParser {
 				Tuple4 tt0 = (Tuple4) decl;
 				name = (String) t.b;
 
-//				Tuple3 xxx = (Tuple3) tt0.c;
+				// Tuple3 xxx = (Tuple3) tt0.c;
 				//
 				// System.out.println("trying on " + tt0.d);
 				// Poly<Poly<Unit, NewSigConst>, NewInstConst> aaa = toTy(f2x,
@@ -589,15 +622,14 @@ public class NewestFQLParser {
 			case "mapping":
 				Tuple4 t0 = (Tuple4) decl;
 				name = (String) t.b;
-/*
-				xxx = (Tuple3) t0.c; // :, (x, ->, x, =), stuff
-				Tuple4 yyy = (Tuple4) xxx.b;
-				Object t1 = yyy.a;
-				Object t2 = yyy.c;
-				Object o = xxx.c;
-				*/
+				/*
+				 * xxx = (Tuple3) t0.c; // :, (x, ->, x, =), stuff Tuple4 yyy =
+				 * (Tuple4) xxx.b; Object t1 = yyy.a; Object t2 = yyy.c; Object
+				 * o = xxx.c;
+				 */
 				ret.add(NewestFQLProgram.NewDecl.mapDecl(name, idx,
-						toMapping(t0.d))); //, new Pair<>(toSchema(t1), toSchema(t2))));
+						toMapping(t0.d))); // , new Pair<>(toSchema(t1),
+											// toSchema(t2))));
 				// // ret.add(mappingDecl(decl));
 				break;
 			default:

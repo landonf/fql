@@ -59,7 +59,6 @@ public class Mapping  {
 	boolean ALLOW_WF_CHECK = true;
 	public boolean flag = false;
 	
-
 	public Mapping(Signature src, Signature dst,
 			Map<Node, Node> nm, Map<Edge, Path> em) {
 		ALLOW_WF_CHECK = false;
@@ -904,7 +903,7 @@ public class Mapping  {
 		return vv;
 	}
 
-	public static Mapping compose(String string, Mapping l, Mapping r)
+	public static Mapping compose(/* String string, */ Mapping l, Mapping r)
 			throws FQLException {
 		if (!l.target.equals(r.source)) {
 			throw new RuntimeException(l.target + "\n\n" + r.source);
@@ -932,75 +931,6 @@ public class Mapping  {
 	}
 
 	
-/*
-	@Override
-	public String tojson() {
-		String ret = "{\n" + "\"source\" : " + source.tojson() + ",\n"
-				+ "\"target\" : " + target.tojson() + ",\n"
-				+ "\"onObjects\" : " + jsonNodes() + ",\n"
-				+ "\"onGenerators\" : " + jsonEdges() + "\n}\n";
-
-		// try {
-		// System.out.println(new JSONMappingParser().parse(new Tokens(ret)));
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// }
-		return ret;
-	}
-	*/
-/*
-	private String jsonEdges() {
-		String s = "[";
-
-		boolean first = true;
-		for (Entry<Edge, Path> e : em.entrySet()) {
-			if (!first) {
-				s += ",";
-			}
-			first = false;
-			s += "\n{"
-					+ "\"arrow\" : "
-					+ (e.getKey().tojson() + ",\n\"path\" : " + e.getValue()
-							.tojson()) + "}";
-		}
-
-		return s + "\n]";
-
-	}
-
-	private String jsonNodes() {
-		String s = "{";
-
-		boolean first = true;
-		for (Entry<Node, Node> e : nm.entrySet()) {
-			if (!first) {
-				s += ",";
-			}
-			first = false;
-			s += (e.getKey().tojson() + " : " + e.getValue().tojson());
-		}
-
-		return s + "}";
-	}
-
-	@Override
-	public JPanel json() {
-		JTextArea q = new JTextArea(tojson());
-		q.setWrapStyleWord(true);
-		q.setLineWrap(true);
-		JPanel p = new JPanel(new GridLayout(1, 1));
-		JScrollPane jsc = new JScrollPane(q);
-		// jsc.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		p.add(jsc);
-		return p;
-	}
-	*/
-/*
-	public static Mapping fromjson(String mapping) throws Exception {
-		return new JSONMappingParser().parse(new FqlTokenizer(mapping)).value;
-	}
-	*/
-
 
 
 	public void okForPi() throws FQLException {

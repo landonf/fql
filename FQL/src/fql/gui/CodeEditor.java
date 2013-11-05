@@ -370,6 +370,10 @@ public class CodeEditor extends JPanel {
 			respArea.setText("Syntax error: " + e.getLocalizedMessage());
 			e.printStackTrace();
 			return;
+		} catch (RuntimeException e) {
+			respArea.setText("Error: " + e.getLocalizedMessage());
+			e.printStackTrace();
+			return;
 		}
 
 		try {

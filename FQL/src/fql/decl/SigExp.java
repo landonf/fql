@@ -6,12 +6,19 @@ import java.util.Map;
 import fql.FQLException;
 import fql.Pair;
 import fql.Triple;
-import fql.Unit;
 
 public abstract class SigExp {
 	
+	public SigExp unresolve(Map<String, SigExp> env) {
+		return accept(env, new Unresolver());
+	}
+	
+	public Const toConst(Map<String, SigExp> env) {
+		return accept(env, new SigOps());
+	}
+	
 	public Signature toSig(Map<String, SigExp> env) {
-		Const e = accept(env, new SigOps());
+		Const e = toConst(env);
 		try {
 			return new Signature(e.nodes, e.attrs, e.arrows, e.eqs);
 		} catch (FQLException fe) {
@@ -404,7 +411,7 @@ public abstract class SigExp {
 	@Override
 	public abstract int hashCode();
 	
-	public Unit typeOf(Map<String, SigExp> env) {
+	public SigExp typeOf(Map<String, SigExp> env) {
 		return accept(env, new SigExpChecker());
 	}
 	

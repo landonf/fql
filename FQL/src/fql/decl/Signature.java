@@ -1,9 +1,11 @@
 package fql.decl;
 
 import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Paint;
 import java.awt.Stroke;
 import java.util.Arrays;
 import java.util.Collection;
@@ -18,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.UIManager;
 
 import org.apache.commons.collections15.Transformer;
 
@@ -449,7 +452,7 @@ public class Signature  {
 		JTable nodesComponent = new JTable(sn, new String[] { "Name" });
 		JPanel nodesTemp = new JPanel(new GridLayout(1, 1));
 		nodesTemp.setBorder(BorderFactory.createTitledBorder(
-				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Entities"));
+				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Nodes"));
 		nodesTemp.add(new JScrollPane(nodesComponent));
 		// nodesComponent.setRowSelectionAllowed(false);
 		// nodesComponent.setColumnSelectionAllowed(false);
@@ -476,7 +479,7 @@ public class Signature  {
 		JPanel edgesTemp = new JPanel(new GridLayout(1, 1));
 		edgesTemp.add(new JScrollPane(esC));
 		edgesTemp.setBorder(BorderFactory.createTitledBorder(
-				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Foreign keys"));
+				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Arrows"));
 
 		// esC.setRowSelectionAllowed(false);
 		// esC.setColumnSelectionAllowed(false);
@@ -769,15 +772,16 @@ public class Signature  {
 				layout);
 		vv.setPreferredSize(new Dimension(600, 400));
 		// Setup up a new vertex to paint transformer...
-		/* Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
+		 Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
 			public Paint transform(String i) {
-				if (!isAttribute(i)) {
-					return env.colors.get(name0);
-				} else {
+				if (isAttribute(i)) {
 					return UIManager.getColor("Panel.background");
+//					return env.colors.get(name0);
+				} else {
+					return Color.RED;
 				}
 			}
-		}; */
+		}; 
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
@@ -801,7 +805,7 @@ public class Signature  {
 				return bs;
 			}
 		};
-//		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 		vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
 		vv.getRenderContext().setVertexLabelTransformer(
 				new ToStringLabeller<String>());
@@ -855,16 +859,46 @@ public class Signature  {
 //	}
 
 	@Override
-	/**
-	 * Name-based equality
-	 */
-	public boolean equals(Object o) {
-		throw new RuntimeException();
-//		if (!(o instanceof Signature)) {
-//			return false;
-//		}
-//		Signature s = (Signature) o;
-//		return (s.name0.equals(name0));
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((attrs == null) ? 0 : attrs.hashCode());
+		result = prime * result + ((edges == null) ? 0 : edges.hashCode());
+		result = prime * result + ((eqs == null) ? 0 : eqs.hashCode());
+		result = prime * result + ((nodes == null) ? 0 : nodes.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Signature other = (Signature) obj;
+		if (attrs == null) {
+			if (other.attrs != null)
+				return false;
+		} else if (!attrs.equals(other.attrs))
+			return false;
+		if (edges == null) {
+			if (other.edges != null)
+				return false;
+		} else if (!edges.equals(other.edges))
+			return false;
+		if (eqs == null) {
+			if (other.eqs != null)
+				return false;
+		} else if (!eqs.equals(other.eqs))
+			return false;
+		if (nodes == null) {
+			if (other.nodes != null)
+				return false;
+		} else if (!nodes.equals(other.nodes))
+			return false;
+		return true;
 	}
 
 /*

@@ -19,24 +19,24 @@ public class CompositionExample extends Example {
 					+ "\nschema B = { nodes b1,b2; attributes; arrows; equations; }"
 					+ "\nschema A = { nodes a1,a2,a3; attributes; arrows; equations; }"
 					+ "\n"
-					+ "\nmapping s : B -> S = { nodes b1 -> s, b2 -> s; attributes; arrows; }"
-					+ "\nmapping f : B -> A = { nodes b1 -> a1, b2 -> a2 ; attributes; arrows; }"
-					+ "\nmapping t : A -> T = { nodes a1 -> t, a2 -> t, a3 -> t ; attributes; arrows; }"
+					+ "\nmapping s = { nodes b1 -> s, b2 -> s; attributes; arrows; } : B -> S "
+					+ "\nmapping f = { nodes b1 -> a1, b2 -> a2 ; attributes; arrows; } : B -> A"
+					+ "\nmapping t = { nodes a1 -> t, a2 -> t, a3 -> t ; attributes; arrows; } : A -> T"
 					+ "\n"
-					+ "\nquery q1 : S -> T = delta s pi f sigma t"
+					+ "\nquery q1 = delta s pi f sigma t"
 					+ "\n"
 					+ "\nschema D = { nodes d1,d2 ;  attributes; arrows; equations; }"
 					+ "\nschema C = { nodes c ;  attributes; arrows; equations; }"
 					+ "\nschema U = { nodes u ;  attributes; arrows; equations;}"
 					+ "\n"
-					+ "\nmapping u : D -> T = { nodes d1 -> t, d2 -> t ;  attributes; arrows;}"
+					+ "\nmapping u = { nodes d1 -> t, d2 -> t ;  attributes; arrows;} : D -> T"
 					+ "\n"
-					+ "\nmapping g : D -> C = { nodes d1 -> c, d2 -> c ;  attributes; arrows;}"
+					+ "\nmapping g = { nodes d1 -> c, d2 -> c ;  attributes; arrows;} : D -> C"
 					+ "\n"
-					+ "\nmapping v : C -> U = { nodes c -> u ;  attributes; arrows; }"
+					+ "\nmapping v = { nodes c -> u ;  attributes; arrows; } : C -> U "
 					+ "\n"
-					+ "\nquery q2 : T -> U = delta u pi g sigma v"
-					+ "\nquery q : S -> U = q1 then q2";
+					+ "\nquery q2 = delta u pi g sigma v"
+					+ "\nquery q3 = (q1 then q2)";
 
 			
 }

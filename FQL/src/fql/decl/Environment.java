@@ -14,365 +14,27 @@ import fql.FQLException;
  */
 public class Environment {
 
-//	final Map<String, Color> colors = new HashMap<>();
-//	final Map<String, Object> graphs = new HashMap<>();
-/*
- * 		public Map<String, Signature> signatures;
-		public Map<String, Mapping> mappings;
-		public Map<String, Query> queries;
-		public Map<String, Instance> instances;
-
- */
-	//public Environment(NewFQLProgram p) throws FQLException {
-	
-
-//	}
-	
-	//public Environment(Program p) throws FQLException {
-		/*
-		signatures = new HashMap<>();
-		mappings = new HashMap<>();
-		queries = new HashMap<>();
-		instances = new HashMap<>();
-		Set<String> names = new HashSet<>();
-		// colors = new HashMap<>();
-		instance_types = new HashMap<>();
-
-		// Map<String, Signature> it = new HashMap<>();
-		for (Decl d : p.decls) {
-			if (names.contains(d.name)) {
-				throw new FQLException("Duplicate declaration: " + d.name);
-			}
-			names.add(d.name);
-
-			if (d instanceof SignatureDecl) {
-				addSchema((SignatureDecl) d);
-			} else if (d instanceof MappingDecl) {
-				addMapping((MappingDecl) d);
-			} else if (d instanceof QueryDecl) {
-				addQuery((QueryDecl) d);
-			} else if (d instanceof ExternalDecl) {
-				check((ExternalDecl) d);
-				instance_types.put(d.name,
-						signatures.get(((ExternalDecl) d).type));
-			} else if (d instanceof EvalInstanceDecl) {
-				check((EvalInstanceDecl) d);
-				if (signatures.get(((EvalInstanceDecl) d).type) == null) {
-					throw new FQLException("In " + d.name + ", cannot find "
-							+ ((EvalInstanceDecl) d).type);
-				}
-				instance_types.put(d.name,
-						signatures.get(((EvalInstanceDecl) d).type));
-			} else if (d instanceof EvalDSPInstanceDecl) {
-				check((EvalDSPInstanceDecl) d);
-				if (signatures.get(((EvalDSPInstanceDecl) d).type) == null) {
-					throw new FQLException("In " + d.name + ", cannot find "
-							+ ((EvalDSPInstanceDecl) d).type);
-
-				}
-				instance_types.put(d.name,
-						signatures.get(((EvalDSPInstanceDecl) d).type));
-			} else if (d instanceof ConstantInstanceDecl) {
-				instance_types.put(d.name,
-						signatures.get(((ConstantInstanceDecl) d).type));
-				if (signatures.get(((ConstantInstanceDecl) d).type) == null) {
-					throw new FQLException("In " + d.name + ", cannot find "
-							+ ((ConstantInstanceDecl) d).type);
-				}
-			} else if (d instanceof RelationalizeDecl) {
-				if (signatures.get(((RelationalizeDecl) d).type) == null) {
-					throw new FQLException("In " + d.name + ", cannot find "
-							+ ((RelationalizeDecl) d).type);
-				}
-				if (instance_types.get(((RelationalizeDecl) d).inst) == null) {
-					throw new FQLException("Cannot find instance "
-							+ ((RelationalizeDecl) d).inst);
-				}
-				if (!signatures.get(((RelationalizeDecl) d).type).name0
-						.equals(instance_types
-								.get(((RelationalizeDecl) d).inst).name0)) {
-					throw new FQLException(
-							"Relativize must have same input and output schemas on "
-									+ d.name); // , not
-												// " + signatures.get(((RelationalizeDecl) d).inst).name0 + "
-												// and " +
-												// instance_types.get(d.mapping).name0);
-				}
-
-			}
-
-			else {
-				throw new FQLException("Unknown declaration " + d);
-			}
-		}
-
-		List<PSM> psm = PSMGen.compile0(this, p);
-		Map<String, Set<Map<String, Object>>> output0 = PSMInterp.interp(psm);
-
-		// System.out.println("output is");
-		// System.out.println(output0);
-
-		for (Decl d : p.decls) {
-			if (d instanceof InstanceDecl) {
-				InstanceDecl d0 = (InstanceDecl) d;
-				if (!(d instanceof ExternalDecl)) {
-					addInstance(new ConstantInstanceDecl(d.name, d0.type,
-							gather(d.name, getSchema(d0.type), output0)));
-				} else {
-					addInstance(d.name, d0.type);
-				}
-			}
-		}
-//TODO validate with EDs
-		// double check sigmas
-		if (DEBUG.VALIDATE_WITH_EDS) {
-			//try {
-				for (Decl d : p.decls) { // double check pi
-					if (d instanceof EvalDSPInstanceDecl) {
-						EvalDSPInstanceDecl x = (EvalDSPInstanceDecl) d;
-						Mapping m = mappings.get(x.mapping);
-						Instance i = instances.get(x.inst);
-						Instance j = instances.get(x.name);
-
-						if (x.kind.equals("sigma") || x.kind.equals("SIGMA")) {
-
-							Instance j0 = Chase.sigma(m, i);
-							if (!Instance.quickCompare(j, j0)) {
-								throw new FQLException("Comparison failed \n\n" + j + "\n\n----------------\n\n" + j0);
-							} 
-							  else { System.out.println("normal\n" + j);
-							  System.out.println("\n\n\n computed " + j0); }
-							 
-						} else if (x.kind.equals("delta")) {
-							Instance j0 = Chase.delta(m, i);
-							if (!Instance.quickCompare(j, j0)) {
-								throw new FQLException("Comparison failed \n\n" + j + "\n\n----------------\n\n" + j0);
-							} else { System.out.println("normal\n" + j);
-							  System.out.println("\n\n\n computed " + j0); }
-						} else {
-							/*
-							 Instance j0 = Chase.pi(m, i);
-							
-							if (!Instance.quickCompare(j, j0)) {
-								throw new FQLException("Comparison failed\n\n" + j + "\n\n----------------\n\n" + j0);
-							} else { System.out.println("normal\n" + j);
-							  System.out.println("\n\n\n computed " + j0); }
-							
-						}
-					}
-				}
-
-			//} catch (Throwable e) {
-			//	e.printStackTrace();
-			//}
-
-			// try {
-			// for (Decl d : p.decls) { //double check pi
-			// if (d instanceof EvalDSPInstanceDecl) {
-			// EvalDSPInstanceDecl x = (EvalDSPInstanceDecl) d;
-			// if (x.kind.equals("pi")) {
-			// Mapping m = mappings.get(x.mapping);
-			// Instance i = instances.get(x.inst);
-			//
-			// // FinFunctor<Object, Object, Object, Object> F;
-			// //Inst<Object, Object, Object, Object> inst;
-			//
-			// Inst<Node, Path, Object, Object> res =
-			// FDM.pi(m.toFunctor2().first,
-			// i.toFunctor2());
-			//
-			// //System.out.println("**********" + d.name);
-			// //System.out.println(res);
-			// }
-			// }
-			// } } catch (Throwable e) {
-			// e.printStackTrace();
-			// }
-		}
-			for (String s : signatures.keySet()) {
-				colors.put(s, nextColor());
-			}
-		
-*/
-//	}
-
-//	private void check(ExternalDecl d) throws FQLException {
-//		if (signatures.get(d.type) == null) {
-//			throw new FQLException("Cannot find type for instance " + d.name);
-//		}
-//	}
-/*
-	private void check(EvalInstanceDecl d) throws FQLException {
-		if (queries.get(d.query) == null) {
-			throw new FQLException("Cannot find query " + d.query);
-		}
-		if (instance_types.get(d.inst) == null) {
-			throw new FQLException("Cannot find instance " + d.inst);
-		}
-		if (!d.type.equals(queries.get(d.query).union.target.name0)) {
-			throw new FQLException("Ill-typed query return  : " + d.name);
-		}
-		if (!queries.get(d.query).project.target.name0.equals(instance_types
-				.get(d.inst).name0)) {
-			throw new FQLException("Ill-typed input  : " + d.name);
-		}
-	}*/
-/*
-	private void check(EvalDSPInstanceDecl d) throws FQLException {
-		if (signatures.get(d.type) == null) {
-			throw new FQLException("Cannot find schema " + d.type
-					+ " for instance " + d.name);
-		}
-		if (mappings.get(d.mapping) == null) {
-			throw new FQLException("Cannot find mapping " + d.mapping);
-		}
-		if (instance_types.get(d.inst) == null) {
-			throw new FQLException("Cannot find instance " + d.inst);
-		}
-		if (d.kind.equals("delta")) {
-			if (!mappings.get(d.mapping).source.name0.equals(d.type)) {
-				throw new FQLException("Ill-typed return  : " + d.name);
-			}
-			if (!mappings.get(d.mapping).target.name0.equals(instance_types
-					.get(d.inst).name0)) {
-				throw new FQLException("Ill-typed input  : " + d.name);
-			}
-		} else if (d.kind.equals("sigma") || d.kind.equals("SIGMA")) {
-			if (!mappings.get(d.mapping).target.name0.equals(d.type)) {
-				throw new FQLException("Ill-typed return  : " + d.name);
-			}
-			if (!mappings.get(d.mapping).source.name0.equals(instance_types
-					.get(d.inst).name0)) {
-				throw new FQLException("Ill-typed input  : " + d.name);
-			}
-		} else if (d.kind.equals("pi")) {
-			if (!mappings.get(d.mapping).target.name0.equals(d.type)) {
-				throw new FQLException("Ill-typed return value : " + d.name);
-			}
-			if (!mappings.get(d.mapping).source.name0.equals(instance_types
-					.get(d.inst).name0)) {
-				throw new FQLException("Ill-typed input  : " + d.name);
-			}
-		} else {
-			throw new RuntimeException();
-		}
-
-	}
-	*/
-
-	
 	public Environment(Map<String, Signature> signatures,
 		Map<String, Mapping> mappings,
-		Map<String, Instance> instances) {
+		Map<String, Instance> instances,
+		Map<String, Query> queries) {
 	super();
 	this.signatures = signatures;
 	this.mappings = mappings;
 	this.instances = instances;
+	this.queries = queries;
 }
 
 	
 
-//	int index = 0;
-//	static Color[] colors0 = new Color[] { Color.YELLOW, Color.GREEN,
-//			Color.BLUE, Color.RED, Color.GRAY, Color.ORANGE, Color.PINK,
-//			Color.WHITE, Color.DARK_GRAY, Color.CYAN, Color.MAGENTA, Color.PINK };
-//
-//	private Color nextColor() {
-//		if (index == colors0.length) {
-//			index = 0;
-//		}
-//		return colors0[index++];
-//	}
 
-//	private void addSchema(SignatureDecl schemaDecl0) throws FQLException {
-//		if (schemaDecl0 instanceof SignatureDeclConst) {
-//			SignatureDeclConst schemaDecl = (SignatureDeclConst) schemaDecl0;
-//			List<Triple<String, String, String>> arrows = schemaDecl.arrows;
-//			String name = schemaDecl.name;
-//			List<Pair<List<String>, List<String>>> eqs = schemaDecl.eqs;
-//
-//			Signature signature = new Signature(/* schemaDecl.name, */schemaDecl.nodes,
-//				schemaDecl.attrs, arrows, eqs);
-//			signatures.put(name, signature);
-//		} else {
-//			throw new RuntimeException();
-//		}
-//	}
-/*
-	private void addQuery(QueryDecl queryDecl) throws FQLException {
-		Query q = new Query(queryDecl.name, this, queryDecl);
-		if (!q.getSource().name0.equals(queryDecl.source)) {
-			throw new FQLException("Query typing source mismatch on "
-					+ queryDecl.name + " " + q.getSource().name0 + " and "
-					+ queryDecl.source);
-		}
-		if (!q.getTarget().name0.equals(queryDecl.target)) {
-			throw new FQLException("Query typing target mismatch on "
-					+ queryDecl.name + " " + q.getTarget().name0 + " and "
-					+ queryDecl.target);
-		}
-		queries.put(queryDecl.name, q);
-	}
-	*/
-/*
-	private void addMapping(MappingDecl mappingDecl) throws FQLException {
-		Mapping m = new Mapping(mappingDecl.name, this, mappingDecl);
-		mappings.put(mappingDecl.name, m);
-	}
-
-	public void addInstance(Instance i) throws FQLException {
-		Signature thesig = signatures.get(i.thesig.name0);
-		instance_types.put(i.name, thesig);
-		instances.put(i.name, i);
-	}
-*/
-//	private void addInstance(ConstantInstanceDecl instanceDecl)
-//			throws FQLException {
-//		Signature thesig = signatures.get(instanceDecl.type);
-//		instance_types.put(instanceDecl.name, thesig);
-//		instances.put(instanceDecl.name, new Instance(instanceDecl.name,
-//				thesig, instanceDecl.data));
-//	}
-//
-//	private void addInstance(String name, String type) throws FQLException {
-//		Signature thesig = signatures.get(type);
-//		instance_types.put(name, thesig);
-//		instances.put(name, new Instance(name, thesig));
-//	}
 
 	public Map<String, Signature> signatures;
 	public Map<String, Mapping> mappings;
-	//public Map<String, Query> queries;
+	public Map<String, Query> queries;
 	public Map<String, Instance> instances;
 
-//	public Map<String, Signature> instance_types;
-/*
-	public Viewable<?> get(String name) throws FQLException {
-		Viewable<?> v = null;
 
-		v = signatures.get(name);
-		if (v != null) {
-			return v;
-		}
-
-		v = mappings.get(name);
-		if (v != null) {
-			return v;
-		}
-
-//		v = queries.get(name);
-//		if (v != null) {
-//			return v;
-//		}
-
-		v = instances.get(name);
-		if (v != null) {
-			return v;
-		}
-
-		throw new FQLException("Cannot find " + name);
-	}
-	*/
 
 	public Signature getSchema(String s0) throws FQLException {
 		Signature s = signatures.get(s0);
@@ -391,13 +53,12 @@ public class Environment {
 		return s;
 	}
 
-//	public Query getQuery(String s0) throws FQLException {
-//		Query s = queries.get(s0);
-//		if (s == null) {
-//			throw new FQLException("Cannot find query " + s0);
-//		}
-//		return s;
-//
-//	}
+	public Query getQuery(String s0) throws FQLException {
+		Query s = queries.get(s0);
+		if (s == null) {
+			throw new FQLException("Cannot find query " + s0);
+		}
+		return s;
+	}
 
 }

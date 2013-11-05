@@ -13,9 +13,16 @@ public class NewestFQLProgram {
 			MapExp map;
 			InstExp inst;
 			Integer line;
+			QueryExp query;
 
 //			Pair<SigExp, SigExp> map_t;
 	//		SigExp inst_t;
+			
+			public static NewDecl queryDecl(String name, Integer line, QueryExp query) {
+				NewDecl ret = new NewDecl(name, line);
+				ret.query = query;
+				return ret;
+			}
 
 			public static NewDecl sigDecl(String name, Integer line,
 					SigExp sig) {
@@ -49,13 +56,13 @@ public class NewestFQLProgram {
 		public LinkedHashMap<String, SigExp> sigs = new LinkedHashMap<>();
 		public LinkedHashMap<String, MapExp> maps = new LinkedHashMap<>();
 		public LinkedHashMap<String, InstExp> insts = new LinkedHashMap<>();
-		/*
-		public LinkedHashMap<String, Pair<SigExp, SigExp>> maps_t = new LinkedHashMap<>();
-		public LinkedHashMap<String, SigExp> insts_t = new LinkedHashMap<>();
-		*/
+		public LinkedHashMap<String, QueryExp> queries = new LinkedHashMap<>();
+
 		public LinkedHashMap<String, Integer> sigs_lines = new LinkedHashMap<>();
 		public LinkedHashMap<String, Integer> maps_lines = new LinkedHashMap<>();
 		public LinkedHashMap<String, Integer> insts_lines = new LinkedHashMap<>();
+		public LinkedHashMap<String, Integer> queries_lines = new LinkedHashMap<>();
+		
 		public List<String> order = new LinkedList<>();
 		
 		public NewestFQLProgram(List<NewDecl> decls) {
@@ -68,13 +75,15 @@ public class NewestFQLProgram {
 				} else if (decl.inst != null) {
 					checkDup(decl.name, "instance");
 					insts.put(decl.name, decl.inst);
-//					insts_t.put(decl.name, decl.inst_t);
 					insts_lines.put(decl.name, decl.line);
 				} else if (decl.map != null) {
 					checkDup(decl.name, "mapping");
 					maps.put(decl.name, decl.map);
-	//				maps_t.put(decl.name, decl.map_t);
 					maps_lines.put(decl.name, decl.line);
+				} else if (decl.query != null) {
+					checkDup(decl.name, "query");
+					queries.put(decl.name, decl.query);
+					queries_lines.put(decl.name, decl.line);
 				} else {
 					throw new RuntimeException();
 				}
@@ -83,7 +92,7 @@ public class NewestFQLProgram {
 		}
 
 		private <X, Y> void checkDup(X name, String s) {
-			if (sigs.containsKey(name) || maps.containsKey(name) || insts.containsKey(name)) {
+			if (sigs.containsKey(name) || maps.containsKey(name) || insts.containsKey(name) || queries.containsKey(name)) {
 				throw new RuntimeException("Duplicate " + s + " " + name);
 			}
 

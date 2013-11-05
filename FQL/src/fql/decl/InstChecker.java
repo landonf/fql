@@ -1,12 +1,14 @@
 package fql.decl;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import fql.Pair;
-import fql.Triple;
+import fql.Quad;
 import fql.decl.InstExp.Const;
 import fql.decl.InstExp.Delta;
+import fql.decl.InstExp.Eval;
 import fql.decl.InstExp.Exp;
 import fql.decl.InstExp.External;
 import fql.decl.InstExp.FullSigma;
@@ -21,7 +23,7 @@ import fql.decl.InstExp.Two;
 import fql.decl.InstExp.Var;
 import fql.decl.InstExp.Zero;
 
-public class InstChecker implements InstExpVisitor<SigExp, Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>>> {
+public class InstChecker implements InstExpVisitor<SigExp, Quad<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>, Map<String, QueryExp>>> {
 
 	List<String> seen;
 	
@@ -31,34 +33,37 @@ public class InstChecker implements InstExpVisitor<SigExp, Triple<Map<String, Si
 
 	@Override
 	public SigExp visit(
-			Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>> env,
+			Quad<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>, Map<String, QueryExp>> env,
 			Zero e) {
-		e.sig.typeOf(env.first);
-		return e.sig;
+		SigExp k = e.sig.typeOf(env.first);
+		return k;
 	}
 
 	@Override
 	public SigExp visit(
-			Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>> env,
+			Quad<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>, Map<String, QueryExp>> env,
 			One e) {
-		e.sig.typeOf(env.first);
-		return e.sig;
+		SigExp k = e.sig.typeOf(env.first);
+		return k;
 	}
 
 	@Override
 	public SigExp visit(
-			Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>> env,
+			Quad<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>, Map<String, QueryExp>> env,
 			Two e) {
-		e.sig.typeOf(env.first);
-		return e.sig;
+		SigExp k = e.sig.typeOf(env.first);
+		return k;
 	}
 
 	@Override
 	public SigExp visit(
-			Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>> env,
+			Quad<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>, Map<String, QueryExp>> env,
 			Plus e) {
+		List<String> l = new LinkedList<>(seen);
 		SigExp lt = e.a.accept(env, this);
+		seen = l;
 		SigExp rt = e.b.accept(env, this);
+		seen = l;
 		if (!lt.equals(rt)) {
 			throw new RuntimeException("Not of same type in " + e + ": " + lt + " and " + rt);
 		}
@@ -67,10 +72,13 @@ public class InstChecker implements InstExpVisitor<SigExp, Triple<Map<String, Si
 
 	@Override
 	public SigExp visit(
-			Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>> env,
+			Quad<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>, Map<String, QueryExp>> env,
 			Times e) {
+		List<String> l = new LinkedList<>(seen);
 		SigExp lt = e.a.accept(env, this);
+		seen = l;
 		SigExp rt = e.b.accept(env, this);
+		seen = l;
 		if (!lt.equals(rt)) {
 			throw new RuntimeException("Not of same type in " + e + ": " + lt + " and " + rt);
 		}
@@ -79,10 +87,13 @@ public class InstChecker implements InstExpVisitor<SigExp, Triple<Map<String, Si
 
 	@Override
 	public SigExp visit(
-			Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>> env,
+			Quad<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>, Map<String, QueryExp>> env,
 			Exp e) {
+		List<String> l = new LinkedList<>(seen);
 		SigExp lt = e.a.accept(env, this);
+		seen = l;
 		SigExp rt = e.b.accept(env, this);
+		seen = l;
 		if (!lt.equals(rt)) {
 			throw new RuntimeException("Not of same type in " + e + ": " + lt + " and " + rt);
 		}
@@ -91,7 +102,7 @@ public class InstChecker implements InstExpVisitor<SigExp, Triple<Map<String, Si
 
 	@Override
 	public SigExp visit(
-			Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>> env,
+			Quad<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>, Map<String, QueryExp>> env,
 			Var e) {
 		if (seen.contains(e.v)) {
 			throw new RuntimeException("Cyclic definition: " + e.v);
@@ -107,15 +118,15 @@ public class InstChecker implements InstExpVisitor<SigExp, Triple<Map<String, Si
 	@Override
 	//TODO const inst checker
 	public SigExp visit(
-			Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>> env,
+			Quad<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>, Map<String, QueryExp>> env,
 			Const e) {
-		e.sig.typeOf(env.first);
-		return e.sig;
+		SigExp k = e.sig.typeOf(env.first);
+		return k;
 	}
 
 	@Override
 	public SigExp visit(
-			Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>> env,
+			Quad<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>, Map<String, QueryExp>> env,
 			Delta e) {
 		SigExp it = e.I.accept(env, this);
 		Pair<SigExp, SigExp> ft = e.F.type(env.first, env.second);
@@ -128,7 +139,7 @@ public class InstChecker implements InstExpVisitor<SigExp, Triple<Map<String, Si
 	@Override
 	//TODO check disc op fib
 	public SigExp visit(
-			Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>> env,
+			Quad<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>, Map<String, QueryExp>> env,
 			Sigma e) {
 		SigExp it = e.I.accept(env, this);
 		Pair<SigExp, SigExp> ft = e.F.type(env.first, env.second);
@@ -141,7 +152,7 @@ public class InstChecker implements InstExpVisitor<SigExp, Triple<Map<String, Si
 	@Override
 	//TODO check bijection
 	public SigExp visit(
-			Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>> env,
+			Quad<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>, Map<String, QueryExp>> env,
 			Pi e) {
 		SigExp it = e.I.accept(env, this);
 		Pair<SigExp, SigExp> ft = e.F.type(env.first, env.second);
@@ -154,7 +165,7 @@ public class InstChecker implements InstExpVisitor<SigExp, Triple<Map<String, Si
 	@Override
 	//TODO check union comp
 	public SigExp visit(
-			Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>> env,
+			Quad<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>, Map<String, QueryExp>> env,
 			FullSigma e) {
 		SigExp it = e.I.accept(env, this);
 		Pair<SigExp, SigExp> ft = e.F.type(env.first, env.second);
@@ -166,17 +177,29 @@ public class InstChecker implements InstExpVisitor<SigExp, Triple<Map<String, Si
 
 	@Override
 	public SigExp visit(
-			Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>> env,
+			Quad<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>, Map<String, QueryExp>> env,
 			Relationalize e) {
 		return e.I.accept(env, this);
 	}
 
 	@Override
 	public SigExp visit(
-			Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>> env,
+			Quad<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>, Map<String, QueryExp>> env,
 			External e) {
-		e.sig.typeOf(env.first);
-		return e.sig;
+		SigExp k = e.sig.typeOf(env.first);
+		return k;
+	}
+
+	@Override
+	public SigExp visit(
+			Quad<Map<String, SigExp>, Map<String, MapExp>, Map<String, InstExp>, Map<String, QueryExp>> env,
+			Eval e) {
+		Pair<SigExp, SigExp> k = e.q.type(env.first, env.second, env.fourth);
+		SigExp v = e.e.accept(env, this);
+		if (!(k.first.equals(v))) {
+			throw new RuntimeException("On " + e + ", expected input to be " + k.first + " but computed " + v);
+		}
+		return k.second;
 	}
 	
 	

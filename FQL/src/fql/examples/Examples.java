@@ -39,10 +39,10 @@ public class Examples {
 	public static Example relative = new RelationalizerExample();
 	public static Example sotgd = new EDExample();
 
-	public static Example[] examples = new Example[] { /* people , */ external,
+	public static Example[] examples = new Example[] { people , external,
 			typeddelta, delta, pi, typedPi, typedsigma, sigma, full, employess,
-			typedemployees, /* composition , tcomp, */ iso, triangle, cyclicgroup,
-			dihedral, /* one, */ empty, /* foil, typedFoil, */ sql2fql, weird,
+			typedemployees, composition , tcomp, iso, triangle, cyclicgroup,
+			dihedral, /* one, */ empty, foil, typedFoil, sql2fql, weird,
 			typedWeird, relative, sotgd, plusSig };
 
 	public static final Example INIT_EXAMPLE = typeddelta;
@@ -58,7 +58,7 @@ public class Examples {
 	 * "\ninstance I = eval Q I" + "\ninstance I = delta F I" +
 	 * "\ninstance I = sigma F I" + "\ninstance I = pi F I"
 	 */
-	"See the People example for a tutorial, and the Empty example for all possible FQL syntax."
+	"See the People example for a tutorial, and the All syntax example for all possible FQL syntax."
 			+ "\n"
 			+ "\nFor sigma/pi query generation, signatures must be finite."
 			+ "\n"

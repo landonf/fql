@@ -2,10 +2,12 @@ package fql.decl;
 
 import java.awt.BasicStroke;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Paint;
 import java.awt.Stroke;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,6 +28,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.UIManager;
 import javax.swing.table.TableRowSorter;
 
 import org.apache.commons.collections15.Transformer;
@@ -1041,14 +1044,14 @@ public class Instance  {
 		vv.setPreferredSize(new Dimension(600, 400));
 		// vv.getRenderContext().setEdgeLabelRerderer(new MyEdgeT());
 		// Setup up a new vertex to paint transformer...
-		/* Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
+		Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
 			public Paint transform(String i) {
-				if (!thesig.isAttribute(i)) {
-					return env.colors.get(thesig.name0);
+				if (thesig.isAttribute(i)) {
+					return UIManager.getColor("Panel.background");
 				}
-				return UIManager.getColor("Panel.background");
+				return Color.RED;
 			}
-		}; */
+		}; 
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		// gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
@@ -1069,7 +1072,7 @@ public class Instance  {
 		// return edgeStroke;
 		// }
 		// };
-		//vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 		// vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
 		vv.getRenderContext().setVertexLabelRenderer(new MyVertexT());
 		// vv.getRenderContext().setVertexLabelTransformer(new

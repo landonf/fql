@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import fql.FQLException;
-import fql.Unit;
 import fql.decl.SigExp.Const;
 import fql.decl.SigExp.Exp;
 import fql.decl.SigExp.One;
@@ -15,52 +14,52 @@ import fql.decl.SigExp.Times;
 import fql.decl.SigExp.Var;
 import fql.decl.SigExp.Zero;
 
-public class SigExpChecker implements SigExpVisitor<Unit, Map<String, SigExp>>{
+public class SigExpChecker implements SigExpVisitor<SigExp, Map<String, SigExp>>{
 
 	public List<String> seen = new LinkedList<>();
 	
 	@Override
-	public Unit visit(Map<String, SigExp> env, Zero e) {
-		return new Unit();
+	public SigExp visit(Map<String, SigExp> env, Zero e) {
+		return e;
 	}
 
 	@Override
-	public Unit visit(Map<String, SigExp> env, One e) {
-		return new Unit();
+	public SigExp visit(Map<String, SigExp> env, One e) {
+		return e;
 	}
 
 	@Override
-	public Unit visit(Map<String, SigExp> env, Plus e) {
+	public SigExp visit(Map<String, SigExp> env, Plus e) {
 		List<String> s = new LinkedList<>(seen);
-		e.a.accept(env, this);
+		SigExp a = e.a.accept(env, this);
 		seen = s;
-		e.b.accept(env, this);
+		SigExp b = e.b.accept(env, this);
 		seen = s;
-		return new Unit();
+		return new SigExp.Plus(a,b); 
 	}
 
 	@Override
-	public Unit visit(Map<String, SigExp> env, Times e) {
+	public SigExp visit(Map<String, SigExp> env, Times e) {
 		List<String> s = new LinkedList<>(seen);
-		e.a.accept(env, this);
+		SigExp a = e.a.accept(env, this);
 		seen = s;
-		e.b.accept(env, this);
+		SigExp b = e.b.accept(env, this);
 		seen = s;
-		return new Unit();
+		return new Times(a,b);
 	}
 
 	@Override
-	public Unit visit(Map<String, SigExp> env, Exp e) {
+	public SigExp visit(Map<String, SigExp> env, Exp e) {
 		List<String> s = new LinkedList<>(seen);
-		e.a.accept(env, this);
+		SigExp a = e.a.accept(env, this);
 		seen = s;
-		e.b.accept(env, this);
+		SigExp b = e.b.accept(env, this);
 		seen = s;
-		return new Unit();
+		return new Exp(a,b);
 	}
 
 	@Override
-	public Unit visit(Map<String, SigExp> env, Var e) {
+	public SigExp visit(Map<String, SigExp> env, Var e) {
 		if (seen.contains(e.v)) {
 			throw new RuntimeException("Cyclic definition: " + e);
 		}
@@ -73,13 +72,13 @@ public class SigExpChecker implements SigExpVisitor<Unit, Map<String, SigExp>>{
 	}
 
 	@Override
-	public Unit visit(Map<String, SigExp> env, Const e) {
+	public SigExp visit(Map<String, SigExp> env, Const e) {
 		try {
 			new Signature(e.nodes, e.attrs, e.arrows, e.eqs);
 		} catch (FQLException ee) {
 			throw new RuntimeException(ee.getLocalizedMessage());
 		}
-		return new Unit();
+		return e;
 	}
 	
 	//TODO take care of seen for map checker like in sig checker

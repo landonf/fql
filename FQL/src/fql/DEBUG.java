@@ -1,6 +1,7 @@
 package fql;
 
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 
 import javax.swing.JCheckBox;
@@ -68,6 +69,7 @@ public class DEBUG {
 	public static boolean inst_joined = true;
 	public static boolean inst_gr = true;
 	public static boolean inst_obs = true;
+
 	
 	//public enum Intermediate { SOME, NONE, ALL };
 	
@@ -102,42 +104,9 @@ public class DEBUG {
 		p.add(labelM);
 		p.add(jcbM);
 		
-		/*
-		JCheckBox jcb1 = new JCheckBox("", SHOW_QUERY_PATHS);
-		JLabel label1 = new JLabel("Draw arrows in query graphs:");
-		label1.setToolTipText(label1text);
-		p.add(label1);
-		p.add(jcb1);
-		*/
 		
-		/*
-		JRadioButton noneb = new JRadioButton("none");
-		JRadioButton somb = new JRadioButton("some");
-		JRadioButton allb = new JRadioButton("all");
-		ButtonGroup bg = new ButtonGroup();
-		bg.add(noneb);
-		bg.add(somb);
-		bg.add(allb);
-		if (INTERMEDIATE == Intermediate.SOME) {
-			somb.setSelected(true);
-		} else if (INTERMEDIATE == Intermediate.NONE) {
-			noneb.setSelected(true);
-		} else if (INTERMEDIATE == Intermediate.ALL) {
-			allb.setSelected(true);
-		} else {
-			throw new RuntimeException();
-		}
 		
-		//	JPanel p0 = new JPanel();
-		JLabel label2 = new JLabel("Show intermediate declarations:");
-		label2.setToolTipText(label2text);
-			p.add(label2);
-			JPanel xxx = new JPanel();
-			xxx.add(noneb);
-			xxx.add(somb);
-			xxx.add(allb);
-			p.add(xxx);
-			*/
+		
 		
 		/* JCheckBox jcbX = new JCheckBox("", DO_NOT_GUIDIFY);
 			JPanel p0 = new JPanel();
@@ -192,15 +161,16 @@ public class DEBUG {
 		p.add(area);
 		area.setMaximumSize(new Dimension(200,300));
 		
-		JPanel schemaArea = new JPanel();
-		JCheckBox schema_graphical_box = new JCheckBox("Graphical", schema_graphical);
-		JCheckBox schema_tabular_box = new JCheckBox("Tabular", schema_tabular);
-		JCheckBox schema_textual_box = new JCheckBox("Textual", schema_textual);
-		JCheckBox schema_denotation_box = new JCheckBox("Denotation", schema_denotation);
+		//JPanel schemaArea = new JPanel();
+		JPanel schemaArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JCheckBox schema_graphical_box = new JCheckBox("Graph", schema_graphical);
+		JCheckBox schema_textual_box = new JCheckBox("Text", schema_textual);
+		JCheckBox schema_tabular_box = new JCheckBox("Table", schema_tabular);
 		JCheckBox schema_ed_box = new JCheckBox("ED", schema_ed);
+		JCheckBox schema_denotation_box = new JCheckBox("Denotation", schema_denotation);
 		schemaArea.add(schema_graphical_box);
-		schemaArea.add(schema_tabular_box);
 		schemaArea.add(schema_textual_box);
+		schemaArea.add(schema_tabular_box);
 		schemaArea.add(schema_ed_box);
 		schemaArea.add(schema_denotation_box);
 		
@@ -209,14 +179,14 @@ public class DEBUG {
 		p.add(schema_label);
 		p.add(schemaArea);
 
-		JPanel mappingArea = new JPanel();
-		JCheckBox mapping_graphical_box = new JCheckBox("Graphical", mapping_graphical);
-		JCheckBox mapping_tabular_box = new JCheckBox("Tabular", mapping_tabular);
-		JCheckBox mapping_textual_box = new JCheckBox("Textual", mapping_textual);
+		JPanel mappingArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JCheckBox mapping_graphical_box = new JCheckBox("Graph", mapping_graphical);
+		JCheckBox mapping_textual_box = new JCheckBox("Text", mapping_textual);
+		JCheckBox mapping_tabular_box = new JCheckBox("Table", mapping_tabular);
 		JCheckBox mapping_ed_box = new JCheckBox("ED", mapping_ed);
 		mappingArea.add(mapping_graphical_box);
-		mappingArea.add(mapping_tabular_box);
 		mappingArea.add(mapping_textual_box);
+		mappingArea.add(mapping_tabular_box);
 		mappingArea.add(mapping_ed_box);
 		
 		JLabel mapping_label = new JLabel("Mapping viewer panels:");
@@ -224,26 +194,28 @@ public class DEBUG {
 		p.add(mapping_label);
 		p.add(mappingArea);
 		
-		JPanel instArea = new JPanel();
-		JCheckBox inst_graphical_box = new JCheckBox("Graphical", inst_graphical);
-		JCheckBox inst_tabular_box = new JCheckBox("Tabular", inst_tabular);
-		JCheckBox inst_textual_box = new JCheckBox("Textual", inst_textual);
-		JCheckBox inst_gr_box = new JCheckBox("Elements", inst_gr);
+		JPanel instArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JCheckBox inst_graphical_box = new JCheckBox("Graph", inst_graphical);
+		JCheckBox inst_textual_box = new JCheckBox("Text", inst_textual);
+		JCheckBox inst_tabular_box = new JCheckBox("Table", inst_tabular);
 		JCheckBox inst_joined_box = new JCheckBox("Joined", inst_joined);
+		JCheckBox inst_gr_box = new JCheckBox("Elements", inst_gr);
 		JCheckBox inst_obs_box = new JCheckBox("Observables", inst_obs);
 		instArea.add(inst_graphical_box);
-		instArea.add(inst_tabular_box);
 		instArea.add(inst_textual_box);
+		instArea.add(inst_tabular_box);
+		instArea.add(inst_joined_box);
 		instArea.add(inst_gr_box);
 		instArea.add(inst_obs_box);
-		instArea.add(inst_joined_box);
 		
 		JLabel inst_label = new JLabel("Instance viewer panels:");
 		inst_label.setToolTipText("Sets which viewers to use for instances.");
 		p.add(inst_label);
 		p.add(instArea);
 
+
 		
+
 //		JTextField sz = new JTextField(Integer.toString(MAX_JOIN_SIZE));
 //		p.add(new JLabel("Maximum potential join size:"));
 //		p.add(iter);
@@ -269,16 +241,7 @@ public class DEBUG {
 			//DO_NOT_GUIDIFY = jcbX.isSelected();
 			//SHOW_QUERY_PATHS = jcb1.isSelected();
 			MultiView = jcbM.isSelected();
-			/*
-			if (somb.isSelected()) {
-				INTERMEDIATE = Intermediate.SOME;
-			} else if (noneb.isSelected()) {
-				INTERMEDIATE = Intermediate.NONE;
-			} else if (allb.isSelected()) {
-				INTERMEDIATE = Intermediate.ALL;
-			} else {
-				throw new RuntimeException();
-			} */
+		
 			
 	//		CHECK_MAPPINGS = jcb1.isSelected();
 			MAX_PATH_LENGTH = a;
@@ -296,7 +259,6 @@ public class DEBUG {
 			mapping_graphical = mapping_graphical_box.isSelected();
 			mapping_tabular = mapping_tabular_box.isSelected();
 			mapping_textual = mapping_textual_box.isSelected();
-
 			
 			inst_graphical = inst_graphical_box.isSelected();
 			inst_tabular = inst_tabular_box.isSelected();
@@ -304,7 +266,9 @@ public class DEBUG {
 			inst_joined = inst_joined_box.isSelected();
 			inst_gr = inst_gr_box.isSelected();
 			inst_obs = inst_obs_box.isSelected();
-			
+
+		
+
 			//MAX_JOIN_SIZE = c;
 		}
 	}

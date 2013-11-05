@@ -34,15 +34,18 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, Pair<M
 	@Override
 	public Pair<SigExp, SigExp> visit(
 			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Id e) {
-		e.t.typeOf(env.first);
-		return new Pair<>(e.t, e.t);
+		SigExp x = e.t.typeOf(env.first);
+		return new Pair<>(x, x);
 	}
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
 			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Comp e) {
+		List<String> l = new LinkedList<>(seen);
 		Pair<SigExp, SigExp> lt = e.l.accept(env, this);
+		seen = l;
 		Pair<SigExp, SigExp> rt = e.r.accept(env, this);
+		seen = l;
 		if (!lt.second.equals(rt.first)) {
 			throw new RuntimeException("Composition type mismatch: " + lt.second + " and " + rt.first + " on " + e);
 		}
@@ -53,23 +56,23 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, Pair<M
 	@Override
 	public Pair<SigExp, SigExp> visit(
 			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Dist1 e) {
-		e.a.typeOf(env.first);
-		e.b.typeOf(env.first);
-		e.c.typeOf(env.first);
-		return new Pair<SigExp, SigExp>(new SigExp.Times(e.a,
-				new SigExp.Plus(e.b, e.c)), new SigExp.Plus(new SigExp.Times(e.a,
-				e.b), new SigExp.Times(e.a, e.c)));
+		SigExp aa = e.a.typeOf(env.first);
+		SigExp bb = e.b.typeOf(env.first);
+		SigExp cc = e.c.typeOf(env.first);
+		return new Pair<SigExp, SigExp>(new SigExp.Times(aa,
+				new SigExp.Plus(bb, cc)), new SigExp.Plus(new SigExp.Times(aa,
+				bb), new SigExp.Times(aa, cc)));
 	}
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
 			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Dist2 e) {
-		e.a.typeOf(env.first);
-		e.b.typeOf(env.first);
-		e.c.typeOf(env.first);
-		return new Pair<SigExp, SigExp>(new SigExp.Plus(new SigExp.Times(e.a,
-				e.b), new SigExp.Times(e.a, e.c)), new SigExp.Times(e.a,
-						new SigExp.Plus(e.b, e.c)));
+		SigExp aa = e.a.typeOf(env.first);
+		SigExp bb = e.b.typeOf(env.first);
+		SigExp cc = e.c.typeOf(env.first);
+		return new Pair<SigExp, SigExp>(new SigExp.Plus(new SigExp.Times(aa,
+				bb), new SigExp.Times(aa, cc)), new SigExp.Times(aa,
+						new SigExp.Plus(bb, cc)));
 	}
 
 	@Override
@@ -90,64 +93,64 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, Pair<M
 	@Override
 	public Pair<SigExp, SigExp> visit(
 			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Const e) {
-		e.src.typeOf(env.first);
-		e.dst.typeOf(env.first);
-		return new Pair<>(e.src, e.dst);
+		SigExp a = e.src.typeOf(env.first);
+		SigExp b = e.dst.typeOf(env.first);
+		return new Pair<>(a, b);
 	}
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
 			Pair<Map<String, SigExp>, Map<String, MapExp>> env, TT e) {
-		e.t.typeOf(env.first);
-		return new Pair<SigExp, SigExp>(e.t, new SigExp.One());
+		SigExp x = e.t.typeOf(env.first);
+		return new Pair<SigExp, SigExp>(x, new SigExp.One());
 	}
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
 			Pair<Map<String, SigExp>, Map<String, MapExp>> env, FF e) {
-		e.t.typeOf(env.first);
-		return new Pair<SigExp, SigExp>(e.t, new SigExp.Zero());
+		SigExp x = e.t.typeOf(env.first);
+		return new Pair<SigExp, SigExp>(new SigExp.Zero(), x);
 	}
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
 			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Fst e) {
-		e.s.typeOf(env.first);
-		e.t.typeOf(env.first);
-		return new Pair<SigExp, SigExp>(new SigExp.Times(e.s, e.t), e.s);
+		SigExp a = e.s.typeOf(env.first);
+		SigExp b = e.t.typeOf(env.first);
+		return new Pair<SigExp, SigExp>(new SigExp.Times(a, b), a);
 	}
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
 			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Snd e) {
-		e.s.typeOf(env.first);
-		e.t.typeOf(env.first);
-		return new Pair<SigExp, SigExp>(new SigExp.Times(e.s, e.t), e.t);
+		SigExp a = e.s.typeOf(env.first);
+		SigExp b = e.t.typeOf(env.first);
+		return new Pair<SigExp, SigExp>(new SigExp.Times(a, b), b);
 	}
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
 			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Inl e) {
-		e.s.typeOf(env.first);
-		e.t.typeOf(env.first);
-		return new Pair<SigExp, SigExp>(e.s, new SigExp.Plus(e.s, e.t));
+		SigExp a = e.s.typeOf(env.first);
+		SigExp b = e.t.typeOf(env.first);
+		return new Pair<SigExp, SigExp>(a, new SigExp.Plus(a, b));
 	}
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
 			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Inr e) {
-		e.s.typeOf(env.first);
-		e.t.typeOf(env.first);
-		return new Pair<SigExp, SigExp>(e.t, new SigExp.Plus(e.s, e.t));
+		SigExp a = e.s.typeOf(env.first);
+		SigExp b = e.t.typeOf(env.first);
+		return new Pair<SigExp, SigExp>(b, new SigExp.Plus(a, b));
 	}
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
 			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Apply e) {
-		e.s.typeOf(env.first);
-		e.t.typeOf(env.first);
-		return new Pair<SigExp, SigExp>(new SigExp.Times(new SigExp.Exp(e.s,
-				e.t), e.t), e.s);
+		SigExp s = e.s.typeOf(env.first);
+		SigExp t = e.t.typeOf(env.first);
+		return new Pair<SigExp, SigExp>(new SigExp.Times(new SigExp.Exp(s,
+				t), t), s);
 	}
 
 	@Override
@@ -164,8 +167,11 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, Pair<M
 	@Override
 	public Pair<SigExp, SigExp> visit(
 			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Case e) {
+		List<String> l = new LinkedList<>(seen);
 		Pair<SigExp, SigExp> lt = e.l.accept(env, this);
+		seen = l;
 		Pair<SigExp, SigExp> rt = e.r.accept(env, this);
+		seen = l;
 		if (!lt.second.equals(rt.second)) {
 			throw new RuntimeException("target schema mismatch on " + e + ": " + lt.second + " and " + rt.second);
 		}
@@ -176,8 +182,11 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, Pair<M
 	@Override
 	public Pair<SigExp, SigExp> visit(
 			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Prod e) {
+		List<String> l = new LinkedList<>(seen);
 		Pair<SigExp, SigExp> lt = e.l.accept(env, this);
+		seen = l;
 		Pair<SigExp, SigExp> rt = e.r.accept(env, this);
+		seen = l;
 		if (!lt.first.equals(rt.first)) {
 			throw new RuntimeException("source schema mismatch on " + e + ": " + lt.first + " and " + rt.first);
 		}

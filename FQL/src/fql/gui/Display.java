@@ -27,13 +27,14 @@ import javax.swing.event.ListSelectionListener;
 import fql.DEBUG;
 import fql.FQLException;
 import fql.Pair;
-import fql.decl.Driver;
 import fql.decl.Environment;
 import fql.decl.Instance;
 import fql.decl.Mapping;
 import fql.decl.NewestFQLProgram;
+import fql.decl.Query;
 import fql.decl.SigExp;
 import fql.decl.Signature;
+import fql.decl.Unresolver;
 
 /**
  * 
@@ -45,7 +46,7 @@ public class Display {
 
 	List<Pair<String, JComponent>> frames = new LinkedList<>();
 	
-	public JPanel showInst(Environment environment, String c, Instance view) throws FQLException{
+	public JPanel showInst(Environment environment, /* String c, */ Instance view) throws FQLException{
 		JTabbedPane px = new JTabbedPane();
 
 		if (DEBUG.inst_graphical) {
@@ -88,7 +89,7 @@ public class Display {
 		return top;
 	}
 
-	public JPanel showMapping(Environment environment, String c, Mapping view) throws FQLException {
+	public JPanel showMapping(Environment environment, /* String c, */ Mapping view) throws FQLException {
 	
 		JTabbedPane px = new JTabbedPane();
 
@@ -122,7 +123,7 @@ public class Display {
 		return top;
 	}
 	
-	public JPanel showSchema(Environment environment, String c, Signature view) throws FQLException{
+	public JPanel showSchema(Environment environment, /* String c, */ Signature view) throws FQLException{
 		JTabbedPane px = new JTabbedPane();
 
 		if (DEBUG.schema_graphical) {
@@ -160,19 +161,52 @@ public class Display {
 		return top;
 	}
 	
+	public JPanel showQuery(Environment environment /* , String c */, Query view) throws FQLException{
+		JTabbedPane px = new JTabbedPane();
+
+		Mapping d = view.project;
+		Mapping p = view.join;
+		Mapping u = view.union;
+		Signature s = d.target;
+		Signature i1 = d.source;
+		Signature i2 = p.target;
+		Signature t = u.target;
+		
+		px.add("Source", showSchema(environment, s));
+		px.add("Delta", showMapping(environment, d));
+		px.add("Intermediate 1", showSchema(environment, i1));		
+		px.add("Pi", showMapping(environment, p));
+		px.add("Intermediate 2", showSchema(environment, i2));
+		px.add("Sigma", showMapping(environment, u));
+		px.add("Target", showSchema(environment, t));
+		
+		JPanel top = new JPanel(new GridLayout(1, 1));
+		top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+		top.add(px);
+		return top;
+	}
+
+	
 	public Display(NewestFQLProgram p, final Environment environment) throws FQLException {
 	
 		for (String c : p.order) {
 			if (environment.signatures.get(c) != null) {
-				frames.add(new Pair<String, JComponent>("schema " + c, showSchema(environment, c, environment.getSchema(c))));
+				frames.add(new Pair<String, JComponent>("schema " + c, showSchema(environment, environment.getSchema(c))));
 			} else if (environment.mappings.get(c) != null) {
 				Pair<SigExp, SigExp> xxx = p.maps.get(c).type(p.sigs, p.maps); 
-				String a = xxx.first.accept(p.sigs, new Driver.Unresolver()).toString();
-				String b = xxx.second.accept(p.sigs, new Driver.Unresolver()).toString();
-				frames.add(new Pair<String, JComponent>("mapping " + c + " : " + a + " -> " + b, showMapping(environment, c, environment.getMapping(c))));
+				String a = xxx.first.accept(p.sigs, new Unresolver()).toString();
+				String b = xxx.second.accept(p.sigs, new Unresolver()).toString();
+				frames.add(new Pair<String, JComponent>("mapping " + c + " : " + a + " -> " + b, showMapping(environment, environment.getMapping(c))));
 			} else if (environment.instances.get(c) != null) {
-				String xxx = p.insts.get(c).type(p.sigs, p.maps, p.insts).accept(p.sigs, new Driver.Unresolver()).toString();
-				frames.add(new Pair<String, JComponent>("instance " + c + " : " + xxx , showInst(environment, c, environment.instances.get(c))));
+				String xxx = p.insts.get(c).type(p.sigs, p.maps, p.insts, p.queries).accept(p.sigs, new Unresolver()).toString();
+				frames.add(new Pair<String, JComponent>("instance " + c + " : " + xxx , showInst(environment, environment.instances.get(c))));
+			} else if (environment.queries.get(c) != null) {
+				Pair<SigExp, SigExp> xxx = p.queries.get(c).type(p.sigs, p.maps, p.queries); 
+				String a = xxx.first.accept(p.sigs, new Unresolver()).toString();
+				String b = xxx.second.accept(p.sigs, new Unresolver()).toString();
+				frames.add(new Pair<String, JComponent>("query " + c + " : " + a + " -> " + b, showQuery(environment, environment.queries.get(c))));				
+			} else {
+				throw new RuntimeException();
 			}
 		}
 	}
@@ -184,23 +218,6 @@ public class Display {
 		final CardLayout cl = new CardLayout();
 		final JPanel x = new JPanel(cl);
 		frame = new JFrame();
-
-		// List<Pair<String, JComponent>> list = new LinkedList<Pair<String,
-		// JComponent>>();
-		// for (String p : order) {
-		// list.add(new Pair<String, JComponent>(p, frames.get(p)));
-		// }
-		// Collections.sort(list, new Comparator<Pair<String, JComponent>>() {
-		//
-		// @Override
-		// public int compare(Pair<String, JComponent> arg0,
-		// Pair<String, JComponent> arg1) {
-		// String s1 = arg0.first.split(" ")[1];
-		// String s2 = arg1.first.split(" ")[1];
-		// return s1.compareTo(s2);
-		// }
-		//
-		// });
 
 		final Vector<String> ooo = new Vector<>();
 

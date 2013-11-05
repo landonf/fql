@@ -147,11 +147,11 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 	 * @throws FQLException
 	 */
 	public Triple<Mapping, Quad<Signature, Pair<Map<ObjA, String>, Map<String, ObjA>>, Pair<Map<Arr<ObjA, ArrowA>, String>, Map<String, Arr<ObjA, ArrowA>>>, Pair<Map<Attribute<ObjA>, String>, Map<String, Attribute<ObjA>>>>, Quad<Signature, Pair<Map<ObjB, String>, Map<String, ObjB>>, Pair<Map<Arr<ObjB, ArrowB>, String>, Map<String, Arr<ObjB, ArrowB>>>, Pair<Map<Attribute<ObjB>, String>, Map<String, Attribute<ObjB>>>>> 
-	toMapping(String n, String n1, String n2) throws FQLException {
+	toMapping(/*String n, String n1, String n2*/) throws FQLException {
 		Quad<Signature, Pair<Map<ObjA, String>, Map<String, ObjA>>, Pair<Map<Arr<ObjA, ArrowA>, String>, Map<String, Arr<ObjA, ArrowA>>>, Pair<Map<Attribute<ObjA>, String>, Map<String, Attribute<ObjA>>>> src = srcCat
-				.toSig(n1);
+				.toSig();
 		Quad<Signature, Pair<Map<ObjB, String>, Map<String, ObjB>>, Pair<Map<Arr<ObjB, ArrowB>, String>, Map<String, Arr<ObjB, ArrowB>>>, Pair<Map<Attribute<ObjB>, String>, Map<String, Attribute<ObjB>>>> dst = dstCat
-				.toSig(n2);
+				.toSig();
 
 		Signature srcSig = src.first;
 		Signature dstSig = dst.first;

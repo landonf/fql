@@ -178,7 +178,7 @@ public class FinCat<Obj, Arrow> {
 	 * @throws FQLException
 	 */
 	public Quad<Signature, Pair<Map<Obj, String>, Map<String, Obj>>, Pair<Map<Arr<Obj, Arrow>, String>, Map<String, Arr<Obj, Arrow>>>, Pair<Map<Attribute<Obj>, String>, Map<String, Attribute<Obj>>>> 
-	toSig(String n) throws FQLException {
+	toSig(/*String n*/) throws FQLException {
 
 		
 		 Map<Attribute<Obj>, String> attM = new HashMap<>(); 

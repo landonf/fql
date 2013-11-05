@@ -9,8 +9,12 @@ import fql.Pair;
 
 public abstract class MapExp {
 
+	public Const toConst(Map<String, SigExp> env, Map<String, MapExp> ctx) {
+		return accept(new Pair<>(env, ctx), new SigOps());
+	}
+	
 	public Mapping toMap(Map<String, SigExp> env, Map<String, MapExp> ctx) {
-		Const e = accept(new Pair<>(env, ctx), new SigOps());
+		Const e = toConst(env, ctx);
 		try {
 			return new Mapping(e.src.toSig(env), e.dst.toSig(env), e.objs, e.attrs,
 					e.arrows);
@@ -206,6 +210,7 @@ public abstract class MapExp {
 			this.dst = dst;
 		}
 
+
 		@Override
 		// TODO toString for mapping const
 		public String toString() {
@@ -351,7 +356,7 @@ public abstract class MapExp {
 
 		@Override
 		public String toString() {
-			return "tt " + t;
+			return "unit " + t;
 		}
 
 		@Override
@@ -395,7 +400,7 @@ public abstract class MapExp {
 
 		@Override
 		public String toString() {
-			return "ff " + t;
+			return "void " + t;
 		}
 
 		@Override

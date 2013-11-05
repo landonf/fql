@@ -826,7 +826,7 @@ public class PSMGen
 		
 		for (Node d0 : D.objects) {
 			ret.add(new DropTable(dst + "_" + d0.string + "_limnoguid")); 
-	//		ret.add(new DropTable(dst + "_" + d0.string + "_limit"));
+			ret.add(new DropTable(dst + "_" + d0.string + "_limit"));
 		}
 		
 		for (int ii = 0; ii < tempTables; ii++) {

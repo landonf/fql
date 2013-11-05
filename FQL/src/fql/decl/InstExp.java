@@ -5,15 +5,64 @@ import java.util.List;
 import java.util.Map;
 
 import fql.Pair;
-import fql.Triple;
+import fql.Quad;
 
 public abstract class InstExp {
 	
 	public final SigExp type(Map<String, SigExp> env,
-			Map<String, MapExp> ctx, Map<String, InstExp> insts) {
-		return accept(new Triple<>(env, ctx, insts), new InstChecker(new LinkedList<String>()));
+			Map<String, MapExp> ctx, Map<String, InstExp> insts, Map<String, QueryExp> qs) {
+		return accept(new Quad<>(env, ctx, insts, qs), new InstChecker(new LinkedList<String>()));
 	}
 
+	public static class Eval extends InstExp {
+		QueryExp q;
+		InstExp e;
+		public Eval(QueryExp q, InstExp e) {
+			super();
+			this.q = q;
+			this.e = e;
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((e == null) ? 0 : e.hashCode());
+			result = prime * result + ((q == null) ? 0 : q.hashCode());
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Eval other = (Eval) obj;
+			if (e == null) {
+				if (other.e != null)
+					return false;
+			} else if (!e.equals(other.e))
+				return false;
+			if (q == null) {
+				if (other.q != null)
+					return false;
+			} else if (!q.equals(other.q))
+				return false;
+			return true;
+		}
+		
+		@Override
+		public String toString() {
+			return "eval" + q + " " + e;
+		}
+
+		@Override
+		public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+	}
 
 	//TODO Const equality for instances
 	public static class Const extends InstExp {
@@ -60,18 +109,14 @@ public abstract class InstExp {
 
 		@Override
 		public String toString() {
-			return data.toString();
+			return data.toString(); //TODO toString for inst
 		}
 		
-
 		@Override
 		public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
 
-		
-
-		
 	}
 
 	public static class Var extends InstExp {
@@ -740,20 +785,21 @@ public static class External extends InstExp {
 	
 	
 	public interface InstExpVisitor<R, E> {
-		public R visit (E env, Zero e) ;
-		public R visit (E env, One e) ;
-		public R visit (E env, Two e) ;
-		public R visit (E env, Plus e) ;
-		public R visit (E env, Times e) ;
-		public R visit (E env, Exp e) ;
-		public R visit (E env, Var e) ;
-		public R visit (E env, Const e) ;
-		public R visit (E env, Delta e) ;
-		public R visit (E env, Sigma e) ;
-		public R visit (E env, Pi e) ;
-		public R visit (E env, FullSigma e) ;
-		public R visit (E env, Relationalize e) ;
-		public R visit (E env, External e) ;
+		public R visit (E env, Zero e);
+		public R visit (E env, One e);
+		public R visit (E env, Two e);
+		public R visit (E env, Plus e);
+		public R visit (E env, Times e);
+		public R visit (E env, Exp e);
+		public R visit (E env, Var e);
+		public R visit (E env, Const e);
+		public R visit (E env, Delta e);
+		public R visit (E env, Sigma e);
+		public R visit (E env, Pi e);
+		public R visit (E env, FullSigma e);
+		public R visit (E env, Relationalize e);
+		public R visit (E env, External e);
+		public R visit (E env, Eval e);
 	}
 
 }

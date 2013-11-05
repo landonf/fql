@@ -55,7 +55,10 @@ public class InsertKeygen extends PSM {
 	public void exec(Map<String, Set<Map<String, Object>>> state) {
 		//System.out.println("Exec " + this + " on " + state);
 		if (!state.containsKey(name)) {
-			throw new RuntimeException(this.toString());
+			throw new RuntimeException(name + "\n\n" + state);
+		}
+		if (state.get(r) == null) {
+			throw new RuntimeException(r + "\n\n" + state);
 		}
 		if (state.get(name).size() > 0) {
 			throw new RuntimeException(this.toString());
