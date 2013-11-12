@@ -17,11 +17,7 @@ import javax.swing.JTextField;
  * Contains global constants for debugging.
  */
 public class DEBUG {
-	
-	//TODO make sure equality takes node order into account
-
-	//TODO cat to sig should output equalitites
-	
+		
 	public static String prelude = 
 			"DROP DATABASE FQL; CREATE DATABASE FQL; USE FQL; SET @guid := 0;";
 	
@@ -35,9 +31,9 @@ public class DEBUG {
 
 	public static  boolean VALIDATE = true;
 	
-	public static  int MAX_PATH_LENGTH = 8;
+	public static  int MAX_PATH_LENGTH = 80;
 
-	public static  int MAX_DENOTE_ITERATIONS = 64;
+	public static  int MAX_DENOTE_ITERATIONS = 640;
 	
 	public static boolean ALL_GR_PATHS = false;
 
@@ -117,7 +113,7 @@ public class DEBUG {
 		
 		JCheckBox jcb0 = new JCheckBox("", ALLOW_INFINITES);
 	//	JPanel p0 = new JPanel();
-		JLabel label4 = new JLabel("Do not validate mappings (allows infinte schemas):"); 
+		JLabel label4 = new JLabel("Do not validate mappings (allows some infinte schemas):"); 
 		label4.setToolTipText(label4text);
 		p.add(label4);
 		p.add(jcb0);
@@ -190,7 +186,7 @@ public class DEBUG {
 		mappingArea.add(mapping_ed_box);
 		
 		JLabel mapping_label = new JLabel("Mapping viewer panels:");
-		schema_label.setToolTipText("Sets which viewers to use for mappings.");
+		mapping_label.setToolTipText("Sets which viewers to use for mappings.");
 		p.add(mapping_label);
 		p.add(mappingArea);
 		
@@ -220,7 +216,7 @@ public class DEBUG {
 //		p.add(new JLabel("Maximum potential join size:"));
 //		p.add(iter);
 		
-		int ret = JOptionPane.showConfirmDialog(null, p, "Options", JOptionPane.OK_CANCEL_OPTION);
+		int ret = JOptionPane.showConfirmDialog(null, p, "Options", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
 		if (ret == JOptionPane.YES_OPTION) {
 			int a = MAX_PATH_LENGTH;
 			int b = MAX_DENOTE_ITERATIONS;
@@ -274,10 +270,10 @@ public class DEBUG {
 	}
 	
 	public static void showAbout() {
-		JOptionPane.showMessageDialog(null, about, "About", JOptionPane.INFORMATION_MESSAGE);
+		JOptionPane.showMessageDialog(null, about, "About", JOptionPane.PLAIN_MESSAGE, null);
 	}
 	
-	static String about = "FQL IDE Copyright (C) 2013 David Spivak and Ryan Wisnesky"
+	static String about = "FQL IDE Copyright (C) 2014 David Spivak and Ryan Wisnesky"
 			              + "\nLicense: Creative-Commons Attribution-NonCommercial-NoDerivs 3.0 Unported"
 			 	          + "\n\nLibraries used:\n\nJParsec (parsing)\nJUNG (graph visualization)\nRSyntaxTextArea (code editor)";
 

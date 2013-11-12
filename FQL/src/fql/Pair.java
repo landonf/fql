@@ -8,7 +8,7 @@ package fql;
  * @param <T1> the type of left
  * @param <T2> the type of right
  */
-public class Pair<T1, T2> {
+public class Pair<T1, T2> implements Comparable<Pair<T1, T2>> {
 
 	public T1 first;
 	public T2 second;
@@ -56,6 +56,20 @@ public class Pair<T1, T2> {
 	}
 	public Pair<T2, T1> reverse() {
 		return new Pair<>(second, first);
+	}
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public int compareTo(Pair<T1, T2> o) {
+		Comparable x = (Comparable) o.first;
+		Comparable y = (Comparable) first;
+		int c = x.compareTo(y);
+		if (c == 0) {
+			Comparable a = (Comparable) o.second;
+			Comparable b = (Comparable) second;
+			return a.compareTo(b);
+		} else {
+			return c;
+		}
 	}
 	
 }

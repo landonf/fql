@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class PathParser implements RyanParser<List<String>> {
 
-	public Partial<List<String>> parse(Tokens s) throws BadSyntax, IllTyped {
+	public Partial<List<String>> parse(Tokens s) throws BadSyntax {
 		Partial<List<String>> ret = ParserUtils.manySep(new StringParser(),
 				new KeywordParser(".")).parse(s);
 		if (ret.value.size() == 0) {

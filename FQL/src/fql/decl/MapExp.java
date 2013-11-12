@@ -1,11 +1,13 @@
 package fql.decl;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import fql.FQLException;
 import fql.Pair;
+import fql.parse.PrettyPrinter;
 
 public abstract class MapExp {
 
@@ -208,15 +210,56 @@ public abstract class MapExp {
 			this.arrows = arrows;
 			this.src = src;
 			this.dst = dst;
+			Collections.sort(this.objs);
+			Collections.sort(this.attrs);
+			Collections.sort(this.arrows);
 		}
 
 
 		@Override
-		// TODO toString for mapping const
 		public String toString() {
-			return "NewMapConst [arrows=" + arrows + ", attrs=" + attrs
-					+ ", objs=" + objs + "]";
+			String ret = "";
+			
+			String nm = "nodes ";
+			boolean b = false;
+			for (Pair<String, String> k : objs) {
+				if (b) {
+					nm += ",";
+				}
+				b = true;
+				nm += k.first + " -> " + k.second;
+			}
+			nm += ";\n";
+			ret += nm;
+
+			nm = "attributes ";
+			b = false;
+			for (Pair<String, String> k : attrs) {
+				if (b) {
+					nm += ",";
+				}
+				b = true;
+				nm += k.first + " -> " + k.second;
+			}
+			nm += ";\n";
+			ret += nm;
+			
+			nm = "arrows ";
+			b = false;
+			for (Pair<String, List<String>> k : arrows) {
+				if (b) {
+					nm += ",";
+				}
+				b = true;
+				nm += k.first + " -> " + PrettyPrinter.sep0(".", k.second);
+			}
+			nm += ";\n";
+			ret += nm;
+
+
+			return "{" + ret + "}";
 		}
+		
 
 		@Override
 		public int hashCode() {

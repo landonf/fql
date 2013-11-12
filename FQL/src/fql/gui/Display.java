@@ -75,7 +75,7 @@ public class Display {
 		
 		if (DEBUG.inst_gr) {
 			 JPanel groth = view.groth();
-			 px.add("Grothendieck", new JScrollPane(groth));
+			 px.add("Elements", new JScrollPane(groth));
 		}
 		
 		if (DEBUG.inst_obs) {
@@ -114,7 +114,7 @@ public class Display {
 		
 		if (DEBUG.mapping_ed) {
 			JPanel map = view.constraint();
-			px.add("Embedded Dependency", map);
+			px.add("ED", map);
 		}
 
 		JPanel top = new JPanel(new GridLayout(1, 1));
@@ -147,7 +147,7 @@ public class Display {
 		
 		if (DEBUG.schema_ed) {
 			JPanel map = view.constraint();
-			px.add("Embedded Dependency", map);
+			px.add("ED", map);
 		}
 		
 		if (DEBUG.schema_denotation) {

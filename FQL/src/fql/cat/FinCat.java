@@ -198,10 +198,12 @@ public class FinCat<Obj, Arrow> {
 			i++;
 		}
 
-		for (Attribute<Obj> att : attrs) {
-			attM.put(att, "attrib" + ax);
-			attM2.put("attrib" + ax, att);
-			attrs0.add(new Triple<>("attrib" + ax++, objM2.get(att.source), att.target.toString()));
+		if (attrs != null) {
+			for (Attribute<Obj> att : attrs) {
+				attM.put(att, "attrib" + ax);
+				attM2.put("attrib" + ax, att);
+				attrs0.add(new Triple<>("attrib" + ax++, objM2.get(att.source), att.target.toString()));
+			}
 		}
 		
 		List<Triple<String, String, String>> arrs = new LinkedList<>();
@@ -231,22 +233,47 @@ public class FinCat<Obj, Arrow> {
 
 		// System.out.println("arrows are " + arrows);
 		LinkedList<Pair<List<String>, List<String>>> eqs = new LinkedList<>();
-
-		 //System.out.println("$$$$$$$$$$$$$$$$$$$$$");
-		 //System.out.println(this);
-		 //System.out.println(ret2);
+		for (Pair<Arr<Obj, Arrow>, Arr<Obj, Arrow>> k : composition.keySet()) {
+			Arr<Obj, Arrow> v = composition.get(k);
+			
+			String s = arrM2.get(k.first);
+			String t = arrM2.get(k.second);
+			String u = arrM2.get(v);
+			
+			String ob = objM2.get(v.src);
+			
+			List<String> lhs = new LinkedList<>();
+			List<String> rhs = new LinkedList<>();
+			lhs.add(ob); rhs.add(ob);
+			if (s != null) {
+				lhs.add(s);
+			}
+			if (t != null) {
+				lhs.add(t);
+			}
+			if (u != null) {
+				rhs.add(u);
+			}
+			if (!lhs.equals(rhs)) {
+				eqs.add(new Pair<>(lhs, rhs));
+			}
+		}
+		
+//		 System.out.println("$$$$$$$$$$$$$$$$$$$$$");
+//		 System.out.println(this);
 //		 System.out.println(objM);
 //		 System.out.println(objM2);
 //		 System.out.println(arrM);
 //		 System.out.println(arrM2);
 //		 System.out.println(attM2);
 //		 System.out.println(attM);
+//		System.out.println(eqs);
 //		 System.out.println("$$$$$$$$$$$$$$$$$$$$$");
 		
 		Signature ret2 = new Signature(/*n,*/ objs, attrs0, arrs, 
 				eqs);
 
-		
+		//System.out.println(ret2);
 		 
 		Quad<Signature, Pair<Map<Obj, String>, Map<String, Obj>>, Pair<Map<Arr<Obj, Arrow>, String>, Map<String, Arr<Obj, Arrow>>>, Pair<Map<Attribute<Obj>, String>, Map<String, Attribute<Obj>>>> retret 
 		= new Quad<>(ret2, new Pair<>(objM2, objM), new Pair<>(arrM2, arrM), new Pair<>(attM, attM2));

@@ -9,6 +9,7 @@ import java.awt.Stroke;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +61,7 @@ public class Mapping  {
 	public boolean flag = false;
 	
 	public Mapping(Signature src, Signature dst,
-			Map<Node, Node> nm, Map<Edge, Path> em) {
+			LinkedHashMap<Node, Node> nm, LinkedHashMap<Edge, Path> em) {
 		ALLOW_WF_CHECK = false;
 	//	this.name = name;
 		this.source = src;
@@ -81,6 +82,8 @@ public class Mapping  {
 						+ " does not preserve typing on " + a + " and " + b);
 			}
 		}
+		
+		//TODO: source and target paths should be well-formed
 
 		// should be checked by knuth-bendix
 
@@ -94,8 +97,10 @@ public class Mapping  {
 				if (!zzz.third.second.of(appy(x.lhs)).equals(
 						zzz.third.second.of(appy(x.rhs)))) {
 					throw new FQLException("On " + this + "\n\n equivalence " + x
-							+ " not respected on \n\n" + x + "\n and \n"
-							+ appy(x.lhs) + "\n\n" + appy(x.rhs));
+							+ " not respected on \n\n"
+							+ appy(x.lhs) + "\nand\n" + appy(x.rhs) + "\n\ntransformed lhs is " + zzz.third.second.of(appy(x.lhs)) +
+							"\n\n transformed rhs is " + zzz.third.second.of(appy(x.rhs)) +
+							"\n\nschemas:" + source + " and target " + target);
 
 				}
 			}
@@ -103,9 +108,9 @@ public class Mapping  {
 
 	}
 
-	public Map<Node, Node> nm = new HashMap<>();
-	public Map<Edge, Path> em = new HashMap<>();
-	public Map<Attribute<Node>, Attribute<Node>> am = new HashMap<>();
+	public LinkedHashMap<Node, Node> nm = new LinkedHashMap<>();
+	public LinkedHashMap<Edge, Path> em = new LinkedHashMap<>();
+	public LinkedHashMap<Attribute<Node>, Attribute<Node>> am = new LinkedHashMap<>();
 	public Signature source;
 	public Signature target;
 //	public String name;
@@ -174,7 +179,7 @@ public class Mapping  {
 			} else if (source.isNode(p.first) && target.isNode(p.second)) {
 				ret2.add(p);
 			} else {
-				throw new FQLException("Bad mapping: " + p + " in " + this);
+				throw new FQLException("Bad mapping: " + p);
 			}
 		}
 
@@ -274,6 +279,7 @@ public class Mapping  {
 				Edge e = this.source.getEdge(arrow.first);
 				Path p = new Path(this.target, arrow.second);
 				em.put(e, p);
+				//TODO why is this not getting triggered?
 			}
 		} catch (FQLException e) {
 			throw new FQLException("In mapping " + this
@@ -459,7 +465,7 @@ public class Mapping  {
 
 		String sigma = "";
 		try {
-			sigma = printNicely(PSMGen.sigma(this, "input", "output"));
+			sigma = printNicely(PSMGen.sigma(this, "output", "input")); //backwards
 		} catch (Exception e) {
 			sigma = e.toString();
 		}

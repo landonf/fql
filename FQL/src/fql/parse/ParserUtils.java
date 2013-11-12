@@ -15,7 +15,7 @@ public class ParserUtils {
 
 	public static <T> RyanParser<List<T>> many(final RyanParser<T> p) {
 		return new RyanParser<List<T>>() {
-			public Partial<List<T>> parse(Tokens s) throws BadSyntax, IllTyped {
+			public Partial<List<T>> parse(Tokens s) throws BadSyntax {
 				List<T> ret = new ArrayList<T>();
 				try {
 					for (;;) {
@@ -41,7 +41,7 @@ public class ParserUtils {
 	public static <T> RyanParser<T> seq(final RyanParser<?> p1,
 			final RyanParser<T> p2) {
 		return new RyanParser<T>() {
-			public Partial<T> parse(Tokens s) throws BadSyntax, IllTyped {
+			public Partial<T> parse(Tokens s) throws BadSyntax {
 				Partial<?> x = p1.parse(s);
 				Partial<T> y = p2.parse(x.tokens);
 				return new Partial<T>(y.tokens, y.value);
@@ -52,7 +52,7 @@ public class ParserUtils {
 	public static <T> RyanParser<List<T>> manySep(final RyanParser<T> p,
 			final RyanParser<?> sep) {
 		return new RyanParser<List<T>>() {
-			public Partial<List<T>> parse(Tokens s) throws BadSyntax, IllTyped {
+			public Partial<List<T>> parse(Tokens s) throws BadSyntax {
 				try {
 					Partial<T> x = p.parse(s);
 
@@ -80,8 +80,8 @@ public class ParserUtils {
 	public static <T, U> RyanParser<Pair<T, U>> inside(final RyanParser<T> l,
 			final RyanParser<?> u, final RyanParser<U> r) {
 		return new RyanParser<Pair<T, U>>() {
-			public Partial<Pair<T, U>> parse(Tokens s) throws BadSyntax,
-					IllTyped {
+			public Partial<Pair<T, U>> parse(Tokens s) throws BadSyntax
+					 {
 				Partial<? extends T> l0 = l.parse(s);
 				Partial<?> u0 = u.parse(l0.tokens);
 				Partial<? extends U> r0 = r.parse(u0.tokens);
@@ -101,7 +101,7 @@ public class ParserUtils {
 	public static <T> RyanParser<T> outside(final RyanParser<?> l,
 			final RyanParser<T> u, final RyanParser<?> r) {
 		return new RyanParser<T>() {
-			public Partial<T> parse(Tokens s) throws BadSyntax, IllTyped {
+			public Partial<T> parse(Tokens s) throws BadSyntax {
 				Partial<?> l0 = l.parse(s);
 				Partial<? extends T> u0 = u.parse(l0.tokens);
 				Partial<?> r0 = r.parse(u0.tokens);
@@ -117,7 +117,7 @@ public class ParserUtils {
 
 			@SuppressWarnings("unchecked")
 			@Override
-			public Partial<Object> parse(Tokens s) throws BadSyntax, IllTyped {
+			public Partial<Object> parse(Tokens s) throws BadSyntax {
 				try {
 					return p.parse(s);
 				} catch (Exception e) {

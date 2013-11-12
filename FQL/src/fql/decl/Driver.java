@@ -1,6 +1,7 @@
 package fql.decl;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import fql.DEBUG;
 import fql.FQLException;
 import fql.LineException;
 import fql.Pair;
+import fql.Triple;
 import fql.decl.InstExp.Delta;
 import fql.decl.InstExp.Eval;
 import fql.decl.InstExp.External;
@@ -19,12 +21,34 @@ import fql.decl.InstExp.Pi;
 import fql.decl.InstExp.Relationalize;
 import fql.decl.InstExp.Sigma;
 import fql.decl.InstExp.Two;
+import fql.decl.SigExp.Const;
+import fql.sql.CopyFlower;
+import fql.sql.Flower;
+import fql.sql.InsertSQL;
+import fql.sql.InsertValues;
 import fql.sql.PSM;
 import fql.sql.PSMGen;
 import fql.sql.PSMInterp;
 import fql.sql.Relationalizer;
+import fql.sql.Union;
 
 public class Driver {
+	
+	public static String checkReport(NewestFQLProgram p) {
+		String ret = "";
+
+		for (String k : p.maps.keySet()) {
+			try {
+				MapExp m = p.maps.get(k);
+				Pair<SigExp, SigExp> v = m.type(p.sigs, p.maps);
+				ret += k + ": " + v.first.unresolve(p.sigs) + " -> " + v.second.unresolve(p.sigs) + "\n\n";
+			} catch (RuntimeException ex) {
+				ret += k + ": " + ex.getLocalizedMessage() + "\n\n";				
+			}
+		}
+		return ret;
+	}
+
 
 	public static void check(NewestFQLProgram p) {
 		for (String k : p.sigs.keySet()) {
@@ -70,6 +94,7 @@ public class Driver {
 			try {
 				sigs.put(k, v.toSig(prog.sigs));
 			} catch (RuntimeException re) {
+				re.printStackTrace();
 				throw new LineException(re.getLocalizedMessage(), k, "schema");
 			}
 		}
@@ -143,12 +168,36 @@ public class Driver {
 
 		@Override
 		public List<PSM> visit(String dst, fql.decl.InstExp.Zero e) {
-			throw new RuntimeException();
+			return new LinkedList<>();
 		}
 
 		@Override
 		public List<PSM> visit(String dst, fql.decl.InstExp.One e) {
-			throw new RuntimeException();
+			Const c = e.sig.toConst(prog.sigs);
+			if (c.attrs.size() > 0) {
+				throw new RuntimeException("Cannot create unit instance for schemas with attributes: " + e);
+			}
+			List<PSM> ret = new LinkedList<>();
+			List<String> attrs = new LinkedList<>();
+			attrs.add("c0");
+			attrs.add("c1");
+			Set<Map<String, Object>> values = new HashSet<>();
+			Map<String, Object> o = new HashMap<>();
+			o.put("unit", "unit");
+			values.add(o);
+			
+			for (String k : c.nodes) {
+				ret.add(new InsertValues(dst + "_" + k, attrs, values));				
+			}
+			for (Triple<String, String, String> k : c.arrows) {
+				ret.add(new InsertValues(dst + "_" + k.first, attrs, values));				
+			}
+			try {
+				ret.addAll(PSMGen.guidify(dst, c.toSig(prog.sigs)));
+			} catch (FQLException fe) {
+				throw new RuntimeException(fe.getLocalizedMessage());
+			}
+			return ret;
 		}
 
 		@Override
@@ -158,7 +207,43 @@ public class Driver {
 
 		@Override
 		public List<PSM> visit(String dst, fql.decl.InstExp.Plus e) {
-			throw new RuntimeException();
+			SigExp k = e.type(prog.sigs, prog.maps, prog.insts, prog.queries);
+			Signature s = k.toSig(prog.sigs);
+			List<PSM> ret = new LinkedList<>();
+			String t1 = next();
+			ret.addAll(PSMGen.makeTables(t1, s, false));
+			ret.addAll(e.a.accept(t1, this));
+			String t2 = next();
+			ret.addAll(PSMGen.makeTables(t2, s, false));
+			ret.addAll(e.b.accept(t2, this));
+			
+			for (Node n : s.nodes) {
+				List<Flower> l = new LinkedList<>();
+				l.add(new CopyFlower(t1 + "_" + n.string));
+				l.add(new CopyFlower(t2 + "_" + n.string));
+				ret.add(new InsertSQL(dst + "_" + n.string, new Union(l)));
+			}
+			for (Attribute<Node> n : s.attrs) {
+				List<Flower> l = new LinkedList<>();
+				l.add(new CopyFlower(t1 + "_" + n.name));
+				l.add(new CopyFlower(t2 + "_" + n.name));
+				ret.add(new InsertSQL(dst + "_" + n.name, new Union(l)));
+			}
+			for (Edge n : s.edges) {
+				List<Flower> l = new LinkedList<>();
+				l.add(new CopyFlower(t1 + "_" + n.name));
+				l.add(new CopyFlower(t2 + "_" + n.name));
+				ret.add(new InsertSQL(dst + "_" + n.name, new Union(l)));
+			}
+			
+			ret.addAll(PSMGen.dropTables(t1, s));
+			ret.addAll(PSMGen.dropTables(t2, s));
+			try {
+				ret.addAll(PSMGen.guidify(dst, s));
+			} catch (FQLException fe) {
+				throw new RuntimeException(fe.getLocalizedMessage());
+			}
+			return ret;
 		}
 
 		@Override
@@ -240,7 +325,7 @@ public class Driver {
 				ret.addAll(e.I.accept(next, this));				
 				ret.addAll(PSMGen.pi(F0, next, dst)); 
 				ret.addAll(PSMGen.dropTables(next, F0.source));
-				//ret.addAll(PSMGen.guidify(dst, F0.target)); //TODO when is guidify necessary?
+				//ret.addAll(PSMGen.guidify(dst, F0.target)); //not necessary, pi creates all new guids
 				return ret;
 			} catch (FQLException fe) {
 				fe.printStackTrace();

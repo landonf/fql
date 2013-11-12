@@ -10,7 +10,7 @@ package fql;
  * @param <S2>
  * @param <S3>
  */
-public class Triple<S1, S2, S3> {
+public class Triple<S1, S2, S3> implements Comparable<Triple<S1, S2, S3>> {
 
 	public Triple(S1 a, S2 b, S3 c) {
 		first = a; second = b; third = c;
@@ -54,4 +54,26 @@ public class Triple<S1, S2, S3> {
 	public S1 first;
 	public S2 second;
 	public S3 third;
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public int compareTo(Triple<S1, S2, S3> o) {
+		Comparable x = (Comparable) o.first;
+		Comparable y = (Comparable) first;
+		int c = x.compareTo(y);
+		if (c == 0) {
+			Comparable a = (Comparable) o.second;
+			Comparable b = (Comparable) second;
+			c = a.compareTo(b);
+			if (c == 0) {
+				Comparable i = (Comparable) o.third;
+				Comparable j = (Comparable) third;
+				return i.compareTo(j);
+			} else {
+				return c;
+			}
+		} else {
+			return c;
+		}
+	}
 }

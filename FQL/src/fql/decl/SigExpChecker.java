@@ -81,6 +81,4 @@ public class SigExpChecker implements SigExpVisitor<SigExp, Map<String, SigExp>>
 		return e;
 	}
 	
-	//TODO take care of seen for map checker like in sig checker
-
 }

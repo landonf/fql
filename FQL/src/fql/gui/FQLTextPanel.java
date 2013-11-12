@@ -53,6 +53,7 @@ public class FQLTextPanel extends JPanel {
 		setText(text);
 
 		area.setFont(new Font("Courier", Font.PLAIN, 13));
+		//area.setEditable(false);
 
 		final UndoManager m = new UndoManager();
 		// area.setundoManager = new UndoManager();

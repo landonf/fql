@@ -1,6 +1,7 @@
 package fql.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Menu;
 import java.awt.MenuBar;
@@ -23,6 +24,7 @@ import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -89,6 +91,7 @@ public class GUI extends JPanel {
 		});
 
 		// respArea.setWrapStyleWord();
+		
 		KeyStroke ctrlS = KeyStroke.getKeyStroke(KeyEvent.VK_S,
 				InputEvent.CTRL_MASK);
 		MenuShortcut s = new MenuShortcut(ctrlS.getKeyCode());
@@ -143,15 +146,6 @@ public class GUI extends JPanel {
 				InputEvent.CTRL_MASK);
 		MenuShortcut q = new MenuShortcut(ctrlQ.getKeyCode());
 		exitItem.setShortcut(q);
-
-//		Menu webMenu = new Menu("Web");
-		//MenuItem serverItem = new MenuItem("Start Local Server");
-//		webMenu.add(serverItem);
-//		serverItem.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent e) {
-//				serverAction();
-//			}
-//		});
 		
 		// Menu optionsMenu = new Menu("Options");
 		MenuItem optionsItem = new MenuItem("Show Options");
@@ -167,6 +161,14 @@ public class GUI extends JPanel {
 		chaseItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Chase.dostuff();
+			}
+		});
+
+		MenuItem checkItem = new MenuItem("Type Check");
+		editMenu.add(checkItem);
+		checkItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				checkAction();
 			}
 		});
 
@@ -191,7 +193,7 @@ public class GUI extends JPanel {
 			}
 
 		});
-		MenuItem aboutItem = new MenuItem("Legal stuff");
+		MenuItem aboutItem = new MenuItem("Legal");
 		helpMenu.add(aboutItem);
 		aboutItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -339,38 +341,11 @@ public class GUI extends JPanel {
 		// toolBar.add(temp2);
 		toolBar.add(l);
 		toolBar.add(box);
-
-		// toolBar.add(temp1);
-
-		// toolBar.add(reset_button);
-		// toolBar.addSeparator();
-		// toolBar.add(pi_button);
-		// toolBar.addSeparator();
-		// toolBar.add(mig_button);
-		// toolBar.addSeparator();
-		// toolBar.add(emps_button);
-		// toolBar.addSeparator();
-		// toolBar.add(comp_button);
-		// toolBar.addSeparator();
-
-		// toolBar.addSeparator();
-		// toolBar.add(new JLabel("Knuth-Bendix timout:"));
-		// toolBar.add(jcb);
-		// toolBar.setFloatable(false);
-		// toolBar.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-
+		
 		pan.add(toolBar, BorderLayout.PAGE_START);
 		pan.add(editors, BorderLayout.CENTER);
 
 		newAction(null, "");
-
-		// this.
-
-		// setContentPane(pan);
-		// pan.setMenuBar(menuBar);
-
-		// pack();
-		// setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 		return new Pair<>(pan, menuBar);
 	}
@@ -383,6 +358,14 @@ public class GUI extends JPanel {
 		newAction(e.getName(), e.getText());
 	}
 
+	private static void checkAction() {
+		int i = editors.getSelectedIndex();
+		CodeEditor c = (CodeEditor) editors.getComponentAt(i);
+		if (c == null) {
+			return;
+		}
+		c.check();
+	}
 	private static void closeAction() {
 		delay();
 		int i = editors.getSelectedIndex();
@@ -400,25 +383,23 @@ public class GUI extends JPanel {
 		titles.remove(c.id);
 	}
 
-	protected static void serverAction() {
-//		String r = JOptionPane.showInputDialog("Local port:", 8085);
-//		if (r == null) {
-//			return;
-//		}
-//		try {
-//			int rr = Integer.parseInt(r);
-//			FQLServlet.serve(rr);
-//		} catch (Exception e) {
-//			JOptionPane.showMessageDialog(null, e);
-//		}
-	}
 
 	static void helpAction() {
 		JTextArea jta = new JTextArea(Examples.helpString);
-		JScrollPane p = new JScrollPane(jta);
+		jta.setWrapStyleWord(true);
+		//jta.setEditable(false);
+		jta.setLineWrap(true);
+		JScrollPane p = new JScrollPane(jta, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		p.setPreferredSize(new Dimension(650,300));
 
-		JOptionPane.showMessageDialog(null, p, "Help",
-				JOptionPane.QUESTION_MESSAGE);
+		JOptionPane pane = new JOptionPane(p);
+		 // Configure via set methods
+		 JDialog dialog = pane.createDialog(null, "Help");
+		 dialog.setModal(false);
+		 dialog.setVisible(true);
+		 
+		//JOptionPane.showMessageDialog(null, p, "Help",
+			//	JOptionPane.PLAIN_MESSAGE, null);
 	}
 
 	public static void exitAction() {
@@ -545,25 +526,9 @@ public class GUI extends JPanel {
 		editors.setSelectedIndex(i);
 
 		return c.id;
-		// if (abortBecauseDirty()) {
-		// return;
-		// }
-		// topArea.setText("");
-		// // bottomArea.setText("");
-		// dirty = false;
-		// program = "";
-		// if (display != null) {
-		// display.close();
-		// }
-		// display = null;
+		
 	}
 
-	// static CodeEditor topArea = new CodeEditor("FQL Program",program);
-
-	// static FQLTextPanel topArea = new FQLTextPanel("FQL Program",program);
-	// static FQLTextPanel bottomArea = new FQLTextPanel("Commands",
-	// Examples.initialCommands);
-	// static FQLTextPanel respArea = new FQLTextPanel("Compiler response", "");
 
 	static private String readFile(String file) {
 		try {

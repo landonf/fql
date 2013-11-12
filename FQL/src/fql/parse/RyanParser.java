@@ -11,6 +11,6 @@ package fql.parse;
  */
 public interface RyanParser<T> {
 
-	public Partial<T> parse(Tokens s) throws BadSyntax, IllTyped;
+	public Partial<T> parse(Tokens s) throws BadSyntax;
 
 }

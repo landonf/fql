@@ -23,7 +23,6 @@ public class ED {
 		this.where = dedup(where);
 		this.ret = dedup(ret);
 
-		// TODO validate
 	}
 
 	private List<Pair<Integer, Integer>> dedup(List<Pair<Integer, Integer>> l) {

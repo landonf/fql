@@ -9,7 +9,7 @@ package fql.parse;
 public class StringParser implements RyanParser<String> {
 
 	@Override
-	public Partial<String> parse(Tokens s) throws BadSyntax, IllTyped {
+	public Partial<String> parse(Tokens s) throws BadSyntax {
 		String k = s.peek(0);
 		if (!k.equals(";") && !k.equals("}")&& !k.equals(",")&& !k.equals("{")&& !k.equals(")")&& !k.equals(")") && !k.equals("=") && !k.equals("/") && !k.equals("\\")) {
 			return new Partial<String>(s.pop(), s.head());

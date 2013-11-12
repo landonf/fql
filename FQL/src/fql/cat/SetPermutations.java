@@ -2,31 +2,10 @@ package fql.cat;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class SetPermutations<T> {
-	public static void main(String args[]) {
-		SetPermutations<Integer> obj = new SetPermutations<Integer>();
-		Collection<Integer> input = new ArrayList<Integer>();
-		input.add(1);
-		input.add(2);
-		input.add(3);
-
-		Collection<List<Integer>> output = obj.permute(input);
-		int k = 0;
-		Set<List<Integer>> pnr = null;
-		for (int i = 0; i <= input.size(); i++) {
-			pnr = new HashSet<List<Integer>>();
-			for (List<Integer> integers : output) {
-				pnr.add(integers.subList(i, integers.size()));
-			}
-			k = input.size() - i;
-			System.out.println("P(" + input.size() + "," + k + ") :"
-					+ "Count (" + pnr.size() + ") :- " + pnr);
-		}
-	}
+	
 
 	public Collection<List<T>> permute(Collection<T> input) {
 		Collection<List<T>> output = new ArrayList<List<T>>();

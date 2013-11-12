@@ -1,12 +1,5 @@
 package fql.parse;
 
-import fql.parse.BadSyntax;
-import fql.parse.IllTyped;
-import fql.parse.RyanParser;
-import fql.parse.Partial;
-import fql.parse.QuotedParser;
-import fql.parse.StringParser;
-import fql.parse.Tokens;
 
 /**
  * 
@@ -17,7 +10,7 @@ import fql.parse.Tokens;
 public class LongStringParser implements RyanParser<String> {
 
 	@Override
-	public Partial<String> parse(Tokens s) throws BadSyntax, IllTyped {
+	public Partial<String> parse(Tokens s) throws BadSyntax {
 		try {
 			return new QuotedParser().parse(s);
 		} catch (Exception e) { }

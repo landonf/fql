@@ -34,7 +34,7 @@ public class EmbeddedDependency {
 		}
 		
 		
-//		System.out.println("XXX IN forall " +  forall + " where " + where + " exists " + exists + " s.t. " + egd + " " + tgd);
+//		System.out.println(" IN forall " +  forall + " where " + where + " exists " + exists + " s.t. " + egd + " " + tgd);
 		
 		this.forall = forall;
 		
@@ -165,7 +165,7 @@ public class EmbeddedDependency {
 			}
 		}
 		
-//		System.out.println("XXX OUT forall " +  this.forall + " where " + this.where + " exists " + this.exists + " s.t. " + this.egd + " " + this.tgd);
+//		System.out.println(" OUT forall " +  this.forall + " where " + this.where + " exists " + this.exists + " s.t. " + this.egd + " " + this.tgd);
 	}
 	
 

@@ -1,5 +1,6 @@
 package fql.gui;
 
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,14 +9,18 @@ import java.awt.event.KeyEvent;
 import java.text.DateFormat;
 import java.util.Date;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
@@ -75,6 +80,7 @@ public class CodeEditor extends JPanel {
 
 	public JPanel makeSearchDialog() {
 		JPanel toolBar = new JPanel(new GridLayout(3, 4));
+		toolBar.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
 
 		// JPanel toolBar = new JPanel();
 		toolBar.add(new JLabel("Search for:"));
@@ -450,6 +456,52 @@ public class CodeEditor extends JPanel {
 			return true;
 		}
 		return false;
+	}
+
+	public void check() {
+		String program = topArea.getText();
+
+		NewestFQLProgram init;
+		try {
+			init = NewestFQLParser.program(program);
+		} catch (ParserException e) {
+			int col = e.getLocation().column;
+			int line = e.getLocation().line;
+			topArea.requestFocusInWindow();
+			topArea.setCaretPosition(topArea.getDocument()
+					.getDefaultRootElement().getElement(line - 1)
+					.getStartOffset()
+					+ (col - 1));
+			String s = e.getMessage();
+			String t = s.substring(s.indexOf(" "));
+			t.split("\\s+");
+
+			respArea.setText("Syntax error: " + e.getLocalizedMessage());
+			e.printStackTrace();
+			return;
+		} catch (RuntimeException e) {
+			respArea.setText("Error: " + e.getLocalizedMessage());
+			e.printStackTrace();
+			return;
+		}
+
+		String xxx = Driver.checkReport(init);
+		
+		DateFormat format = DateFormat.getTimeInstance();
+		String time = format.format(new Date(System.currentTimeMillis()));
+		String foo = GUI.getTitle(id);
+
+		JTextArea jta = new JTextArea(xxx);
+		jta.setWrapStyleWord(true);
+		jta.setLineWrap(true);
+		JScrollPane p = new JScrollPane(jta, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		p.setPreferredSize(new Dimension(650,300));
+
+		JOptionPane pane = new JOptionPane(p);
+		JDialog dialog = pane.createDialog(null, "Type Check " + foo + " - " + time);
+		dialog.setModal(false);
+		dialog.setVisible(true);
+		
 	}
 
 }

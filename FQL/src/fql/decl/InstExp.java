@@ -66,14 +66,20 @@ public abstract class InstExp {
 
 	//TODO Const equality for instances
 	public static class Const extends InstExp {
-		public List<Pair<String, List<Pair<Object, Object>>>> data;
+		//pubic List
+//		public List<Pair<String, List<Pair<Object, Object>>>> data;
 		public SigExp sig;
+		List<Pair<String, List<Pair<Object, Object>>>> nodes, attrs, arrows, data;
 		
-		public Const(List<Pair<String, List<Pair<Object, Object>>>> data,
-				SigExp sig) {
-			super();
-			this.data = data;
+		public Const(List<Pair<String, List<Pair<Object, Object>>>> nodes, List<Pair<String, List<Pair<Object, Object>>>> attrs, List<Pair<String, List<Pair<Object, Object>>>> arrows, SigExp sig) {
+			this.nodes = nodes;
+			this.attrs = attrs;
+			this.arrows = arrows;
 			this.sig = sig;
+			data = new LinkedList<>();
+			data.addAll(nodes);
+			data.addAll(attrs);
+			data.addAll(arrows);
 		}
 
 		@Override
@@ -109,7 +115,64 @@ public abstract class InstExp {
 
 		@Override
 		public String toString() {
-			return data.toString(); //TODO toString for inst
+			String x = "nodes ";
+			boolean b = false;
+			for (Pair<String, List<Pair<Object, Object>>> k : nodes) {
+				if (b) {
+					x += ", \n";
+				}
+				b = true;
+				x += k + " -> {";
+				boolean d = false;
+				for (Pair<Object, Object> v : k.second) {
+					if (d) {
+						x += ", ";
+					}
+					d = true;
+					x += v.first;
+				}
+				x+="}";		
+			}
+			x += ";\n";
+			x += "attributes ";
+			b = false;
+			for (Pair<String, List<Pair<Object, Object>>> k : attrs) {
+				if (b) {
+					x += ", \n";
+				}
+				b = true;
+				x += k + " -> {";
+				boolean d = false;
+				for (Pair<Object, Object> v : k.second) {
+					if (d) {
+						x += ", ";
+					}
+					d = true;
+					x += "(" + v.first + ", " + v.second + ")";
+				}
+				x+="}";		
+			}
+			
+			x = "arrows ";
+			b = false;
+			for (Pair<String, List<Pair<Object, Object>>> k : arrows) {
+				if (b) {
+					x += ", \n";
+				}
+				b = true;
+				x += k + " -> {";
+				boolean d = false;
+				for (Pair<Object, Object> v : k.second) {
+					if (d) {
+						x += ", ";
+					}
+					d = true;
+					x += v.first;
+				}
+				x+="}";		
+			}
+			
+			return "{" + x + "}";
 		}
 		
 		@Override

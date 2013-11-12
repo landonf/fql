@@ -30,7 +30,6 @@ import fql.decl.Signature;
 import fql.gui.FQLTextPanel;
 import fql.parse.BadSyntax;
 import fql.parse.FqlTokenizer;
-import fql.parse.IllTyped;
 import fql.parse.KeywordParser;
 import fql.parse.ParserUtils;
 import fql.parse.Partial;
@@ -40,34 +39,6 @@ import fql.parse.Tokens;
 
 public class Chase {
 
-	// need to find all matching valuations
-	public static Map<String, Integer> match(
-			Map<String, Set<Pair<Object, Object>>> I,
-			List<Triple<String, String, String>> T) {
-
-		return null;
-	}
-
-	public static Map<String, Integer> create(Map<String, Integer> env,
-			Map<String, Set<Pair<Object, Object>>> I,
-			List<Triple<String, String, String>> T) {
-
-		return null;
-	}
-
-	public static Map<String, Set<Pair<Object, Object>>> add(
-			Map<String, Integer> env, Map<String, Set<Pair<Object, Object>>> I,
-			List<Triple<String, String, String>> T) {
-		return null;
-
-	}
-
-	public static Map<String, Set<Pair<Object, Object>>> equate(
-			Map<String, Set<Pair<Object, Object>>> I,
-			List<Pair<Integer, Integer>> eqs) {
-
-		return null;
-	}
 
 	static JButton run = new JButton("Run");
 
@@ -193,7 +164,7 @@ public class Chase {
 
 			@Override
 			public Partial<EmbeddedDependency> parse(Tokens s)
-					throws BadSyntax, IllTyped {
+					throws BadSyntax {
 				RyanParser<List<String>> strings = ParserUtils
 						.many(new StringParser());
 				RyanParser<List<Triple<String, String, String>>> where1 = ParserUtils
@@ -239,7 +210,7 @@ public class Chase {
 			@SuppressWarnings("unchecked")
 			@Override
 			public Partial<Pair<List<Triple<String, String, String>>, List<Pair<String, String>>>> parse(
-					Tokens s) throws BadSyntax, IllTyped {
+					Tokens s) throws BadSyntax {
 
 				RyanParser<List<Object>> objs0 = ParserUtils.manySep(
 						ParserUtils.or(facts_p(), eq_p()), new KeywordParser(
@@ -275,7 +246,7 @@ public class Chase {
 
 			@Override
 			public Partial<Triple<String, String, String>> parse(Tokens s)
-					throws BadSyntax, IllTyped {
+					throws BadSyntax {
 				StringParser p = new StringParser();
 
 				String b;

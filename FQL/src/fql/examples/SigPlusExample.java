@@ -4,7 +4,7 @@ public class SigPlusExample extends Example {
 
 	@Override
 	public String getName() {
-		return "Co-products of schemas";
+		return "Co-products";
 	}
 
 	@Override
@@ -22,7 +22,18 @@ public class SigPlusExample extends Example {
 				+ "\n"
 				+ "\nschema X = void"
 				+ "\n"
-				+ "\nschema Y = ((C + (C + C)) + void)\n\n";
+				+ "\nschema Y = ((C + (C + C)) + void)\n"
+				+ "\nschema s = {"
+				+ "\n	nodes a, b ;"
+				+ "\n	attributes;"
+				+ "\n	arrows f : a -> b;"
+				+ "\n	equations;"
+				+ "\n	}"
+				+ "\n"
+				+ "\ninstance i = unit s"
+				+ "\ninstance j = unit s"
+				+ "\ninstance k = (i + j)"
+				+ "\n";
 	}
 
 }

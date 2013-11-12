@@ -1,5 +1,7 @@
 package fql.decl;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +11,9 @@ import fql.Triple;
 
 public abstract class SigExp {
 	
+//	public static final Comparator<? super String>  = null;
+
+
 	public SigExp unresolve(Map<String, SigExp> env) {
 		return accept(env, new Unresolver());
 	}
@@ -43,7 +48,53 @@ public abstract class SigExp {
 			this.attrs = attrs;
 			this.arrows = arrows;
 			this.eqs = eqs;
+			Collections.sort(this.nodes);
+			Collections.sort(this.attrs);
+			Collections.sort(this.arrows);
+			Collections.sort(this.eqs, comp);
 		}
+		
+		static Comparator<Pair<List<String>, List<String>>> comp = new Comparator<Pair<List<String>, List<String>>>() {
+
+			@Override
+			public int compare(Pair<List<String>, List<String>> o1,
+					Pair<List<String>, List<String>> o2) {
+				int c = compareTo(o1.first, o2.first);
+				if (c == 0) {
+					return compareTo(o1.second, o2.second);
+				} else {
+					return c;
+				}
+
+			}
+
+			private int compareTo(List<String> l, List<String> r) {
+				List<String> small, large;
+				if (l.size() < r.size()) {
+					small = l;
+					large = r;
+				} else {
+					small = r;
+					large = l;
+				}
+				for (int i = 0; i < small.size(); i++) {
+					int c = small.get(i).compareTo(large.get(i));
+					if (c == 0) {
+						continue;
+					}
+				}
+				if (l.size() == r.size()) {
+					return 0;
+				} else if (small == l) {
+					return -1;
+				} else if (large == l) {
+					return 1;
+				}
+				throw new RuntimeException();
+			}
+			
+		};
+
 
 		@Override
 		public int hashCode() {
@@ -144,6 +195,7 @@ public abstract class SigExp {
 					ret += ".";
 				}
 				ret += a;
+				b = true;
 			}
 			return ret;
 		}

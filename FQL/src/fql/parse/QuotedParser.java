@@ -9,7 +9,7 @@ package fql.parse;
 public class QuotedParser implements RyanParser<String> {
 
 	@Override
-	public Partial<String> parse(Tokens s) throws BadSyntax, IllTyped {
+	public Partial<String> parse(Tokens s) throws BadSyntax {
 		return ParserUtils.outside(new KeywordParser("\""), new StringParser(), new KeywordParser("\"")).parse(s);
 	}
 

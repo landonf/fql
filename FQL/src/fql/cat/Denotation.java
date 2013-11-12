@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ import fql.DEBUG;
 import fql.FQLException;
 import fql.Fn;
 import fql.Pair;
+import fql.Triple;
 import fql.decl.Edge;
 import fql.decl.Eq;
 import fql.decl.Instance;
@@ -49,7 +51,6 @@ import fql.sql.PSMInterp;
  */
 public class Denotation {
 
-	//TODO change slider limit back to 20
 	int counter = 0;
 	static int LIMIT = 20, INC = 1;
 	int _FRESH;
@@ -205,7 +206,7 @@ public class Denotation {
 			B.eqs.add(new Eq(new Path(B, n), new Path(B, e)));
 		}
 		
-		Map<Edge, Path> ff = new HashMap<>(f.em);
+		LinkedHashMap<Edge, Path> ff = new LinkedHashMap<>(f.em);
 		for (Node n : A.nodes) {
 			Node m = f.nm.get(n);
 			ff.put(new Edge(n.string + " id", n, n), new Path(B, m));
@@ -363,8 +364,6 @@ public class Denotation {
 			rtables.get(k).add(x);
 		}
 
-		// TODO ignore naturality tables?
-
 		for (Edge k : Ltables1.keySet()) {
 			Pair<Node, Node> v = Ltables1.get(k);
 			if (!v.first.equals(n)) {
@@ -479,11 +478,9 @@ public class Denotation {
 				if ( row[n - 1] != null 
 						&& row[c.length - 1] != null && !row[n - 1].equals(row[c.length - 1]) ) {
 					if (row[n - 1] < row[c.length - 1]) {
-						//TODO 1
 						SA.get(a)
 								.add(new Pair<>(row[n - 1], row[c.length - 1]));
 					} else {
-						//TODO 2
 						SA.get(a)
 								.add(new Pair<>(row[c.length - 1], row[n - 1]));
 					}
@@ -510,7 +507,6 @@ public class Denotation {
 						&& row[c.length - 1] != null && !(row[n - 1].equals(row[c.length - 1]))) {
 					if (row[n - 1] < row[c.length - 1]) {
 		//				System.out.println("AAAA");
-						//TODO X
 						SA.get(a)
 								.add(new Pair<>(row[n - 1], row[c.length - 1]));
 					} else {
@@ -994,8 +990,9 @@ public class Denotation {
 		enumerate(l);
 		JTabbedPane t = new JTabbedPane();
 
-		Pair<JPanel, JPanel> xxx = toCat();
+		Triple<JPanel, JPanel, JPanel> xxx = toCat();
 		t.addTab("Category", xxx.first);
+		t.addTab("Signature", xxx.third);
 		t.addTab("Normalizer", xxx.second);
 
 		Map<String, JTable> m = new HashMap<>();
@@ -1025,10 +1022,12 @@ public class Denotation {
 		return t;
 	}
 
-	private Pair<JPanel, JPanel> toCat() {
+	private Triple<JPanel, JPanel, JPanel> toCat() {
 		JPanel p = new JPanel(new GridLayout(1, 1));
 		JTextArea a = new JTextArea();
 		JPanel q = null;
+		JPanel rr = new JPanel(new GridLayout(1, 1));
+
 		try {
 
 			Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> xxx = toCategory();
@@ -1037,13 +1036,17 @@ public class Denotation {
 			a.setCaretPosition(0);
 
 			q = makeNormalizer(xxx.second);
+			
+			JTextArea ra = new JTextArea(xxx.first.toSig().first.toString());
+			rr.add(new JScrollPane(ra));
 
 		} catch (Throwable e) {
+			e.printStackTrace();
 			a.setText(e.getMessage());
 		}
 		p.add(new JScrollPane(a));
 
-		return new Pair<>(p, q);
+		return new Triple<>(p, q, rr);
 	}
 
 	private JPanel makeNormalizer(final Fn<Path, Arr<Node, Path>> f) {

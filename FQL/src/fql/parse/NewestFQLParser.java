@@ -435,7 +435,7 @@ public class NewestFQLParser {
 		Tuple3 y = (Tuple3) decl;
 		Tuple3 x = (Tuple3) y.a;
 
-		List<Pair<String, List<Pair<Object, Object>>>> data = new LinkedList<>();
+		//List<Pair<String, List<Pair<Object, Object>>>> data = new LinkedList<>();
 
 		Tuple3 nodes = (Tuple3) x.a;
 		Tuple3 attrs = (Tuple3) x.b;
@@ -445,6 +445,9 @@ public class NewestFQLParser {
 		List attrs0 = (List) attrs.b;
 		List arrows0 = (List) arrows.b;
 
+		List<Object> seen = new LinkedList<>();
+		
+		List<Pair<String, List<Pair<Object, Object>>>> nodesX = new LinkedList<>();
 		for (Object o : nodes0) {
 			Tuple3 u = (Tuple3) o;
 			String n = (String) u.a;
@@ -453,10 +456,16 @@ public class NewestFQLParser {
 			for (Object h : m) {
 				l.add(new Pair<>(h, h));
 			}
-			data.add(new Pair<>(n, l));
+			if (seen.contains(n)) {
+				throw new RuntimeException("duplicate field: " + o);
+			}
+			seen.add(n);
+			nodesX.add(new Pair<>(n, l));
 		}
 
+		List<Pair<String, List<Pair<Object, Object>>>> attrsX = new LinkedList<>();
 		for (Object o : attrs0) {
+			
 			Tuple3 u = (Tuple3) o;
 			String n = (String) u.a;
 			List m = (List) u.c;
@@ -465,9 +474,14 @@ public class NewestFQLParser {
 				Tuple3 k = (Tuple3) h;
 				l.add(new Pair<>(k.a, k.c));
 			}
-			data.add(new Pair<>(n, l));
+			if (seen.contains(n)) {
+				throw new RuntimeException("duplicate field: " + o);
+			}
+			seen.add(n);
+			attrsX.add(new Pair<>(n, l));
 		}
 
+		List<Pair<String, List<Pair<Object, Object>>>> arrowsX = new LinkedList<>();
 		for (Object o : arrows0) {
 			Tuple3 u = (Tuple3) o;
 			String n = (String) u.a;
@@ -477,9 +491,13 @@ public class NewestFQLParser {
 				Tuple3 k = (Tuple3) h;
 				l.add(new Pair<>(k.a, k.c));
 			}
-			data.add(new Pair<>(n, l));
+			if (seen.contains(n)) {
+				throw new RuntimeException("duplicate field: " + o);
+			}
+			seen.add(n);
+			arrowsX.add(new Pair<>(n, l));
 		}
-		return new InstExp.Const(data, toSchema(y.c));
+		return new InstExp.Const(nodesX, attrsX, arrowsX, toSchema(y.c));
 	}
 
 	@SuppressWarnings("rawtypes")

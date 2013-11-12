@@ -70,6 +70,7 @@ public class Path  {
 			if (!e.source.equals(target)) {
 				throw new FQLException("bad path: " + strings);
 			}
+
 			path.add(e);
 			target = e.target;
 			if (target == null) {
