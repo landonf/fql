@@ -1,10 +1,10 @@
 package fql.examples;
 
-public class SigPlusExample extends Example {
+public class CoProdExample extends Example {
 
 	@Override
 	public String getName() {
-		return "Co-products";
+		return "Co-products Schema";
 	}
 
 	@Override
@@ -23,17 +23,7 @@ public class SigPlusExample extends Example {
 				+ "\nschema X = void"
 				+ "\n"
 				+ "\nschema Y = ((C + (C + C)) + void)\n"
-				+ "\nschema s = {"
-				+ "\n	nodes a, b ;"
-				+ "\n	attributes;"
-				+ "\n	arrows f : a -> b;"
-				+ "\n	equations;"
-				+ "\n	}"
-				+ "\n"
-				+ "\ninstance i = unit s"
-				+ "\ninstance j = unit s"
-				+ "\ninstance k = (i + j)"
-				+ "\n";
+				+ "\nmapping q = void C";
 	}
 
 }

@@ -1,6 +1,7 @@
 package fql.gui;
 
 import java.awt.Dimension;
+import java.awt.Event;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,7 +10,10 @@ import java.awt.event.KeyEvent;
 import java.text.DateFormat;
 import java.util.Date;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -27,6 +31,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultEditorKit;
 
 import org.codehaus.jparsec.error.ParserException;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
@@ -46,9 +52,9 @@ import fql.LineException;
 import fql.Pair;
 import fql.decl.Driver;
 import fql.decl.Environment;
-import fql.decl.NewestFQLProgram;
+import fql.decl.FQLProgram;
 import fql.examples.Example;
-import fql.parse.NewestFQLParser;
+import fql.parse.FQLParser;
 
 /**
  * 
@@ -80,7 +86,7 @@ public class CodeEditor extends JPanel {
 
 	public JPanel makeSearchDialog() {
 		JPanel toolBar = new JPanel(new GridLayout(3, 4));
-		toolBar.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
+		toolBar.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 
 		// JPanel toolBar = new JPanel();
 		toolBar.add(new JLabel("Search for:"));
@@ -261,6 +267,7 @@ public class CodeEditor extends JPanel {
 		topArea.setText(content);
 		topArea.setCaretPosition(0);
 		topArea.setAutoscrolls(true);
+		// topArea.setAntiAliasingEnabled(true);
 		RSyntaxTextArea.setTemplatesEnabled(true);
 
 		CodeTemplateManager ctm = RSyntaxTextArea.getCodeTemplateManager();
@@ -273,12 +280,51 @@ public class CodeEditor extends JPanel {
 		ctm.addTemplate(ct);
 
 		ct = new StaticCodeTemplate("instance", "instance ",
-				" = {\n\tnodes;\n\tattributes;\n\tarrows;\n} :  -> ");
+				" = {\n\tnodes;\n\tattributes;\n\tarrows;\n} :  ");
 		ctm.addTemplate(ct);
 
-		ct = new StaticCodeTemplate("query", "query ",
-				" = delta pi sigma");
+		ct = new StaticCodeTemplate("query", "query ", " = delta pi sigma");
+
+		ct = new StaticCodeTemplate("transform", "transform ",
+				" = {\n\tnodes;\n} :  -> ");
 		ctm.addTemplate(ct);
+
+		InputMap inputMap = topArea.getInputMap();
+
+	//	KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_A, Event.META_MASK);
+		KeyStroke key2 = KeyStroke.getKeyStroke(KeyEvent.VK_A, Event.CTRL_MASK);
+
+		//inputMap.put(key, DefaultEditorKit.beginLineAction);
+		inputMap.put(key2, DefaultEditorKit.beginLineAction);
+
+		KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_E, Event.META_MASK);
+		key2 = KeyStroke.getKeyStroke(KeyEvent.VK_E, Event.CTRL_MASK);
+
+		inputMap.put(key, DefaultEditorKit.endLineAction);
+		inputMap.put(key2, DefaultEditorKit.endLineAction);
+
+		 key = KeyStroke.getKeyStroke(KeyEvent.VK_K, Event.META_MASK);
+		 key2 = KeyStroke.getKeyStroke(KeyEvent.VK_K, Event.CTRL_MASK);
+
+		 Action al = new AbstractAction() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					int len = topArea.getLineEndOffsetOfCurrentLine();
+					int offs = topArea.getCaretPosition();
+					try {
+						//System.out.println("xxx " + offs + " xxx " + len);
+						//System.out.println(topArea.getDocument().getText(offs, len - 1));
+						if (len - offs - 1 > 0) {
+							topArea.getDocument().remove(offs, len - offs - 1 );
+						}
+					} catch (BadLocationException e1) {
+						e1.printStackTrace();
+					}
+				}
+			};
+			topArea.getActionMap().put("RemoveToEndOfLine", al);
+		inputMap.put(key, "RemoveToEndOfLine");
+		inputMap.put(key2,"RemoveToEndOfLine");
 
 		// topArea.setBracketMatchingEnabled(true);
 		// topArea.setAutoIndentEnabled(true);
@@ -288,14 +334,7 @@ public class CodeEditor extends JPanel {
 		// topArea.setHighlightCurrentLine(true);
 
 		// topArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
-		// topArea.setSyn
-
-		// RSyntaxDocument.
-		// SyntaxScheme scheme = topArea.s();
-
-		// topArea.setS
 		topArea.setCodeFoldingEnabled(true);
-		// topArea.setAntiAliasingEnabled(true);
 		RTextScrollPane sp = new RTextScrollPane(topArea);
 		sp.setFoldIndicatorEnabled(true);
 		// add(sp);
@@ -353,11 +392,11 @@ public class CodeEditor extends JPanel {
 	void runAction() {
 		String program = topArea.getText();
 
-		NewestFQLProgram init;
+		FQLProgram init;
 		Environment env; // = Driver.intemp1;
 		String env2;
 		try {
-			init = NewestFQLParser.program(program);
+			init = FQLParser.program(program);
 		} catch (ParserException e) {
 			int col = e.getLocation().column;
 			int line = e.getLocation().line;
@@ -392,16 +431,7 @@ public class CodeEditor extends JPanel {
 					+ e.getLocalizedMessage());
 			e.printStackTrace();
 			topArea.requestFocusInWindow();
-			Integer theLine;
-			if (e.kind.equals("schema")) {
-				theLine = init.sigs_lines.get(e.decl);
-			} else if (e.kind.equals("instance")) {
-				theLine = init.insts_lines.get(e.decl);
-			} else if (e.kind.equals("mapping")) {
-				theLine = init.maps_lines.get(e.decl);
-			} else {
-				throw new RuntimeException();
-			}
+			Integer theLine = init.lines.get(e.decl);
 			topArea.setCaretPosition(theLine);
 			return;
 		} catch (Throwable re) {
@@ -424,7 +454,7 @@ public class CodeEditor extends JPanel {
 			}
 			display.display(foo, init.order);
 
-		//	String psm = PSMGen.compile(env, init);
+			// String psm = PSMGen.compile(env, init);
 			respArea.setText(env2);
 		} catch (Exception ee) {
 			respArea.setText(ee.toString());
@@ -461,9 +491,9 @@ public class CodeEditor extends JPanel {
 	public void check() {
 		String program = topArea.getText();
 
-		NewestFQLProgram init;
+		FQLProgram init;
 		try {
-			init = NewestFQLParser.program(program);
+			init = FQLParser.program(program);
 		} catch (ParserException e) {
 			int col = e.getLocation().column;
 			int line = e.getLocation().line;
@@ -486,7 +516,7 @@ public class CodeEditor extends JPanel {
 		}
 
 		String xxx = Driver.checkReport(init);
-		
+
 		DateFormat format = DateFormat.getTimeInstance();
 		String time = format.format(new Date(System.currentTimeMillis()));
 		String foo = GUI.getTitle(id);
@@ -494,14 +524,18 @@ public class CodeEditor extends JPanel {
 		JTextArea jta = new JTextArea(xxx);
 		jta.setWrapStyleWord(true);
 		jta.setLineWrap(true);
-		JScrollPane p = new JScrollPane(jta, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		p.setPreferredSize(new Dimension(650,300));
+		JScrollPane p = new JScrollPane(jta,
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		p.setPreferredSize(new Dimension(650, 300));
 
 		JOptionPane pane = new JOptionPane(p);
-		JDialog dialog = pane.createDialog(null, "Type Check " + foo + " - " + time);
+		JDialog dialog = pane.createDialog(null, "Type Check " + foo + " - "
+				+ time);
 		dialog.setModal(false);
+		dialog.setResizable(true);
 		dialog.setVisible(true);
-		
+
 	}
 
 }

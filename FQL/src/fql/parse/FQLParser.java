@@ -16,15 +16,16 @@ import org.codehaus.jparsec.functors.Tuple5;
 
 import fql.Pair;
 import fql.Triple;
+import fql.decl.FQLProgram;
+import fql.decl.FQLProgram.NewDecl;
 import fql.decl.InstExp;
 import fql.decl.MapExp;
-import fql.decl.NewestFQLProgram;
-import fql.decl.NewestFQLProgram.NewDecl;
 import fql.decl.QueryExp;
 import fql.decl.SigExp;
 import fql.decl.SigExp.Const;
+import fql.decl.TransExp;
 
-public class NewestFQLParser {
+public class FQLParser {
 
 	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
 			.map(new Map<String, Integer>() {
@@ -36,12 +37,12 @@ public class NewestFQLParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|" };
 
-	static String[] res = new String[] { "nodes", "attributes", "schema",
-			"transform", "dist1", "dist2", "arrows", "equations", "id",
-			"delta", "sigma", "pi", "SIGMA", "apply", "eq", "relationalize",
-			"external", "then", "query", "instance", "fst", "snd", "inl",
-			"inr", "curry", "mapping", "eval", "string", "int", "void", "unit",
-			"prop", /* "tt", "ff" */};
+	static String[] res = new String[] { "drop", "nodes", "attributes",
+			"ASWRITTEN", "schema", "transform", "dist1", "dist2", "arrows",
+			"equations", "id", "delta", "sigma", "pi", "SIGMA", "apply", "eq",
+			"relationalize", "external", "then", "query", "instance", "fst",
+			"snd", "inl", "inr", "curry", "mapping", "eval", "string", "int",
+			"void", "unit", "prop", /* "tt", "ff" */};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -68,9 +69,9 @@ public class NewestFQLParser {
 				Parsers.tuple(schemaDecl().source().peek(), schemaDecl()),
 				Parsers.tuple(instanceDecl().source().peek(), instanceDecl()),
 				Parsers.tuple(mappingDecl().source().peek(), mappingDecl()),
-				Parsers.tuple(queryDecl().source().peek(), queryDecl())
-				)
-				.many();
+				Parsers.tuple(queryDecl().source().peek(), queryDecl()),
+				Parsers.tuple(transDecl().source().peek(), transDecl()),
+				Parsers.tuple(dropDecl().source().peek(), dropDecl())).many();
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -95,19 +96,20 @@ public class NewestFQLParser {
 	public static final Parser<?> queryDecl() {
 		return Parsers.tuple(term("query"), ident(), term("="), query());
 	}
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final Parser<?> query() {
 		Reference ref = Parser.newReference();
-		
+
 		Parser p1 = Parsers.tuple(term("delta"), mapping());
 		Parser p2 = Parsers.tuple(term("pi"), mapping());
 		Parser p3 = Parsers.tuple(term("sigma"), mapping());
-		Parser ret = Parsers.or(
-				Parsers.tuple(p1, p2, p3),
-				Parsers.tuple(term("("), ref.lazy(), term("then"), ref.lazy(), term(")")), ident());
-		
+		Parser ret = Parsers.or(Parsers.tuple(p1, p2, p3), Parsers.tuple(
+				term("("), ref.lazy(), term("then"), ref.lazy(), term(")")),
+				ident());
+
 		ref.set(ret);
-		
+
 		return ret;
 	}
 
@@ -123,7 +125,7 @@ public class NewestFQLParser {
 				ident());
 		Parser<?> p3 = Parsers.tuple(path(), term("="), path());
 		Parser<?> foo = Parsers.tuple(section("nodes", p1),
-				section("attributes", p2), section("arrows", pX),
+				Parsers.or((Parser<?>)section("attributes", p2), (Parser<?>)Parsers.tuple(term("attributes"), term("ASWRITTEN"), term(";"))), section("arrows", pX),
 				section("equations", p3));
 		return Parsers.between(term("{"), foo, term("}"));
 	}
@@ -178,17 +180,24 @@ public class NewestFQLParser {
 		Tuple3 eqs0 = (Tuple3) s.d;
 
 		List nodes1 = (List) nodes0.b;
-		List attrs1 = (List) attrs0.b;
 		List arrows1 = (List) arrows0.b;
 		List eqs1 = (List) eqs0.b;
 
 		for (Object o : nodes1) {
 			nodes.add((String) o);
 		}
-		for (Object o : attrs1) {
-			Tuple5 x = (Tuple5) o;
-			attrs.add(new Triple<>((String) x.a, (String) x.c, ((Token) x.e)
-					.toString()));
+
+		if (attrs0.b.toString().equals("ASWRITTEN")) {
+			for (String k : nodes) {
+				attrs.add(new Triple<>(k + "_att", k, "string"));
+			}
+		} else {
+			List attrs1 = (List) attrs0.b;
+			for (Object o : attrs1) {
+				Tuple5 x = (Tuple5) o;
+				attrs.add(new Triple<>((String) x.a, (String) x.c,
+						((Token) x.e).toString()));
+			}
 		}
 		for (Object o : arrows1) {
 			Tuple5 x = (Tuple5) o;
@@ -200,6 +209,169 @@ public class NewestFQLParser {
 		}
 		Const c = new Const(nodes, attrs, arrows, eqs);
 		return c;
+	}
+
+	public static final Parser<?> transDecl() {
+		return Parsers
+				.tuple(term("transform"), ident(), term("="), transform());
+	}
+
+	public static final Parser<?> dropDecl() {
+		return Parsers.tuple(term("drop"), ident().many());
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static final Parser<?> transform() {
+		Reference ref = Parser.newReference();
+
+		Parser plusTy = Parsers.tuple(ident(), term("."), Parsers.between(
+				term("("), Parsers.tuple(ref.lazy(), term("+"), ref.lazy()),
+				term(")")));
+		Parser prodTy = Parsers.tuple(ident(), term("."), Parsers.between(
+				term("("), Parsers.tuple(ref.lazy(), term("*"), ref.lazy()),
+				term(")")));
+		Parser compTy = Parsers.between(term("("),
+				Parsers.tuple(ref.lazy(), term("then"), ref.lazy()), term(")"));
+
+		Parser a = Parsers.or(new Parser[] {
+				Parsers.tuple(ident(), term("."), term("unit"), ident()),
+				Parsers.tuple(ident(), term("."), term("void"), ident()),
+				Parsers.tuple(ident(), term("."), term("fst")),
+				Parsers.tuple(ident(), term("."), term("snd")),
+				Parsers.tuple(ident(), term("."), term("inl")),
+				Parsers.tuple(ident(), term("."), term("inr")),
+				// Parsers.tuple(term("apply"), sig(), sig()),
+				// Parsers.tuple(term("curry"), ref.lazy()),
+				// Parsers.tuple(term("eq"), sig()),
+				Parsers.tuple(term("id"), ident()),
+				// Parsers.tuple(term("dist1"), sig(), sig(), sig()),
+				// Parsers.tuple(term("dist2"), sig(), sig(), sig()), compTy,
+				compTy, plusTy, prodTy, ident(), transConst() });
+
+		ref.set(a);
+		return a;
+	}
+
+	public static final Parser<?> transConst() {
+		Parser<?> p = Parsers.tuple(term("("), string(), term(","), string(),
+				term(")")).sepBy(term(","));
+
+		Parser<?> node = Parsers.tuple(ident(), term("->"),
+				p.between(term("{"), term("}")));
+
+		Parser<?> xxx = section("nodes", node);
+
+		Parser<?> p1 = Parsers.tuple(
+				Parsers.between(term("{"), xxx, term("}")), term(":"), ident(),
+				term("->"), ident());
+
+		return p1;
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static final TransExp toTransConst(Object decl, String t1, String t2) {
+
+		List<Pair<String, List<Pair<String, String>>>> objs = new LinkedList<>();
+
+		Tuple3 a0 = (Tuple3) decl;
+		List b0 = (List) a0.b;
+		for (Object o : b0) {
+			Tuple3 z = (Tuple3) o;
+			String p = (String) z.a;
+
+			List<?> q = (List<?>) z.c;
+			List<Pair<String, String>> l = new LinkedList<>();
+			for (Object q0 : q) {
+				Tuple5 q1 = (Tuple5) q0;
+				l.add(new Pair<>(q1.b.toString(), q1.d.toString()));
+			}
+
+			objs.add(new Pair<>(p, l));
+		}
+
+		return new TransExp.Const(objs, t1, t2);
+
+	}
+
+	@SuppressWarnings("rawtypes")
+	public static final TransExp toTrans(Object o) {
+	
+		try {
+			Tuple4 p = (Tuple4) o;
+
+			String obj = p.a.toString();
+			String dst = p.d.toString();
+			if (p.c.toString().equals("void")) {
+				return new TransExp.FF(obj, dst);
+			} else if (p.c.toString().equals("unit")) {
+				return new TransExp.TT(obj, dst);
+			}
+
+		} catch (RuntimeException re) {
+
+		}
+
+		try {
+			Tuple3 p = (Tuple3) o;
+
+			Object p2 = p.b;
+			Object p3 = p.c;
+			Object o1 = p.a;
+			String p1 = p.a.toString();
+
+			if (p3.toString().equals("fst")) {
+				return new TransExp.Fst(p1);
+			} else if (p3.toString().equals("snd")) {
+				return new TransExp.Snd(p1);
+			} else if (p3.toString().equals("inl")) {
+				return new TransExp.Inl(p1);
+			} else if (p3.toString().equals("inr")) {
+				return new TransExp.Inr(p1);
+			} else if (p2.toString().equals("then")) {
+				return new TransExp.Comp(toTrans(o1), toTrans(p3));
+			} else if (p3 instanceof Tuple3) {
+				Tuple3 y = (Tuple3) p3;
+				String x = y.b.toString();
+				if (x.equals("+")) {
+					return new TransExp.Case(p1, toTrans(y.a), toTrans(y.c));
+				} else if (x.equals("*")) {
+					return new TransExp.Prod(p1, toTrans(y.a), toTrans(y.c));
+					// } else if (x.equals("^")) {
+					// return new TransExp.(p1, toTrans(y.a), toTrans(y.c));
+				} else {
+					throw new RuntimeException("foo");
+				}
+			}
+
+		} catch (RuntimeException re) {
+		}
+
+		try {
+			Tuple5 p = (Tuple5) o;
+
+			Object p2 = p.c;
+			Object p3 = p.e;
+			Object o1 = p.a;
+			return toTransConst(o1, p2.toString(), p3.toString());
+		} catch (RuntimeException re) {
+		}
+
+		try {
+			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;
+			String p1 = p.a.toString();
+			Object p2 = p.b;
+			if (p1.equals("id")) {
+				return new TransExp.Id(p2.toString());
+			}
+		} catch (RuntimeException re) {
+
+		}
+
+		if (o instanceof String) {
+			return new TransExp.Var(o.toString());
+		}
+
+		throw new RuntimeException();
 	}
 
 	public static final Parser<?> mappingDecl() {
@@ -394,7 +566,7 @@ public class NewestFQLParser {
 		Parser<?> SIGMA = Parsers.tuple(term("SIGMA"), mapping(), ref.lazy());
 		Parser<?> relationalize = Parsers.tuple(term("relationalize"), ident());
 		Parser<?> eval = Parsers.tuple(term("eval"), query(), ref.lazy());
-		
+
 		Parser a = Parsers.or(new Parser[] {
 				Parsers.tuple(term("prop"), sig()),
 				Parsers.tuple(term("void"), sig()),
@@ -423,8 +595,11 @@ public class NewestFQLParser {
 								Parsers.tuple(string(), term(","), string()),
 								term(")")).sepBy(term(",")), term("}")));
 
-		Parser<?> xxx = Parsers.tuple(section("nodes", node),
-				section("attributes", arrow), section("arrows", arrow));
+		Parser<?> xxx = Parsers.tuple(section("nodes", node), Parsers.or(
+				(Parser<?>) section("attributes", arrow),
+				(Parser<?>) Parsers.tuple(term("attributes"),
+						term("ASWRITTEN"), term(";"))),
+				section("arrows", arrow));
 		Parser<?> constant = Parsers.tuple(
 				Parsers.between(term("{"), xxx, term("}")), term(":"), sig());
 		return constant;
@@ -434,19 +609,21 @@ public class NewestFQLParser {
 	public static InstExp toInstConst(Object decl) {
 		Tuple3 y = (Tuple3) decl;
 		Tuple3 x = (Tuple3) y.a;
+		
+		
 
-		//List<Pair<String, List<Pair<Object, Object>>>> data = new LinkedList<>();
+		// List<Pair<String, List<Pair<Object, Object>>>> data = new
+		// LinkedList<>();
 
 		Tuple3 nodes = (Tuple3) x.a;
-		Tuple3 attrs = (Tuple3) x.b;
 		Tuple3 arrows = (Tuple3) x.c;
+		Tuple3 attrs = (Tuple3) x.b;
 
 		List nodes0 = (List) nodes.b;
-		List attrs0 = (List) attrs.b;
 		List arrows0 = (List) arrows.b;
 
 		List<Object> seen = new LinkedList<>();
-		
+
 		List<Pair<String, List<Pair<Object, Object>>>> nodesX = new LinkedList<>();
 		for (Object o : nodes0) {
 			Tuple3 u = (Tuple3) o;
@@ -463,24 +640,34 @@ public class NewestFQLParser {
 			nodesX.add(new Pair<>(n, l));
 		}
 
+		RuntimeException toThrow = null;
+		
 		List<Pair<String, List<Pair<Object, Object>>>> attrsX = new LinkedList<>();
-		for (Object o : attrs0) {
-			
-			Tuple3 u = (Tuple3) o;
-			String n = (String) u.a;
-			List m = (List) u.c;
-			List<Pair<Object, Object>> l = new LinkedList<>();
-			for (Object h : m) {
-				Tuple3 k = (Tuple3) h;
-				l.add(new Pair<>(k.a, k.c));
+		if (attrs.b.toString().equals("ASWRITTEN")) {
+			for (Pair<String, List<Pair<Object, Object>>> k : nodesX) {
+				attrsX.add(new Pair<>(k.first + "_att", k.second));
 			}
-			if (seen.contains(n)) {
-				throw new RuntimeException("duplicate field: " + o);
-			}
-			seen.add(n);
-			attrsX.add(new Pair<>(n, l));
-		}
+		} else {
+			List attrs0 = (List) attrs.b;
 
+			for (Object o : attrs0) {
+
+				Tuple3 u = (Tuple3) o;
+				String n = (String) u.a;
+				List m = (List) u.c;
+				List<Pair<Object, Object>> l = new LinkedList<>();
+				for (Object h : m) {
+					Tuple3 k = (Tuple3) h;
+					l.add(new Pair<>(k.a, k.c));
+				}
+				if (seen.contains(n)) {
+					toThrow = new RuntimeException("duplicate field: " + o + " in " + decl);
+					throw toThrow;
+				}
+				seen.add(n);
+				attrsX.add(new Pair<>(n, l));
+			}
+		}
 		List<Pair<String, List<Pair<Object, Object>>>> arrowsX = new LinkedList<>();
 		for (Object o : arrows0) {
 			Tuple3 u = (Tuple3) o;
@@ -497,7 +684,9 @@ public class NewestFQLParser {
 			seen.add(n);
 			arrowsX.add(new Pair<>(n, l));
 		}
-		return new InstExp.Const(nodesX, attrsX, arrowsX, toSchema(y.c));
+		fql.decl.InstExp.Const ret = new InstExp.Const(nodesX, attrsX, arrowsX,
+				toSchema(y.c));
+		return ret;
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -507,17 +696,17 @@ public class NewestFQLParser {
 			Token z = (Token) t.a;
 			String y = z.toString();
 			if (y.equals("delta")) {
-				return new InstExp.Delta(toMapping(t.b), toInst(t.c));
+				return new InstExp.Delta(toMapping(t.b), t.c.toString());
 			} else if (y.equals("sigma")) {
-				return new InstExp.Sigma(toMapping(t.b), toInst(t.c));
+				return new InstExp.Sigma(toMapping(t.b), t.c.toString());
 			} else if (y.equals("SIGMA")) {
-				return new InstExp.FullSigma(toMapping(t.b), toInst(t.c));
+				return new InstExp.FullSigma(toMapping(t.b), t.c.toString());
 			} else if (y.equals("pi")) {
-				return new InstExp.Pi(toMapping(t.b), toInst(t.c));
+				return new InstExp.Pi(toMapping(t.b), t.c.toString());
 			} else if (y.equals("external")) {
 				return new InstExp.External(toSchema(t.b), t.c.toString());
 			} else if (y.equals("eval")) {
-				return new InstExp.Eval(toQuery(t.b), toInst(t.c));
+				return new InstExp.Eval(toQuery(t.b), t.c.toString());
 			}
 		} catch (RuntimeException cce) {
 		}
@@ -527,12 +716,12 @@ public class NewestFQLParser {
 			Token z = (Token) t.b;
 			String y = z.toString();
 			if (y.equals("+")) {
-				return new InstExp.Plus(toInst(t.a), toInst(t.c));
+				return new InstExp.Plus(t.a.toString(), t.c.toString());
 			} else if (y.equals("*")) {
-				return new InstExp.Times(toInst(t.a), toInst(t.c));
+				return new InstExp.Times(t.a.toString(), t.c.toString());
 			}
 			if (y.equals("^")) {
-				return new InstExp.Exp(toInst(t.a), toInst(t.c));
+				return new InstExp.Exp(t.a.toString(), (t.c).toString());
 			}
 		} catch (RuntimeException cce) {
 		}
@@ -547,39 +736,41 @@ public class NewestFQLParser {
 			} else if (pr.a.toString().equals("prop")) {
 				return new InstExp.Two(toSchema(pr.b));
 			} else if (pr.a.toString().equals("relationalize")) {
-				return new InstExp.Relationalize(toInst(pr.b));
+				return new InstExp.Relationalize(pr.b.toString());
 			}
 			throw new RuntimeException();
 		} catch (RuntimeException cce) {
 		}
 
-		try {
+	//	try {
 			// System.out.println("ta is " + t.a);
 			// System.out.println("tb is " + t.b);
 			return toInstConst(o);
-		} catch (RuntimeException cce) {
+	//	} catch (RuntimeException cce) {
 			// System.out.println(o);
 			// System.out.println(f1.of(o));
 			// System.out.println(f2.of(o));
 			// cce.printStackTrace();
-		}
+		//}
 
 		// System.out.println(o.getClass());
-		// System.out.println(o);
-		return new InstExp.Var(o.toString());
+	//	 System.out.println(o);
+//		 return new InstExp.Var(o.toString());
+	//	throw new RuntimeException(o.toString());
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	public static QueryExp toQuery(Object o) {
 		if (o instanceof Tuple5) {
-			Tuple5 t = (Tuple5) o;			
+			Tuple5 t = (Tuple5) o;
 			return new QueryExp.Comp(toQuery(t.b), toQuery(t.d));
 		} else if (o instanceof Tuple3) {
 			Tuple3 x = (Tuple3) o;
 			org.codehaus.jparsec.functors.Pair p1 = (org.codehaus.jparsec.functors.Pair) x.a;
 			org.codehaus.jparsec.functors.Pair p2 = (org.codehaus.jparsec.functors.Pair) x.b;
 			org.codehaus.jparsec.functors.Pair p3 = (org.codehaus.jparsec.functors.Pair) x.c;
-			return new QueryExp.Const(toMapping(p1.b), toMapping(p2.b), toMapping(p3.b));
+			return new QueryExp.Const(toMapping(p1.b), toMapping(p2.b),
+					toMapping(p3.b));
 		} else {
 			return new QueryExp.Var(o.toString());
 		}
@@ -587,9 +778,9 @@ public class NewestFQLParser {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static final NewestFQLProgram program(String s) {
+	public static final FQLProgram program(String s) {
 		List<NewDecl> ret = new LinkedList<>();
-		List decls = (List) NewestFQLParser.program.parse(s);
+		List decls = (List) FQLParser.program.parse(s);
 
 		for (Object d : decls) {
 			org.codehaus.jparsec.functors.Pair pr = (org.codehaus.jparsec.functors.Pair) d;
@@ -599,6 +790,18 @@ public class NewestFQLParser {
 			if (idx < 0) {
 				throw new RuntimeException();
 			}
+
+			if (decl instanceof org.codehaus.jparsec.functors.Pair) {
+				// System.out.println("a");
+				org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) decl;
+				if (p.a.toString().equals("drop")) {
+					// System.out.println("b");
+					ret.add(NewDecl.dropDecl((List<String>) p.b));
+					continue;
+					// System.out.println("c");
+				} else {
+				}
+			}
 			// System.out.println("whasabi  " + s.indexOf(txt));
 			// s.indexOf(txt);
 			Tuple3 t = (Tuple3) decl;
@@ -607,32 +810,21 @@ public class NewestFQLParser {
 			case "query":
 				Tuple4 tta = (Tuple4) decl;
 				String name = (String) tta.b;
-				
+
 				ret.add(NewDecl.queryDecl(name, idx, toQuery(tta.d)));
 				break;
 			case "schema":
 				Tuple4 tt = (Tuple4) decl;
-				 name = (String) tt.b;
+				name = (String) tt.b;
 
-				ret.add(NewestFQLProgram.NewDecl.sigDecl(name, idx,
-						toSchema(tt.d)));
+				ret.add(FQLProgram.NewDecl.sigDecl(name, idx, toSchema(tt.d)));
 
 				break;
 			case "instance":
 				Tuple4 tt0 = (Tuple4) decl;
 				name = (String) t.b;
 
-				// Tuple3 xxx = (Tuple3) tt0.c;
-				//
-				// System.out.println("trying on " + tt0.d);
-				// Poly<Poly<Unit, NewSigConst>, NewInstConst> aaa = toTy(f2x,
-				// f1x, tt0.d);
-				// System.out.println(">>>" + aaa);
-				//
-				// Poly<Unit, NewSigConst> bbb = toTy(f2, f1, xxx.b);
-				// System.out.println("<<<" + bbb);
-				//
-				NewDecl toAdd = NewestFQLProgram.NewDecl.instDecl(name, idx,
+				NewDecl toAdd = FQLProgram.NewDecl.instDecl(name, idx,
 						toInst(tt0.d));
 				ret.add(toAdd);
 
@@ -640,22 +832,22 @@ public class NewestFQLParser {
 			case "mapping":
 				Tuple4 t0 = (Tuple4) decl;
 				name = (String) t.b;
-				/*
-				 * xxx = (Tuple3) t0.c; // :, (x, ->, x, =), stuff Tuple4 yyy =
-				 * (Tuple4) xxx.b; Object t1 = yyy.a; Object t2 = yyy.c; Object
-				 * o = xxx.c;
-				 */
-				ret.add(NewestFQLProgram.NewDecl.mapDecl(name, idx,
-						toMapping(t0.d))); // , new Pair<>(toSchema(t1),
-											// toSchema(t2))));
-				// // ret.add(mappingDecl(decl));
+
+				ret.add(FQLProgram.NewDecl.mapDecl(name, idx, toMapping(t0.d)));
 				break;
+			case "transform":
+				Tuple4 tx = (Tuple4) decl;
+				name = (String) tx.b;
+
+				ret.add(FQLProgram.NewDecl.transDecl(name, idx, toTrans(tx.d)));
+				break;
+
 			default:
 				throw new RuntimeException("Unknown decl: " + kind);
 			}
 		}
 
-		return new NewestFQLProgram(ret);
+		return new FQLProgram(ret);
 	}
 
 	private static Parser<List<String>> path() {

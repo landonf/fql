@@ -4,10 +4,12 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-public class NewestFQLProgram {
+public class FQLProgram {
 
 
 		public static class NewDecl {
+			List<String> drop;
+			TransExp trans;
 			String name;
 			SigExp sig;
 			MapExp map;
@@ -17,6 +19,20 @@ public class NewestFQLProgram {
 
 //			Pair<SigExp, SigExp> map_t;
 	//		SigExp inst_t;
+
+			
+			
+			public static NewDecl transDecl(String name, Integer line, TransExp trans) {
+				NewDecl ret = new NewDecl(name, line);
+				ret.trans = trans;
+				return ret;		
+			}
+			
+			public static NewDecl dropDecl(List<String> drop) {
+				NewDecl ret = new NewDecl(null, null);
+				ret.drop = drop;
+				return ret;		
+			}
 			
 			public static NewDecl queryDecl(String name, Integer line, QueryExp query) {
 				NewDecl ret = new NewDecl(name, line);
@@ -57,42 +73,57 @@ public class NewestFQLProgram {
 		public LinkedHashMap<String, MapExp> maps = new LinkedHashMap<>();
 		public LinkedHashMap<String, InstExp> insts = new LinkedHashMap<>();
 		public LinkedHashMap<String, QueryExp> queries = new LinkedHashMap<>();
-
-		public LinkedHashMap<String, Integer> sigs_lines = new LinkedHashMap<>();
-		public LinkedHashMap<String, Integer> maps_lines = new LinkedHashMap<>();
-		public LinkedHashMap<String, Integer> insts_lines = new LinkedHashMap<>();
-		public LinkedHashMap<String, Integer> queries_lines = new LinkedHashMap<>();
+		public LinkedHashMap<String, TransExp> transforms = new LinkedHashMap<>();
 		
+		public LinkedHashMap<String, Integer> lines = new LinkedHashMap<>();
+		public List<String> drop = new LinkedList<>(); 
 		public List<String> order = new LinkedList<>();
 		
-		public NewestFQLProgram(List<NewDecl> decls) {
+		public FQLProgram(List<NewDecl> decls) {
 			for (NewDecl decl : decls) {
-				order.add(decl.name);
+				if (decl.name != null) {
+					order.add(decl.name); //drops are unnamed
+				}
 				if (decl.sig != null) {
 					checkDup(decl.name, "signature");
 					sigs.put(decl.name, decl.sig);
-					sigs_lines.put(decl.name, decl.line);
+					lines.put(decl.name, decl.line);
 				} else if (decl.inst != null) {
 					checkDup(decl.name, "instance");
 					insts.put(decl.name, decl.inst);
-					insts_lines.put(decl.name, decl.line);
+					lines.put(decl.name, decl.line);
 				} else if (decl.map != null) {
 					checkDup(decl.name, "mapping");
 					maps.put(decl.name, decl.map);
-					maps_lines.put(decl.name, decl.line);
+					lines.put(decl.name, decl.line);
 				} else if (decl.query != null) {
 					checkDup(decl.name, "query");
 					queries.put(decl.name, decl.query);
-					queries_lines.put(decl.name, decl.line);
-				} else {
+					lines.put(decl.name, decl.line);
+				} else if (decl.drop != null) {
+					drop.addAll(decl.drop);
+				} else if (decl.trans != null) {
+					checkDup(decl.name, "transform");
+					transforms.put(decl.name, decl.trans);
+					lines.put(decl.name, decl.line);
+				}
+				else {
 					throw new RuntimeException();
 				}
 			}
 
 		}
 
+		@Override
+		public String toString() {
+			return "FQLProgram [sigs=" + sigs + ", maps=" + maps + ", insts="
+					+ insts + ", queries=" + queries + ", transforms="
+					+ transforms + ", lines=" + lines + ", drop=" + drop
+					+ ", order=" + order + "]";
+		}
+
 		private <X, Y> void checkDup(X name, String s) {
-			if (sigs.containsKey(name) || maps.containsKey(name) || insts.containsKey(name) || queries.containsKey(name)) {
+			if (sigs.containsKey(name) || maps.containsKey(name) || insts.containsKey(name) || queries.containsKey(name) || transforms.containsKey(name)) {
 				throw new RuntimeException("Duplicate " + s + " " + name);
 			}
 

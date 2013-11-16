@@ -1,14 +1,18 @@
 package fql.gui;
 
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -28,12 +32,15 @@ import fql.DEBUG;
 import fql.FQLException;
 import fql.Pair;
 import fql.decl.Environment;
+import fql.decl.Eq;
+import fql.decl.FQLProgram;
 import fql.decl.Instance;
 import fql.decl.Mapping;
-import fql.decl.NewestFQLProgram;
+import fql.decl.Node;
 import fql.decl.Query;
 import fql.decl.SigExp;
 import fql.decl.Signature;
+import fql.decl.Transform;
 import fql.decl.Unresolver;
 
 /**
@@ -46,11 +53,11 @@ public class Display {
 
 	List<Pair<String, JComponent>> frames = new LinkedList<>();
 	
-	public JPanel showInst(Environment environment, /* String c, */ Instance view) throws FQLException{
+	public JPanel showInst(Color color,/* Environment environment, String c, */ Instance view) throws FQLException{
 		JTabbedPane px = new JTabbedPane();
 
 		if (DEBUG.inst_graphical) {
-			JPanel gp = view.pretty(environment);
+			JPanel gp = view.pretty(color);
 			JPanel gp0 = new JPanel(new GridLayout(1, 1));
 			gp0.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 			gp0.add(gp);
@@ -122,10 +129,38 @@ public class Display {
 		top.add(px);
 		return top;
 	}
+
+	public JPanel showTransform(Environment environment, String src_n, String dst_n, Transform view) throws FQLException{
+		JTabbedPane px = new JTabbedPane();
+
+		if (DEBUG.transform_graphical) {
+			JPanel gp = view.graphical(src_n, dst_n);
+			JPanel gp0 = new JPanel(new GridLayout(1, 1));
+			gp0.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+			gp0.add(gp);
+			px.add("Graphical", new JScrollPane(gp0));
+			gp0.setSize(600, 600);			
+		}
+		
+		if (DEBUG.transform_textual) {
+			JPanel ta = view.text();
+			px.add("Textual", ta);
+		}
+		
+		if (DEBUG.transform_tabular) {
+			JPanel tp = view.view(src_n, dst_n);
+			px.add("Tabular", tp);
+		}
+
+		JPanel top = new JPanel(new GridLayout(1, 1));
+		top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+		top.add(px);
+		return top;
+	}
 	
 	public JPanel showSchema(Environment environment, /* String c, */ Signature view) throws FQLException{
 		JTabbedPane px = new JTabbedPane();
-
+		
 		if (DEBUG.schema_graphical) {
 			JPanel gp = view.pretty(environment);
 			JPanel gp0 = new JPanel(new GridLayout(1, 1));
@@ -186,8 +221,8 @@ public class Display {
 		return top;
 	}
 
-	
-	public Display(NewestFQLProgram p, final Environment environment) throws FQLException {
+
+	public Display(FQLProgram p, final Environment environment) throws FQLException {
 	
 		for (String c : p.order) {
 			if (environment.signatures.get(c) != null) {
@@ -199,14 +234,18 @@ public class Display {
 				frames.add(new Pair<String, JComponent>("mapping " + c + " : " + a + " -> " + b, showMapping(environment, environment.getMapping(c))));
 			} else if (environment.instances.get(c) != null) {
 				String xxx = p.insts.get(c).type(p.sigs, p.maps, p.insts, p.queries).accept(p.sigs, new Unresolver()).toString();
-				frames.add(new Pair<String, JComponent>("instance " + c + " : " + xxx , showInst(environment, environment.instances.get(c))));
+				frames.add(new Pair<String, JComponent>("instance " + c + " : " + xxx , showInst(environment.colors.get(c), environment.instances.get(c))));
 			} else if (environment.queries.get(c) != null) {
 				Pair<SigExp, SigExp> xxx = p.queries.get(c).type(p.sigs, p.maps, p.queries); 
 				String a = xxx.first.accept(p.sigs, new Unresolver()).toString();
 				String b = xxx.second.accept(p.sigs, new Unresolver()).toString();
 				frames.add(new Pair<String, JComponent>("query " + c + " : " + a + " -> " + b, showQuery(environment, environment.queries.get(c))));				
-			} else {
-				throw new RuntimeException();
+			} else if (environment.transforms.get(c) != null) {
+				Pair<String, String> xxx = p.transforms.get(c).type(p);
+				frames.add(new Pair<String, JComponent>("transform " + c + " : " + xxx.first + " -> " + xxx.second, showTransform(environment, xxx.first, xxx.second, environment.transforms.get(c))));  
+			} 
+			else {
+				throw new RuntimeException("Not found: " + c);
 			}
 		}
 	}

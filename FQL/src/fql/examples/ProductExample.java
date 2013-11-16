@@ -4,7 +4,7 @@ public class ProductExample extends Example {
 
 	@Override
 	public String getName() {
-		return "Products";
+		return "Products Schema";
 	}
 
 	@Override
@@ -38,7 +38,8 @@ public class ProductExample extends Example {
 			+ "\nmapping p2 = snd S T"
 			+ "\n"
 			+ "\nmapping p = (p1*p2) //is identity"
-			+ "\n";
+			+ "\n"
+	+ "\nschema X = unit" + "\nmapping H = unit T";
 
 
 }

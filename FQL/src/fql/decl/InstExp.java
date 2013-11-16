@@ -8,20 +8,22 @@ import fql.Pair;
 import fql.Quad;
 
 public abstract class InstExp {
-	
-	public final SigExp type(Map<String, SigExp> env,
-			Map<String, MapExp> ctx, Map<String, InstExp> insts, Map<String, QueryExp> qs) {
-		return accept(new Quad<>(env, ctx, insts, qs), new InstChecker(new LinkedList<String>()));
+
+	public final SigExp type(Map<String, SigExp> env, Map<String, MapExp> ctx,
+			Map<String, InstExp> insts, Map<String, QueryExp> qs) {
+		return accept(new Quad<>(env, ctx, insts, qs), new InstChecker());
 	}
 
 	public static class Eval extends InstExp {
-		QueryExp q;
-		InstExp e;
-		public Eval(QueryExp q, InstExp e) {
+		public QueryExp q;
+		public String e;
+
+		public Eval(QueryExp q, String e) {
 			super();
 			this.q = q;
 			this.e = e;
 		}
+
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -30,6 +32,7 @@ public abstract class InstExp {
 			result = prime * result + ((q == null) ? 0 : q.hashCode());
 			return result;
 		}
+
 		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
@@ -51,7 +54,7 @@ public abstract class InstExp {
 				return false;
 			return true;
 		}
-		
+
 		@Override
 		public String toString() {
 			return "eval" + q + " " + e;
@@ -64,14 +67,18 @@ public abstract class InstExp {
 
 	}
 
-	//TODO Const equality for instances
+	// TODO Const equality for instances
 	public static class Const extends InstExp {
-		//pubic List
-//		public List<Pair<String, List<Pair<Object, Object>>>> data;
+		// pubic List
+		// public List<Pair<String, List<Pair<Object, Object>>>> data;
 		public SigExp sig;
-		List<Pair<String, List<Pair<Object, Object>>>> nodes, attrs, arrows, data;
-		
-		public Const(List<Pair<String, List<Pair<Object, Object>>>> nodes, List<Pair<String, List<Pair<Object, Object>>>> attrs, List<Pair<String, List<Pair<Object, Object>>>> arrows, SigExp sig) {
+		public List<Pair<String, List<Pair<Object, Object>>>> nodes, attrs,
+				arrows, data;
+
+		public Const(List<Pair<String, List<Pair<Object, Object>>>> nodes,
+				List<Pair<String, List<Pair<Object, Object>>>> attrs,
+				List<Pair<String, List<Pair<Object, Object>>>> arrows,
+				SigExp sig) {
 			this.nodes = nodes;
 			this.attrs = attrs;
 			this.arrows = arrows;
@@ -131,7 +138,7 @@ public abstract class InstExp {
 					d = true;
 					x += v.first;
 				}
-				x+="}";		
+				x += "}";
 			}
 			x += ";\n";
 			x += "attributes ";
@@ -150,9 +157,9 @@ public abstract class InstExp {
 					d = true;
 					x += "(" + v.first + ", " + v.second + ")";
 				}
-				x+="}";		
+				x += "}";
 			}
-			
+
 			x = "arrows ";
 			b = false;
 			for (Pair<String, List<Pair<Object, Object>>> k : arrows) {
@@ -169,12 +176,12 @@ public abstract class InstExp {
 					d = true;
 					x += v.first;
 				}
-				x+="}";		
+				x += "}";
 			}
-			
+
 			return "{" + x + "}";
 		}
-		
+
 		@Override
 		public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
 			return v.visit(env, this);
@@ -182,63 +189,36 @@ public abstract class InstExp {
 
 	}
 
-	public static class Var extends InstExp {
-		String v;
-
-		public Var(String v) {
-			if (v.contains(" ")) {
-				throw new RuntimeException();
-			}
-			this.v = v;
-		}
-
-		@Override
-		public String toString() {
-			return v;
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((v == null) ? 0 : v.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			Var other = (Var) obj;
-			if (v == null) {
-				if (other.v != null)
-					return false;
-			} else if (!v.equals(other.v))
-				return false;
-			return true;
-		}
-
-		@Override
-		public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
-			return v.visit(env, this);
-		}
-
-		
-	}
+	/*
+	 * public static class Var extends InstExp { String v;
+	 * 
+	 * public Var(String v) { if (v.contains(" ")) { throw new
+	 * RuntimeException(); } this.v = v; }
+	 * 
+	 * @Override public String toString() { return v; }
+	 * 
+	 * @Override public int hashCode() { final int prime = 31; int result = 1;
+	 * result = prime * result + ((v == null) ? 0 : v.hashCode()); return
+	 * result; }
+	 * 
+	 * @Override public boolean equals(Object obj) { if (this == obj) return
+	 * true; if (obj == null) return false; if (getClass() != obj.getClass())
+	 * return false; Var other = (Var) obj; if (v == null) { if (other.v !=
+	 * null) return false; } else if (!v.equals(other.v)) return false; return
+	 * true; }
+	 * 
+	 * @Override public <R, E> R accept(E env, InstExpVisitor<R, E> v) { return
+	 * v.visit(env, this); } }
+	 */
 
 	public static class Zero extends InstExp {
 
-		SigExp sig;
-		
+		public SigExp sig;
+
 		public Zero(SigExp sig) {
 			super();
 			this.sig = sig;
 		}
-
 
 		@Override
 		public int hashCode() {
@@ -275,19 +255,16 @@ public abstract class InstExp {
 			return v.visit(env, this);
 		}
 
-
-		
 	}
 
 	public static class One extends InstExp {
-		
-		SigExp sig;
-		
+
+		public SigExp sig;
+
 		public One(SigExp sig) {
 			super();
 			this.sig = sig;
 		}
-
 
 		@Override
 		public int hashCode() {
@@ -323,19 +300,17 @@ public abstract class InstExp {
 		public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
-		
-		
+
 	}
-	
+
 	public static class Two extends InstExp {
-		
-		SigExp sig;
-		
+
+		public SigExp sig;
+
 		public Two(SigExp sig) {
 			super();
 			this.sig = sig;
 		}
-
 
 		@Override
 		public int hashCode() {
@@ -371,14 +346,13 @@ public abstract class InstExp {
 		public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
-		
-		
+
 	}
 
 	public static class Plus extends InstExp {
-		InstExp a, b;
+		public String a, b;
 
-		public Plus(InstExp a, InstExp b) {
+		public Plus(String a, String b) {
 			this.a = a;
 			this.b = b;
 		}
@@ -424,13 +398,12 @@ public abstract class InstExp {
 			return v.visit(env, this);
 		}
 
-		
 	}
 
 	public static class Times extends InstExp {
-		InstExp a, b;
+		public String a, b;
 
-		public Times(InstExp a, InstExp b) {
+		public Times(String a, String b) {
 			this.a = a;
 			this.b = b;
 		}
@@ -475,14 +448,13 @@ public abstract class InstExp {
 		public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
-		
-		
+
 	}
 
 	public static class Exp extends InstExp {
-		InstExp a, b;
+		public String a, b;
 
-		public Exp(InstExp a, InstExp b) {
+		public Exp(String a, String b) {
 			this.a = a;
 			this.b = b;
 		}
@@ -527,21 +499,20 @@ public abstract class InstExp {
 		public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
-		
-		
 
 	}
-	
+
 	public static class Delta extends InstExp {
-		
-		MapExp F;
-		InstExp I;
-		public Delta(MapExp f, InstExp i) {
+
+		public MapExp F;
+		public String I;
+
+		public Delta(MapExp f, String i) {
 			super();
 			F = f;
 			I = i;
 		}
-		
+
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -550,6 +521,7 @@ public abstract class InstExp {
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
 			return result;
 		}
+
 		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
@@ -571,29 +543,30 @@ public abstract class InstExp {
 				return false;
 			return true;
 		}
+
 		@Override
 		public String toString() {
 			return "delta " + F + " " + I;
 		}
+
 		@Override
 		public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
 
-		
-		
 	}
-	
-public static class Sigma extends InstExp {
-		
-		MapExp F;
-		InstExp I;
-		public Sigma(MapExp f, InstExp i) {
+
+	public static class Sigma extends InstExp {
+
+		public MapExp F;
+		public String I;
+
+		public Sigma(MapExp f, String i) {
 			super();
 			F = f;
 			I = i;
 		}
-		
+
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -602,6 +575,7 @@ public static class Sigma extends InstExp {
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
 			return result;
 		}
+
 		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
@@ -623,219 +597,223 @@ public static class Sigma extends InstExp {
 				return false;
 			return true;
 		}
+
 		@Override
 		public String toString() {
 			return "sigma " + F + " " + I;
 		}
+
 		@Override
 		public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
-		
-		
 
-		
 	}
 
-public static class Pi extends InstExp {
-	
-	MapExp F;
-	InstExp I;
-	public Pi(MapExp f, InstExp i) {
-		super();
-		F = f;
-		I = i;
-	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((F == null) ? 0 : F.hashCode());
-		result = prime * result + ((I == null) ? 0 : I.hashCode());
-		return result;
-	}
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public static class Pi extends InstExp {
+
+		public MapExp F;
+		public String I;
+
+		public Pi(MapExp f, String i) {
+			super();
+			F = f;
+			I = i;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((F == null) ? 0 : F.hashCode());
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Pi other = (Pi) obj;
+			if (F == null) {
+				if (other.F != null)
+					return false;
+			} else if (!F.equals(other.F))
+				return false;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Pi other = (Pi) obj;
-		if (F == null) {
-			if (other.F != null)
-				return false;
-		} else if (!F.equals(other.F))
-			return false;
-		if (I == null) {
-			if (other.I != null)
-				return false;
-		} else if (!I.equals(other.I))
-			return false;
-		return true;
-	}
-	@Override
-	public String toString() {
-		return "pi " + F + " " + I;
-	}
-	@Override
-	public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
-		return v.visit(env, this);
-	}
-	
-	
+		}
 
-	
-}
+		@Override
+		public String toString() {
+			return "pi " + F + " " + I;
+		}
 
-public static class FullSigma extends InstExp {
-	
-	MapExp F;
-	InstExp I;
-	public FullSigma(MapExp f, InstExp i) {
-		super();
-		F = f;
-		I = i;
+		@Override
+		public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
 	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((F == null) ? 0 : F.hashCode());
-		result = prime * result + ((I == null) ? 0 : I.hashCode());
-		return result;
-	}
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+
+	public static class FullSigma extends InstExp {
+
+		public MapExp F;
+		public String I;
+
+		public FullSigma(MapExp f, String i) {
+			super();
+			F = f;
+			I = i;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((F == null) ? 0 : F.hashCode());
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			FullSigma other = (FullSigma) obj;
+			if (F == null) {
+				if (other.F != null)
+					return false;
+			} else if (!F.equals(other.F))
+				return false;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		FullSigma other = (FullSigma) obj;
-		if (F == null) {
-			if (other.F != null)
-				return false;
-		} else if (!F.equals(other.F))
-			return false;
-		if (I == null) {
-			if (other.I != null)
-				return false;
-		} else if (!I.equals(other.I))
-			return false;
-		return true;
-	}
-	@Override
-	public String toString() {
-		return "SIGMA " + F + " " + I;
-	}
-	@Override
-	public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
-		return v.visit(env, this);
-	}
-	
-	
-	
-}
+		}
 
-public static class Relationalize extends InstExp {
-	
-	public Relationalize(InstExp i) {
-		super();
-		I = i;
+		@Override
+		public String toString() {
+			return "SIGMA " + F + " " + I;
+		}
+
+		@Override
+		public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
 	}
-	InstExp I;
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((I == null) ? 0 : I.hashCode());
-		return result;
-	}
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+
+	public static class Relationalize extends InstExp {
+		public String I;
+
+		public Relationalize(String i) {
+			super();
+			I = i;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Relationalize other = (Relationalize) obj;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Relationalize other = (Relationalize) obj;
-		if (I == null) {
-			if (other.I != null)
+		}
+
+		@Override
+		public String toString() {
+			return "relationalize " + I;
+		}
+
+		@Override
+		public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+	}
+
+	public static class External extends InstExp {
+
+		public SigExp sig;
+		public String name;
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((name == null) ? 0 : name.hashCode());
+			result = prime * result + ((sig == null) ? 0 : sig.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
 				return false;
-		} else if (!I.equals(other.I))
-			return false;
-		return true;
-	}
-	@Override
-	public String toString() {
-		return "relationalize " + I;
-	}
-	@Override
-	public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
-		return v.visit(env, this);
-	}
-
-	
-}
-
-public static class External extends InstExp {
-	
-	SigExp sig;
-	String name;
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((sig == null) ? 0 : sig.hashCode());
-		return result;
-	}
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+			if (getClass() != obj.getClass())
+				return false;
+			External other = (External) obj;
+			if (name == null) {
+				if (other.name != null)
+					return false;
+			} else if (!name.equals(other.name))
+				return false;
+			if (sig == null) {
+				if (other.sig != null)
+					return false;
+			} else if (!sig.equals(other.sig))
+				return false;
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		External other = (External) obj;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (sig == null) {
-			if (other.sig != null)
-				return false;
-		} else if (!sig.equals(other.sig))
-			return false;
-		return true;
+		}
+
+		public External(SigExp sig, String name) {
+			super();
+			this.sig = sig;
+			this.name = name;
+		}
+
+		@Override
+		public String toString() {
+			return "external " + name + " " + sig;
+		}
+
+		@Override
+		public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
 	}
-	public External(SigExp sig, String name) {
-		super();
-		this.sig = sig;
-		this.name = name;
-	}
-	
-	@Override
-	public String toString() {
-		return "external " + name + " " + sig;
-	}
-	
-	@Override
-	public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
-		return v.visit(env, this);
-	}
-	
-	
-}
 
 	@Override
 	public abstract boolean equals(Object o);
@@ -844,25 +822,36 @@ public static class External extends InstExp {
 
 	@Override
 	public abstract int hashCode();
-	
-	
-	
+
 	public interface InstExpVisitor<R, E> {
-		public R visit (E env, Zero e);
-		public R visit (E env, One e);
-		public R visit (E env, Two e);
-		public R visit (E env, Plus e);
-		public R visit (E env, Times e);
-		public R visit (E env, Exp e);
-		public R visit (E env, Var e);
-		public R visit (E env, Const e);
-		public R visit (E env, Delta e);
-		public R visit (E env, Sigma e);
-		public R visit (E env, Pi e);
-		public R visit (E env, FullSigma e);
-		public R visit (E env, Relationalize e);
-		public R visit (E env, External e);
-		public R visit (E env, Eval e);
+		public R visit(E env, Zero e);
+
+		public R visit(E env, One e);
+
+		public R visit(E env, Two e);
+
+		public R visit(E env, Plus e);
+
+		public R visit(E env, Times e);
+
+		public R visit(E env, Exp e);
+
+		// public R visit (E env, Var e);
+		public R visit(E env, Const e);
+
+		public R visit(E env, Delta e);
+
+		public R visit(E env, Sigma e);
+
+		public R visit(E env, Pi e);
+
+		public R visit(E env, FullSigma e);
+
+		public R visit(E env, Relationalize e);
+
+		public R visit(E env, External e);
+
+		public R visit(E env, Eval e);
 	}
 
 }

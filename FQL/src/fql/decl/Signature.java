@@ -9,10 +9,13 @@ import java.awt.Paint;
 import java.awt.Stroke;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
@@ -54,16 +57,33 @@ public class Signature  {
 	public List<Node> nodes;
 	public List<Edge> edges;
 	public List<Attribute<Node>> attrs;
+	
+	public Map<String, Color> colors;
 
+	public static Color[] colors_arr = new Color[] { Color.RED, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.yellow, Color.CYAN, Color.GRAY, Color.ORANGE, Color.PINK, Color.BLACK};
+	
 	public Set<Eq> eqs;
 //	public String name0;
 
+	public void doColors() {
+		colors = new HashMap<>();
+		int i = 0;
+		for (Node n : nodes) {
+			if (i == colors_arr.length) {
+				colors.put(n.string, Color.WHITE);
+			} else {
+				colors.put(n.string, colors_arr[i++]);
+			}
+		}
+	}
+	
 	public Signature clone() {
 		Signature s = new Signature();
 		s.nodes = new LinkedList<>(nodes);
 		s.edges = new LinkedList<>(edges);
 		s.attrs = new LinkedList<>(attrs);
 		s.eqs = new HashSet<>(eqs);
+		s.colors = new HashMap<>(colors);
 	//	s.name0 = newname;
 		return s;
 	}
@@ -150,10 +170,16 @@ public class Signature  {
 			eqs.add(eq);
 		}
 		
+		Collections.sort(nodes);
+		Collections.sort(attrs);
+		Collections.sort(arrows);
+		
 		//System.out.println(this);
 		if (!DEBUG.ALLOW_INFINITES) {
 			toCategory2();
 		}
+		
+		doColors();
 	}
 /*
 	public Signature(String n, List<Triple<String, String, String>> arrows,

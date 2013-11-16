@@ -22,7 +22,7 @@ import fql.decl.Edge;
 import fql.decl.Environment;
 import fql.decl.Int;
 import fql.decl.Mapping;
-import fql.decl.NewestFQLProgram;
+import fql.decl.FQLProgram;
 import fql.decl.Node;
 import fql.decl.Path;
 import fql.decl.Signature;
@@ -39,8 +39,13 @@ public class PSMGen
 {
 
 	public static List<PSM> guidify(String pre0, Signature sig) throws FQLException {	
+		return guidify(pre0, sig, false);
+	}
+	public static List<PSM> guidify(String pre0, Signature sig, boolean remember) throws FQLException {	
 		// System.out.println("GUIDifying " + pre0);
 		List<PSM> ret = new LinkedList<>();
+		
+		
 
 //		if (DEBUG.DO_NOT_GUIDIFY) {
 //			return ret;
@@ -69,11 +74,11 @@ public class PSMGen
 			// make a substitution table
 			ret.add(new CreateTable(pre + "_subst", twocol_attrs, false));
 			ret.add(new InsertSQL(pre + "_subst", makeSubst(pre0, n)));
-
+			
 			ret.add(new CreateTable(pre + "_subst_inv", twocol_attrs, false));
 			ret.add(new InsertSQL(pre + "_subst_inv", invertSubst(pre0, n)));
 
-			// create a new table that applies the substitution
+					// create a new table that applies the substitution
 			ret.add(new CreateTable(pre + "_applied", twocol_attrs, false));
 			ret.add(new InsertSQL(pre + "_applied", makeApplyNode(pre0, n)));
 
@@ -132,10 +137,12 @@ public class PSMGen
 
 		// same for attributes, but one sided
 
-		for (Node n : sig.nodes) {
-			String pre = pre0 + "_" + n;
-			ret.add(new DropTable(pre + "_subst"));
-			ret.add(new DropTable(pre + "_subst_inv"));
+		if (!remember) {
+			for (Node n : sig.nodes) {
+				String pre = pre0 + "_" + n;
+				ret.add(new DropTable(pre + "_subst"));
+				ret.add(new DropTable(pre + "_subst_inv"));
+			}
 		}
 		// System.out.println("&&&&&&&&&&&&");
 		// System.out.println(ret);
@@ -217,7 +224,7 @@ public class PSMGen
 		return new Flower(select, from, where);
 	}
 
-	public static List<PSM> compile0(Environment env, NewestFQLProgram init)
+	public static List<PSM> compile0(Environment env, FQLProgram init)
 			throws FQLException {
 		List<PSM> ret = new LinkedList<>();
 		/*
@@ -245,7 +252,7 @@ public class PSMGen
 		return ret;
 	}
 
-	public static String compile(Environment env, NewestFQLProgram init)
+	public static String compile(Environment env, FQLProgram init)
 			throws FQLException {
 		return DEBUG.prelude + "\n\n" + prettyPrint(compile0(env, init));
 	}
@@ -484,7 +491,7 @@ public class PSMGen
 		return ret0;
 	}
 
-	private static Flower compose(String[] p) {
+	public static Flower compose(String[] p) {
 		Map<String, Pair<String, String>> select = new HashMap<>();
 		Map<String, String> from = new HashMap<>();
 		List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();

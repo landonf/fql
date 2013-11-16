@@ -26,7 +26,8 @@ public class ExternalExample extends Example {
 					+ "\ninstance I = { nodes T -> {}; attributes; arrows; } : C"
 					+ "\n"
 					+ "\n// copies given extblname into J"
-					+ "\ninstance J = external C extblname\n";
+					+ "\ninstance J = external C extblname\n"
+					+ "\n\ndrop I //drops tables for I";
 /*					+ "\n"
 					+ "\nmapping F : C -> C = id C"
 					+ "\n"

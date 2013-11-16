@@ -7,7 +7,7 @@ package fql.decl;
  *         Implentation of atomic attributes.
  */
 @SuppressWarnings("hiding")
-public class Attribute<Node> {
+public class Attribute<Node> implements Comparable<Attribute<Node>> {
 
 	public Attribute(String name, Node source, Type target) {
 		this.name = name;
@@ -60,5 +60,9 @@ public class Attribute<Node> {
 	public String name;
 	public Node source;
 	public Type target;
+	@Override
+	public int compareTo(Attribute<Node> o) {
+		return name.compareTo(o.name);
+	}
 
 }

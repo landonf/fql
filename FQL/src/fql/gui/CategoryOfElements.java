@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Paint;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.UIManager;
+
+import org.apache.commons.collections15.Transformer;
 
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
@@ -110,7 +114,7 @@ public class CategoryOfElements {
 		return false;
 	}
 
-	public static JPanel doView(Graph<Pair<Node, Object>, Pair<Path, Integer>> sgv, HashMap<Pair<Node, Object>, Map<Attribute<Node>, Object>> map0) {
+	public static JPanel doView(final Instance inst, Graph<Pair<Node, Object>, Pair<Path, Integer>> sgv, HashMap<Pair<Node, Object>, Map<Attribute<Node>, Object>> map0) {
 	//	HashMap<Pair<Node, Object>,String> map = new HashMap<>();
 		JPanel cards = new JPanel(new CardLayout());
 
@@ -127,15 +131,11 @@ public class CategoryOfElements {
 				layout);
 		vv.setPreferredSize(new Dimension(600, 400));
 		// Setup up a new vertex to paint transformer...
-//		Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
-//			public Paint transform(String i) {
-//				if (!isAttribute(i)) {
-//					return env.colors.get(name0);
-//				} else {
-//					return UIManager.getColor("Panel.background");
-//				}
-//			}
-//		};
+		Transformer<Pair<Node, Object>, Paint> vertexPaint = new Transformer<Pair<Node, Object>, Paint>() {
+			public Paint transform(Pair<Node, Object> i) {
+				return inst.thesig.colors.get(i.first.string);
+			}
+		};
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
@@ -160,7 +160,7 @@ public class CategoryOfElements {
 //				return bs;
 //			}
 //		};
-//		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 //		vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
 //		vv.getRenderContext().setVertexLabelTransformer(
 	//			new ToStringLabeller<String>());
@@ -234,7 +234,7 @@ public class CategoryOfElements {
 			if (g.first.getVertexCount() == 0) {
 				return new JPanel();
 			}
-			return doView(g.first, g.second);
+			return doView(i, g.first, g.second);
 
 		} catch (FQLException e) {
 			JPanel p = new JPanel(new GridLayout(1,1));

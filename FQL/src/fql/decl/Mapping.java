@@ -14,7 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -47,7 +46,6 @@ import fql.cat.FinFunctor;
 import fql.sql.EmbeddedDependency;
 import fql.sql.PSM;
 import fql.sql.PSMGen;
-import fql.sql.RA;
 
 /**
  * 
@@ -83,8 +81,6 @@ public class Mapping  {
 			}
 		}
 		
-		//TODO: source and target paths should be well-formed
-
 		// should be checked by knuth-bendix
 
 		if (!DEBUG.ALLOW_INFINITES  && !flag ) {
@@ -279,7 +275,6 @@ public class Mapping  {
 				Edge e = this.source.getEdge(arrow.first);
 				Path p = new Path(this.target, arrow.second);
 				em.put(e, p);
-				//TODO why is this not getting triggered?
 			}
 		} catch (FQLException e) {
 			throw new FQLException("In mapping " + this
@@ -422,7 +417,7 @@ public class Mapping  {
 
 		return p;
 	}
-
+/*
 	static String printNicely(Map<String, RA> r) {
 		String s = "";
 		for (String k : r.keySet()) {
@@ -431,6 +426,7 @@ public class Mapping  {
 		}
 		return s;
 	}
+	*/
 
 	/**
 	 * Text view for mappings.
@@ -705,7 +701,7 @@ public class Mapping  {
 	// }
 	// return ret;
 	// }
-
+/*
 	public Map<String, Set<Pair<Object, Object>>> evalDelta(Instance theinstance)
 			throws FQLException {
 
@@ -742,6 +738,7 @@ public class Mapping  {
 
 		return Query.convert(i1);
 	}
+	*/
 
 	public JPanel pretty(final Environment env) throws FQLException {
 		Graph<String, String> g = build();

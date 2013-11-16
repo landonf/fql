@@ -7,7 +7,11 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import fql.decl.Driver;
+import fql.decl.Environment;
+import fql.decl.FQLProgram;
 import fql.gui.GUI;
+import fql.parse.FQLParser;
 
 /**
  * 
@@ -18,8 +22,23 @@ import fql.gui.GUI;
 public class FQL {
 
 	public static void main(String[] args) {
-		// System.setProperty("awt.useSystemAAFontSettings","on");
-		// System.setProperty("swing.aatext", "true");
+		if (args.length == 1) {
+			try {
+				FQLProgram init = FQLParser.program(args[0]);
+				Pair<Environment, String> envX = Driver.makeEnv(init);
+				System.out.println("OK");
+				System.out.println(envX.second);
+				return;
+			} catch (Throwable err) {
+				err.printStackTrace(System.err);
+				System.out.println(err.getLocalizedMessage());
+				return;
+			}
+		} else if (args.length != 0) {
+			System.out.println("The FQL IDE expects zero arguments for the gui and one argument, a string, for the compiler.");
+			return;
+		}
+		
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 

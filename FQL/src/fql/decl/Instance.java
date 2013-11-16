@@ -271,6 +271,7 @@ public class Instance  {
 			List<Pair<String, List<Pair<Object, Object>>>> data)
 			throws FQLException {
 		//this.name = n;
+		this.thesig = thesig;
 		this.data = new HashMap<>();
 		for (Node node : thesig.nodes) {
 			this.data.put(node.string, makeFirst(node.string, data));
@@ -282,7 +283,6 @@ public class Instance  {
 		for (Attribute<Node> a : thesig.attrs) {
 			this.data.put(a.name, lookup(a.name, data));
 		}
-		this.thesig = thesig;
 		if (!typeCheck(thesig)) {
 			throw new FQLException("Type-checking failure " + this);
 		}
@@ -296,8 +296,8 @@ public class Instance  {
 				return secol(p.second);
 			}
 		}
-		throw new RuntimeException("cannot find " + string + " in " + data2
-				+ " in " + this);
+		throw new RuntimeException("conformsTo failure: cannot find " + string + " in " + data2
+				);
 	}
 
 	private Set<Pair<Object, Object>> secol(List<Pair<Object, Object>> second) {
@@ -446,6 +446,10 @@ public class Instance  {
 			return false;
 		return true;
 	}
+	
+	public String quickPrint() {
+		return data.toString();
+	}
 
 	@Override
 	public String toString() {
@@ -516,6 +520,9 @@ public class Instance  {
 	private String printSet(Set<Pair<Object, Object>> v) {
 		StringBuffer sb = new StringBuffer();
 		boolean first = true;
+		if (v == null) {
+			return "null";
+		}
 		for (Pair<Object, Object> p : v) {
 			if (!first) {
 				sb.append(", ");
@@ -998,8 +1005,8 @@ public class Instance  {
 		}
 	}
 
-	public JPanel pretty(Environment env) throws FQLException {
-		return makeViewer(env);
+	public JPanel pretty(Color c) throws FQLException {
+		return makeViewer(c);
 	}
 
 
@@ -1023,15 +1030,15 @@ public class Instance  {
 		return g2;
 	}
 
-	public JPanel makeViewer(Environment env) {
+	public JPanel makeViewer(Color c) {
 		Graph<String, String> g = build();
 		if (g.getVertexCount() == 0) {
 			return new JPanel();
 		}
-		return doView(env, g);
+		return doView(c, g);
 	}
 
-	public JPanel doView(final Environment env, Graph<String, String> sgv) {
+	public JPanel doView(/* final Environment env ,*/ final Color color, Graph<String, String> sgv) {
 		// Layout<V, E>, BasicVisualizationServer<V,E>
 		// Layout<String, String> layout = new KKLayout(sgv);
 
@@ -1049,7 +1056,7 @@ public class Instance  {
 				if (thesig.isAttribute(i)) {
 					return UIManager.getColor("Panel.background");
 				}
-				return Color.RED;
+				return color;
 			}
 		}; 
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();

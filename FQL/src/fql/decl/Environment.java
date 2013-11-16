@@ -1,6 +1,9 @@
 package fql.decl;
 
+import java.awt.Color;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import fql.FQLException;
 
@@ -15,27 +18,43 @@ import fql.FQLException;
 public class Environment {
 
 	public Environment(Map<String, Signature> signatures,
-		Map<String, Mapping> mappings,
-		Map<String, Instance> instances,
-		Map<String, Query> queries) {
-	super();
-	this.signatures = signatures;
-	this.mappings = mappings;
-	this.instances = instances;
-	this.queries = queries;
-}
+			Map<String, Mapping> mappings, Map<String, Instance> instances,
+			Map<String, Query> queries, Map<String, Transform> transforms) {
+		super();
+		this.signatures = signatures;
+		this.mappings = mappings;
+		this.instances = instances;
+		this.queries = queries;
+		this.transforms = transforms;
+		doColors();
+	}
 
+	public Map<String, Color> colors;
+
+	public static Color[] colors_arr = new Color[] { Color.RED, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.yellow, Color.CYAN, Color.GRAY, Color.ORANGE, Color.PINK, Color.BLACK};
 	
+	public Set<Eq> eqs;
+//	public String name0;
 
-
+	public void doColors() {
+		colors = new HashMap<>();
+		int i = 0;
+		for (String n : instances.keySet()) {
+			if (i == colors_arr.length) {
+				colors.put(n, Color.WHITE);
+			} else {
+				colors.put(n, colors_arr[i++]);
+			}
+		}
+	}
 
 	public Map<String, Signature> signatures;
 	public Map<String, Mapping> mappings;
 	public Map<String, Query> queries;
 	public Map<String, Instance> instances;
+	public Map<String, Transform> transforms;
 
-
-
+	
 	public Signature getSchema(String s0) throws FQLException {
 		Signature s = signatures.get(s0);
 		if (s == null) {

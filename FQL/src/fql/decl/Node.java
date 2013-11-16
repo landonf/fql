@@ -7,7 +7,7 @@ package fql.decl;
  * 
  *         Nodes in a signature.
  */
-public class Node {
+public class Node implements Comparable<Node> {
 
 	public String toString() {
 		return string;
@@ -47,6 +47,11 @@ public class Node {
 
 	public String tojson() {
 		return "\"" + string + "\"";
+	}
+
+	@Override
+	public int compareTo(Node o) {
+		return string.compareTo(o.string);
 	}
 
 }

@@ -74,9 +74,9 @@ public class ExampleMaker {
 					sb.append("\"");
 				}
 				sb.append(l);
-				sb.append("\"");
-				sb.append("\n");				
+				sb.append("\"\n");
 			}
+			sb.append("\n\n");				
 			return sb.toString();
 		} catch (IOException e) {
 			e.printStackTrace();

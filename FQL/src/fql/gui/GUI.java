@@ -397,6 +397,7 @@ public class GUI extends JPanel {
 		 JDialog dialog = pane.createDialog(null, "Help");
 		 dialog.setModal(false);
 		 dialog.setVisible(true);
+		 dialog.setResizable(true);
 		 
 		//JOptionPane.showMessageDialog(null, p, "Help",
 			//	JOptionPane.PLAIN_MESSAGE, null);
@@ -462,6 +463,8 @@ public class GUI extends JPanel {
 		CodeEditor e = (CodeEditor) editors.getComponentAt(editors
 				.getSelectedIndex());
 		doSave(f, e.getText());
+		// change for david
+		dirty.put(e.id, false);
 		closeAction();
 		doOpen(f);
 	}
