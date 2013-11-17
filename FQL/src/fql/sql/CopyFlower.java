@@ -24,8 +24,8 @@ public class CopyFlower extends Flower {
 	}
 	
 	@Override
-	public Set<Map<String, Object>> eval(
-			Map<String, Set<Map<String, Object>>> state) {
+	public Set<Map<Object, Object>> eval(
+			Map<String, Set<Map<Object, Object>>> state) {
 		return state.get(name);
 	}
 }

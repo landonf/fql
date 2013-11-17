@@ -19,11 +19,11 @@ public class DropTable extends PSM {
 
 	@Override
 	public String toPSM() {
-		return "DROP TABLE " + name + ";";
+		return "DROP TABLE " + name;
 	}
 
 	@Override
-	public void exec(Map<String, Set<Map<String, Object>>> state) {
+	public void exec(Map<String, Set<Map<Object, Object>>> state) {
 		if (state.containsKey(name) && state.get(name) == null) {
 			throw new RuntimeException("Table does not exist: " + name);
 		}

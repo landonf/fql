@@ -149,13 +149,13 @@ public class ED {
 		where0.addAll(ret);
 		Flower back = make(2 * forall.size(), forall0, where0);
 
-		Map<String, Set<Map<String, Object>>> state = conv(I);
+		Map<String, Set<Map<Object, Object>>> state = conv(I);
 
 	//		System.out.println("front is " + front);
 		//	System.out.println("back is " + back);
 		
-		Set<Map<String, Object>> lhs = front.eval(state);
-		Set<Map<String, Object>> rhs = back.eval(state);
+		Set<Map<Object, Object>> lhs = front.eval(state);
+		Set<Map<Object, Object>> rhs = back.eval(state);
 
 		if (lhs.equals(rhs)) {
 			return true;
@@ -191,16 +191,16 @@ public class ED {
 		return new Flower(s, f, w);
 	}
 
-	public static Map<String, Set<Map<String, Object>>> conv(
+	public static Map<String, Set<Map<Object, Object>>> conv(
 			Map<String, Set<Pair<Object, Object>>> i) {
-		Map<String, Set<Map<String, Object>>> ret = new HashMap<>();
+		Map<String, Set<Map<Object, Object>>> ret = new HashMap<>();
 
 		for (String k : i.keySet()) {
 			Set<Pair<Object, Object>> v = i.get(k);
-			Set<Map<String, Object>> v0 = new HashSet<>();
+			Set<Map<Object, Object>> v0 = new HashSet<>();
 
 			for (Pair<Object, Object> o : v) {
-				Map<String, Object> x = new HashMap<>();
+				Map<Object, Object> x = new HashMap<>();
 				x.put("c0", o.first);
 				x.put("c1", o.second);
 				v0.add(x);

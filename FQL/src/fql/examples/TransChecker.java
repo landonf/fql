@@ -3,10 +3,13 @@ package fql.examples;
 import java.util.LinkedList;
 import java.util.List;
 
+import fql.FQLException;
 import fql.Pair;
 import fql.decl.FQLProgram;
 import fql.decl.InstExp;
+import fql.decl.Instance;
 import fql.decl.SigExp;
+import fql.decl.Signature;
 import fql.decl.TransExp.Case;
 import fql.decl.TransExp.Comp;
 import fql.decl.TransExp.Const;
@@ -20,6 +23,7 @@ import fql.decl.TransExp.Snd;
 import fql.decl.TransExp.TT;
 import fql.decl.TransExp.TransExpVisitor;
 import fql.decl.TransExp.Var;
+import fql.decl.Transform;
 
 public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLProgram>{
 
@@ -79,8 +83,16 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		if (!srct.equals(dstt)) {
 			throw new RuntimeException("Instances not of same type on " + e + " are " + srct + " and " + dstt);
 		}
+
+		Signature sig = srct.toSig(env.sigs);
+			List<Pair<String, List<Pair<Object, Object>>>> bbb = e.objs;
+		try {	
+			new Transform(new Instance(sig, src0.data), new Instance(sig, dst0.data), bbb );
+		} catch (FQLException fe) {
+			fe.printStackTrace();
+			throw new RuntimeException(fe.getLocalizedMessage());
+		}
 		
-		//TODO check that transExpConst is a transformation
 		//TODO syntax highlighting pass
 		
 		return new Pair<>(e.src, e.dst);

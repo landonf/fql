@@ -21,11 +21,11 @@ public class InsertSQL extends PSM {
 
 	@Override
 	public String toPSM() {
-		return "INSERT INTO " + name + " " + sql.toPSM() + ";";
+		return "INSERT INTO " + name + " " + sql.toPSM();
 	}
 
 	@Override
-	public void exec(Map<String, Set<Map<String, Object>>> state) {
+	public void exec(Map<String, Set<Map<Object, Object>>> state) {
 		if (!state.containsKey(name)) {
 			throw new RuntimeException("does not contain key " + name + "\n\n" + state);
 		}

@@ -44,13 +44,7 @@ public class PSMGen
 	public static List<PSM> guidify(String pre0, Signature sig, boolean remember) throws FQLException {	
 		// System.out.println("GUIDifying " + pre0);
 		List<PSM> ret = new LinkedList<>();
-		
-		
-
-//		if (DEBUG.DO_NOT_GUIDIFY) {
-//			return ret;
-//		}
-//		
+				
 		Map<String, String> guid_attrs = new HashMap<>();
 		Map<String, String> twocol_attrs = new HashMap<>();
 
@@ -264,7 +258,7 @@ public class PSMGen
 			if (s.trim().length() == 0) {
 				continue;
 			}
-			ret += p.toPSM() + "\n\n";
+			ret += p.toPSM() + ";\n\n";
 		}
 		return ret;
 	}
@@ -420,10 +414,10 @@ public class PSMGen
 		List<String> attrs = new LinkedList<>();
 		attrs.add("c0");
 		attrs.add("c1");
-		Set<Map<String, Object>> values = new HashSet<>();
+		Set<Map<Object, Object>> values = new HashSet<>();
 
 		for (Pair<Object, Object> row : data) {
-			Map<String, Object> m = new HashMap<>();
+			Map<Object, Object> m = new HashMap<>();
 			m.put("c0", row.first);
 			m.put("c1", row.second);
 			values.add(m);
@@ -1066,10 +1060,10 @@ public class PSMGen
 		return ret;
 	}
 
-	private static List<Pair<Object, Object>> gather0(Set<Map<String, Object>> v) {
+	private static List<Pair<Object, Object>> gather0(Set<Map<Object, Object>> v) {
 		List<Pair<Object, Object>> ret = new LinkedList<>();
 
-		for (Map<String, Object> o : v) {
+		for (Map<Object, Object> o : v) {
 			ret.add(new Pair<>(o.get("c0"), o.get("c1")));
 		}
 
@@ -1078,11 +1072,11 @@ public class PSMGen
 
 	public static List<Pair<String, List<Pair<Object, Object>>>> gather(
 			String pre, Signature sig,
-			Map<String, Set<Map<String, Object>>> state) {
+			Map<String, Set<Map<Object, Object>>> state) {
 		List<Pair<String, List<Pair<Object, Object>>>> ret = new LinkedList<>();
 
 		for (Node n : sig.nodes) {
-			Set<Map<String, Object>> v = state.get(pre + "_" + n.string);
+			Set<Map<Object, Object>> v = state.get(pre + "_" + n.string);
 			if (v == null) {
 				throw new RuntimeException("Missing: " + pre + "_" + n.string
 						+ " in " + state);
@@ -1090,11 +1084,11 @@ public class PSMGen
 			ret.add(new Pair<>(n.string, gather0(v)));
 		}
 		for (Edge e : sig.edges) {
-			Set<Map<String, Object>> v = state.get(pre + "_" + e.name);
+			Set<Map<Object, Object>> v = state.get(pre + "_" + e.name);
 			ret.add(new Pair<>(e.name, gather0(v)));
 		}
 		for (Attribute<Node> a : sig.attrs) {
-			Set<Map<String, Object>> v = state.get(pre + "_" + a.name);
+			Set<Map<Object, Object>> v = state.get(pre + "_" + a.name);
 			ret.add(new Pair<>(a.name, gather0(v)));
 		}
 

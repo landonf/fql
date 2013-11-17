@@ -477,8 +477,8 @@ public class Chase {
 
 			Flower front = xxx.front();
 			Flower back = xxx.back();
-			Set<Map<String, Object>> frontX = front.eval(ED.conv(i0));
-			Set<Map<String, Object>> backX = back.eval(ED.conv(i0));
+			Set<Map<Object, Object>> frontX = front.eval(ED.conv(i0));
+			Set<Map<Object, Object>> backX = back.eval(ED.conv(i0));
 			if (!frontX.equals(backX)) {
 				return false;
 			}
@@ -489,8 +489,8 @@ public class Chase {
 
 			Flower front = xxx.front();
 			Flower back = xxx.back();
-			Set<Map<String, Object>> frontX = front.eval(ED.conv(i0));
-			Set<Map<String, Object>> backX = back.eval(ED.conv(i0));
+			Set<Map<Object, Object>> frontX = front.eval(ED.conv(i0));
+			Set<Map<Object, Object>> backX = back.eval(ED.conv(i0));
 			if (!frontX.equals(backX)) {
 				return false;
 			}
@@ -727,10 +727,10 @@ public class Chase {
 		Flower back = xxx.back();
 		// System.out.println("Back " + back);
 
-		Set<Map<String, Object>> frontX = front.eval(ED.conv(i));
+		Set<Map<Object, Object>> frontX = front.eval(ED.conv(i));
 		// System.out.println("Front " + frontX);
 
-		Set<Map<String, Object>> backX = back.eval(ED.conv(i));
+		Set<Map<Object, Object>> backX = back.eval(ED.conv(i));
 		// System.out.println("Back " + backX);
 
 		if (frontX.equals(backX)) {
@@ -739,7 +739,7 @@ public class Chase {
 
 		// System.out.println("Firing on " + i);
 
-		for (Map<String, Object> eq : frontX) {
+		for (Map<Object, Object> eq : frontX) {
 			// System.out.println("eq is " + eq);
 
 			Map<String, String> map = new HashMap<>();
@@ -798,10 +798,10 @@ public class Chase {
 		Flower back = xxx.back();
 		// System.out.println("Back " + back);
 
-		Set<Map<String, Object>> frontX = front.eval(ED.conv(i));
+		Set<Map<Object, Object>> frontX = front.eval(ED.conv(i));
 		// System.out.println("Front " + frontX);
 
-		Set<Map<String, Object>> backX = back.eval(ED.conv(i));
+		Set<Map<Object, Object>> backX = back.eval(ED.conv(i));
 		// System.out.println("Back " + backX);
 
 		if (frontX.equals(backX)) {
@@ -816,7 +816,7 @@ public class Chase {
 			int b = getColNo(xxx0.forall, xxx0.where, eq.second);
 			// System.out.println(a);
 			// System.out.println(b);
-			for (Map<String, Object> row : frontX) {
+			for (Map<Object, Object> row : frontX) {
 				ret.add(new Pair<>(row.get("c" + a), row.get("c" + b)));
 			}
 		}

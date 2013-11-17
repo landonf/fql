@@ -201,10 +201,10 @@ public abstract class TransExp {
 	}
 */
 	public static class Const extends TransExp {
-		public List<Pair<String, List<Pair<String, String>>>> objs;
+		public List<Pair<String, List<Pair<Object, Object>>>> objs;
 		public String src, dst;
 
-		public Const(List<Pair<String, List<Pair<String, String>>>> objs,
+		public Const(List<Pair<String, List<Pair<Object, Object>>>> objs,
 				 String src, String dst) {
 			this.objs = objs;
 			this.src = src;
@@ -219,7 +219,7 @@ public abstract class TransExp {
 			
 			String nm = "nodes ";
 			boolean b = false;
-			for (Pair<String, List<Pair<String, String>>> k : objs) {
+			for (Pair<String, List<Pair<Object, Object>>> k : objs) {
 				if (b) {
 					nm += ",";
 				}
@@ -227,7 +227,7 @@ public abstract class TransExp {
 				
 				String xxx = "";
 				boolean c = false;
-				for (Pair<String, String> k0 : k.second) {
+				for (Pair<Object, Object> k0 : k.second) {
 					if (c) {
 						xxx += ",";
 					}

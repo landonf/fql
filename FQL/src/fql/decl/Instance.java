@@ -73,6 +73,9 @@ public class Instance  {
 						+ " in " + this);
 			}
 			for (Pair<Object, Object> p : i) {
+				if (p.first == null || p.second == null) {
+					throw new FQLException("Null data in " + this);
+				}
 				if (!p.first.equals(p.second)) {
 					throw new FQLException("Not reflexive: " 
 							+ s + " and " + this);
@@ -1479,7 +1482,7 @@ public class Instance  {
 		JTabbedPane t = new JTabbedPane();
 
 		String name = "obsinput"; //dont use 'input' here - it conflicts
-		Map<String, Set<Map<String, Object>>> state = shred( name );
+		Map<String, Set<Map<Object, Object>>> state = shred( name );
 		//System.out.println(state);
 		try {
 			if (thesig.attrs.size() == 0) {
@@ -1489,7 +1492,7 @@ public class Instance  {
 			List<PSM> prog = (PSMGen.makeTables("output", thesig, false));
 
 			 prog.addAll(Relationalizer.compile(thesig, "output", name, true));
-			Map<String, Set<Map<String, Object>>> res = PSMInterp.interpX(prog, state);
+			Map<String, Set<Map<Object, Object>>> res = PSMInterp.interpX(prog, state);
 						
 			for (Node n : thesig.nodes) {
 				t.addTab(n.string, makePanel(Relationalizer.attrs.get(n), res, n));
@@ -1507,7 +1510,7 @@ public class Instance  {
 	}
 
 	private JPanel makePanel(List<String> attrs,
-			Map<String, Set<Map<String, Object>>> res, Node n) {
+			Map<String, Set<Map<Object, Object>>> res, Node n) {
 		try {
 //		System.out.println("********");
 //		System.out.println(res);
@@ -1522,7 +1525,7 @@ public class Instance  {
 		Object[][] rows = new Object[data.get(n.string).size()][attrs.size() + 1];
 		
 		int j = 0;
-		for (Map<String, Object> row : res.get(n.string + "_observables")) {
+		for (Map<Object, Object> row : res.get(n.string + "_observables")) {
 			for (int i = 0; i < attrs.size(); i++) {
 				rows[j][i+1] = row.get("c" + i);
 			}
@@ -1551,18 +1554,18 @@ public class Instance  {
 	
 	}
 
-	private Map<String, Set<Map<String, Object>>> shred(String pre) {
-		Map<String, Set<Map<String, Object>>> ret = new HashMap<>();
+	private Map<String, Set<Map<Object, Object>>> shred(String pre) {
+		Map<String, Set<Map<Object, Object>>> ret = new HashMap<>();
 		for (String k : data.keySet()) {
 			ret.put(pre + "_" + k, shred0(data.get(k)));
 		}
 		return ret;
 	}
 
-	private Set<Map<String, Object>> shred0(Set<Pair<Object, Object>> set) {
-		Set<Map<String, Object>> ret = new HashSet<>();
+	private Set<Map<Object, Object>> shred0(Set<Pair<Object, Object>> set) {
+		Set<Map<Object, Object>> ret = new HashSet<>();
 		for (Pair<Object, Object> p : set) {
-			Map<String, Object> m = new HashMap<>();
+			Map<Object, Object> m = new HashMap<>();
 			m.put("c0", p.first);
 			m.put("c1", p.second);
 			ret.add(m);

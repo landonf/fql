@@ -39,7 +39,7 @@ public class FullSigma extends PSM {
 	}
 
 	@Override
-	public void exec(Map<String, Set<Map<String, Object>>> state) {
+	public void exec(Map<String, Set<Map<Object, Object>>> state) {
 		Signature C = f.source;
 		Signature D = f.target;
 		List<Pair<String, List<Pair<Object, Object>>>> I0 = PSMGen.gather(inst, C, state);
@@ -67,10 +67,10 @@ public class FullSigma extends PSM {
 		
 	}
 
-	private Set<Map<String, Object>> conv(Set<Pair<Object, Object>> set) {
-		Set<Map<String, Object>> ret = new HashSet<>();
+	private Set<Map<Object, Object>> conv(Set<Pair<Object, Object>> set) {
+		Set<Map<Object, Object>> ret = new HashSet<>();
 		for (Pair<Object, Object> p : set) {
-			Map<String, Object> m = new HashMap<>();
+			Map<Object, Object> m = new HashMap<>();
 			m.put("c0", p.first);
 			m.put("c1", p.second);
 			ret.add(m);

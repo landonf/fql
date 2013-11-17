@@ -11,8 +11,8 @@ import java.util.Set;
  */
 public abstract class SQL {
 
-	public abstract Set<Map<String, Object>> eval(
-			Map<String, Set<Map<String, Object>>> state);
+	public abstract Set<Map<Object, Object>> eval(
+			Map<String, Set<Map<Object, Object>>> state);
 
 	public abstract String toPSM();
 

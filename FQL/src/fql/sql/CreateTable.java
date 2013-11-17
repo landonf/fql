@@ -41,16 +41,16 @@ public class CreateTable extends PSM {
 			s += keys.get(i) + " " + attrs.get(keys.get(i));
 		}
 
-		return "CREATE TABLE " + name + "(" + s + ");";
+		return "CREATE TABLE " + name + "(" + s + ")";
 	}
 
 	@Override
-	public void exec(Map<String, Set<Map<String, Object>>> state) {
+	public void exec(Map<String, Set<Map<Object, Object>>> state) {
 		if (state.get(name) != null) {
 			throw new RuntimeException("table already exists: " + name + " in "
 					+ state);
 		}
-		state.put(name, new HashSet<Map<String, Object>>());
+		state.put(name, new HashSet<Map<Object, Object>>());
 	}
 
 }

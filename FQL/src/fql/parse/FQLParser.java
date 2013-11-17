@@ -271,7 +271,7 @@ public class FQLParser {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final TransExp toTransConst(Object decl, String t1, String t2) {
 
-		List<Pair<String, List<Pair<String, String>>>> objs = new LinkedList<>();
+		List<Pair<String, List<Pair<Object, Object>>>> objs = new LinkedList<>();
 
 		Tuple3 a0 = (Tuple3) decl;
 		List b0 = (List) a0.b;
@@ -280,10 +280,10 @@ public class FQLParser {
 			String p = (String) z.a;
 
 			List<?> q = (List<?>) z.c;
-			List<Pair<String, String>> l = new LinkedList<>();
+			List<Pair<Object, Object>> l = new LinkedList<>();
 			for (Object q0 : q) {
 				Tuple5 q1 = (Tuple5) q0;
-				l.add(new Pair<>(q1.b.toString(), q1.d.toString()));
+				l.add(new Pair<>(q1.b, q1.d));
 			}
 
 			objs.add(new Pair<>(p, l));

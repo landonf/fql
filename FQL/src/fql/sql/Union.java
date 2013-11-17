@@ -36,9 +36,9 @@ public class Union extends SQL {
 	}
 
 	@Override
-	public Set<Map<String, Object>> eval(
-			Map<String, Set<Map<String, Object>>> state) {
-		Set<Map<String, Object>> ret = new HashSet<>();
+	public Set<Map<Object, Object>> eval(
+			Map<String, Set<Map<Object, Object>>> state) {
+		Set<Map<Object, Object>> ret = new HashSet<>();
 		for (Flower f : flowers) {
 			ret.addAll(f.eval(state));
 		}

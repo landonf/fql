@@ -10,6 +10,7 @@ import java.util.Set;
 import fql.DEBUG;
 import fql.FQLException;
 import fql.Fn;
+import fql.JDBCBridge;
 import fql.LineException;
 import fql.Pair;
 import fql.Quad;
@@ -191,8 +192,14 @@ public class Driver {
 				throw new LineException(re.getLocalizedMessage(), k, "instance");
 			}
 		}
+		List<PSM> drops = computeDrops(prog);
 
-		Map<String, Set<Map<String, Object>>> res = PSMInterp.interp(psm);
+		Map<String, Set<Map<Object, Object>>> res;
+		if (DEBUG.useJDBC) {
+			res = JDBCBridge.go(psm, drops, prog);
+		} else {
+			res = PSMInterp.interp(psm);
+		}
 		// System.out.println(res);
 		for (String k : prog.insts.keySet()) {
 			try {
@@ -227,6 +234,14 @@ public class Driver {
 			}
 		}
 
+
+		String str = DEBUG.prelude + "\n\n" + PSMGen.prettyPrint(psm) + "\n\n"
+				+ PSMGen.prettyPrint(drops) + "\n\n";
+		return new Pair<>(new Environment(sigs, maps, insts, queries,
+				transforms), str.trim());
+	}
+
+	public static List<PSM> computeDrops(FQLProgram prog) {
 		List<PSM> drops = new LinkedList<>();
 		for (String k : prog.drop) {
 			if (prog.insts.containsKey(k)) {
@@ -253,12 +268,7 @@ public class Driver {
 						+ prog);
 			}
 		}
-
-		String str = DEBUG.prelude + "\n\n" + PSMGen.prettyPrint(psm) + "\n\n"
-				+ PSMGen.prettyPrint(drops) + "\n\n";
-		return new Pair<>(new Environment(sigs, maps, insts, queries,
-				transforms), str);
-
+		return drops;
 	}
 
 	public static class ToTransVisitor implements
@@ -348,7 +358,7 @@ public class Driver {
 
 			ret.addAll(PSMGen.makeTables("pre_" + dst, s, false));
 			for (Node k : s.nodes) {
-				Set<Map<String, Object>> values = convert(lookup(k.string,
+				Set<Map<Object, Object>> values = convert(lookup(k.string,
 						e.objs));
 				ret.add(new InsertValues("pre_" + dst + "_" + k.string, attrs,
 						values));
@@ -364,9 +374,9 @@ public class Driver {
 			return ret;
 		}
 
-		private List<Pair<String, String>> lookup(String string,
-				List<Pair<String, List<Pair<String, String>>>> objs) {
-			for (Pair<String, List<Pair<String, String>>> k : objs) {
+		private List<Pair<Object, Object>> lookup(String string,
+				List<Pair<String, List<Pair<Object, Object>>>> objs) {
+			for (Pair<String, List<Pair<Object, Object>>> k : objs) {
 				if (k.first.equals(string)) {
 					return k.second;
 				}
@@ -374,11 +384,11 @@ public class Driver {
 			throw new RuntimeException(string + " not found in " + objs);
 		}
 
-		private Set<Map<String, Object>> convert(List<Pair<String, String>> objs) {
-			Set<Map<String, Object>> ret = new HashSet<>();
+		private Set<Map<Object, Object>> convert(List<Pair<Object, Object>> list) {
+			Set<Map<Object, Object>> ret = new HashSet<>();
 
-			for (Pair<String, String> k : objs) {
-				Map<String, Object> map = new HashMap<>();
+			for (Pair<Object, Object> k : list) {
+				Map<Object, Object> map = new HashMap<>();
 				map.put("c0", k.first);
 				map.put("c1", k.second);
 				ret.add(map);
@@ -573,8 +583,8 @@ public class Driver {
 			List<String> attrs = new LinkedList<>();
 			attrs.add("c0");
 			attrs.add("c1");
-			Set<Map<String, Object>> values = new HashSet<>();
-			Map<String, Object> o = new HashMap<>();
+			Set<Map<Object, Object>> values = new HashSet<>();
+			Map<Object, Object> o = new HashMap<>();
 			o.put("unit", "unit");
 			values.add(o);
 
@@ -725,15 +735,15 @@ public class Driver {
 						attrsM.put(a.name, a.target.toString());
 					}
 					Flower f = new Flower(select, from, where);
-					ret.add(new CreateTable(dst + "_prod_temp_" + n.string, attrsM,
-							false));
+					ret.add(new CreateTable(dst + "_prod_temp_" + n.string,
+							attrsM, false));
 					ret.add(new InsertSQL(dst + "_prod_temp_" + n.string, f));
 					Map<String, String> attrsM0 = new HashMap<>(attrsM);
 					attrsM0.put("guid", PSM.VARCHAR());
-					ret.add(new CreateTable(dst + "_prod_guid_" + n.string, attrsM0,
-							false));
-					ret.add(new InsertKeygen(dst + "_prod_guid_" + n.string, "guid",
-							dst + "_prod_temp_" + n.string, attrs));
+					ret.add(new CreateTable(dst + "_prod_guid_" + n.string,
+							attrsM0, false));
+					ret.add(new InsertKeygen(dst + "_prod_guid_" + n.string,
+							"guid", dst + "_prod_temp_" + n.string, attrs));
 
 					List<Pair<Pair<String, String>, Pair<String, String>>> where0 = new LinkedList<>();
 
@@ -744,7 +754,7 @@ public class Driver {
 					select.put("c1", new Pair<>("t", "left"));
 					f = new Flower(select, from, where0);
 					ret.add(new InsertSQL(dst + "_fst_" + n, f));
-					
+
 					from = new HashMap<>();
 					from.put("t", dst + "_prod_guid_" + n.string);
 					select = new HashMap<>();
@@ -770,9 +780,9 @@ public class Driver {
 						ret.add(new InsertSQL(dst + "_" + a.name, sql));
 					}
 					ret.add(new DropTable(dst + "_prod_temp_" + n));
-					
+
 				}
-				
+
 				for (Edge edge : s.edges) {
 					Map<String, String> from = new HashMap<>();
 					from.put("leftEdge", e.a + "_" + edge.name);
@@ -780,24 +790,28 @@ public class Driver {
 					from.put("srcGuid", dst + "_prod_guid_" + edge.source);
 					from.put("dstGuid", dst + "_prod_guid_" + edge.target);
 					List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
-					where.add(new Pair<>(new Pair<>("leftEdge", "c0"),new Pair<>("srcGuid", "left")));
-					where.add(new Pair<>(new Pair<>("rightEdge", "c0"),new Pair<>("srcGuid", "right")));
-					where.add(new Pair<>(new Pair<>("leftEdge", "c1"),new Pair<>("dstGuid", "left")));
-					where.add(new Pair<>(new Pair<>("rightEdge", "c1"),new Pair<>("dstGuid", "right")));
+					where.add(new Pair<>(new Pair<>("leftEdge", "c0"),
+							new Pair<>("srcGuid", "left")));
+					where.add(new Pair<>(new Pair<>("rightEdge", "c0"),
+							new Pair<>("srcGuid", "right")));
+					where.add(new Pair<>(new Pair<>("leftEdge", "c1"),
+							new Pair<>("dstGuid", "left")));
+					where.add(new Pair<>(new Pair<>("rightEdge", "c1"),
+							new Pair<>("dstGuid", "right")));
 					Map<String, Pair<String, String>> select = new HashMap<>();
 					select.put("c0", new Pair<>("srcGuid", "guid"));
 					select.put("c1", new Pair<>("dstGuid", "guid"));
 					Flower f = new Flower(select, from, where);
 					ret.add(new InsertSQL(dst + "_" + edge.name, f));
 				}
-				
-			Fn<Quad<String, String, String, String>, List<PSM>> fn = new Fn<Quad<String, String, String, String>, List<PSM>>() {
+
+				Fn<Quad<String, String, String, String>, List<PSM>> fn = new Fn<Quad<String, String, String, String>, List<PSM>>() {
 					@Override
-					public List<PSM> of(Quad<String, String, String, String> x) { 
+					public List<PSM> of(Quad<String, String, String, String> x) {
 						String f = x.first; // x.third -> e.a
 						String g = x.second; // x.third -> e.b
 						String C = x.third;
-						
+
 						String dst0 = x.fourth;
 
 						// must be a map x.third -> dst
@@ -808,9 +822,12 @@ public class Driver {
 							from.put("f", f + "_" + n.string);
 							from.put("g", g + "_" + n.string);
 							from.put("lim", dst + "_prod_guid_" + n.string);
-							where.add(new Pair<>(new Pair<>("f","c0"), new Pair<>("g","c0")));
-							where.add(new Pair<>(new Pair<>("lim","left"),new Pair<>("f", "c1")));
-							where.add(new Pair<>(new Pair<>("lim","right"),new Pair<>("g", "c1")));							
+							where.add(new Pair<>(new Pair<>("f", "c0"),
+									new Pair<>("g", "c0")));
+							where.add(new Pair<>(new Pair<>("lim", "left"),
+									new Pair<>("f", "c1")));
+							where.add(new Pair<>(new Pair<>("lim", "right"),
+									new Pair<>("g", "c1")));
 							Map<String, Pair<String, String>> select = new HashMap<>();
 							select.put("c0", new Pair<>("f", "c0"));
 							select.put("c1", new Pair<>("lim", "guid"));

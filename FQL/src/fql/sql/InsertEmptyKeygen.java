@@ -21,11 +21,11 @@ public class InsertEmptyKeygen extends InsertKeygen {
 
 	@Override
 	public String toPSM() {
-		return "INSERT INTO " + name + " VALUES (@guid:=@guid+1);"; 
+		return "INSERT INTO " + name + " VALUES (@guid:=@guid+1)"; 
 	}
 
 	@Override
-	public void exec(Map<String, Set<Map<String, Object>>> state) {
+	public void exec(Map<String, Set<Map<Object, Object>>> state) {
 		//System.out.println("Exec " + this + " on " + state);
 		if (!state.containsKey(name)) {
 			throw new RuntimeException(this.toString());
@@ -33,8 +33,8 @@ public class InsertEmptyKeygen extends InsertKeygen {
 		if (state.get(name).size() > 0) {
 			throw new RuntimeException(this.toString());
 		}
-		Set<Map<String, Object>> ret = new HashSet<>();
-		Map<String, Object> m = new HashMap<>();
+		Set<Map<Object, Object>> ret = new HashSet<>();
+		Map<Object, Object> m = new HashMap<>();
 		m.put("guid", ++PSMInterp.guid);
 		ret.add(m);
 		

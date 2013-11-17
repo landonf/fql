@@ -26,14 +26,14 @@ public class SquishFlower extends Flower {
 	}
 
 	@Override
-	public Set<Map<String, Object>> eval(
-			Map<String, Set<Map<String, Object>>> state) {
-		Set<Map<String, Object>> v = state.get(name);
+	public Set<Map<Object, Object>> eval(
+			Map<String, Set<Map<Object, Object>>> state) {
+		Set<Map<Object, Object>> v = state.get(name);
 
-		Set<Map<String, Object>> ret = new HashSet<>();
+		Set<Map<Object, Object>> ret = new HashSet<>();
 
-		for (Map<String, Object> row : v) {
-			Map<String, Object> newrow = new HashMap<>();
+		for (Map<Object, Object> row : v) {
+			Map<Object, Object> newrow = new HashMap<>();
 			newrow.put("c0", row.get("guid"));
 			newrow.put("c1", row.get("guid"));
 			ret.add(newrow);

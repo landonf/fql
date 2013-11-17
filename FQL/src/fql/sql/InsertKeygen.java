@@ -47,12 +47,12 @@ public class InsertKeygen extends PSM {
 		}
 		
 	
-		return "INSERT INTO " + name + "(" + a + ", guid) SELECT " + a + ", @guid:=@guid+1 AS " + col + " FROM " + r + ";"; 
+		return "INSERT INTO " + name + "(" + a + ", guid) SELECT " + a + ", @guid:=@guid+1 AS " + col + " FROM " + r; 
 		
 	}
 
 	@Override
-	public void exec(Map<String, Set<Map<String, Object>>> state) {
+	public void exec(Map<String, Set<Map<Object, Object>>> state) {
 		//System.out.println("Exec " + this + " on " + state);
 		if (!state.containsKey(name)) {
 			throw new RuntimeException(name + "\n\n" + state);
@@ -63,10 +63,10 @@ public class InsertKeygen extends PSM {
 		if (state.get(name).size() > 0) {
 			throw new RuntimeException(this.toString());
 		}
-		Set<Map<String, Object>> ret = new HashSet<>();
-		for (Map<String, Object> row : state.get(r)) {
-			Map<String, Object> row0 = new HashMap<>();
-			for (String s : row.keySet()) {
+		Set<Map<Object, Object>> ret = new HashSet<>();
+		for (Map<Object, Object> row : state.get(r)) {
+			Map<Object, Object> row0 = new HashMap<>();
+			for (Object s : row.keySet()) {
 				row0.put(s, row.get(s));
 			}
 			row0.put(col, ++PSMInterp.guid);

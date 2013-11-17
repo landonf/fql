@@ -74,15 +74,15 @@ public class Flower extends SQL {
 	}
 
 	@Override
-	public Set<Map<String, Object>> eval(
-			Map<String, Set<Map<String, Object>>> state) {
+	public Set<Map<Object, Object>> eval(
+			Map<String, Set<Map<Object, Object>>> state) {
 
 //		 System.out.println("********");
 //		 System.out.println("Evaluating " + this);
 //		 System.out.println("state " + state);
 //		
 
-		Set<Map<Pair<String, String>, Object>> tableau = evalFrom(state);
+		Set<Map<Pair<Object, Object>, Object>> tableau = evalFrom(state);
 
 		// System.out.println("tableau " + tableau);
 
@@ -90,17 +90,17 @@ public class Flower extends SQL {
 
 		// System.out.println("tableau " + filtered);
 
-		Set<Map<String, Object>> projected = evalSelect(tableau);
+		Set<Map<Object, Object>> projected = evalSelect(tableau);
 
 		// System.out.println("tableau " + projected);
 
 		return projected;
 	}
 
-	private Set<Map<Pair<String, String>, Object>> evalWhere2(
-			Set<Map<Pair<String, String>, Object>> tableau) {
-		Set<Map<Pair<String, String>, Object>> ret = new HashSet<>();
-		a: for (Map<Pair<String, String>, Object> row : tableau) {
+	private Set<Map<Pair<Object, Object>, Object>> evalWhere2(
+			Set<Map<Pair<Object, Object>, Object>> tableau) {
+		Set<Map<Pair<Object, Object>, Object>> ret = new HashSet<>();
+		a: for (Map<Pair<Object, Object>, Object> row : tableau) {
 			for (Pair<Pair<String, String>, Pair<String, String>> eq : where) {
 				// System.out.println("****" + row);
 				// System.out.println("condition " + eq);
@@ -139,11 +139,11 @@ public class Flower extends SQL {
 	// return ret;
 	// }
 
-	private Set<Map<String, Object>> evalSelect(
-			Set<Map<Pair<String, String>, Object>> filtered) {
-		Set<Map<String, Object>> ret = new HashSet<>();
-		for (Map<Pair<String, String>, Object> row : filtered) {
-			Map<String, Object> row0 = new HashMap<>();
+	private Set<Map<Object, Object>> evalSelect(
+			Set<Map<Pair<Object, Object>, Object>> filtered) {
+		Set<Map<Object, Object>> ret = new HashSet<>();
+		for (Map<Pair<Object, Object>, Object> row : filtered) {
+			Map<Object, Object> row0 = new HashMap<>();
 			for (String k : select.keySet()) {
 				row0.put(k, row.get(select.get(k)));
 			}
@@ -152,9 +152,9 @@ public class Flower extends SQL {
 		return ret;
 	}
 
-	private Set<Map<Pair<String, String>, Object>> evalFrom(
-			Map<String, Set<Map<String, Object>>> state) {
-		Set<Map<Pair<String, String>, Object>> ret = null; // ok
+	private Set<Map<Pair<Object, Object>, Object>> evalFrom(
+			Map<String, Set<Map<Object, Object>>> state) {
+		Set<Map<Pair<Object, Object>, Object>> ret = null; // ok
 
 		// int sz = 1;
 		// for (String k : from.keySet()) {
@@ -189,22 +189,22 @@ public class Flower extends SQL {
 		return ret;
 	}
 
-	private Set<Map<Pair<String, String>, Object>> cartProd(String k,
-			Set<Map<Pair<String, String>, Object>> x,
-			Set<Map<String, Object>> y0, String v) {
+	private Set<Map<Pair<Object, Object>, Object>> cartProd(String k,
+			Set<Map<Pair<Object, Object>, Object>> x,
+			Set<Map<Object, Object>> y0, String v) {
 
-		Set<Map<Pair<String, String>, Object>> y = unit(k, y0, v);
+		Set<Map<Pair<Object, Object>, Object>> y = unit(k, y0, v);
 
-		Set<Map<Pair<String, String>, Object>> ret = new HashSet<>();
+		Set<Map<Pair<Object, Object>, Object>> ret = new HashSet<>();
 		// System.out.println("doing cartprod for " + x + " and " + y0 + " and "
 		// + v + " k " + k);
-		for (Map<Pair<String, String>, Object> row1 : x) {
-			for (Map<Pair<String, String>, Object> row2 : y) {
-				Map<Pair<String, String>, Object> row = new HashMap<>();
-				for (Pair<String, String> s : row1.keySet()) {
+		for (Map<Pair<Object, Object>, Object> row1 : x) {
+			for (Map<Pair<Object, Object>, Object> row2 : y) {
+				Map<Pair<Object, Object>, Object> row = new HashMap<>();
+				for (Pair<Object, Object> s : row1.keySet()) {
 					row.put(s, row1.get(s));
 				}
-				for (Pair<String, String> s : row2.keySet()) {
+				for (Pair<Object, Object> s : row2.keySet()) {
 					row.put(s, row2.get(s));
 				}
 				ret.add(row);
@@ -214,15 +214,15 @@ public class Flower extends SQL {
 		return ret;
 	}
 
-	private Set<Map<Pair<String, String>, Object>> unit(String k,
-			Set<Map<String, Object>> set, String v) {
-		Set<Map<Pair<String, String>, Object>> ret = new HashSet<>();
+	private Set<Map<Pair<Object, Object>, Object>> unit(String k,
+			Set<Map<Object, Object>> set, String v) {
+		Set<Map<Pair<Object, Object>, Object>> ret = new HashSet<>();
 		// System.out.println("doing unit for " + set + " and " + v + " and k "
 		// + k);
-		for (Map<String, Object> row : set) {
-			Map<Pair<String, String>, Object> row0 = new HashMap<>();
-			for (String attr : row.keySet()) {
-				row0.put(new Pair<>(k, attr), row.get(attr));
+		for (Map<Object, Object> row : set) {
+			Map<Pair<Object, Object>, Object> row0 = new HashMap<>();
+			for (Object attr : row.keySet()) {
+				row0.put(new Pair<>((Object)k, attr), row.get(attr));
 			}
 			ret.add(row0);
 		}

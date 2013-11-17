@@ -32,12 +32,11 @@ public abstract class SigExp {
 		}
 	}
 
-	//TODO Const equality should not matter order
 	public static class Const extends SigExp {
-		List<String> nodes;
-		List<Triple<String, String, String>> attrs;
-		List<Triple<String, String, String>> arrows;
-		List<Pair<List<String>, List<String>>> eqs;
+		public List<String> nodes;
+		public List<Triple<String, String, String>> attrs;
+		public List<Triple<String, String, String>> arrows;
+		public List<Pair<List<String>, List<String>>> eqs;
 
 		public Const(List<String> nodes,
 				List<Triple<String, String, String>> attrs,
