@@ -1,5 +1,6 @@
 package fql.decl;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,9 +17,16 @@ public class FQLProgram {
 			InstExp inst;
 			Integer line;
 			QueryExp query;
+			List<String> enums;
 
 //			Pair<SigExp, SigExp> map_t;
 	//		SigExp inst_t;
+			
+			public static NewDecl typeDecl(String name, List<String> values, Integer line) {
+				NewDecl ret = new NewDecl(name, line);
+				ret.enums = values;
+				return ret;
+			}
 
 			
 			
@@ -69,6 +77,7 @@ public class FQLProgram {
 			}
 		}
 
+		public LinkedHashMap<String, Type> enums = new LinkedHashMap<>();
 		public LinkedHashMap<String, SigExp> sigs = new LinkedHashMap<>();
 		public LinkedHashMap<String, MapExp> maps = new LinkedHashMap<>();
 		public LinkedHashMap<String, InstExp> insts = new LinkedHashMap<>();
@@ -83,8 +92,12 @@ public class FQLProgram {
 			for (NewDecl decl : decls) {
 				if (decl.name != null) {
 					order.add(decl.name); //drops are unnamed
-				}
-				if (decl.sig != null) {
+				} 
+				if (decl.enums != null) {
+					checkDup(decl.name, "enum");
+					enums.put(decl.name, new Type.Enum(decl.name, new HashSet<Object>(decl.enums)));
+					lines.put(decl.name, decl.line);
+				} else if (decl.sig != null) {
 					checkDup(decl.name, "signature");
 					sigs.put(decl.name, decl.sig);
 					lines.put(decl.name, decl.line);
@@ -111,7 +124,8 @@ public class FQLProgram {
 					throw new RuntimeException();
 				}
 			}
-
+			enums.put("int", new Type.Int());
+			enums.put("string", new Type.Varchar());
 		}
 
 		@Override
@@ -123,12 +137,10 @@ public class FQLProgram {
 		}
 
 		private <X, Y> void checkDup(X name, String s) {
-			if (sigs.containsKey(name) || maps.containsKey(name) || insts.containsKey(name) || queries.containsKey(name) || transforms.containsKey(name)) {
+			if (sigs.containsKey(name) || maps.containsKey(name) || insts.containsKey(name) || queries.containsKey(name) || transforms.containsKey(name) || enums.containsKey(name)) {
 				throw new RuntimeException("Duplicate " + s + " " + name);
 			}
 
 		}
-
 		
-
 }

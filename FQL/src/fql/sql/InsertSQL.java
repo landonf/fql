@@ -30,7 +30,7 @@ public class InsertSQL extends PSM {
 			throw new RuntimeException("does not contain key " + name + "\n\n" + state);
 		}
 		if (state.get(name).size() > 0) {
-			throw new RuntimeException();
+			throw new RuntimeException(name + ": already " + state.get(name) + " in " + this);
 		}
 		state.put(name, sql.eval(state));
 	}

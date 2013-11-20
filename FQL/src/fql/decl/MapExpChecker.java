@@ -2,7 +2,6 @@ package fql.decl;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import fql.Pair;
 import fql.decl.MapExp.Apply;
@@ -23,7 +22,7 @@ import fql.decl.MapExp.Snd;
 import fql.decl.MapExp.TT;
 import fql.decl.MapExp.Var;
 
-public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, Pair<Map<String, SigExp>, Map<String, MapExp>>> {
+public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, FQLProgram> {
 
 	public List<String> seen = new LinkedList<>();
 	
@@ -33,14 +32,14 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, Pair<M
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
-			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Id e) {
-		SigExp x = e.t.typeOf(env.first);
+			FQLProgram env, Id e) {
+		SigExp x = e.t.typeOf(env);
 		return new Pair<>(x, x);
 	}
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
-			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Comp e) {
+			FQLProgram env, Comp e) {
 		List<String> l = new LinkedList<>(seen);
 		Pair<SigExp, SigExp> lt = e.l.accept(env, this);
 		seen = l;
@@ -55,10 +54,10 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, Pair<M
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
-			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Dist1 e) {
-		SigExp aa = e.a.typeOf(env.first);
-		SigExp bb = e.b.typeOf(env.first);
-		SigExp cc = e.c.typeOf(env.first);
+			FQLProgram env, Dist1 e) {
+		SigExp aa = e.a.typeOf(env);
+		SigExp bb = e.b.typeOf(env);
+		SigExp cc = e.c.typeOf(env);
 		return new Pair<SigExp, SigExp>(new SigExp.Times(aa,
 				new SigExp.Plus(bb, cc)), new SigExp.Plus(new SigExp.Times(aa,
 				bb), new SigExp.Times(aa, cc)));
@@ -66,10 +65,10 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, Pair<M
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
-			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Dist2 e) {
-		SigExp aa = e.a.typeOf(env.first);
-		SigExp bb = e.b.typeOf(env.first);
-		SigExp cc = e.c.typeOf(env.first);
+			FQLProgram env, Dist2 e) {
+		SigExp aa = e.a.typeOf(env);
+		SigExp bb = e.b.typeOf(env);
+		SigExp cc = e.c.typeOf(env);
 		return new Pair<SigExp, SigExp>(new SigExp.Plus(new SigExp.Times(aa,
 				bb), new SigExp.Times(aa, cc)), new SigExp.Times(aa,
 						new SigExp.Plus(bb, cc)));
@@ -77,12 +76,12 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, Pair<M
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
-			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Var e) {
+			FQLProgram env, Var e) {
 		if (seen.contains(e.v)) {
 			throw new RuntimeException("Cyclic definition: " + e);
 		}
 		seen.add(e.v);
-		MapExp r = env.second.get(e.v);
+		MapExp r = env.maps.get(e.v);
 		if (r == null) {
 			throw new RuntimeException("Unknown mapping " + e.v);
 		}
@@ -92,70 +91,70 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, Pair<M
 	//TODO this when sigops ready
 	@Override
 	public Pair<SigExp, SigExp> visit(
-			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Const e) {
-		SigExp a = e.src.typeOf(env.first);
-		SigExp b = e.dst.typeOf(env.first);
+			FQLProgram env, Const e) {
+		SigExp a = e.src.typeOf(env);
+		SigExp b = e.dst.typeOf(env);
 		return new Pair<>(a, b);
 	}
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
-			Pair<Map<String, SigExp>, Map<String, MapExp>> env, TT e) {
-		SigExp x = e.t.typeOf(env.first);
+			FQLProgram env, TT e) {
+		SigExp x = e.t.typeOf(env);
 		return new Pair<SigExp, SigExp>(x, new SigExp.One());
 	}
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
-			Pair<Map<String, SigExp>, Map<String, MapExp>> env, FF e) {
-		SigExp x = e.t.typeOf(env.first);
+			FQLProgram env, FF e) {
+		SigExp x = e.t.typeOf(env);
 		return new Pair<SigExp, SigExp>(new SigExp.Zero(), x);
 	}
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
-			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Fst e) {
-		SigExp a = e.s.typeOf(env.first);
-		SigExp b = e.t.typeOf(env.first);
+			FQLProgram env, Fst e) {
+		SigExp a = e.s.typeOf(env);
+		SigExp b = e.t.typeOf(env);
 		return new Pair<SigExp, SigExp>(new SigExp.Times(a, b), a);
 	}
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
-			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Snd e) {
-		SigExp a = e.s.typeOf(env.first);
-		SigExp b = e.t.typeOf(env.first);
+			FQLProgram env, Snd e) {
+		SigExp a = e.s.typeOf(env);
+		SigExp b = e.t.typeOf(env);
 		return new Pair<SigExp, SigExp>(new SigExp.Times(a, b), b);
 	}
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
-			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Inl e) {
-		SigExp a = e.s.typeOf(env.first);
-		SigExp b = e.t.typeOf(env.first);
+			FQLProgram env, Inl e) {
+		SigExp a = e.s.typeOf(env);
+		SigExp b = e.t.typeOf(env);
 		return new Pair<SigExp, SigExp>(a, new SigExp.Plus(a, b));
 	}
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
-			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Inr e) {
-		SigExp a = e.s.typeOf(env.first);
-		SigExp b = e.t.typeOf(env.first);
+			FQLProgram env, Inr e) {
+		SigExp a = e.s.typeOf(env);
+		SigExp b = e.t.typeOf(env);
 		return new Pair<SigExp, SigExp>(b, new SigExp.Plus(a, b));
 	}
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
-			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Apply e) {
-		SigExp s = e.s.typeOf(env.first);
-		SigExp t = e.t.typeOf(env.first);
+			FQLProgram env, Apply e) {
+		SigExp s = e.s.typeOf(env);
+		SigExp t = e.t.typeOf(env);
 		return new Pair<SigExp, SigExp>(new SigExp.Times(new SigExp.Exp(s,
 				t), t), s);
 	}
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
-			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Curry e) {
+			FQLProgram env, Curry e) {
 		Pair<SigExp, SigExp> ft = e.f.accept(env, this);
 		if (!(ft.first instanceof SigExp.Times)) {
 			throw new RuntimeException("Not a product: " + ft.first + " in " + e);
@@ -166,7 +165,7 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, Pair<M
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
-			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Case e) {
+			FQLProgram env, Case e) {
 		List<String> l = new LinkedList<>(seen);
 		Pair<SigExp, SigExp> lt = e.l.accept(env, this);
 		seen = l;
@@ -181,7 +180,7 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, Pair<M
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
-			Pair<Map<String, SigExp>, Map<String, MapExp>> env, Prod e) {
+			FQLProgram env, Prod e) {
 		List<String> l = new LinkedList<>(seen);
 		Pair<SigExp, SigExp> lt = e.l.accept(env, this);
 		seen = l;

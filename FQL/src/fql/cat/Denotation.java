@@ -39,6 +39,7 @@ import fql.decl.Mapping;
 import fql.decl.Node;
 import fql.decl.Path;
 import fql.decl.Signature;
+import fql.decl.Type;
 import fql.gui.FQLTextPanel;
 import fql.sql.PSMInterp;
 
@@ -1037,7 +1038,7 @@ public class Denotation {
 
 			q = makeNormalizer(xxx.second);
 			
-			JTextArea ra = new JTextArea(xxx.first.toSig().first.toString());
+			JTextArea ra = new JTextArea(xxx.first.toSig(new HashMap<String, Type>()).first.toString());
 			rr.add(new JScrollPane(ra));
 
 		} catch (Throwable e) {

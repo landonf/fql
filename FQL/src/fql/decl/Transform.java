@@ -9,7 +9,6 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Stroke;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -82,15 +81,15 @@ public class Transform {
 				try {
 					lookup(data.get(n.string), k.first);
 				} catch (RuntimeException re) {
-					throw new RuntimeException("Not total: " + n.string);
+					throw new RuntimeException("Not total: " + n.string + "\n\n" + this);
 				}
 			}
 			for (Pair<Object, Object> k : v) {
 				if (!src.data.get(n.string).contains(new Pair<>(k.first, k.first))) {
-					throw new RuntimeException("Non-domain value in " + n);
+					throw new RuntimeException("Non-domain value in " + n + "\n\n" + this);
 				}
 				if (!dst.data.get(n.string).contains(new Pair<>(k.second, k.second))) {
-					throw new RuntimeException("Non-range value in " + n);					
+					throw new RuntimeException("Non-range value in " + n + "\n\n" + this);					
 				}
 			}
 		}
@@ -102,7 +101,7 @@ public class Transform {
 					data.get(f.target.string));
 
 			if (!lhs.equals(rhs)) {
-				throw new RuntimeException("Not respected on " + f);
+				throw new RuntimeException("Not respected on " + f + " in " + this);
 			}
 		}
 		
@@ -118,7 +117,8 @@ public class Transform {
 					Object valDst = lookup(a, trans_id);
 					
 					if (!valSrc.equals(valDst)) {
-						throw new RuntimeException("Not equal: " + valSrc + " and " + valDst + " from ID " + id.first + " and translated ID " + trans_id);
+						String xxx = "cannot pair (" + id.first + ", " + trans_id + "), not equal: att(" + id.first + ") = " + valSrc + " and att(" + trans_id + ") = " + valDst;
+						throw new RuntimeException(xxx);
 					}
 				}
 			}
@@ -207,7 +207,7 @@ public class Transform {
 		panel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 		return panel;
 	}
-
+/*
 	private List<Pair<Object, Object>> get(String k,
 			List<Pair<String, List<Pair<Object, Object>>>> x) {
 		for (Pair<String, List<Pair<Object, Object>>> k0 : x) {
@@ -226,6 +226,7 @@ public class Transform {
 		}
 		return ret;
 	}
+	*/
 
 	@Override
 	public String toString() {

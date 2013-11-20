@@ -37,11 +37,12 @@ public class FQLParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|" };
 
-	static String[] res = new String[] { "drop", "nodes", "attributes",
+	static String[] res = new String[] { "drop", "nodes", "attributes", 
+		"enum",
 			"ASWRITTEN", "schema", "transform", "dist1", "dist2", "arrows",
 			"equations", "id", "delta", "sigma", "pi", "SIGMA", "apply", "eq",
 			"relationalize", "external", "then", "query", "instance", "fst",
-			"snd", "inl", "inr", "curry", "mapping", "eval", "string", "int",
+			"snd", "inl", "inr", "curry", "mapping", "eval", 
 			"void", "unit", "prop", /* "tt", "ff" */};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
@@ -69,6 +70,7 @@ public class FQLParser {
 				Parsers.tuple(schemaDecl().source().peek(), schemaDecl()),
 				Parsers.tuple(instanceDecl().source().peek(), instanceDecl()),
 				Parsers.tuple(mappingDecl().source().peek(), mappingDecl()),
+				Parsers.tuple(enumDecl().source().peek(), enumDecl()),
 				Parsers.tuple(queryDecl().source().peek(), queryDecl()),
 				Parsers.tuple(transDecl().source().peek(), transDecl()),
 				Parsers.tuple(dropDecl().source().peek(), dropDecl())).many();
@@ -93,6 +95,10 @@ public class FQLParser {
 		return a;
 	}
 
+	public static final Parser<?> enumDecl() {
+		return Parsers.tuple(term("enum"), ident(), term("="), Parsers.between(term("{"), string().sepBy(term(",")), term("}")));
+	}
+	
 	public static final Parser<?> queryDecl() {
 		return Parsers.tuple(term("query"), ident(), term("="), query());
 	}
@@ -120,7 +126,7 @@ public class FQLParser {
 	public static final Parser<?> schemaConst() {
 		Parser<?> p1 = ident();
 		Parser<?> p2 = Parsers.tuple(ident(), term(":"), ident(), term("->"),
-				type());
+				ident());
 		Parser<?> pX = Parsers.tuple(ident(), term(":"), ident(), term("->"),
 				ident());
 		Parser<?> p3 = Parsers.tuple(path(), term("="), path());
@@ -196,7 +202,7 @@ public class FQLParser {
 			for (Object o : attrs1) {
 				Tuple5 x = (Tuple5) o;
 				attrs.add(new Triple<>((String) x.a, (String) x.c,
-						((Token) x.e).toString()));
+						(String) x.e));
 			}
 		}
 		for (Object o : arrows1) {
@@ -240,6 +246,11 @@ public class FQLParser {
 				Parsers.tuple(ident(), term("."), term("snd")),
 				Parsers.tuple(ident(), term("."), term("inl")),
 				Parsers.tuple(ident(), term("."), term("inr")),
+				Parsers.tuple(term("delta"), ident(), ident(), ref.lazy()),
+				Parsers.tuple(term("sigma"), ident(), ident(), ref.lazy()),
+				Parsers.tuple(term("SIGMA"), ident(), ident(), ref.lazy()),
+				Parsers.tuple(term("pi"), ident(), ident(), ref.lazy()),
+				Parsers.tuple(term("relationalize"), ident(), ident(), ref.lazy()),
 				// Parsers.tuple(term("apply"), sig(), sig()),
 				// Parsers.tuple(term("curry"), ref.lazy()),
 				// Parsers.tuple(term("eq"), sig()),
@@ -268,7 +279,7 @@ public class FQLParser {
 		return p1;
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes" })
 	public static final TransExp toTransConst(Object decl, String t1, String t2) {
 
 		List<Pair<String, List<Pair<Object, Object>>>> objs = new LinkedList<>();
@@ -293,9 +304,35 @@ public class FQLParser {
 
 	}
 
+	
+	
+	
 	@SuppressWarnings("rawtypes")
 	public static final TransExp toTrans(Object o) {
 	
+		try {
+			Tuple4 p = (Tuple4) o;
+			String src = p.b.toString();
+			String dst = p.c.toString();
+			TransExp h = toTrans(p.d);
+			String kind = p.a.toString();
+			if (kind.equals("delta")) {
+				return new TransExp.Delta(h, src, dst);
+			} else if (kind.equals("pi")) {
+				return new TransExp.Pi(h, src, dst);				
+			} else if (kind.equals("sigma")) {
+				return new TransExp.Sigma(h, src, dst);
+			} else if (kind.equals("SIGMA")) {
+				return new TransExp.FullSigma(h, src, dst);
+			} else if (kind.equals("relationalize")) {
+				return new TransExp.Relationalize(h, src, dst);
+			} else {
+				throw new RuntimeException(o.toString());
+			}
+		} catch (RuntimeException ex) {
+			
+		}
+		
 		try {
 			Tuple4 p = (Tuple4) o;
 
@@ -371,6 +408,8 @@ public class FQLParser {
 			return new TransExp.Var(o.toString());
 		}
 
+//		System.out.println(o.getClass());
+//		System.out.println(o);
 		throw new RuntimeException();
 	}
 
@@ -777,7 +816,7 @@ public class FQLParser {
 
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final FQLProgram program(String s) {
 		List<NewDecl> ret = new LinkedList<>();
 		List decls = (List) FQLParser.program.parse(s);
@@ -807,9 +846,18 @@ public class FQLParser {
 			Tuple3 t = (Tuple3) decl;
 			String kind = ((Token) t.a).toString();
 			switch (kind) {
+			case "enum":
+				Tuple4 tte = (Tuple4) decl;
+				String name = (String) tte.b;
+				
+				List<String> values = (List<String>) tte.d;
+
+				ret.add(NewDecl.typeDecl(name, values, idx));
+				
+				break;
 			case "query":
 				Tuple4 tta = (Tuple4) decl;
-				String name = (String) tta.b;
+				name = (String) tta.b;
 
 				ret.add(NewDecl.queryDecl(name, idx, toQuery(tta.d)));
 				break;
@@ -856,10 +904,6 @@ public class FQLParser {
 
 	public static Parser<?> section(String s, Parser<?> p) {
 		return Parsers.tuple(term(s), p.sepBy(term(",")), term(";"));
-	}
-
-	private static Parser<?> type() {
-		return Parsers.or(term("int"), term("string"));
 	}
 
 	private static Parser<?> string() {

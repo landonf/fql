@@ -79,6 +79,9 @@ public class Mapping  {
 				throw new FQLException("Mapping " /* + name */
 						+ " does not preserve typing on " + a + " and " + b);
 			}
+			if (!b.source.equals(nm.get(a.source))) {
+				throw new FQLException("Mapping does not preserve source on " + nm.get(a.source) + " and " + b.source); 
+			}
 		}
 		
 		// should be checked by knuth-bendix

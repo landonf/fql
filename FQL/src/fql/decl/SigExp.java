@@ -18,14 +18,14 @@ public abstract class SigExp {
 		return accept(env, new Unresolver());
 	}
 	
-	public Const toConst(Map<String, SigExp> env) {
+	public Const toConst(FQLProgram env) {
 		return accept(env, new SigOps());
 	}
 	
-	public Signature toSig(Map<String, SigExp> env) {
+	public Signature toSig(FQLProgram env) {
 		Const e = toConst(env);
 		try {
-			return new Signature(e.nodes, e.attrs, e.arrows, e.eqs);
+			return new Signature(env.enums, e.nodes, e.attrs, e.arrows, e.eqs);
 		} catch (FQLException fe) {
 			fe.printStackTrace();
 			throw new RuntimeException(fe.getLocalizedMessage());
@@ -462,7 +462,7 @@ public abstract class SigExp {
 	@Override
 	public abstract int hashCode();
 	
-	public SigExp typeOf(Map<String, SigExp> env) {
+	public SigExp typeOf(FQLProgram env) {
 		return accept(env, new SigExpChecker());
 	}
 	

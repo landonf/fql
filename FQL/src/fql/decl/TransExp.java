@@ -10,7 +10,311 @@ public abstract class TransExp {
 	public Pair<String, String> type(FQLProgram p) {
 		return accept(p, new TransChecker());
 	}
+	
+	public static class Delta extends TransExp {
+		public TransExp h;
+		public Delta(TransExp h, String src, String dst) {
+			super();
+			this.h = h;
+			this.src = src;
+			this.dst = dst;
+		}
+		public String src, dst;
+		
+		@Override
+		public String toString() {
+			return "delta " + src + " " + dst + " " + h;
+		}
+		
+		@Override
+		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Delta other = (Delta) obj;
+			if (dst == null) {
+				if (other.dst != null)
+					return false;
+			} else if (!dst.equals(other.dst))
+				return false;
+			if (h == null) {
+				if (other.h != null)
+					return false;
+			} else if (!h.equals(other.h))
+				return false;
+			if (src == null) {
+				if (other.src != null)
+					return false;
+			} else if (!src.equals(other.src))
+				return false;
+			return true;
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
+			result = prime * result + ((h == null) ? 0 : h.hashCode());
+			result = prime * result + ((src == null) ? 0 : src.hashCode());
+			return result;
+		}
+	}
+	
+	public static class Sigma extends TransExp {
+		public TransExp h;
+		public String src, dst;
+		
+		public Sigma(TransExp h, String src, String dst) {
+			super();
+			this.h = h;
+			this.src = src;
+			this.dst = dst;
+		}
 
+		@Override
+		public String toString() {
+			return "sigma " + src + " " + dst + " " + h;
+		}
+		
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
+			result = prime * result + ((h == null) ? 0 : h.hashCode());
+			result = prime * result + ((src == null) ? 0 : src.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Sigma other = (Sigma) obj;
+			if (dst == null) {
+				if (other.dst != null)
+					return false;
+			} else if (!dst.equals(other.dst))
+				return false;
+			if (h == null) {
+				if (other.h != null)
+					return false;
+			} else if (!h.equals(other.h))
+				return false;
+			if (src == null) {
+				if (other.src != null)
+					return false;
+			} else if (!src.equals(other.src))
+				return false;
+			return true;
+		}
+
+		@Override
+		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+	}
+	
+	public static class FullSigma extends TransExp {
+		public TransExp h;
+		public String src, dst;
+		
+		@Override
+		public String toString() {
+			return "SIGMA " + src + " " + " " + dst + " " + h;
+		}
+		
+		public FullSigma(TransExp h, String src, String dst) {
+			super();
+			this.h = h;
+			this.src = src;
+			this.dst = dst;
+		}
+
+		@Override
+		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
+			result = prime * result + ((h == null) ? 0 : h.hashCode());
+			result = prime * result + ((src == null) ? 0 : src.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			FullSigma other = (FullSigma) obj;
+			if (dst == null) {
+				if (other.dst != null)
+					return false;
+			} else if (!dst.equals(other.dst))
+				return false;
+			if (h == null) {
+				if (other.h != null)
+					return false;
+			} else if (!h.equals(other.h))
+				return false;
+			if (src == null) {
+				if (other.src != null)
+					return false;
+			} else if (!src.equals(other.src))
+				return false;
+			return true;
+		}
+
+		
+
+	}
+	
+	public static class Pi extends TransExp {
+		public TransExp h;
+		public String src, dst;
+		
+		@Override
+		public String toString() {
+			return "pi " + src + " " + dst + " " + h;
+		}
+		
+
+		public Pi(TransExp h, String src, String dst) {
+			super();
+			this.h = h;
+			this.src = src;
+			this.dst = dst;
+		}
+
+
+		@Override
+		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
+			result = prime * result + ((h == null) ? 0 : h.hashCode());
+			result = prime * result + ((src == null) ? 0 : src.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Pi other = (Pi) obj;
+			if (dst == null) {
+				if (other.dst != null)
+					return false;
+			} else if (!dst.equals(other.dst))
+				return false;
+			if (h == null) {
+				if (other.h != null)
+					return false;
+			} else if (!h.equals(other.h))
+				return false;
+			if (src == null) {
+				if (other.src != null)
+					return false;
+			} else if (!src.equals(other.src))
+				return false;
+			return true;
+		}
+	}
+	
+	public static class Relationalize extends TransExp {
+		public TransExp h;
+		public String src, dst;
+
+		@Override
+		public String toString() {
+			return "relationalize " + src + " " + dst + " " + h;
+		}
+		
+
+		public Relationalize(TransExp h, String src, String dst) {
+			super();
+			this.h = h;
+			this.src = src;
+			this.dst = dst;
+		}
+
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
+			result = prime * result + ((h == null) ? 0 : h.hashCode());
+			result = prime * result + ((src == null) ? 0 : src.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Relationalize other = (Relationalize) obj;
+			if (dst == null) {
+				if (other.dst != null)
+					return false;
+			} else if (!dst.equals(other.dst))
+				return false;
+			if (h == null) {
+				if (other.h != null)
+					return false;
+			} else if (!h.equals(other.h))
+				return false;
+			if (src == null) {
+				if (other.src != null)
+					return false;
+			} else if (!src.equals(other.src))
+				return false;
+			return true;
+		}
+
+		@Override
+		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+	}
+	
+
+	
 /*
 	public Const toConst(Map<String, SigExp> env, Map<String, TransExp> ctx) {
 		return accept(new Pair<>(env, ctx), new SigOps());
@@ -898,6 +1202,12 @@ public abstract class TransExp {
 
 		public R visit(E env, Inr e);
 
+		public R visit(E env, Delta e);
+		public R visit(E env, Sigma e);
+		public R visit(E env, FullSigma e);
+		public R visit(E env, Pi e);
+		public R visit(E env, Relationalize e);
+		
 //		public R visit(E env, Apply e);
 
 	//	public R visit(E env, Curry e);

@@ -4,7 +4,7 @@ public class WrittenExample extends Example {
 
 	@Override
 	public String getName() {
-		return "Written macro";
+		return "Written Macro";
 	}
 
 	@Override

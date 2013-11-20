@@ -36,7 +36,7 @@ public class JDBCBridge {
 
 			for (String k : prog.insts.keySet()) {
 				InstExp v = prog.insts.get(k);
-				SigExp.Const t = v.type(prog.sigs, prog.maps, prog.insts, prog.queries).toConst(prog.sigs);
+				SigExp.Const t = v.type(prog).toConst(prog);
 				for (String n : t.nodes) {
 					ResultSet RS = Stmt.executeQuery("SELECT c0,c1 FROM " + k + "_" + n);
 					Set<Map<Object, Object>> ms = new HashSet<>();
@@ -77,7 +77,7 @@ public class JDBCBridge {
 			
 			for (String k : prog.transforms.keySet()) {
 				TransExp v = prog.transforms.get(k);
-				SigExp.Const t = prog.insts.get(v.type(prog)).type(prog.sigs, prog.maps, prog.insts, prog.queries).toConst(prog.sigs);
+				SigExp.Const t = prog.insts.get(v.type(prog)).type(prog).toConst(prog);
 				for (String n : t.nodes) {
 					ResultSet RS = Stmt.executeQuery("SELECT c0,c1 FROM " + k + "_" + n);
 					Set<Map<Object, Object>> ms = new HashSet<>();

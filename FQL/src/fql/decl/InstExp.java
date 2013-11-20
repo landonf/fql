@@ -2,18 +2,15 @@ package fql.decl;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import fql.Pair;
-import fql.Quad;
 
 public abstract class InstExp {
 
-	public final SigExp type(Map<String, SigExp> env, Map<String, MapExp> ctx,
-			Map<String, InstExp> insts, Map<String, QueryExp> qs) {
-		return accept(new Quad<>(env, ctx, insts, qs), new InstChecker());
+	public final SigExp type(FQLProgram prog) {
+		return accept(prog, new InstChecker());
 	}
-
+	
 	public static class Eval extends InstExp {
 		public QueryExp q;
 		public String e;
@@ -129,7 +126,7 @@ public abstract class InstExp {
 					x += ", \n";
 				}
 				b = true;
-				x += k + " -> {";
+				x += k.first + " -> {";
 				boolean d = false;
 				for (Pair<Object, Object> v : k.second) {
 					if (d) {
@@ -148,7 +145,7 @@ public abstract class InstExp {
 					x += ", \n";
 				}
 				b = true;
-				x += k + " -> {";
+				x += k.first + " -> {";
 				boolean d = false;
 				for (Pair<Object, Object> v : k.second) {
 					if (d) {
@@ -157,26 +154,26 @@ public abstract class InstExp {
 					d = true;
 					x += "(" + v.first + ", " + v.second + ")";
 				}
-				x += "}";
+				x += "};\n";
 			}
 
-			x = "arrows ";
+			x += "arrows ";
 			b = false;
 			for (Pair<String, List<Pair<Object, Object>>> k : arrows) {
 				if (b) {
 					x += ", \n";
 				}
 				b = true;
-				x += k + " -> {";
+				x += k.first + " -> {";
 				boolean d = false;
 				for (Pair<Object, Object> v : k.second) {
 					if (d) {
 						x += ", ";
 					}
 					d = true;
-					x += v.first;
+					x += "(" + v.first + ", " + v.second + ")";
 				}
-				x += "}";
+				x += "};";
 			}
 
 			return "{" + x + "}";
@@ -186,6 +183,8 @@ public abstract class InstExp {
 		public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
+
+		
 
 	}
 

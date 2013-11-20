@@ -63,9 +63,10 @@ public class Instance  {
 
 //	public String name;
 	
-	
+	//TODO better drop handling, by kind, visitor
 	
 	public void conformsTo(Signature s) throws FQLException {
+//		System.out.println("Checking " + this + " against " + s);
 		for (Node n : s.nodes) {
 			Set<Pair<Object, Object>> i = data.get(n.string);
 			if (i == null) {
@@ -101,7 +102,7 @@ public class Instance  {
 			for (Pair<Object, Object> p1 : i) {
 				for (Pair<Object, Object> p2 : i) {
 					if (p1.first.equals(p2.first)) {
-						if (!p2.second.equals(p2.second)) {
+						if (!p1.second.equals(p2.second)) {
 							throw new FQLException("In " + this + ", not functional: "
 									+ " in " + s);
 						}
@@ -113,12 +114,8 @@ public class Instance  {
 					throw new FQLException("Domain has non foreign key: "
 							+ s + " and " + this);
 				}
-				if (a.target instanceof Int) {
-					try {
-						Integer.parseInt((String) p1.second);
-					} catch (NumberFormatException nfe) {
-						throw new FQLException("Not an int: " + p1.second);
-					}
+				if (!a.target.in(p1.second)) {
+					throw new FQLException("Not a " + a.target + ": " + p1.second);
 				}
 			}
 		}
@@ -142,7 +139,7 @@ public class Instance  {
 			for (Pair<Object, Object> p1 : i) {
 				for (Pair<Object, Object> p2 : i) {
 					if (p1.first.equals(p2.first)) {
-						if (!p2.second.equals(p2.second)) {
+						if (!p1.second.equals(p2.second)) {
 							throw new FQLException("Not functional: " 
 									+ " in " + s + " and " + this);
 						}
@@ -593,7 +590,8 @@ public class Instance  {
 			JPanel p = new JPanel(new GridLayout(1, 1));
 			p.add(new JScrollPane(t));
 			p.setBorder(BorderFactory.createTitledBorder(
-					BorderFactory.createEmptyBorder(2, 2, 2, 2), k));
+					BorderFactory.createEmptyBorder(2, 2, 2, 2), k + "   ("
+							+ xxx.size() + " rows)"));
 			panels.add(p);
 			p.setSize(60, 60);
 		}
@@ -685,9 +683,6 @@ public class Instance  {
 			jnd.get(a.source.string).put(a.name, data.get(a.name));
 		}
 
-		// System.out.println(joined);
-		// System.out.println(nd);
-
 		Comparator<String> strcmp = new Comparator<String>() {
 			public int compare(String f1, String f2) {
 				return f1.compareTo(f2);
@@ -765,7 +760,7 @@ public class Instance  {
 			JTable t = new JTable(arr, cols3) {
 				public Dimension getPreferredScrollableViewportSize() {
 					Dimension d = getPreferredSize();
-					return new Dimension(d.width, d.height * 2);
+					return new Dimension(d.width, d.height );
 				}
 			};
 
@@ -775,7 +770,7 @@ public class Instance  {
 			JTable foo = new JTable(t.getModel()) {
 				public Dimension getPreferredScrollableViewportSize() {
 					Dimension d = getPreferredSize();
-					return new Dimension(d.width, d.height * 2);
+					return new Dimension(d.width, d.height );
 				}
 			};
 			JPanel p = new JPanel(new GridLayout(1, 1));
@@ -1394,83 +1389,7 @@ public class Instance  {
 	JPanel vwr = new JPanel();
 	CardLayout cards = new CardLayout();
 	Map<String, JTable> joined;
-/*
-	@Override
-	public String tojson() {
-		List<String> l = new LinkedList<String>();
-		for (Node kk : thesig.nodes) {
-			String k = kk.string;
-			Set<Pair<Object, Object>> v = data.get(k);
-			boolean first = true;
-			String s = "\"" + k + "\" : [";
-			for (Pair<Object, Object> tuple : v) {
-				if (!first) {
-					s += ",";
-				}
-				first = false;
 
-				s += "\"" + tuple.first + "\"";
-			}
-			s += "]";
-			l.add(s);
-		}
-
-		String s = PrettyPrinter.sep0(",\n", l);
-
-		String onobjects = "\"onObjects\" : {\n" + s + "\n}";
-
-		l = new LinkedList<String>();
-		for (Edge kk : thesig.edges) {
-			String k = kk.name;
-			Set<Pair<Object, Object>> v = data.get(k);
-			boolean first = true;
-			s = "{\"arrow\":" + kk.tojson() + ",\n\"map\" : {";
-			for (Pair<Object, Object> tuple : v) {
-				if (!first) {
-					s += ",";
-				}
-				s += "\"" + tuple.first + "\":" + "\"" + tuple.second + "\"";
-				first = false;
-			}
-			s += "}}\n";
-			l.add(s);
-		}
-
-		String onmorphisms = "\"onMorphisms\":[\n" + PrettyPrinter.sep0(",", l)
-				+ "]\n}\n";
-
-		String ret = "{\n\"ontology\":" + thesig.tojson() + ",\n" + onobjects
-				+ ",\n" + onmorphisms;
-
-		// try {
-		// System.out.println(new JSONParsers.JSONInstParser().parse(new
-		// Tokens(ret)));
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// }
-		return ret;
-
-	}
-	*/
-/*
-	@Override
-	public JPanel json() {
-		JTextArea q = new JTextArea(tojson());
-		q.setWrapStyleWord(true);
-		q.setLineWrap(true);
-		JPanel p = new JPanel(new GridLayout(1, 1));
-		JScrollPane jsc = new JScrollPane(q);
-		// jsc.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		p.add(jsc);
-		return p;
-	}
-	*/
-/*
-	public static Instance fromjson(String instance) throws Exception {
-		return new JSONParsers.JSONInstParser()
-				.parse(new FqlTokenizer(instance)).value;
-	}
-*/
 	
 	public JPanel groth() throws FQLException {
 		return CategoryOfElements.makePanel(this);
@@ -1491,11 +1410,12 @@ public class Instance  {
 
 			List<PSM> prog = (PSMGen.makeTables("output", thesig, false));
 
-			 prog.addAll(Relationalizer.compile(thesig, "output", name, true));
+			Pair<Map<Node, List<String>>, List<PSM>> xxx = Relationalizer.compile(thesig, "output", name);
+			prog.addAll(xxx.second);
 			Map<String, Set<Map<Object, Object>>> res = PSMInterp.interpX(prog, state);
 						
 			for (Node n : thesig.nodes) {
-				t.addTab(n.string, makePanel(Relationalizer.attrs.get(n), res, n));
+				t.addTab(n.string, makePanel(xxx.first.get(n), res, n));
 			}
 			JPanel ret = new JPanel(new GridLayout(1,1));
 			ret.add(t);
@@ -1525,7 +1445,7 @@ public class Instance  {
 		Object[][] rows = new Object[data.get(n.string).size()][attrs.size() + 1];
 		
 		int j = 0;
-		for (Map<Object, Object> row : res.get(n.string + "_observables")) {
+		for (Map<Object, Object> row : res.get("output_" + n.string + "_observables")) {
 			for (int i = 0; i < attrs.size(); i++) {
 				rows[j][i+1] = row.get("c" + i);
 			}
@@ -1542,7 +1462,7 @@ public class Instance  {
 
 		ret.add(new JScrollPane(table));
 		
-		String str = data.get(n.string).size() + " IDs, " + res.get(n.string + "_observables_proj").size() + " unique attribute combinations";
+		String str = data.get(n.string).size() + " IDs, " + res.get("output_" + n.string + "_observables_proj").size() + " unique attribute combinations";
 		ret.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), str));
 		
 		return ret;

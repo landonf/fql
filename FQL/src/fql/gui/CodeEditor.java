@@ -307,6 +307,8 @@ public class CodeEditor extends JPanel {
 		 key2 = KeyStroke.getKeyStroke(KeyEvent.VK_K, Event.CTRL_MASK);
 
 		 Action al = new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					int len = topArea.getLineEndOffsetOfCurrentLine();
@@ -422,7 +424,7 @@ public class CodeEditor extends JPanel {
 		}
 
 		try {
-			Driver.check(init);
+//			Driver.check(init);
 			Pair<Environment, String> envX = Driver.makeEnv(init);
 			env = envX.first;
 			env2 = envX.second;

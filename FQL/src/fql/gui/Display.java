@@ -8,11 +8,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -32,11 +29,9 @@ import fql.DEBUG;
 import fql.FQLException;
 import fql.Pair;
 import fql.decl.Environment;
-import fql.decl.Eq;
 import fql.decl.FQLProgram;
 import fql.decl.Instance;
 import fql.decl.Mapping;
-import fql.decl.Node;
 import fql.decl.Query;
 import fql.decl.SigExp;
 import fql.decl.Signature;
@@ -228,22 +223,24 @@ public class Display {
 			if (environment.signatures.get(c) != null) {
 				frames.add(new Pair<String, JComponent>("schema " + c, showSchema(environment, environment.getSchema(c))));
 			} else if (environment.mappings.get(c) != null) {
-				Pair<SigExp, SigExp> xxx = p.maps.get(c).type(p.sigs, p.maps); 
+				Pair<SigExp, SigExp> xxx = p.maps.get(c).type(p); 
 				String a = xxx.first.accept(p.sigs, new Unresolver()).toString();
 				String b = xxx.second.accept(p.sigs, new Unresolver()).toString();
 				frames.add(new Pair<String, JComponent>("mapping " + c + " : " + a + " -> " + b, showMapping(environment, environment.getMapping(c))));
 			} else if (environment.instances.get(c) != null) {
-				String xxx = p.insts.get(c).type(p.sigs, p.maps, p.insts, p.queries).accept(p.sigs, new Unresolver()).toString();
+				String xxx = p.insts.get(c).type(p).accept(p.sigs, new Unresolver()).toString();
 				frames.add(new Pair<String, JComponent>("instance " + c + " : " + xxx , showInst(environment.colors.get(c), environment.instances.get(c))));
 			} else if (environment.queries.get(c) != null) {
-				Pair<SigExp, SigExp> xxx = p.queries.get(c).type(p.sigs, p.maps, p.queries); 
+				Pair<SigExp, SigExp> xxx = p.queries.get(c).type(p); 
 				String a = xxx.first.accept(p.sigs, new Unresolver()).toString();
 				String b = xxx.second.accept(p.sigs, new Unresolver()).toString();
 				frames.add(new Pair<String, JComponent>("query " + c + " : " + a + " -> " + b, showQuery(environment, environment.queries.get(c))));				
 			} else if (environment.transforms.get(c) != null) {
 				Pair<String, String> xxx = p.transforms.get(c).type(p);
 				frames.add(new Pair<String, JComponent>("transform " + c + " : " + xxx.first + " -> " + xxx.second, showTransform(environment, xxx.first, xxx.second, environment.transforms.get(c))));  
-			} 
+			} else if (p.enums.get(c) != null) {
+				
+			}
 			else {
 				throw new RuntimeException("Not found: " + c);
 			}

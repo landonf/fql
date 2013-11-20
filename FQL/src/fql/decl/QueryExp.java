@@ -2,10 +2,8 @@ package fql.decl;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import fql.Pair;
-import fql.Triple;
 
 
 
@@ -183,23 +181,21 @@ public abstract class QueryExp {
 
 	}
 
-	public final Pair<SigExp, SigExp> type(Map<String, SigExp> sigs,
-			Map<String, MapExp> maps, Map<String, QueryExp> qs) {
-		return accept(new Triple<>(sigs, maps, qs), new QueryExpChecker());
+	public final Pair<SigExp, SigExp> type(FQLProgram env) {
+		return accept(env, new QueryExpChecker());
 	}
 	
-	public static class QueryExpChecker implements QueryExpVisitor<Pair<SigExp, SigExp>, Triple<Map<String, SigExp>,
-			Map<String, MapExp>, Map<String, QueryExp>>> {
+	public static class QueryExpChecker implements QueryExpVisitor<Pair<SigExp, SigExp>, FQLProgram> {
 		
 		List<String> seen = new LinkedList<>();
 
 		@Override
 		public Pair<SigExp, SigExp> visit(
-				Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, QueryExp>> env,
+				FQLProgram env,
 				Const e) {
-			Pair<SigExp, SigExp> d = e.delta.type(env.first, env.second);
-			Pair<SigExp, SigExp> p = e.pi.type(env.first, env.second);
-			Pair<SigExp, SigExp> s = e.sigma.type(env.first, env.second);
+			Pair<SigExp, SigExp> d = e.delta.type(env);
+			Pair<SigExp, SigExp> p = e.pi.type(env);
+			Pair<SigExp, SigExp> s = e.sigma.type(env);
 			
 			if (!d.first.equals(p.first)) {
 				throw new RuntimeException("Mismatch: " + d.first + " and " + p.first);
@@ -213,7 +209,7 @@ public abstract class QueryExp {
 
 		@Override
 		public Pair<SigExp, SigExp> visit(
-				Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, QueryExp>> env,
+				FQLProgram env,
 				Comp e) {
 			List<String> x = new LinkedList<String>(seen);
 			Pair<SigExp, SigExp> lt = e.l.accept(env, this);
@@ -228,13 +224,13 @@ public abstract class QueryExp {
 
 		@Override
 		public Pair<SigExp, SigExp> visit(
-				Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, QueryExp>> env,
+				FQLProgram env,
 				Var e) {
 			if (seen.contains(e.v)) {
 				throw new RuntimeException("Circular: " + e.v);
 			}
 			seen.add(e.v);
-			QueryExp q = env.third.get(e.v);
+			QueryExp q = env.queries.get(e.v);
 			if (q == null) {
 				throw new RuntimeException("Unknown query: " + e.v);
 			}

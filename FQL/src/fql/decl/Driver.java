@@ -56,10 +56,20 @@ public class Driver {
 	public static String checkReport(FQLProgram p) {
 		String ret = "";
 
+		for (String k : p.sigs.keySet()) {
+			try {
+				SigExp v = p.sigs.get(k);
+				v.typeOf(p);
+			} catch (RuntimeException re) {
+				re.printStackTrace();
+				throw new LineException(re.getLocalizedMessage(), k, "schema");
+			}
+		}
+
 		for (String k : p.maps.keySet()) {
 			try {
 				MapExp m = p.maps.get(k);
-				Pair<SigExp, SigExp> v = m.type(p.sigs, p.maps);
+				Pair<SigExp, SigExp> v = m.type(p);
 				ret += "mapping " + k + ": " + v.first.unresolve(p.sigs)
 						+ " -> " + v.second.unresolve(p.sigs) + "\n\n";
 			} catch (RuntimeException ex) {
@@ -76,37 +86,12 @@ public class Driver {
 				ret += k + ": " + ex.getLocalizedMessage() + "\n\n";
 			}
 		}
-
-		return ret.trim() + "\n\n";
-	}
-
-	public static void check(FQLProgram p) {
-		for (String k : p.sigs.keySet()) {
-			try {
-				SigExp v = p.sigs.get(k);
-				v.typeOf(p.sigs);
-			} catch (RuntimeException re) {
-				re.printStackTrace();
-				throw new LineException(re.getLocalizedMessage(), k, "schema");
-			}
-		}
-
-		for (String k : p.maps.keySet()) {
-			try {
-				MapExp m = p.maps.get(k);
-				m.type(p.sigs, p.maps);
-			} catch (RuntimeException ex) {
-				ex.printStackTrace();
-				throw new LineException(ex.getLocalizedMessage(), k, "mapping");
-			}
-		}
-
-		Map<String, InstExp> m = new HashMap<>();
+		ret += "\n\n";
 		for (String k : p.insts.keySet()) {
 			try {
 				InstExp i = p.insts.get(k);
-				i.type(p.sigs, p.maps, m, p.queries);
-				m.put(k, i);
+				SigExp y = i.type(p);
+				// ret += "instance " + k + ": " + y.unresolve(p.sigs) + "\n\n";
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
 				throw new LineException(ex.getLocalizedMessage(), k, "instance");
@@ -115,13 +100,29 @@ public class Driver {
 
 		for (String k : p.transforms.keySet()) {
 			try {
-				p.transforms.get(k).type(p);
+				Pair<String, String> v = p.transforms.get(k).type(p);
+				// ret += "instance " + k + ": " + v.first + " ->" + v.second +
+				// "\n\n";
 			} catch (RuntimeException re) {
 				re.printStackTrace();
-				throw new LineException(re.getLocalizedMessage(), k, "instance");
+				throw new LineException(re.getLocalizedMessage(), k,
+						"transform");
 			}
 		}
 
+		for (String k : p.queries.keySet()) {
+			try {
+				QueryExp v = p.queries.get(k);
+				Pair<SigExp, SigExp> t = v.type(p);
+				ret += "query " + k + ": " + t.first.unresolve(p.sigs) + " -> "
+						+ t.second.unresolve(p.sigs) + "\n\n";
+			} catch (RuntimeException re) {
+				re.printStackTrace();
+				throw new LineException(re.getLocalizedMessage(), k, "query");
+			}
+		}
+
+		return ret.trim() + "\n\n";
 	}
 
 	public static Pair<Environment, String> makeEnv(FQLProgram prog) {
@@ -134,7 +135,7 @@ public class Driver {
 		for (String k : prog.sigs.keySet()) {
 			try {
 				SigExp v = prog.sigs.get(k);
-				sigs.put(k, v.toSig(prog.sigs));
+				sigs.put(k, v.toSig(prog));
 			} catch (RuntimeException re) {
 				re.printStackTrace();
 				throw new LineException(re.getLocalizedMessage(), k, "schema");
@@ -145,8 +146,7 @@ public class Driver {
 		for (String k : prog.maps.keySet()) {
 			try {
 				MapExp v = prog.maps.get(k);
-				maps.put(k, v.toMap(prog.sigs, prog.maps));
-
+				maps.put(k, v.toMap(prog));
 			} catch (RuntimeException re) {
 				re.printStackTrace();
 				throw new LineException(re.getLocalizedMessage(), k, "mapping");
@@ -156,11 +156,30 @@ public class Driver {
 			try {
 
 				QueryExp v = prog.queries.get(k);
-				queries.put(k,
-						Query.toQuery(prog.sigs, prog.maps, prog.queries, v));
+				queries.put(k, Query.toQuery(prog, v));
 			} catch (RuntimeException re) {
 				re.printStackTrace();
 				throw new LineException(re.getLocalizedMessage(), k, "query");
+			}
+		}
+		for (String k : prog.insts.keySet()) {
+			try {
+				InstExp v = prog.insts.get(k);
+				v.type(prog);
+			} catch (RuntimeException re) {
+				re.printStackTrace();
+				throw new LineException(re.getLocalizedMessage(), k, "instance");
+			}
+		}
+		for (String k : prog.transforms.keySet()) {
+			try {
+
+				TransExp v = prog.transforms.get(k);
+				v.type(prog);
+			} catch (RuntimeException re) {
+				re.printStackTrace();
+				throw new LineException(re.getLocalizedMessage(), k,
+						"transform");
 			}
 		}
 
@@ -168,9 +187,8 @@ public class Driver {
 		for (String k : prog.insts.keySet()) {
 			try {
 				InstExp v = prog.insts.get(k);
-				psm.addAll(PSMGen.makeTables(k,
-						v.type(prog.sigs, prog.maps, prog.insts, prog.queries)
-								.toSig(prog.sigs), false));
+				psm.addAll(PSMGen
+						.makeTables(k, v.type(prog).toSig(prog), false));
 				psm.addAll(v.accept(k, new ToInstVisitor(prog)).first);
 			} catch (RuntimeException re) {
 				re.printStackTrace();
@@ -183,8 +201,7 @@ public class Driver {
 				TransExp v = prog.transforms.get(k);
 				Pair<String, String> val = prog.transforms.get(k).type(prog);
 				InstExp i = prog.insts.get(val.first);
-				Signature s = i.type(prog.sigs, prog.maps, prog.insts,
-						prog.queries).toSig(prog.sigs);
+				Signature s = i.type(prog).toSig(prog);
 				psm.addAll(PSMGen.makeTables(k, s, false));
 				psm.addAll(v.accept(k, new ToTransVisitor(prog)));
 			} catch (RuntimeException re) {
@@ -199,13 +216,11 @@ public class Driver {
 			res = JDBCBridge.go(psm, drops, prog);
 		} else {
 			res = PSMInterp.interp(psm);
+
 		}
-		// System.out.println(res);
 		for (String k : prog.insts.keySet()) {
 			try {
-				Signature s = prog.insts.get(k)
-						.type(prog.sigs, prog.maps, prog.insts, prog.queries)
-						.toSig(prog.sigs);
+				Signature s = prog.insts.get(k).type(prog).toSig(prog);
 				List<Pair<String, List<Pair<Object, Object>>>> b = PSMGen
 						.gather(k, s, res);
 				insts.put(k, new Instance(s, b));
@@ -220,8 +235,7 @@ public class Driver {
 			try {
 				Pair<String, String> val = prog.transforms.get(k).type(prog);
 				InstExp i = prog.insts.get(val.first);
-				Signature s = i.type(prog.sigs, prog.maps, prog.insts,
-						prog.queries).toSig(prog.sigs);
+				Signature s = i.type(prog).toSig(prog);
 				List<Pair<String, List<Pair<Object, Object>>>> b = PSMGen
 						.gather(k, s, res);
 				transforms.put(
@@ -234,7 +248,6 @@ public class Driver {
 			}
 		}
 
-
 		String str = DEBUG.prelude + "\n\n" + PSMGen.prettyPrint(psm) + "\n\n"
 				+ PSMGen.prettyPrint(drops) + "\n\n";
 		return new Pair<>(new Environment(sigs, maps, insts, queries,
@@ -246,8 +259,7 @@ public class Driver {
 		for (String k : prog.drop) {
 			if (prog.insts.containsKey(k)) {
 				InstExp i = prog.insts.get(k);
-				Signature s = i.type(prog.sigs, prog.maps, prog.insts,
-						prog.queries).toSig(prog.sigs);
+				Signature s = i.type(prog).toSig(prog);
 				drops.addAll(PSMGen.dropTables(k, s));
 
 				// TODO add other drops
@@ -260,8 +272,7 @@ public class Driver {
 				TransExp t = prog.transforms.get(k);
 				Pair<String, String> val = t.type(prog);
 				InstExp i = prog.insts.get(val.first);
-				Signature s = i.type(prog.sigs, prog.maps, prog.insts,
-						prog.queries).toSig(prog.sigs);
+				Signature s = i.type(prog).toSig(prog);
 				drops.addAll(PSMGen.dropTables(k, s));
 			} else {
 				throw new RuntimeException("for drop, not found: " + k + " in "
@@ -278,7 +289,7 @@ public class Driver {
 		int count = 0;
 
 		public String next() {
-			return "totrans_temp" + count++;
+			return "trans" + count++;
 		}
 
 		public ToTransVisitor(FQLProgram prog) {
@@ -289,9 +300,7 @@ public class Driver {
 		public List<PSM> visit(String dst, Id e) {
 			List<PSM> ret = new LinkedList<>();
 
-			for (Node k : prog.insts.get(e.t)
-					.type(prog.sigs, prog.maps, prog.insts, prog.queries)
-					.toSig(prog.sigs).nodes) {
+			for (Node k : prog.insts.get(e.t).type(prog).toSig(prog).nodes) {
 				ret.add(new InsertSQL(dst + "_" + k.string, new CopyFlower(e.t
 						+ "_" + k.string)));
 			}
@@ -305,8 +314,7 @@ public class Driver {
 
 			Pair<String, String> ty = e.l.type(prog);
 			InstExp inst = prog.insts.get(ty.first);
-			Signature inst_type = inst.type(prog.sigs, prog.maps, prog.insts,
-					prog.queries).toSig(prog.sigs);
+			Signature inst_type = inst.type(prog).toSig(prog);
 
 			String el = next();
 			ret.addAll(PSMGen.makeTables(el, inst_type, false));
@@ -348,9 +356,8 @@ public class Driver {
 		public List<PSM> visit(String dst, fql.decl.TransExp.Const e) {
 			List<PSM> ret = new LinkedList<>();
 
-			Signature s = prog.insts.get(e.src)
-					.type(prog.sigs, prog.maps, prog.insts, prog.queries)
-					.toConst(prog.sigs).toSig(prog.sigs);
+			Signature s = prog.insts.get(e.src).type(prog).toConst(prog)
+					.toSig(prog);
 
 			List<String> attrs = new LinkedList<>();
 			attrs.add("c0");
@@ -398,24 +405,60 @@ public class Driver {
 
 		@Override
 		public List<PSM> visit(String dst, TT e) {
-			List<PSM> ret = new LinkedList<>();
-			Signature s = prog.insts.get(e.obj)
-					.type(prog.sigs, prog.maps, prog.insts, prog.queries)
-					.toSig(prog.sigs);
+			try {
+				List<PSM> ret = new LinkedList<>();
+				Signature s = prog.insts.get(e.obj).type(prog).toSig(prog);
 
-			for (Node n : s.nodes) {
-				Map<String, String> from = new HashMap<>();
-				from.put("t1", e.tgt + "_" + n);
-				from.put("t2", e.obj + "_" + n);
-				List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
-				Map<String, Pair<String, String>> select = new HashMap<>();
-				select.put("c0", new Pair<>("t1", "c0"));
-				select.put("c1", new Pair<>("t2", "c0"));
-				Flower f = new Flower(select, from, where);
-				ret.add(new InsertSQL(dst + "_" + n, f));
+				String temp1 = next();
+				ret.addAll(PSMGen.makeTables(temp1, s, false));
+				String temp2 = next();
+				ret.addAll(PSMGen.makeTables(temp2, s, false));
+				
+				Pair<Map<Node, List<String>>, List<PSM>> xxx = Relationalizer
+						.observations(s, temp1, e.tgt, false);
+				Pair<Map<Node, List<String>>, List<PSM>> yyy = Relationalizer
+						.observations(s, temp2, e.obj, false);
+				if (!xxx.first.equals(yyy.first)) {
+					throw new RuntimeException("not equal: " + xxx + " and "
+							+ yyy);
+				}
+				ret.addAll(xxx.second);
+				ret.addAll(yyy.second);
+
+				for (Node n : s.nodes) {
+					List<String> cols = xxx.first.get(n);
+					Map<String, String> from = new HashMap<>();
+					from.put("t1", e.tgt + "_" + n);
+					from.put("t1_obs", temp1 + "_" + n + "_" + "observables");
+					from.put("t2", e.obj + "_" + n);
+					from.put("t2_obs", temp2 + "_" + n + "_" + "observables");
+					List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
+					where.add(new Pair<>(new Pair<>("t1", "c0"), new Pair<>(
+							"t1_obs", "id")));
+					where.add(new Pair<>(new Pair<>("t2", "c0"), new Pair<>(
+							"t2_obs", "id")));
+					//System.out.println("77777" + cols);
+					for (int i = 0; i < cols.size(); i++) {
+						where.add(new Pair<>(new Pair<>("t1_obs", "c" + i),
+								new Pair<>("t2_obs", "c" + i)));
+					}
+					Map<String, Pair<String, String>> select = new HashMap<>();
+					select.put("c0", new Pair<>("t1", "c0"));
+					select.put("c1", new Pair<>("t2", "c0"));
+					Flower f = new Flower(select, from, where);
+					ret.add(new InsertSQL(dst + "_" + n, f));
+
+				}
+				
+				ret.addAll(PSMGen.dropTables(temp1, s));
+				ret.addAll(PSMGen.dropTables(temp2, s));
+				
+				return ret;
+
+			} catch (FQLException fe) {
+				fe.printStackTrace();
+				throw new RuntimeException(fe.getLocalizedMessage());
 			}
-
-			return ret;
 		}
 
 		@Override
@@ -428,9 +471,7 @@ public class Driver {
 			List<PSM> ret = new LinkedList<>();
 
 			InstExp k = prog.insts.get(e.obj);
-			Signature t = k
-					.type(prog.sigs, prog.maps, prog.insts, prog.queries)
-					.toSig(prog.sigs);
+			Signature t = k.type(prog).toSig(prog);
 
 			for (Node n : t.nodes) {
 				ret.add(new InsertSQL(dst + "_" + n.string, new CopyFlower(
@@ -445,9 +486,7 @@ public class Driver {
 			List<PSM> ret = new LinkedList<>();
 
 			InstExp k = prog.insts.get(e.obj);
-			Signature t = k
-					.type(prog.sigs, prog.maps, prog.insts, prog.queries)
-					.toSig(prog.sigs);
+			Signature t = k.type(prog).toSig(prog);
 
 			for (Node n : t.nodes) {
 				ret.add(new InsertSQL(dst + "_" + n.string, new CopyFlower(
@@ -462,9 +501,7 @@ public class Driver {
 			List<PSM> ret = new LinkedList<>();
 
 			InstExp k = prog.insts.get(e.obj);
-			Signature t = k
-					.type(prog.sigs, prog.maps, prog.insts, prog.queries)
-					.toSig(prog.sigs);
+			Signature t = k.type(prog).toSig(prog);
 
 			for (Node n : t.nodes) {
 				ret.add(new InsertSQL(dst + "_" + n.string, new CopyFlower(
@@ -479,9 +516,7 @@ public class Driver {
 			List<PSM> ret = new LinkedList<>();
 
 			InstExp k = prog.insts.get(e.obj);
-			Signature t = k
-					.type(prog.sigs, prog.maps, prog.insts, prog.queries)
-					.toSig(prog.sigs);
+			Signature t = k.type(prog).toSig(prog);
 
 			for (Node n : t.nodes) {
 				ret.add(new InsertSQL(dst + "_" + n.string, new CopyFlower(
@@ -501,9 +536,7 @@ public class Driver {
 
 			List<PSM> ret = new LinkedList<>();
 
-			Signature inst_type = prog.insts.get(e.obj)
-					.type(prog.sigs, prog.maps, prog.insts, prog.queries)
-					.toSig(prog.sigs);
+			Signature inst_type = prog.insts.get(e.obj).type(prog).toSig(prog);
 
 			String el = next();
 			ret.addAll(PSMGen.makeTables(el, inst_type, false));
@@ -530,9 +563,7 @@ public class Driver {
 
 			List<PSM> ret = new LinkedList<>();
 
-			Signature inst_type = prog.insts.get(e.obj)
-					.type(prog.sigs, prog.maps, prog.insts, prog.queries)
-					.toSig(prog.sigs);
+			Signature inst_type = prog.insts.get(e.obj).type(prog).toSig(prog);
 
 			String el = next();
 			ret.addAll(PSMGen.makeTables(el, inst_type, false));
@@ -548,7 +579,35 @@ public class Driver {
 			ret.addAll(PSMGen.dropTables(er, inst_type));
 
 			return ret;
+		}
 
+		@Override
+		public List<PSM> visit(String env, fql.decl.TransExp.Delta e) {
+			throw new RuntimeException("TBD");
+		}
+
+		@Override
+		public List<PSM> visit(String env, fql.decl.TransExp.Sigma e) {
+			// TODO Auto-generated method stub
+			throw new RuntimeException("TBD");
+		}
+
+		@Override
+		public List<PSM> visit(String env, fql.decl.TransExp.FullSigma e) {
+			// TODO Auto-generated method stub
+			throw new RuntimeException("TBD");
+		}
+
+		@Override
+		public List<PSM> visit(String env, fql.decl.TransExp.Pi e) {
+			// TODO Auto-generated method stub
+			throw new RuntimeException("TBD");
+		}
+
+		@Override
+		public List<PSM> visit(String env, fql.decl.TransExp.Relationalize e) {
+			// TODO Auto-generated method stub
+			throw new RuntimeException("TBD");
 		}
 
 	}
@@ -573,33 +632,9 @@ public class Driver {
 
 		@Override
 		public Pair<List<PSM>, Object> visit(String dst, fql.decl.InstExp.One e) {
-			Const c = e.sig.toConst(prog.sigs);
-			if (c.attrs.size() > 0) {
-				throw new RuntimeException(
-						"Cannot create unit instance for schemas with attributes: "
-								+ e);
-			}
-			List<PSM> ret = new LinkedList<>();
-			List<String> attrs = new LinkedList<>();
-			attrs.add("c0");
-			attrs.add("c1");
-			Set<Map<Object, Object>> values = new HashSet<>();
-			Map<Object, Object> o = new HashMap<>();
-			o.put("unit", "unit");
-			values.add(o);
-
-			for (String k : c.nodes) {
-				ret.add(new InsertValues(dst + "_" + k, attrs, values));
-			}
-			for (Triple<String, String, String> k : c.arrows) {
-				ret.add(new InsertValues(dst + "_" + k.first, attrs, values));
-			}
-			try {
-				ret.addAll(PSMGen.guidify(dst, c.toSig(prog.sigs)));
-			} catch (FQLException fe) {
-				throw new RuntimeException(fe.getLocalizedMessage());
-			}
-			return new Pair<>(ret, new Object());
+			fql.decl.InstExp.Const k = Relationalizer.terminal(prog,
+					e.sig.toConst(prog));
+			return k.accept(dst, this);
 		}
 
 		@Override
@@ -611,9 +646,8 @@ public class Driver {
 		public Pair<List<PSM>, Object> visit(final String dst,
 				final fql.decl.InstExp.Plus e) {
 			try {
-				SigExp k = e.type(prog.sigs, prog.maps, prog.insts,
-						prog.queries);
-				final Signature s = k.toSig(prog.sigs);
+				SigExp k = e.type(prog);
+				final Signature s = k.toSig(prog);
 				List<PSM> ret = new LinkedList<>();
 
 				for (Node n : s.nodes) {
@@ -698,9 +732,8 @@ public class Driver {
 		public Pair<List<PSM>, Object> visit(final String dst,
 				fql.decl.InstExp.Times e) {
 			try {
-				SigExp k = e.type(prog.sigs, prog.maps, prog.insts,
-						prog.queries);
-				final Signature s = k.toSig(prog.sigs);
+				SigExp k = e.type(prog);
+				final Signature s = k.toSig(prog);
 				List<PSM> ret = new LinkedList<>();
 				ret.addAll(PSMGen.makeTables(dst + "_fst", s, false));
 				ret.addAll(PSMGen.makeTables(dst + "_snd", s, false));
@@ -858,7 +891,7 @@ public class Driver {
 				fql.decl.InstExp.Const e) {
 			try {
 				List<PSM> ret = new LinkedList<>();
-				Signature sig = e.sig.toSig(prog.sigs);
+				Signature sig = e.sig.toSig(prog);
 				ret.addAll(PSMGen.doConst(dst, sig, e.data));
 				ret.addAll(PSMGen.guidify(dst, sig, true));
 				return new Pair<>(ret, new Object());
@@ -872,7 +905,7 @@ public class Driver {
 		public Pair<List<PSM>, Object> visit(String dst, Delta e) {
 			// String next = next();
 			List<PSM> ret = new LinkedList<>();
-			Mapping F0 = e.F.toMap(prog.sigs, prog.maps);
+			Mapping F0 = e.F.toMap(prog);
 
 			// ret.addAll(PSMGen.makeTables(next, F0.target, false));
 			// ret.addAll(e.I.accept(next, this));
@@ -890,7 +923,7 @@ public class Driver {
 		public Pair<List<PSM>, Object> visit(String dst, Sigma e) {
 			// String next = next();
 			List<PSM> ret = new LinkedList<>();
-			Mapping F0 = e.F.toMap(prog.sigs, prog.maps);
+			Mapping F0 = e.F.toMap(prog);
 
 			try {
 				F0.okForSigma();
@@ -911,7 +944,7 @@ public class Driver {
 		public Pair<List<PSM>, Object> visit(String dst, Pi e) {
 			// String next = next();
 			List<PSM> ret = new LinkedList<>();
-			Mapping F0 = e.F.toMap(prog.sigs, prog.maps);
+			Mapping F0 = e.F.toMap(prog);
 
 			try {
 				F0.okForPi();
@@ -933,7 +966,7 @@ public class Driver {
 		public Pair<List<PSM>, Object> visit(String dst, FullSigma e) {
 			// String next = next();
 			List<PSM> ret = new LinkedList<>();
-			Mapping F0 = e.F.toMap(prog.sigs, prog.maps);
+			Mapping F0 = e.F.toMap(prog);
 
 			// ret.addAll(PSMGen.makeTables(next, F0.source, false));
 			// ret.addAll(e.I.accept(next, this));
@@ -955,15 +988,13 @@ public class Driver {
 																			// in
 			// String next = next();
 			List<PSM> ret = new LinkedList<>();
-			Signature sig = prog.insts.get(e.I)
-					.type(prog.sigs, prog.maps, prog.insts, prog.queries)
-					.toSig(prog.sigs);
+			Signature sig = prog.insts.get(e.I).type(prog).toSig(prog);
 
 			try {
 				// ret.addAll(PSMGen.makeTables(next, sig, false)); //output
 				// mktable done by relationalizer
 				// ret.addAll(e.I.accept(next, this));
-				ret.addAll(Relationalizer.compile(sig, dst, e.I, false));
+				ret.addAll(Relationalizer.compile(sig, dst, e.I).second);
 				ret.addAll(PSMGen.guidify(dst, sig));
 				// ret.addAll(PSMGen.dropTables(next, sig));
 			} catch (FQLException fe) {
@@ -977,7 +1008,7 @@ public class Driver {
 		public Pair<List<PSM>, Object> visit(String dst, External e) {
 			try {
 				List<PSM> ret = new LinkedList<>();
-				Signature sig = e.sig.toSig(prog.sigs);
+				Signature sig = e.sig.toSig(prog);
 				ret.addAll(PSMGen.doExternal(sig, e.name, dst));
 				ret.addAll(PSMGen.guidify(dst, sig, true));
 				return new Pair<>(ret, new Object());
@@ -989,7 +1020,7 @@ public class Driver {
 
 		@Override
 		public Pair<List<PSM>, Object> visit(String dst, Eval e) {
-			Query q = Query.toQuery(prog.sigs, prog.maps, prog.queries, e.q);
+			Query q = Query.toQuery(prog, e.q);
 
 			String next = e.e;
 			String next1 = "query_temp1";

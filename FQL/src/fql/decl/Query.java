@@ -51,9 +51,8 @@ import fql.decl.QueryExp.Var;
  */
 public class Query {
 
-	public static Query toQuery(Map<String, SigExp> ctx,
-			Map<String, MapExp> env, Map<String, QueryExp> xxx, QueryExp q) {
-		return q.accept(new Triple<>(ctx, env, xxx), new ToQueryVisitor());
+	public static Query toQuery(FQLProgram env, QueryExp q) {
+		return q.accept(env, new ToQueryVisitor());
 	}
 
 	public Mapping project, join, union;
@@ -551,7 +550,7 @@ public class Query {
 	/**
 	 * Implements composition at a syntactic level, adding to the environment.
 	 */
-	public static Query compose(/* Environment env, String name, */Query q2,
+	public static Query compose(Map<String, Type> types, Query q2,
 			Query q1) throws FQLException {
 		Mapping s0 = q1.project;
 		Mapping f0 = q1.join;
@@ -575,11 +574,11 @@ public class Query {
 				u0.toFunctor2().first, g0.toFunctor2().first, isoT.first);
 
 		Triple<Mapping, Quad<Signature, Pair<Map<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, String>, Map<String, Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>>, Pair<Map<Arr<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, Pair<Arr<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>, String>, Map<String, Arr<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, Pair<Arr<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>>>, Pair<Map<Attribute<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, String>, Map<String, Attribute<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>>>>, Quad<Signature, Pair<Map<Node, String>, Map<String, Node>>, Pair<Map<Arr<Node, Path>, String>, Map<String, Arr<Node, Path>>>, Pair<Map<Attribute<Node>, String>, Map<String, Attribute<Node>>>>> proj1 = ret.project
-				.toMapping();
+				.toMapping(types);
 		Triple<Mapping, Quad<Signature, Pair<Map<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, String>, Map<String, Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>>, Pair<Map<Arr<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, Pair<Arr<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>, String>, Map<String, Arr<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>, Pair<Arr<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>>>, Pair<Map<Attribute<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>, String>, Map<String, Attribute<Triple<Triple<Node, Triple<Node, Node, Node>, Arr<Node, Path>>, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Triple<Node, Node, Node>, Triple<Arr<Node, Path>, Arr<Node, Path>, Arr<Node, Path>>>>>>>>, Quad<Signature, Pair<Map<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, String>, Map<String, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>>, Pair<Map<Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>, String>, Map<String, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>, Pair<Map<Attribute<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>, String>, Map<String, Attribute<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>>>>> join1 = ret.join
-				.toMapping();
+				.toMapping(types);
 		Triple<Mapping, Quad<Signature, Pair<Map<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, String>, Map<String, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>>, Pair<Map<Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>, String>, Map<String, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>, Pair<Map<Attribute<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>, String>, Map<String, Attribute<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>>>>, Quad<Signature, Pair<Map<Node, String>, Map<String, Node>>, Pair<Map<Arr<Node, Path>, String>, Map<String, Arr<Node, Path>>>, Pair<Map<Attribute<Node>, String>, Map<String, Attribute<Node>>>>> union1 = ret.union
-				.toMapping();
+				.toMapping(types);
 		/*
 		 * env.signatures.put(name + "_B", proj1.second.first);
 		 * env.signatures.put(name + "_A", join1.third.first);
@@ -669,17 +668,17 @@ public class Query {
 
 	public static class ToQueryVisitor
 			implements
-			QueryExpVisitor<Query, Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, QueryExp>>> {
+			QueryExpVisitor<Query, FQLProgram> {
 
 		List<String> seen = new LinkedList<>();
 
 		@Override
 		public Query visit(
-				Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, QueryExp>> env,
+				FQLProgram env,
 				Const e) {
-			Mapping d = e.delta.toMap(env.first, env.second);
-			Mapping s = e.sigma.toMap(env.first, env.second);
-			Mapping p = e.pi.toMap(env.first, env.second);
+			Mapping d = e.delta.toMap(env);
+			Mapping s = e.sigma.toMap(env);
+			Mapping p = e.pi.toMap(env);
 			try {
 				return new Query(d, p, s);
 			} catch (FQLException fe) {
@@ -689,7 +688,7 @@ public class Query {
 
 		@Override
 		public Query visit(
-				Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, QueryExp>> env,
+				FQLProgram env,
 				Comp e) {
 			List<String> x = new LinkedList<>(seen);
 			Query l = e.l.accept(env, this);
@@ -697,7 +696,7 @@ public class Query {
 			Query r = e.r.accept(env, this);
 			seen = x;
 			try {
-				return compose(r, l); //yes, backwards
+				return compose(env.enums, r, l); //yes, backwards
 			} catch (FQLException fe) {
 				throw new RuntimeException(fe.getLocalizedMessage());
 			}
@@ -705,13 +704,13 @@ public class Query {
 
 		@Override
 		public Query visit(
-				Triple<Map<String, SigExp>, Map<String, MapExp>, Map<String, QueryExp>> env,
+				FQLProgram env,
 				Var e) {
 			if (seen.contains(e.v)) {
 				throw new RuntimeException("Circular query: " + e.v);
 			}
 			seen.add(e.v);
-			QueryExp x = env.third.get(e.v);
+			QueryExp x = env.queries.get(e.v);
 			if (x == null) {
 				throw new RuntimeException("Unknown query: " + e.v);
 			}

@@ -13,12 +13,17 @@ import fql.decl.Signature;
 import fql.decl.TransExp.Case;
 import fql.decl.TransExp.Comp;
 import fql.decl.TransExp.Const;
+import fql.decl.TransExp.Delta;
 import fql.decl.TransExp.FF;
 import fql.decl.TransExp.Fst;
+import fql.decl.TransExp.FullSigma;
 import fql.decl.TransExp.Id;
 import fql.decl.TransExp.Inl;
 import fql.decl.TransExp.Inr;
+import fql.decl.TransExp.Pi;
 import fql.decl.TransExp.Prod;
+import fql.decl.TransExp.Relationalize;
+import fql.decl.TransExp.Sigma;
 import fql.decl.TransExp.Snd;
 import fql.decl.TransExp.TT;
 import fql.decl.TransExp.TransExpVisitor;
@@ -55,6 +60,9 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		if (seen.contains(e.v)) {
 			throw new RuntimeException("Circular transform " + e);
 		}
+		if (env.transforms.get(e.v) == null) {
+			throw new RuntimeException("Transform not found " + e);
+		}
 		seen.add(e.v);
 		return env.transforms.get(e.v).accept(env, this);
 	}
@@ -78,13 +86,13 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		InstExp.Const src0 = (InstExp.Const) src;
 		InstExp.Const dst0 = (InstExp.Const) dst;
 
-		SigExp srct = src0.type(env.sigs, env.maps, env.insts, env.queries);
-		SigExp dstt = dst0.type(env.sigs, env.maps, env.insts, env.queries);
+		SigExp srct = src0.type(env);
+		SigExp dstt = dst0.type(env);
 		if (!srct.equals(dstt)) {
 			throw new RuntimeException("Instances not of same type on " + e + " are " + srct + " and " + dstt);
 		}
 
-		Signature sig = srct.toSig(env.sigs);
+		Signature sig = srct.toSig(env);
 			List<Pair<String, List<Pair<Object, Object>>>> bbb = e.objs;
 		try {	
 			new Transform(new Instance(sig, src0.data), new Instance(sig, dst0.data), bbb );
@@ -92,8 +100,6 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 			fe.printStackTrace();
 			throw new RuntimeException(fe.getLocalizedMessage());
 		}
-		
-		//TODO syntax highlighting pass
 		
 		return new Pair<>(e.src, e.dst);
 	}
@@ -113,8 +119,8 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		if (z == null) {
 			throw new RuntimeException("Missing " + e.tgt + " in " + e);
 		}
-		SigExp xt = x.type(env.sigs, env.maps, env.insts, env.queries);
-		SigExp yt = z.type(env.sigs, env.maps, env.insts, env.queries);
+		SigExp xt = x.type(env);
+		SigExp yt = z.type(env);
 		if (!xt.equals(yt)) {
 			throw new RuntimeException("Instances have different types in " + e + ": " + xt + " and " + yt);
 		}
@@ -136,8 +142,8 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		if (z == null) {
 			throw new RuntimeException("Missing " + e.tgt + " in " + e);
 		}
-		SigExp xt = x.type(env.sigs, env.maps, env.insts, env.queries);
-		SigExp yt = z.type(env.sigs, env.maps, env.insts, env.queries);
+		SigExp xt = x.type(env);
+		SigExp yt = z.type(env);
 		if (!xt.equals(yt)) {
 			throw new RuntimeException("Instances have different types in " + e + ": " + xt + " and " + yt);
 		}
@@ -209,7 +215,7 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		if (!(x instanceof InstExp.Plus)) {
 			throw new RuntimeException(e.obj + " is not a plus: " + x);
 		}
-		InstExp.Plus y = (InstExp.Plus) x;
+//		InstExp.Plus y = (InstExp.Plus) x;
 		
 		Pair<String, String> a = e.l.accept(env, this);
 		Pair<String, String> b = e.r.accept(env, this);
@@ -230,7 +236,7 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		if (!(x instanceof InstExp.Times)) {
 			throw new RuntimeException(e.obj + " is not a times: " + x);
 		}
-		InstExp.Times y = (InstExp.Times) x;
+		//InstExp.Times y = (InstExp.Times) x;
 		
 		Pair<String, String> a = e.l.accept(env, this);
 		Pair<String, String> b = e.r.accept(env, this);
@@ -240,6 +246,106 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		}
 		
 		return new Pair<>(a.first, e.obj);
+	}
+
+	@Override
+	public Pair<String, String> visit(FQLProgram env, Delta e) {
+		Pair<String, String> ht = e.h.type(env);
+		InstExp i1 = env.insts.get(e.src);		
+		if (!(i1 instanceof InstExp.Delta)) {
+			throw new RuntimeException(i1 + " is not a delta in " + e);
+		}
+		String i1x = ((InstExp.Delta) i1).I;
+
+		if (!i1x.equals(ht.first)) {
+ 			throw new RuntimeException("Source mismatch on " + e + ": " + i1x + " and " + ht.first);
+		}
+		InstExp i2 = env.insts.get(e.dst);		
+		if (!(i2 instanceof InstExp.Delta)) {
+			throw new RuntimeException(i2 + " is not a delta in " + e);
+		}
+		String i2x = ((InstExp.Delta) i2).I;
+
+		if (!i2x.equals(ht.second)) {
+ 			throw new RuntimeException("Target mismatch on " + e + ": " + i2x + " and " + ht.second);
+		}
+		return new Pair<>(e.src, e.dst);
+	}
+
+	@Override
+	public Pair<String, String> visit(FQLProgram env, Sigma e) {
+		Pair<String, String> ht = e.h.type(env);
+		InstExp i1 = env.insts.get(e.src);		
+		if (!(i1 instanceof InstExp.Sigma)) {
+			throw new RuntimeException(i1 + " is not a sigma in " + e);
+		}
+		String i1x = ((InstExp.Sigma) i1).I;
+
+		if (!i1x.equals(ht.first)) {
+ 			throw new RuntimeException("Source mismatch on " + e + ": " + i1x + " and " + ht.first);
+		}
+		InstExp i2 = env.insts.get(e.dst);		
+		if (!(i2 instanceof InstExp.Sigma)) {
+			throw new RuntimeException(i2 + " is not a sigma in " + e);
+		}
+		String i2x = ((InstExp.Sigma) i2).I;
+
+		if (!i2x.equals(ht.second)) {
+ 			throw new RuntimeException("Target mismatch on " + e + ": " + i2x + " and " + ht.second);
+		}
+		return new Pair<>(e.src, e.dst);
+	}
+
+	@Override
+	public Pair<String, String> visit(FQLProgram env, FullSigma e) {
+		throw new RuntimeException();
+	}
+
+	@Override
+	public Pair<String, String> visit(FQLProgram env, Pi e) {
+		Pair<String, String> ht = e.h.type(env);
+		InstExp i1 = env.insts.get(e.src);		
+		if (!(i1 instanceof InstExp.Pi)) {
+			throw new RuntimeException(i1 + " is not a pi in " + e);
+		}
+		String i1x = ((InstExp.Pi) i1).I;
+		if (!i1x.equals(ht.first)) {
+ 			throw new RuntimeException("Source mismatch on " + e + ": " + i1x + " and " + ht.first);
+		}
+		InstExp i2 = env.insts.get(e.dst);		
+		if (!(i2 instanceof InstExp.Pi)) {
+			throw new RuntimeException(i2 + " is not a pi in " + e);
+		}
+		String i2x = ((InstExp.Pi) i2).I;
+
+		if (!i2x.equals(ht.second)) {
+ 			throw new RuntimeException("Target mismatch on " + e + ": " + i2x + " and " + ht.second);
+		}
+		return new Pair<>(e.src, e.dst);
+	}
+
+	@Override
+	public Pair<String, String> visit(FQLProgram env, Relationalize e) {
+		Pair<String, String> ht = e.h.type(env);
+		InstExp i1 = env.insts.get(e.src);		
+		if (!(i1 instanceof InstExp.Relationalize)) {
+			throw new RuntimeException(i1 + " is not a relationalize in " + e);
+		}
+		String i1x = ((InstExp.Relationalize) i1).I;
+
+		if (!i1x.equals(ht.first)) {
+ 			throw new RuntimeException("Source mismatch on " + e + ": " + i1x + " and " + ht.first);
+		}
+		InstExp i2 = env.insts.get(e.dst);		
+		if (!(i2 instanceof InstExp.Relationalize)) {
+			throw new RuntimeException(i2 + " is not a relationalize in " + e);
+		}
+		String i2x = ((InstExp.Relationalize) i2).I;
+
+		if (!i2x.equals(ht.second)) {
+ 			throw new RuntimeException("Target mismatch on " + e + ": " + i2x + " and " + ht.second);
+		}
+		return new Pair<>(e.src, e.dst);
 	}
 
 }

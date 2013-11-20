@@ -34,8 +34,8 @@ import fql.decl.SigExp.Var;
 import fql.decl.SigExp.Zero;
 
 public class SigOps implements
-		SigExpVisitor<SigExp.Const, Map<String, SigExp>>,
-		MapExpVisitor<Const, Pair<Map<String, SigExp>, Map<String, MapExp>>> {
+		SigExpVisitor<SigExp.Const, FQLProgram>,
+		MapExpVisitor<Const, FQLProgram> {
 
 	public Pair<SigExp.Const, Fn<SigExp.Const, MapExp.Const>> one() {
 		List<String> nodes = new LinkedList<>();
@@ -500,37 +500,37 @@ public class SigOps implements
 	// /////////////////////////////////////
 
 	@Override
-	public fql.decl.SigExp.Const visit(Map<String, SigExp> env, Zero e) {
+	public fql.decl.SigExp.Const visit(FQLProgram env, Zero e) {
 		return zero().first;
 	}
 
 	@Override
-	public fql.decl.SigExp.Const visit(Map<String, SigExp> env, One e) {
+	public fql.decl.SigExp.Const visit(FQLProgram env, One e) {
 		return one().first;
 	}
 
 	@Override
-	public fql.decl.SigExp.Const visit(Map<String, SigExp> env, Plus e) {
+	public fql.decl.SigExp.Const visit(FQLProgram env, Plus e) {
 		return plus(e.a.accept(env, this), e.b.accept(env, this)).first;
 	}
 
 	@Override
-	public fql.decl.SigExp.Const visit(Map<String, SigExp> env, Times e) {
+	public fql.decl.SigExp.Const visit(FQLProgram env, Times e) {
 		return prod(e.a.accept(env, this), e.b.accept(env, this)).first;
 	}
 
 	@Override
-	public fql.decl.SigExp.Const visit(Map<String, SigExp> env, Exp e) {
+	public fql.decl.SigExp.Const visit(FQLProgram env, Exp e) {
 		throw new RuntimeException();
 	}
 
 	@Override
-	public fql.decl.SigExp.Const visit(Map<String, SigExp> env, Var e) {
-		return env.get(e.v).accept(env, this);
+	public fql.decl.SigExp.Const visit(FQLProgram env, Var e) {
+		return env.sigs.get(e.v).accept(env, this);
 	}
 
 	@Override
-	public fql.decl.SigExp.Const visit(Map<String, SigExp> env,
+	public fql.decl.SigExp.Const visit(FQLProgram env,
 			fql.decl.SigExp.Const e) {
 		return e;
 	}
@@ -538,8 +538,8 @@ public class SigOps implements
 	// /////////////////////////////
 
 	@Override
-	public Const visit(Pair<Map<String, SigExp>, Map<String, MapExp>> env, Id e) {
-		SigExp.Const s = e.t.toConst(env.first);
+	public Const visit(FQLProgram env, Id e) {
+		SigExp.Const s = e.t.toConst(env);
 
 		List<Pair<String, String>> objs = new LinkedList<>();
 		for (String x : s.nodes) {
@@ -563,10 +563,10 @@ public class SigOps implements
 	}
 
 	@Override
-	public Const visit(Pair<Map<String, SigExp>, Map<String, MapExp>> env,
+	public Const visit(FQLProgram env,
 			Comp e) {
-		Const a = e.l.toConst(env.first, env.second);
-		Const b = e.r.toConst(env.first, env.second);
+		Const a = e.l.toConst(env);
+		Const b = e.r.toConst(env);
 
 		if (!a.dst.equals(b.src)) {
 			throw new RuntimeException();
@@ -599,98 +599,100 @@ public class SigOps implements
 	}
 
 	@Override
-	public Const visit(Pair<Map<String, SigExp>, Map<String, MapExp>> env,
+	public Const visit(FQLProgram env,
 			Dist1 e) {
 		throw new RuntimeException();
 	}
 
 	@Override
-	public Const visit(Pair<Map<String, SigExp>, Map<String, MapExp>> env,
+	public Const visit(FQLProgram env,
 			Dist2 e) {
 		throw new RuntimeException();
 	}
+	
+	//TODO add foreign key and primary key to generated SQL
 
 	@Override
-	public Const visit(Pair<Map<String, SigExp>, Map<String, MapExp>> env,
+	public Const visit(FQLProgram env,
 			fql.decl.MapExp.Var e) {
-		return env.second.get(e.v).accept(env, this);
+		return env.maps.get(e.v).accept(env, this);
 	}
 
 	@Override
-	public Const visit(Pair<Map<String, SigExp>, Map<String, MapExp>> env,
+	public Const visit(FQLProgram env,
 			Const e) {
-		Pair<SigExp, SigExp> k = e.type(env.first, env.second);  //resolve vars
+		Pair<SigExp, SigExp> k = e.type(env);  //resolve vars
 		return new Const(e.objs, e.attrs, e.arrows, k.first, k.second);
 	}
 
 	@Override
-	public Const visit(Pair<Map<String, SigExp>, Map<String, MapExp>> env, TT e) {
-		return one().second.of(e.t.accept(env.first, this));
+	public Const visit(FQLProgram env, TT e) {
+		return one().second.of(e.t.accept(env, this));
 	}
 
 	@Override
-	public Const visit(Pair<Map<String, SigExp>, Map<String, MapExp>> env, FF e) {
-		return zero().second.of(e.t.accept(env.first, this));
+	public Const visit(FQLProgram env, FF e) {
+		return zero().second.of(e.t.accept(env, this));
 	}
 
 	@Override
-	public Const visit(Pair<Map<String, SigExp>, Map<String, MapExp>> env, Fst e) {
-		return prod(e.s.accept(env.first, this), e.t.accept(env.first, this)).second;
+	public Const visit(FQLProgram env, Fst e) {
+		return prod(e.s.accept(env, this), e.t.accept(env, this)).second;
 	}
 
 	@Override
-	public Const visit(Pair<Map<String, SigExp>, Map<String, MapExp>> env, Snd e) {
-		return prod(e.s.accept(env.first, this), e.t.accept(env.first, this)).third;
+	public Const visit(FQLProgram env, Snd e) {
+		return prod(e.s.accept(env, this), e.t.accept(env, this)).third;
 	}
 
 	@Override
-	public Const visit(Pair<Map<String, SigExp>, Map<String, MapExp>> env, Inl e) {
-		return plus(e.s.accept(env.first, this), e.t.accept(env.first, this)).second;
+	public Const visit(FQLProgram env, Inl e) {
+		return plus(e.s.accept(env, this), e.t.accept(env, this)).second;
 	}
 
 	@Override
-	public Const visit(Pair<Map<String, SigExp>, Map<String, MapExp>> env, Inr e) {
-		return plus(e.s.accept(env.first, this), e.t.accept(env.first, this)).third;
+	public Const visit(FQLProgram env, Inr e) {
+		return plus(e.s.accept(env, this), e.t.accept(env, this)).third;
 	}
 
 	@Override
-	public Const visit(Pair<Map<String, SigExp>, Map<String, MapExp>> env,
+	public Const visit(FQLProgram env,
 			Apply e) {
 		throw new RuntimeException();
 	}
 
 	@Override
-	public Const visit(Pair<Map<String, SigExp>, Map<String, MapExp>> env,
+	public Const visit(FQLProgram env,
 			Curry e) {
 		throw new RuntimeException();
 	}
 
 	@Override
-	public Const visit(Pair<Map<String, SigExp>, Map<String, MapExp>> env,
+	public Const visit(FQLProgram env,
 			Case e) {
 		Const lx = e.l.accept(env, this);
 		Const rx = e.r.accept(env, this);
-		SigExp.Const cx = lx.dst.accept(env.first, this);
+		SigExp.Const cx = lx.dst.accept(env, this);
 
-		return plus(lx.src.accept(env.first, this),
-				rx.src.accept(env.first, this)).fourth.of(new Triple<>(cx, lx,
+		return plus(lx.src.accept(env, this),
+				rx.src.accept(env, this)).fourth.of(new Triple<>(cx, lx,
 				rx));
 
 	}
 
 	@Override
-	public Const visit(Pair<Map<String, SigExp>, Map<String, MapExp>> env,
+	public Const visit(FQLProgram env,
 			Prod e) {
 		Const lx = e.l.accept(env, this);
 		Const rx = e.r.accept(env, this);
-		SigExp.Const cx = lx.src.accept(env.first, this);
-		SigExp.Const dx = rx.src.accept(env.first, this);
+		SigExp.Const cx = lx.src.accept(env, this);
+		SigExp.Const dx = rx.src.accept(env, this);
 		if (!cx.equals(dx)) {
 			throw new RuntimeException(cx + " and " + dx + " and " + lx + " and " + rx);
 		}
 		
-		return prod(lx.dst.accept(env.first, this),
-				rx.dst.accept(env.first, this)).fourth.of(new Triple<>(cx, lx,
+		return prod(lx.dst.accept(env, this),
+				rx.dst.accept(env, this)).fourth.of(new Triple<>(cx, lx,
 				rx));
 	}
 

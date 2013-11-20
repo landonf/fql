@@ -3,7 +3,6 @@ package fql.decl;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import fql.FQLException;
 import fql.Pair;
@@ -11,12 +10,12 @@ import fql.parse.PrettyPrinter;
 
 public abstract class MapExp {
 
-	public Const toConst(Map<String, SigExp> env, Map<String, MapExp> ctx) {
-		return accept(new Pair<>(env, ctx), new SigOps());
+	public Const toConst(FQLProgram env) {
+		return accept(env, new SigOps());
 	}
 	
-	public Mapping toMap(Map<String, SigExp> env, Map<String, MapExp> ctx) {
-		Const e = toConst(env, ctx);
+	public Mapping toMap(FQLProgram env) {
+		Const e = toConst(env);
 		try {
 			return new Mapping(e.src.toSig(env), e.dst.toSig(env), e.objs, e.attrs,
 					e.arrows);
@@ -30,9 +29,8 @@ public abstract class MapExp {
 
 	public abstract boolean equals(Object o);
 
-	public final Pair<SigExp, SigExp> type(Map<String, SigExp> env,
-			Map<String, MapExp> ctx) {
-		return accept(new Pair<>(env, ctx), new MapExpChecker(
+	public final Pair<SigExp, SigExp> type(FQLProgram env) {
+		return accept(env, new MapExpChecker(
 				new LinkedList<String>()));
 	}
 

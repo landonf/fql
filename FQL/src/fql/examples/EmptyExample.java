@@ -1,6 +1,8 @@
 package fql.examples;
 
 public class EmptyExample extends Example {
+	
+	//TODO add drop to FQL syntax highlighting
 
 	@Override
 	public String getName() {
@@ -14,7 +16,7 @@ public class EmptyExample extends Example {
 
 	String s = 
 			"//illustrates all possible FQL declarations"
-					+ "\n"
+					+ "\nenum color = {red, green, blue}\n"
 					+ "\nschema C = {nodes; attributes; arrows; equations;}"
 					+ "\nschema C1 = void"
 					+ "\nschema C2 = unit"
@@ -46,7 +48,7 @@ public class EmptyExample extends Example {
 					+ "\ninstance I4  = relationalize I"
 					+ "\ninstance I5  = SIGMA F I"
 					+ "\ninstance I8  = (I + I)"
-					+ "\n//instance I9 = (I * I)"
+					+ "\ninstance I9 = (I * I)"
 					+ "\n//instance I10 = (I ^ I)"
 					+ "\ninstance I11 = unit C"
 					+ "\ninstance I12 = void C"
@@ -60,14 +62,18 @@ public class EmptyExample extends Example {
 					+ "\ntransform t4 = I8.inl"
 					+ "\ntransform t5 = I8.inr"
 					+ "\ntransform t6 = I8.(t4+t5)"
-					+ "\n//transform t9 = I9.(t7*t9)"
-					+ "\n//transform t10= I9.fst"
-					+ "\n//transform t11= I9.snd"
-					+ "\n//transform t12 = I11.unit I"
+					+ "\ntransform t7= I9.fst"
+					+ "\ntransform t9= I9.snd"
+					+ "\ntransform t10 = I9.(t7*t9)"
+					+ "\ntransform t12 = I11.unit I"
 					+ "\ntransform t13 = I12.void I"
-					+ "\n//transform t14 = I8.(t4*t5)"
+					+ "\n//transform t14 = I8.(t4^t5)"
 					+ "\n//transform curry"
 					+ "\n//transform eval"
+					+ "\n//transforms t15 = delta I1 I1 (id I1)"
+					+ "\n//transforms t16 = sigma I3 I3 (id I3)"
+					+ "\n//transforms t17 = pi I2 I2 (id I2)"
+					+ "\n//transforms t18 = relationalize I1 I1 (id I1)"
 					
 					+ "\n\ndrop I t1\n\n";
 					

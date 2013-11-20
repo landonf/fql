@@ -59,8 +59,8 @@ public class DEBUG {
 	public static boolean inst_tabular = true;
 	public static boolean inst_textual = true;
 	public static boolean inst_joined = true;
-	public static boolean inst_gr = true;
-	public static boolean inst_obs = true;
+	public static boolean inst_gr = false;
+	public static boolean inst_obs = false;
 
 	public static boolean transform_graphical = true;
 	public static boolean transform_tabular = true;

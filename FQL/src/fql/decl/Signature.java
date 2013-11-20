@@ -88,7 +88,7 @@ public class Signature  {
 		return s;
 	}
 	
-	public Signature(/* String n, */ List<String> nodes_str,
+	public Signature(Map<String, Type> types, List<String> nodes_str,
 			List<Triple<String, String, String>> attrs_str,
 			List<Triple<String, String, String>> arrows,
 			List<Pair<List<String>, List<String>>> equivs) throws FQLException {
@@ -144,7 +144,11 @@ public class Signature  {
 				throw new FQLException("Missing node " + source /* + " in " + n */);
 			}
 
-			Attribute<Node> a = new Attribute<>(name, source_node, tryParseType(target));
+			Type type = types.get(target);
+			if (type == null) {
+				throw new RuntimeException("Missing enum: " + target);
+			}
+			Attribute<Node> a = new Attribute<>(name, source_node, type);
 
 			attrsA.add(a);
 
@@ -253,14 +257,18 @@ public class Signature  {
 		}
 	}
 */
+	/*
 	private Type tryParseType(String s) {
 		if (s.equals("string")) {
 			return new Varchar();
 		} else if (s.equals("int")) {
 			return new Int();
+		} else {
+			return new Type.
 		}
 		return null;
 	}
+	*/
 /*
 	// for json
 	public Signature(
@@ -1237,7 +1245,7 @@ public class Signature  {
 			cc.add(new Pair<>(lhs, rhs));
 		}
 		
-		return new Signature(/*n, */o, a, e, cc);
+		return new Signature(new HashMap<String, Type>(), /*n, */o, a, e, cc);
 	}
 
 	

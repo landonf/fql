@@ -14,6 +14,7 @@ import fql.Quad;
 import fql.Triple;
 import fql.decl.Attribute;
 import fql.decl.Signature;
+import fql.decl.Type;
 
 /**
  * 
@@ -29,7 +30,7 @@ import fql.decl.Signature;
 public class FinCat<Obj, Arrow> {
 
 	public List<Attribute<Obj>> attrs;
-	
+
 	public List<Obj> objects = new LinkedList<>();
 	public List<Arr<Obj, Arrow>> arrows = new LinkedList<>();
 	public Map<Pair<Arr<Obj, Arrow>, Arr<Obj, Arrow>>, Arr<Obj, Arrow>> composition = new HashMap<>();
@@ -177,17 +178,16 @@ public class FinCat<Obj, Arrow> {
 	 * @return a signature and isomorphism
 	 * @throws FQLException
 	 */
-	public Quad<Signature, Pair<Map<Obj, String>, Map<String, Obj>>, Pair<Map<Arr<Obj, Arrow>, String>, Map<String, Arr<Obj, Arrow>>>, Pair<Map<Attribute<Obj>, String>, Map<String, Attribute<Obj>>>> 
-	toSig(/*String n*/) throws FQLException {
+	public Quad<Signature, Pair<Map<Obj, String>, Map<String, Obj>>, Pair<Map<Arr<Obj, Arrow>, String>, Map<String, Arr<Obj, Arrow>>>, Pair<Map<Attribute<Obj>, String>, Map<String, Attribute<Obj>>>> toSig(Map<String, Type> types)
+			throws FQLException {
 
-		
-		 Map<Attribute<Obj>, String> attM = new HashMap<>(); 
-		 Map<String, Attribute<Obj>> attM2 = new HashMap<>();
+		Map<Attribute<Obj>, String> attM = new HashMap<>();
+		Map<String, Attribute<Obj>> attM2 = new HashMap<>();
 		int ax = 0;
-		
+
 		List<String> objs = new LinkedList<>();
 		List<Triple<String, String, String>> attrs0 = new LinkedList<>();
-		
+
 		int i = 0;
 		Map<String, Obj> objM = new HashMap<>();
 		Map<Obj, String> objM2 = new HashMap<>();
@@ -202,10 +202,11 @@ public class FinCat<Obj, Arrow> {
 			for (Attribute<Obj> att : attrs) {
 				attM.put(att, "attrib" + ax);
 				attM2.put("attrib" + ax, att);
-				attrs0.add(new Triple<>("attrib" + ax++, objM2.get(att.source), att.target.toString()));
+				attrs0.add(new Triple<>("attrib" + ax++, objM2.get(att.source),
+						att.target.toString()));
 			}
 		}
-		
+
 		List<Triple<String, String, String>> arrs = new LinkedList<>();
 		int j = 0;
 		Map<String, Arr<Obj, Arrow>> arrM = new HashMap<>();
@@ -213,7 +214,7 @@ public class FinCat<Obj, Arrow> {
 		for (Arr<Obj, Arrow> a : arrows) {
 			if (isId(a)) {
 				continue;
-			} 
+			}
 			arrM.put("arrow" + j, a);
 			arrM2.put(a, "arrow" + j);
 			arrs.add(new Triple<>(arrM2.get(a), objM2.get(a.src), objM2
@@ -224,27 +225,26 @@ public class FinCat<Obj, Arrow> {
 		// System.out.println(objM);
 		// System.out.println(arrM);
 
-//		for (Arr<Obj, Arrow> a : this.arrows) {
-//			// System.out.println("arrow a is " + a);
-//			
-//		}
-
-		
+		// for (Arr<Obj, Arrow> a : this.arrows) {
+		// // System.out.println("arrow a is " + a);
+		//
+		// }
 
 		// System.out.println("arrows are " + arrows);
 		LinkedList<Pair<List<String>, List<String>>> eqs = new LinkedList<>();
 		for (Pair<Arr<Obj, Arrow>, Arr<Obj, Arrow>> k : composition.keySet()) {
 			Arr<Obj, Arrow> v = composition.get(k);
-			
+
 			String s = arrM2.get(k.first);
 			String t = arrM2.get(k.second);
 			String u = arrM2.get(v);
-			
+
 			String ob = objM2.get(v.src);
-			
+
 			List<String> lhs = new LinkedList<>();
 			List<String> rhs = new LinkedList<>();
-			lhs.add(ob); rhs.add(ob);
+			lhs.add(ob);
+			rhs.add(ob);
 			if (s != null) {
 				lhs.add(s);
 			}
@@ -258,41 +258,41 @@ public class FinCat<Obj, Arrow> {
 				eqs.add(new Pair<>(lhs, rhs));
 			}
 		}
-		
-//		 System.out.println("$$$$$$$$$$$$$$$$$$$$$");
-//		 System.out.println(this);
-//		 System.out.println(objM);
-//		 System.out.println(objM2);
-//		 System.out.println(arrM);
-//		 System.out.println(arrM2);
-//		 System.out.println(attM2);
-//		 System.out.println(attM);
-//		System.out.println(eqs);
-//		 System.out.println("$$$$$$$$$$$$$$$$$$$$$");
-		
-		Signature ret2 = new Signature(/*n,*/ objs, attrs0, arrs, 
-				eqs);
 
-		//System.out.println(ret2);
-		 
-		Quad<Signature, Pair<Map<Obj, String>, Map<String, Obj>>, Pair<Map<Arr<Obj, Arrow>, String>, Map<String, Arr<Obj, Arrow>>>, Pair<Map<Attribute<Obj>, String>, Map<String, Attribute<Obj>>>> retret 
-		= new Quad<>(ret2, new Pair<>(objM2, objM), new Pair<>(arrM2, arrM), new Pair<>(attM, attM2));
+		// System.out.println("$$$$$$$$$$$$$$$$$$$$$");
+		// System.out.println(this);
+		// System.out.println(objM);
+		// System.out.println(objM2);
+		// System.out.println(arrM);
+		// System.out.println(arrM2);
+		// System.out.println(attM2);
+		// System.out.println(attM);
+		// System.out.println(eqs);
+		// System.out.println("$$$$$$$$$$$$$$$$$$$$$");
+
+		Signature ret2 = new Signature(types, objs, attrs0, arrs, eqs);
+
+		// System.out.println(ret2);
+
+		Quad<Signature, Pair<Map<Obj, String>, Map<String, Obj>>, Pair<Map<Arr<Obj, Arrow>, String>, Map<String, Arr<Obj, Arrow>>>, Pair<Map<Attribute<Obj>, String>, Map<String, Attribute<Obj>>>> retret = new Quad<>(
+				ret2, new Pair<>(objM2, objM), new Pair<>(arrM2, arrM),
+				new Pair<>(attM, attM2));
 		return retret;
 	}
 
-//	private Set<Obj> isolated() {
-//		Set<Obj> ret = new HashSet<>(objects);
-//
-//		for (Arr<Obj, Arrow> a : arrows) {
-//			if (isId(a)) {
-//				continue;
-//			}
-//			ret.remove(a.src);
-//			ret.remove(a.dst);
-//		}
-//
-//		return ret;
-//	}
+	// private Set<Obj> isolated() {
+	// Set<Obj> ret = new HashSet<>(objects);
+	//
+	// for (Arr<Obj, Arrow> a : arrows) {
+	// if (isId(a)) {
+	// continue;
+	// }
+	// ret.remove(a.src);
+	// ret.remove(a.dst);
+	// }
+	//
+	// return ret;
+	// }
 
 	@Override
 	public String toString() {

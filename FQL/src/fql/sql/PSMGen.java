@@ -20,14 +20,11 @@ import fql.cat.FinFunctor;
 import fql.decl.Attribute;
 import fql.decl.Edge;
 import fql.decl.Environment;
-import fql.decl.Int;
-import fql.decl.Mapping;
 import fql.decl.FQLProgram;
+import fql.decl.Mapping;
 import fql.decl.Node;
 import fql.decl.Path;
 import fql.decl.Signature;
-import fql.decl.Type;
-import fql.decl.Varchar;
 
 /**
  * 
@@ -146,7 +143,7 @@ public class PSMGen
 	private static Map<String, String> colattrs(Attribute<Node> a) {
 		Map<String, String> twocol_attrs = new HashMap<>();
 		twocol_attrs.put("c0", PSM.VARCHAR());
-		twocol_attrs.put("c1", typeTrans(a.target));
+		twocol_attrs.put("c1", a.target.psm());
 		return twocol_attrs;
 	}
 
@@ -444,21 +441,14 @@ public class PSMGen
 		for (Attribute<Node> a : sig.attrs) {
 			Map<String, String> attrs = new HashMap<>();
 			attrs.put("c0", PSM.VARCHAR());
-			attrs.put("c1", typeTrans(a.target));
+			attrs.put("c1", a.target.psm());
 			ret.add(new CreateTable(name + "_" + a.name, attrs, suppress));
 		}
 
 		return ret;
 	}
 
-	private static String typeTrans(Type t) {
-		if (t instanceof Int) {
-			return PSM.INTEGER;
-		} else if (t instanceof Varchar) {
-			return PSM.VARCHAR();
-		}
-		throw new RuntimeException();
-	}
+	
 
 //	static String preamble = "DROP DATABASE FQL; CREATE DATABASE FQL; USE FQL; SET @guid := 0;\n\n";
 
@@ -715,7 +705,7 @@ public class PSMGen
 				attrs1.put("c" + i, PSM.VARCHAR());
 			}
 			for (int j = 0; j < xxx.third.length; j++) {
-				attrs1.put("c" + (xxx.second.length + j), typeTrans(xxx.third[j].target));
+				attrs1.put("c" + (xxx.second.length + j), xxx.third[j].target.psm());
 			}
 			Map<String, String> attrs2 = new HashMap<>(attrs1);
 			attrs2.put("guid", PSM.VARCHAR());
