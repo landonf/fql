@@ -62,7 +62,7 @@ import fql.parse.FQLParser;
  * 
  *         The FQL code editor
  */
-public class CodeEditor extends JPanel {
+public class CodeEditor extends JPanel implements Runnable {
 
 	final Integer id;
 
@@ -391,7 +391,68 @@ public class CodeEditor extends JPanel {
 		display = null;
 	}
 
-	void runAction() {
+	@SuppressWarnings("deprecation")
+	void abortAction() {
+		if (thread == null) {
+			return;
+		}
+		if (!thread.isAlive()) {
+			thread = null;
+			return;
+		}
+		try {
+			thread.stop();
+			thread = null;
+			respArea.setText("Aborted");
+		} catch (Exception e) {
+			respArea.setText(e.getLocalizedMessage());
+		}
+	}
+	
+	String toDisplay = null;
+	Thread thread;
+	public void runAction() {
+		if (thread != null) {
+			JOptionPane.showMessageDialog(null, "Cannot compile - wait for current compile to finish, or abort it from the edit menu");
+			return;
+		}
+		toDisplay = null;
+		DateFormat format = DateFormat.getTimeInstance();
+		String foo = format.format(new Date(System.currentTimeMillis()));
+
+//		respArea.setText("Compilation and visualization started at " + foo);
+		thread = new Thread(this);
+		Thread temp = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					int counter = 0;
+					respArea.setText("");
+					for (;;) {
+						Thread.sleep(250);
+						if (toDisplay != null) {
+							respArea.setText(toDisplay);
+							toDisplay = null;
+							return;
+						} else if (thread != null) {
+							respArea.setText(respArea.getText() + ".");
+							counter++;
+							if (counter == 40) {
+								counter = 0;
+								respArea.setText(respArea.getText() + "\n");
+								//respArea.s
+							}
+						}
+					}
+				} catch (InterruptedException ie) {
+					ie.printStackTrace();
+				}
+			}
+		});
+		temp.start();
+		thread.start();
+	}
+	public void run() {
 		String program = topArea.getText();
 
 		FQLProgram init;
@@ -414,12 +475,14 @@ public class CodeEditor extends JPanel {
 			String t = s.substring(s.indexOf(" "));
 			t.split("\\s+");
 
-			respArea.setText("Syntax error: " + e.getLocalizedMessage());
+			toDisplay = "Syntax error: " + e.getLocalizedMessage();
 			e.printStackTrace();
+			thread = null;
 			return;
 		} catch (RuntimeException e) {
-			respArea.setText("Error: " + e.getLocalizedMessage());
+			toDisplay = "Error: " + e.getLocalizedMessage();
 			e.printStackTrace();
+			thread = null;
 			return;
 		}
 
@@ -429,16 +492,18 @@ public class CodeEditor extends JPanel {
 			env = envX.first;
 			env2 = envX.second;
 		} catch (LineException e) {
-			respArea.setText("Error in " + e.kind + " " + e.decl + ": "
-					+ e.getLocalizedMessage());
+			toDisplay = "Error in " + e.kind + " " + e.decl + ": "
+					+ e.getLocalizedMessage();
 			e.printStackTrace();
 			topArea.requestFocusInWindow();
 			Integer theLine = init.lines.get(e.decl);
 			topArea.setCaretPosition(theLine);
+			thread = null;
 			return;
 		} catch (Throwable re) {
-			respArea.setText(re.getLocalizedMessage());
+			toDisplay = re.getLocalizedMessage();
 			re.printStackTrace();
+			thread = null;
 			return;
 		}
 
@@ -457,17 +522,15 @@ public class CodeEditor extends JPanel {
 			display.display(foo, init.order);
 
 			// String psm = PSMGen.compile(env, init);
-			respArea.setText(env2);
+			toDisplay = env2;
 		} catch (Exception ee) {
-			respArea.setText(ee.toString());
+			toDisplay = ee.toString();
 			ee.printStackTrace();
+			thread = null;
 			return;
 		}
-		/*
-		 * //List<PSM> psm0 = PSMGen.compile0(cp, parsed_program); //String
-		 * output0 = PSMInterp.interp0(psm0); // System.out.println(output0); //
-		 * respArea.setText(output0 + "\n\n---------------\n\n" + psm);
-		 */
+		
+		thread = null;
 
 	}
 

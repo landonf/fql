@@ -171,6 +171,14 @@ public class GUI extends JPanel {
 				checkAction();
 			}
 		});
+		
+		MenuItem abortItem = new MenuItem("Abort");
+		editMenu.add(abortItem);
+		abortItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				abortAction();
+			}
+		});
 
 		/*
 		MenuItem jsonItem = new MenuItem("JSON Input");
@@ -366,6 +374,16 @@ public class GUI extends JPanel {
 		}
 		c.check();
 	}
+	
+	private static void abortAction() {
+		int i = editors.getSelectedIndex();
+		CodeEditor c = (CodeEditor) editors.getComponentAt(i);
+		if (c == null) {
+			return;
+		}
+		c.abortAction();
+	}
+	
 	private static void closeAction() {
 		delay();
 		int i = editors.getSelectedIndex();
@@ -478,6 +496,7 @@ public class GUI extends JPanel {
 		files.put(i, f);
 	}
 
+	
 	static protected void openAction() {
 		delay();
 		JFileChooser jfc = new JFileChooser();
@@ -512,6 +531,7 @@ public class GUI extends JPanel {
 		return titles.get(i);
 	}
 
+	
 	static Integer newAction(String title, String content) {
 		untitled_count++;
 		CodeEditor c = new CodeEditor(untitled_count, content);

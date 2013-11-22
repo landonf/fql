@@ -1,7 +1,6 @@
 package fql.gui;
 
 import java.awt.CardLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -48,16 +47,16 @@ public class Display {
 
 	List<Pair<String, JComponent>> frames = new LinkedList<>();
 	
-	public JPanel showInst(Color color,/* Environment environment, String c, */ Instance view) throws FQLException{
+	public JPanel showInst(/* Color color Environment environment, String c, */ Instance view) throws FQLException{
 		JTabbedPane px = new JTabbedPane();
 
 		if (DEBUG.inst_graphical) {
-			JPanel gp = view.pretty(color);
-			JPanel gp0 = new JPanel(new GridLayout(1, 1));
-			gp0.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-			gp0.add(gp);
-			px.add("Graphical", new JScrollPane(gp0));
-			gp0.setSize(600, 600);
+			JPanel gp = view.pretty();
+	//		JPanel gp0 = new JPanel(new GridLayout(1, 1));
+	//		gp0.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+	//		gp0.add(gp);
+			px.add("Graphical", gp);
+		//	gp.setSize(600, 600);
 		}
 
 		if (DEBUG.inst_textual) {
@@ -77,12 +76,12 @@ public class Display {
 		
 		if (DEBUG.inst_gr) {
 			 JPanel groth = view.groth();
-			 px.add("Elements", new JScrollPane(groth));
+			 px.add("Elements", groth);
 		}
 		
 		if (DEBUG.inst_obs) {
 			JPanel rel = view.observables();
-			px.add("Observables", new JScrollPane(rel));
+			px.add("Observables", rel);
 		}
 
 		JPanel top = new JPanel(new GridLayout(1, 1));
@@ -97,11 +96,11 @@ public class Display {
 
 		if (DEBUG.mapping_graphical) {
 			JPanel gp = view.pretty(environment);
-			JPanel gp0 = new JPanel(new GridLayout(1, 1));
-			gp0.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-			gp0.add(gp);
-			px.add("Graphical", new JScrollPane(gp0));
-			gp0.setSize(600, 600);
+//			JPanel gp0 = new JPanel(new GridLayout(1, 1));
+//			gp0.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+//			gp0.add(gp);
+			px.add("Graphical", gp); // new JScrollPane(gp0, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS));
+	//		gp0.setSize(600, 600);
 		}
 
 		if (DEBUG.mapping_textual) {
@@ -130,11 +129,11 @@ public class Display {
 
 		if (DEBUG.transform_graphical) {
 			JPanel gp = view.graphical(src_n, dst_n);
-			JPanel gp0 = new JPanel(new GridLayout(1, 1));
-			gp0.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-			gp0.add(gp);
-			px.add("Graphical", new JScrollPane(gp0));
-			gp0.setSize(600, 600);			
+	//		JPanel gp0 = new JPanel(new GridLayout(1, 1));
+		//	gp0.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+		//	gp0.add(gp);
+			px.add("Graphical", gp); //new JScrollPane(gp0, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS));
+		//	gp0.setSize(600, 600);			
 		}
 		
 		if (DEBUG.transform_textual) {
@@ -157,12 +156,12 @@ public class Display {
 		JTabbedPane px = new JTabbedPane();
 		
 		if (DEBUG.schema_graphical) {
-			JPanel gp = view.pretty(environment);
-			JPanel gp0 = new JPanel(new GridLayout(1, 1));
-			gp0.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-			gp0.add(gp);
-			px.add("Graphical", new JScrollPane(gp0));
-			gp0.setSize(600, 600);
+			JComponent gp = view.pretty();
+//			JPanel gp0 = new JPanel(new GridLayout(1, 1));
+	//		gp0.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+		//	gp0.add(gp);
+			px.add("Graphical", gp);
+			//gp0.setSize(600, 600);
 		}
 
 		if (DEBUG.schema_textual) {
@@ -229,7 +228,7 @@ public class Display {
 				frames.add(new Pair<String, JComponent>("mapping " + c + " : " + a + " -> " + b, showMapping(environment, environment.getMapping(c))));
 			} else if (environment.instances.get(c) != null) {
 				String xxx = p.insts.get(c).type(p).accept(p.sigs, new Unresolver()).toString();
-				frames.add(new Pair<String, JComponent>("instance " + c + " : " + xxx , showInst(environment.colors.get(c), environment.instances.get(c))));
+				frames.add(new Pair<String, JComponent>("instance " + c + " : " + xxx , showInst(environment.instances.get(c))));
 			} else if (environment.queries.get(c) != null) {
 				Pair<SigExp, SigExp> xxx = p.queries.get(c).type(p); 
 				String a = xxx.first.accept(p.sigs, new Unresolver()).toString();

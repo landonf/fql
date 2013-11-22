@@ -25,12 +25,15 @@ public class TerminalExample extends Example {
 			+ "\ninstance I = unit C"
 			+ "\n"
 			+ "\ninstance J = {"
-			+ "\n	nodes a -> {1,2}, b -> {1}, c -> {1};"
-			+ "\n	attributes attb -> {(1,r)}, attc -> {(1,1)};"
-			+ "\n	arrows f -> {(1,1),(2,1)}, g -> {(1,1),(2,1)};"
+			+ "\n	nodes a -> {1,2,3}, b -> {1,2}, c -> {1,3};"
+			+ "\n	attributes attb -> {(1,r),(2,g)}, attc -> {(1,1),(3,2)};"
+			+ "\n	arrows f -> {(1,1),(2,1),(3,2)}, g -> {(1,1),(2,1),(3,3)};"
 			+ "\n} : C"
 			+ "\n"
-			+ "\ntransform K = I.unit J"
+			+ "\ntransform K = I.unit J";
+
+
+
 
 
 

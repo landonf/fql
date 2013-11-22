@@ -288,7 +288,7 @@ public class DEBUG {
 	}
 
 	static String about = "FQL IDE Copyright (C) 2012-2014 David Spivak and Ryan Wisnesky"
-			+ "\nLicense: Creative-Commons Attribution-NonCommercial-NoDerivs 3.0 Unported"
+			+ "\n\nLicense: Creative-Commons Attribution-NonCommercial-NoDerivs 3.0 Unported"
 			+ "\n\nLibraries used:\n\nJParsec (parsing)\nJUNG (graph visualization)\nRSyntaxTextArea (code editor)";
 
 	public static int chase_limit = 64;

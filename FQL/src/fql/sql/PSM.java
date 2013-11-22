@@ -18,7 +18,7 @@ public abstract class PSM {
 		return "VARCHAR(" + DEBUG.varlen + ")";
 	}
 
-	public  abstract void exec(Map<String, Set<Map<Object, Object>>> state);
+	public  abstract void exec(PSMInterp interp, Map<String, Set<Map<Object, Object>>> state);
 	
 	public  abstract String toPSM(); 
 

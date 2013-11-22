@@ -39,18 +39,18 @@ public class FullSigma extends PSM {
 	}
 
 	@Override
-	public void exec(Map<String, Set<Map<Object, Object>>> state) {
+	public void exec(PSMInterp interp, Map<String, Set<Map<Object, Object>>> state) {
 		Signature C = f.source;
 		Signature D = f.target;
 		List<Pair<String, List<Pair<Object, Object>>>> I0 = PSMGen.gather(inst, C, state);
 
 		try {
 			Instance I = new Instance(C, I0);
-			Denotation d = new Denotation(f, I);
+			Denotation d = new Denotation(interp, f, I);
 		//	System.out.println("Exucuting fs on " + I);
 			//System.out.println("GUID is " + PSMInterp.guid);
 //			System.out.println(d);
-			Instance J = d.sigma();
+			Instance J = d.sigma(interp);
 		//	System.out.println("done " + J);
 			//System.out.println("GUID is " + PSMInterp.guid);
 

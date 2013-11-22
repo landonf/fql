@@ -2,7 +2,6 @@ package fql.gui;
 
 import java.awt.CardLayout;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Paint;
@@ -26,6 +25,7 @@ import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
@@ -122,13 +122,13 @@ public class CategoryOfElements {
 		 Layout<Pair<Node, Object>, Pair<Path, Integer>> layout = new FRLayout<>(sgv);
 	//	Layout<Pair<Node, Object>, Pair<Path, Integer>> layout = new ISOMLayout<>(sgv);
 		// Layout<String, String> layout = new CircleLayout(sgv);
-		layout.setSize(new Dimension(600, 400));
+		//layout.setSize(new Dimension(600, 400));
 		// BasicVisualizationServer<String, String> vv = new
 		// BasicVisualizationServer<String, String>(
 		// layout);
 		VisualizationViewer<Pair<Node, Object>, Pair<Path, Integer>> vv = new VisualizationViewer<>(
 				layout);
-		vv.setPreferredSize(new Dimension(600, 400));
+		//vv.setPreferredSize(new Dimension(600, 400));
 		// Setup up a new vertex to paint transformer...
 		Transformer<Pair<Node, Object>, Paint> vertexPaint = new Transformer<Pair<Node, Object>, Paint>() {
 			public Paint transform(Pair<Node, Object> i) {
@@ -217,10 +217,11 @@ public class CategoryOfElements {
 		CardLayout cl = (CardLayout)(cards.getLayout());
 		cl.show(cards, "blank");
 
-		pane.add(vv);
+		pane.add(new GraphZoomScrollPane(vv));
 		pane.add(cards);
+		pane.setResizeWeight(1.0d);
 		ret.add(pane);
-		cards.setPreferredSize(new Dimension(400,100));
+//		cards.setPreferredSize(new Dimension(400,100));
 		
 		return ret;
 	}

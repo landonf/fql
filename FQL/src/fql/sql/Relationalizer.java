@@ -166,7 +166,7 @@ public class Relationalizer {
 			}
 
 			InstExp.Const ret = new InstExp.Const(nodes0, attrs0, arrows0, sig0);
-			System.out.println(ret);
+			//System.out.println(ret);
 			return ret;
 		} catch (FQLException fe) {
 			throw new RuntimeException(fe.getLocalizedMessage());
@@ -360,15 +360,15 @@ public class Relationalizer {
 
 		Flower f = new Flower(select, from, where);
 
-		ret.add(new CreateTable(out + "_" +"relationalize_temp", attrs, false));
-		ret.add(new InsertSQL(out + "_" +"relationalize_temp", f));
+		ret.add(new CreateTable(out + "_" + N + "_relationalize_temp", attrs, false));
+		ret.add(new InsertSQL(out + "_" + N +"_relationalize_temp", f));
 
 		ret.add(new DropTable(out + "_" + N.string));
 		ret.add(new CreateTable(out + "_" + N.string, attrs, false));
 		ret.add(new InsertSQL(out + "_" + N.string, new CopyFlower(
-				out + "_" +"relationalize_temp")));
+				out + "_" + N + "_relationalize_temp")));
 
-		ret.add(new DropTable(out + "_" +"relationalize_temp"));
+		ret.add(new DropTable(out + "_" + N + "_relationalize_temp"));
 
 		for (Edge n : sig.edges) {
 			if (!n.source.equals(N)) {
@@ -394,9 +394,9 @@ public class Relationalizer {
 			ret.add(new DropTable(out + "_" + n.name));
 			ret.add(new CreateTable(out + "_" + n.name, attrs, false));
 			ret.add(new InsertSQL(out + "_" + n.name, new CopyFlower(
-					out + "_" +"relationalize_temp")));
+					out + "_" + n.name + "_relationalize_temp")));
 
-			ret.add(new DropTable(out + "_" +"relationalize_temp"));
+			ret.add(new DropTable(out + "_" + n.name + "_relationalize_temp"));
 		}
 		for (Attribute<Node> n : sig.attrs) {
 			if (!n.source.equals(N)) {

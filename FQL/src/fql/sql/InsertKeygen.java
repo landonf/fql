@@ -52,7 +52,7 @@ public class InsertKeygen extends PSM {
 	}
 
 	@Override
-	public void exec(Map<String, Set<Map<Object, Object>>> state) {
+	public void exec(PSMInterp interp, Map<String, Set<Map<Object, Object>>> state) {
 		//System.out.println("Exec " + this + " on " + state);
 		if (!state.containsKey(name)) {
 			throw new RuntimeException(name + "\n\n" + state);
@@ -69,7 +69,7 @@ public class InsertKeygen extends PSM {
 			for (Object s : row.keySet()) {
 				row0.put(s, row.get(s));
 			}
-			row0.put(col, ++PSMInterp.guid);
+			row0.put(col, ++interp.guid);
 			ret.add(row0);
 		}
 		state.put(name, ret);

@@ -35,6 +35,7 @@ import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
@@ -360,6 +361,12 @@ public class Transform {
 		}
 		return false;
 	}
+	
+	//public JComponent lowerComp() throws FQLException {
+	//	JComponent c = src.thesig.pretty();
+		//c.setMaximumSize(new Dimension(400,100));
+	//	return c;
+	//}
 
 	public JComponent lowerComp() {
 		int size = src.thesig.nodes.size();
@@ -374,39 +381,16 @@ public class Transform {
 		}
 		pan.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Legend"));
-		/*
-		 * JLabel l1 = new JLabel(getSource().name0 + "    <-----");
-		 * l1.setBackground(env.colors.get(getSource().name0));
-		 * l1.setOpaque(true); l1.setHorizontalAlignment(SwingConstants.CENTER);
-		 * pan.add(l1);
-		 * 
-		 * 
-		 * l1 = new JLabel(join.source.name0+ "    ----->");
-		 * l1.setBackground(env.colors.get(join.source.name0));
-		 * l1.setOpaque(true); l1.setHorizontalAlignment(SwingConstants.CENTER);
-		 * pan.add(l1);
-		 * 
-		 * l1 = new JLabel(union.source.name0+ "    ----->");
-		 * l1.setBackground(env.colors.get(union.source.name0));
-		 * l1.setOpaque(true); l1.setHorizontalAlignment(SwingConstants.CENTER);
-		 * pan.add(l1);
-		 * 
-		 * l1 = new JLabel(getTarget().name0);
-		 * l1.setBackground(env.colors.get(getTarget().name0));
-		 * l1.setOpaque(true); l1.setHorizontalAlignment(SwingConstants.CENTER);
-		 * pan.add(l1);
-		 * 
-		 * // pan.setMa`
-		 */
-
+		
 		return new JScrollPane(pan);
-	}
+	} 
+	
 
 	public JPanel doView(
 			final String src_n,
 			final String dst_n,
 			Graph<Triple<Node, Object, String>, Pair<Path, Integer>> first,
-			HashMap<Triple<Node, Object, String>, Map<Attribute<Node>, Object>> second) {
+			HashMap<Triple<Node, Object, String>, Map<Attribute<Node>, Object>> second) throws FQLException {
 
 		// HashMap<Pair<Node, Object>,String> map = new HashMap<>();
 		JPanel cards = new JPanel(new CardLayout());
@@ -417,13 +401,13 @@ public class Transform {
 		// Layout<Pair<Node, Object>, Pair<Path, Integer>> layout = new
 		// ISOMLayout<>(sgv);
 		// Layout<String, String> layout = new CircleLayout(sgv);
-		layout.setSize(new Dimension(600, 350));
+		//layout.setSize(new Dimension(600, 350));
 		// BasicVisualizationServer<String, String> vv = new
 		// BasicVisualizationServer<String, String>(
 		// layout);
 		VisualizationViewer<Triple<Node, Object, String>, Pair<Path, Integer>> vv = new VisualizationViewer<>(
 				layout);
-		vv.setPreferredSize(new Dimension(600, 350));
+		//vv.setPreferredSize(new Dimension(600, 350));
 		// Setup up a new vertex to paint transformer...
 		Transformer<Triple<Node, Object, String>, Paint> vertexPaint = new Transformer<Triple<Node, Object, String>, Paint>() {
 			public Paint transform(Triple<Node, Object, String> i) {
@@ -519,13 +503,15 @@ public class Transform {
 		CardLayout cl = (CardLayout) (cards.getLayout());
 		cl.show(cards, "blank");
 
-		pane.add(vv);
+		pane.add(new GraphZoomScrollPane(vv));
+		pane.setResizeWeight(1.0d);
 		pane.add(cards);
 
 		cards.setPreferredSize(new Dimension(400, 100));
 
 		ret.add(pane, BorderLayout.CENTER);
 		ret.add(lowerComp(), BorderLayout.NORTH);
+		ret.setBorder(BorderFactory.createEtchedBorder());
 		return ret;
 	}
 

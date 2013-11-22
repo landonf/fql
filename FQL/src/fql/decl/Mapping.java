@@ -2,7 +2,6 @@ package fql.decl;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Stroke;
@@ -30,6 +29,7 @@ import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
@@ -409,7 +409,7 @@ public class Mapping  {
 		JPanel j2 = new JPanel(new GridLayout(1, 1));
 		j2.add(q2);
 		j2.setBorder(BorderFactory.createTitledBorder(
-				BorderFactory.createEmptyBorder(), "Edge mapping"));
+				BorderFactory.createEmptyBorder(), "Arrow mapping"));
 		p.add(j2);
 
 		JPanel j3 = new JPanel(new GridLayout(1, 1));
@@ -417,7 +417,7 @@ public class Mapping  {
 		j3.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createEmptyBorder(), "Attribute mapping"));
 		p.add(j3);
-
+		p.setBorder(BorderFactory.createEtchedBorder());
 		return p;
 	}
 /*
@@ -508,7 +508,7 @@ public class Mapping  {
 						+ source.name0 + " -> " + target.name0 */));
 		p4.add(xxx4);
 		tap.add(p4);
-
+		tap.setBorder(BorderFactory.createEtchedBorder());
 		return tap;
 	}
 
@@ -826,10 +826,10 @@ public class Mapping  {
 
 		// Layout<String, String> layout = new ISOMLayout<String,String>(sgv);
 		// Layout<String, String> layout = new CircleLayout(sgv);
-		layout.setSize(new Dimension(600, 400));
+	//	layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
 				layout);
-		vv.setPreferredSize(new Dimension(600, 400));
+	//	vv.setPreferredSize(new Dimension(600, 400));
 		// Setup up a new vertex to paint transformer...
 		Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
 			public Paint transform(String i) {
@@ -844,10 +844,10 @@ public class Mapping  {
 					return UIManager.getColor("Panel.background");
 				}
 				if (p.equals("@source")) {
-					return Color.RED;
-					//return env.colors.get(source.name0);
+//					return Color.RED;
+					return source.colors.get(j);
 				}
-				return Color.BLUE;
+				return target.colors.get(j);
 				//return env.colors.get(target.name0);
 			}
 		};
@@ -906,7 +906,10 @@ public class Mapping  {
 //		 vv.getRenderContext().setLabelOffset(20);
 //		 vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
 
-		return vv;
+		JPanel p = new JPanel(new GridLayout(1,1));
+		p.setBorder(BorderFactory.createEtchedBorder());
+		p.add(new GraphZoomScrollPane(vv));
+		return p;
 	}
 
 	public static Mapping compose(/* String string, */ Mapping l, Mapping r)

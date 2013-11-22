@@ -2,7 +2,6 @@ package fql.decl;
 
 import java.awt.BasicStroke;
 import java.awt.CardLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -37,6 +36,7 @@ import edu.uci.ics.jung.algorithms.layout.ISOMLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
@@ -604,7 +604,7 @@ public class Instance  {
 		for (JPanel p : panels) {
 			panel.add(p);
 		}
-		panel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+		panel.setBorder(BorderFactory.createEtchedBorder());
 		return panel;
 	}
 
@@ -625,7 +625,7 @@ public class Instance  {
 		for (JPanel p : pans) {
 			panel.add(p);
 		}
-		panel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+		panel.setBorder(BorderFactory.createEtchedBorder());
 		return panel;
 	}
 
@@ -1003,8 +1003,8 @@ public class Instance  {
 		}
 	}
 
-	public JPanel pretty(Color c) throws FQLException {
-		return makeViewer(c);
+	public JPanel pretty() throws FQLException {
+		return makeViewer();
 	}
 
 
@@ -1028,33 +1028,35 @@ public class Instance  {
 		return g2;
 	}
 
-	public JPanel makeViewer(Color c) {
+	public JPanel makeViewer(/* Color c */) {
 		Graph<String, String> g = build();
 		if (g.getVertexCount() == 0) {
 			return new JPanel();
 		}
-		return doView(c, g);
+		return doView(g);
 	}
 
-	public JPanel doView(/* final Environment env ,*/ final Color color, Graph<String, String> sgv) {
+	public JPanel doView(/* final Environment env ,*/ /* final Color color */ Graph<String, String> sgv) {
 		// Layout<V, E>, BasicVisualizationServer<V,E>
 		// Layout<String, String> layout = new KKLayout(sgv);
 
 		// Layout<String, String> layout = new FRLayout(sgv);
 		Layout<String, String> layout = new ISOMLayout<String, String>(sgv);
 		// Layout<String, String> layout = new CircleLayout<>(sgv);
-		layout.setSize(new Dimension(600, 400));
+		//layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
 				layout);
-		vv.setPreferredSize(new Dimension(600, 400));
+		//vv.setPreferredSize(new Dimension(600, 400));
 		// vv.getRenderContext().setEdgeLabelRerderer(new MyEdgeT());
 		// Setup up a new vertex to paint transformer...
 		Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
 			public Paint transform(String i) {
 				if (thesig.isAttribute(i)) {
 					return UIManager.getColor("Panel.background");
+				} else {
+					return thesig.colors.get(i);
 				}
-				return color;
+//				return color;
 			}
 		}; 
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
@@ -1121,10 +1123,16 @@ public class Instance  {
 				new ToStringLabeller<String>());
 		vv.getRenderContext().setEdgeLabelTransformer(
 				new ToStringLabeller<String>());
+		
+		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
+		//JPanel ret = new JPanel(new GridLayout(1,1));
+		//ret.add(zzz);
+		//ret.setBorder(BorderFactory.createEtchedBorder());
+
 
 		JSplitPane newthing = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-		newthing.setDividerLocation(.9d);
-		newthing.add(vv);
+		newthing.setResizeWeight(1.0d); //setDividerLocation(.9d);
+		newthing.add(zzz);
 		newthing.add(vwr);
 		JPanel xxx = new JPanel(new GridLayout(1, 1));
 		xxx.add(newthing);
@@ -1412,16 +1420,17 @@ public class Instance  {
 
 			Pair<Map<Node, List<String>>, List<PSM>> xxx = Relationalizer.compile(thesig, "output", name);
 			prog.addAll(xxx.second);
-			Map<String, Set<Map<Object, Object>>> res = PSMInterp.interpX(prog, state);
+			Map<String, Set<Map<Object, Object>>> res = new PSMInterp().interpX(prog, state);
 						
 			for (Node n : thesig.nodes) {
 				t.addTab(n.string, makePanel(xxx.first.get(n), res, n));
 			}
 			JPanel ret = new JPanel(new GridLayout(1,1));
 			ret.add(t);
+			ret.setBorder(BorderFactory.createEtchedBorder());
 			return ret;
 
-		} catch (FQLException e) {
+		} catch (Exception e) {
 			JPanel ret = new JPanel(new GridLayout(1,1));
 			JTextArea a = new JTextArea(e.getMessage());
 			ret.add(new JScrollPane(a));

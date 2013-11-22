@@ -2,7 +2,6 @@ package fql.decl;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Paint;
@@ -19,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -31,6 +31,7 @@ import edu.uci.ics.jung.algorithms.layout.ISOMLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
@@ -463,8 +464,8 @@ public class Signature  {
 		// eqsComponent.setColumnSelectionAllowed(false);
 
 		JPanel p = new JPanel(new GridLayout(2, 2));
-
-		p.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+		p.setBorder(BorderFactory.createEtchedBorder());
+		//p.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 
 		JPanel eqsTemp = new JPanel(new GridLayout(1, 1));
 
@@ -636,9 +637,9 @@ public class Signature  {
 
 		JTextArea ta = new JTextArea(toString());
 		JPanel tap = new JPanel(new GridLayout(1, 1));
-		ta.setBorder(BorderFactory.createEmptyBorder());
+		//ta.setBorder(BorderFactory.createEmptyBorder());
 		//
-		tap.setBorder(BorderFactory.createEmptyBorder());
+		//tap.setBorder(BorderFactory.createEtchedBorder());
 		ta.setWrapStyleWord(true);
 		ta.setLineWrap(true);
 		JScrollPane xxx = new JScrollPane(ta);
@@ -785,26 +786,26 @@ public class Signature  {
 		return g2;
 	}
 
-	public JPanel makeViewer(final Environment env) {
+	public JComponent makeViewer(/* final Environment env */) {
 		Graph<String, String> g = build();
 		if (g.getVertexCount() == 0) {
 			return new JPanel();
 		}
-		return doView(env, g);
+		return doView(/* env, */ g);
 	}
 
-	public JPanel doView(final Environment env, Graph<String, String> sgv) {
+	public JComponent doView(/* final Environment env, */Graph<String, String> sgv) {
 		// Layout<V, E>, BasicVisualizationServer<V,E>
 		// Layout<String, String> layout = new FRLayout(sgv);
 		Layout<String, String> layout = new ISOMLayout<String, String>(sgv);
 		// Layout<String, String> layout = new CircleLayout(sgv);
-		layout.setSize(new Dimension(600, 400));
+		//layout.setSize(new Dimension(600, 400));
 		// BasicVisualizationServer<String, String> vv = new
 		// BasicVisualizationServer<String, String>(
 		// layout);
 		VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
 				layout);
-		vv.setPreferredSize(new Dimension(600, 400));
+		//vv.setPreferredSize(new Dimension(600, 400));
 		// Setup up a new vertex to paint transformer...
 		 Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
 			public Paint transform(String i) {
@@ -812,7 +813,7 @@ public class Signature  {
 					return UIManager.getColor("Panel.background");
 //					return env.colors.get(name0);
 				} else {
-					return Color.RED;
+					return colors.get(i);
 				}
 			}
 		}; 
@@ -862,8 +863,12 @@ public class Signature  {
 					}
 
 				});
-
-		return vv;
+		
+		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
+		JPanel ret = new JPanel(new GridLayout(1,1));
+		ret.add(zzz);
+		ret.setBorder(BorderFactory.createEtchedBorder());
+		return ret;
 	}
 
 	public String getTypeLabel(String t) {
@@ -884,8 +889,8 @@ public class Signature  {
 		return false;
 	}
 
-	public JPanel pretty(final Environment env) throws FQLException {
-		return makeViewer(env);
+	public JComponent pretty(/*final Environment env*/) throws FQLException {
+		return makeViewer();
 	}
 
 //	public String type() {
@@ -1030,7 +1035,7 @@ public class Signature  {
 		List<EmbeddedDependency> l = toED("");
 		
 		JPanel ret = new JPanel(new GridLayout(1,1));
-		
+		ret.setBorder(BorderFactory.createEtchedBorder());
 		String s = "";
 		int i = 0;
 		for (EmbeddedDependency d : l) {

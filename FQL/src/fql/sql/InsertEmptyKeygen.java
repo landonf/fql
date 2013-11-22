@@ -25,7 +25,7 @@ public class InsertEmptyKeygen extends InsertKeygen {
 	}
 
 	@Override
-	public void exec(Map<String, Set<Map<Object, Object>>> state) {
+	public void exec(PSMInterp interp, Map<String, Set<Map<Object, Object>>> state) {
 		//System.out.println("Exec " + this + " on " + state);
 		if (!state.containsKey(name)) {
 			throw new RuntimeException(this.toString());
@@ -35,7 +35,7 @@ public class InsertEmptyKeygen extends InsertKeygen {
 		}
 		Set<Map<Object, Object>> ret = new HashSet<>();
 		Map<Object, Object> m = new HashMap<>();
-		m.put("guid", ++PSMInterp.guid);
+		m.put("guid", ++interp.guid);
 		ret.add(m);
 		
 		state.put(name, ret);	

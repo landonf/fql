@@ -75,7 +75,7 @@ public class Examples {
 			+ "\n"
 			+ "\nProject webpage: wisnesky.net/fql.html"
 			+ "\n"
-			+ "\nIf your program is taking too long to run, try disabling the observables and elements GUI panes in the options menu."
+			+ "\nIf your program is taking too long to run, try disabling the observables and elements GUI panes in the options menu.  Use Abort in the edit menu to stop long-running computations."
 			+ "\n"
 			+ "\n -- Typing rules ------------ \n"
 			+ "\nid C : C -> C"

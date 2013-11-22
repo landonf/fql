@@ -67,7 +67,7 @@ public class InsertValues extends PSM {
 	}
 
 	@Override
-	public void exec(Map<String, Set<Map<Object, Object>>> state) {
+	public void exec(PSMInterp interp, Map<String, Set<Map<Object, Object>>> state) {
 		if (state.get(name).size() > 0) {
 			throw new RuntimeException("table not empty: " + name);
 		}

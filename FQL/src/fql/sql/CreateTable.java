@@ -45,7 +45,7 @@ public class CreateTable extends PSM {
 	}
 
 	@Override
-	public void exec(Map<String, Set<Map<Object, Object>>> state) {
+	public void exec(PSMInterp interp, Map<String, Set<Map<Object, Object>>> state) {
 		if (state.get(name) != null) {
 			throw new RuntimeException("table already exists: " + name + " in "
 					+ state);
