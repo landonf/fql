@@ -7,6 +7,7 @@ import fql.decl.InstExp.Delta;
 import fql.decl.InstExp.Eval;
 import fql.decl.InstExp.Exp;
 import fql.decl.InstExp.External;
+import fql.decl.InstExp.FullEval;
 import fql.decl.InstExp.FullSigma;
 import fql.decl.InstExp.InstExpVisitor;
 import fql.decl.InstExp.One;
@@ -135,7 +136,6 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 	}
 
 	@Override
-	// TODO check union comp
 	public SigExp visit(FQLProgram env, FullSigma e) {
 		InstExp xxx = env.insts.get(e.I);
 		if (xxx == null) {
@@ -166,6 +166,20 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 
 	@Override
 	public SigExp visit(FQLProgram env, Eval e) {
+		Pair<SigExp, SigExp> k = e.q.type(env);
+		if (null == env.insts.get(e.e)) {
+			throw new RuntimeException("Unknown: " + e.e);
+		}
+		SigExp v = env.insts.get(e.e).accept(env, this);
+		if (!(k.first.equals(v))) {
+			throw new RuntimeException("On " + e + ", expected input to be "
+					+ k.first + " but computed " + v);
+		}
+		return k.second;
+	}
+
+	@Override
+	public SigExp visit(FQLProgram env, FullEval e) {
 		Pair<SigExp, SigExp> k = e.q.type(env);
 		if (null == env.insts.get(e.e)) {
 			throw new RuntimeException("Unknown: " + e.e);

@@ -24,7 +24,7 @@ public class SetFunTrans<Obj, Arrow, Y, X> {
 		this.eta = eta;
 		this.F = F;
 		this.G = G;
-		if (DEBUG.VALIDATE) {
+		if (DEBUG.debug.VALIDATE) {
 			validate();
 		}
 	}

@@ -84,6 +84,18 @@ public class Driver {
 				throw new LineException(re.getLocalizedMessage(), k, "query");
 			}
 		}
+		
+		for (String k : p.full_queries.keySet()) {
+			try {
+				FullQueryExp v = p.full_queries.get(k);
+				Pair<SigExp, SigExp> t = v.type(p);
+				ret += "QUERY " + k + ": " + t.first.unresolve(p.sigs) + " -> "
+						+ t.second.unresolve(p.sigs) + "\n\n";
+			} catch (RuntimeException re) {
+				re.printStackTrace();
+				throw new LineException(re.getLocalizedMessage(), k, "query");
+			}
+		}
 
 		return ret.trim() + "\n\n";
 	}
@@ -94,6 +106,7 @@ public class Driver {
 		Map<String, Mapping> maps = new HashMap<>();
 		Map<String, Instance> insts = new HashMap<>();
 		Map<String, Query> queries = new HashMap<>();
+		Map<String, FullQuery> full_queries = new HashMap<>();
 
 		for (String k : prog.sigs.keySet()) {
 			try {
@@ -120,6 +133,16 @@ public class Driver {
 
 				QueryExp v = prog.queries.get(k);
 				queries.put(k, Query.toQuery(prog, v));
+			} catch (RuntimeException re) {
+				re.printStackTrace();
+				throw new LineException(re.getLocalizedMessage(), k, "query");
+			}
+		}
+		for (String k : prog.full_queries.keySet()) {
+			try {
+				FullQueryExp v = prog.full_queries.get(k);
+				v.type(prog);
+				full_queries.put(k, FullQuery.toQuery(prog, v));
 			} catch (RuntimeException re) {
 				re.printStackTrace();
 				throw new LineException(re.getLocalizedMessage(), k, "query");
@@ -176,11 +199,11 @@ public class Driver {
 		List<PSM> drops = computeDrops(prog);
 
 		Map<String, Set<Map<Object, Object>>> res;
-		if (DEBUG.useJDBC) {
+		if (DEBUG.debug.useJDBC) {
 			res = JDBCBridge.go(psm, drops, prog);
 		} else {
 			res = new PSMInterp().interp(psm);
-
+//			System.out.println(res);
 		}
 		for (String k : prog.insts.keySet()) {
 			try {
@@ -213,15 +236,16 @@ public class Driver {
 		}
 		String str = "";
 		try {
-			str = DEBUG.prelude + "\n\n" + PSMGen.prettyPrint(psm) + "\n\n"
+			str = DEBUG.debug.prelude + "\n\n" + PSMGen.prettyPrint(psm) + "\n\n"
 					+ PSMGen.prettyPrint(drops) + "\n\n";			
 		} catch (RuntimeException re) {
 			str = re.getLocalizedMessage();
 		}
-		return new Pair<>(new Environment(sigs, maps, insts, queries,
-				transforms), str.trim());
+		return new Pair<>(new Environment(sigs, maps, insts, queries, 
+				transforms, full_queries), str.trim());
 	}
-
+	
+	
 	public static List<PSM> computeDrops(FQLProgram prog) {
 		List<PSM> drops = new LinkedList<>();
 		for (String k : prog.drop) {

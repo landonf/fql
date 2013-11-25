@@ -1,15 +1,20 @@
 package fql.decl;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import fql.FQLException;
+import fql.Pair;
+import fql.Triple;
 import fql.decl.SigExp.Const;
 import fql.decl.SigExp.Exp;
 import fql.decl.SigExp.One;
 import fql.decl.SigExp.Plus;
 import fql.decl.SigExp.SigExpVisitor;
 import fql.decl.SigExp.Times;
+import fql.decl.SigExp.Union;
 import fql.decl.SigExp.Var;
 import fql.decl.SigExp.Zero;
 
@@ -75,9 +80,35 @@ public class SigExpChecker implements SigExpVisitor<SigExp, FQLProgram>{
 		try {
 			new Signature(env.enums, e.nodes, e.attrs, e.arrows, e.eqs);
 		} catch (FQLException ee) {
-			throw new RuntimeException(ee.getLocalizedMessage());
+			throw new RuntimeException(ee.getLocalizedMessage() + " in " + e);
 		}
 		return e;
+	}
+
+	@Override
+	public SigExp visit(FQLProgram env, Union e) {
+		SigExp lt = e.l.typeOf(env);
+		SigExp rt = e.r.typeOf(env);
+		if (! (lt instanceof SigExp.Const)) {
+			throw new RuntimeException(e.l + " does not have constant schema, has " + lt);
+		}
+		if (! (rt instanceof SigExp.Const)) {
+			throw new RuntimeException(e.r + " does not have constant schema, has " + lt);
+		}
+		SigExp.Const lt0 = (SigExp.Const) lt;
+		SigExp.Const rt0 = (SigExp.Const) rt;
+		
+		
+		Set<String> nodes = new HashSet<>(lt0.nodes);
+		nodes.addAll(rt0.nodes);
+		Set<Triple<String, String, String>> attrs = new HashSet<>(lt0.attrs);
+		attrs.addAll(rt0.attrs);
+		Set<Triple<String, String, String>> arrows = new HashSet<>(lt0.arrows);
+		arrows.addAll(rt0.arrows);
+		Set<Pair<List<String>, List<String>>> eqs = new HashSet<>(lt0.eqs);
+		eqs.addAll(rt0.eqs);
+		
+		return new SigExp.Const(new LinkedList<>(nodes), new LinkedList<>(attrs), new LinkedList<>(arrows), new LinkedList<>(eqs));
 	}
 	
 }

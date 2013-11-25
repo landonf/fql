@@ -21,7 +21,7 @@ public class FinTrans<Obj1, Arrow1, Obj2, Arrow2> {
 		this.eta = eta;
 		this.F = F;
 		this.G = G;
-		if (DEBUG.VALIDATE) {
+		if (DEBUG.debug.VALIDATE) {
 			validate();
 		}
 	}

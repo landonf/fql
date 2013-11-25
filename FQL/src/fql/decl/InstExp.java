@@ -6,9 +6,64 @@ import java.util.List;
 import fql.Pair;
 
 public abstract class InstExp {
+	
+	
 
 	public final SigExp type(FQLProgram prog) {
 		return accept(prog, new InstChecker());
+	}
+	
+	public static class FullEval extends InstExp {
+		public FullQueryExp q;
+		public String e;
+
+		public FullEval(FullQueryExp q, String e) {
+			super();
+			this.q = q;
+			this.e = e;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((e == null) ? 0 : e.hashCode());
+			result = prime * result + ((q == null) ? 0 : q.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			FullEval other = (FullEval) obj;
+			if (e == null) {
+				if (other.e != null)
+					return false;
+			} else if (!e.equals(other.e))
+				return false;
+			if (q == null) {
+				if (other.q != null)
+					return false;
+			} else if (!q.equals(other.q))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "EVAL " + q + " " + e;
+		}
+
+		@Override
+		public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
 	}
 	
 	public static class Eval extends InstExp {
@@ -54,7 +109,7 @@ public abstract class InstExp {
 
 		@Override
 		public String toString() {
-			return "eval" + q + " " + e;
+			return "eval " + q + " " + e;
 		}
 
 		@Override
@@ -851,6 +906,8 @@ public abstract class InstExp {
 		public R visit(E env, External e);
 
 		public R visit(E env, Eval e);
+		
+		public R visit(E env, FullEval e);
 	}
 
 }

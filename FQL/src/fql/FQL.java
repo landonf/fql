@@ -1,6 +1,7 @@
 package fql;
 
 import java.awt.MenuBar;
+import java.awt.event.MouseEvent;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -10,6 +11,7 @@ import javax.swing.UIManager;
 import fql.decl.Driver;
 import fql.decl.Environment;
 import fql.decl.FQLProgram;
+import fql.gui.CodeEditor;
 import fql.gui.GUI;
 import fql.parse.FQLParser;
 
@@ -48,7 +50,10 @@ public class FQL {
 				f.setMenuBar(gui.second);
 				f.pack();
 				f.setSize(840, 630);
-
+			//	GUI.editors.getComponentAt(0).requestFocusInWindow();
+//				((CodeEditor)GUI.editors.getComponentAt(0)).set //setFocusCycleRoot(true); //getCasetsetgetCaret(). 
+//				GUI.editors.(GUI.editors.getSelectedIndex()).requestFocusInWindow();
+				((CodeEditor)GUI.editors.getComponentAt(0)).topArea.requestFocusInWindow();
 				f.setLocationRelativeTo(null);
 				f.setVisible(true);
 

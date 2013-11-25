@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import fql.Pair;
+import fql.Triple;
 import fql.decl.MapExp.Apply;
 import fql.decl.MapExp.Case;
 import fql.decl.MapExp.Comp;
@@ -19,6 +20,7 @@ import fql.decl.MapExp.Inr;
 import fql.decl.MapExp.MapExpVisitor;
 import fql.decl.MapExp.Prod;
 import fql.decl.MapExp.Snd;
+import fql.decl.MapExp.Sub;
 import fql.decl.MapExp.TT;
 import fql.decl.MapExp.Var;
 
@@ -190,6 +192,37 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, FQLPro
 			throw new RuntimeException("source schema mismatch on " + e + ": " + lt.first + " and " + rt.first);
 		}
 		return new Pair<SigExp, SigExp>(lt.first, new SigExp.Times(lt.second, rt.second));
+	}
+
+	@Override
+	public Pair<SigExp, SigExp> visit(FQLProgram env, Sub e) {
+		SigExp lt = e.s.typeOf(env);
+		SigExp rt = e.t.typeOf(env);
+		if (! (lt instanceof SigExp.Const)) {
+			throw new RuntimeException(e.s + " does not have constant schema, has " + lt);
+		}
+		if (! (rt instanceof SigExp.Const)) {
+			throw new RuntimeException(e.t + " does not have constant schema, has " + lt);
+		}
+		SigExp.Const lt0 = (SigExp.Const) lt;
+		SigExp.Const rt0 = (SigExp.Const) rt;
+		
+		for (String n : lt0.nodes) {
+			if (!rt0.nodes.contains(n)) {
+				throw new RuntimeException("Not subset, missing node " + n);
+			}
+		}
+		for (Triple<String, String, String> n : lt0.arrows) {
+			if (!rt0.arrows.contains(n)) {
+				throw new RuntimeException("Not subset, missing arrow " + n);
+			}
+		}
+		for (Triple<String, String, String> n : lt0.attrs) {
+			if (!rt0.attrs.contains(n)) {
+				throw new RuntimeException("Not subset, missing attribute " + n);
+			}
+		}
+		return new Pair<>(lt, rt);
 	}
 
 }

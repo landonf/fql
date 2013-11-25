@@ -24,12 +24,14 @@ import fql.decl.MapExp.Inr;
 import fql.decl.MapExp.MapExpVisitor;
 import fql.decl.MapExp.Prod;
 import fql.decl.MapExp.Snd;
+import fql.decl.MapExp.Sub;
 import fql.decl.MapExp.TT;
 import fql.decl.SigExp.Exp;
 import fql.decl.SigExp.One;
 import fql.decl.SigExp.Plus;
 import fql.decl.SigExp.SigExpVisitor;
 import fql.decl.SigExp.Times;
+import fql.decl.SigExp.Union;
 import fql.decl.SigExp.Var;
 import fql.decl.SigExp.Zero;
 
@@ -696,4 +698,51 @@ public class SigOps implements
 				rx));
 	}
 
+	@Override
+	public Const visit(FQLProgram env, Sub e) {
+		SigExp lt = e.s.typeOf(env);
+		SigExp rt = e.t.typeOf(env);
+		if (! (lt instanceof SigExp.Const)) {
+			throw new RuntimeException(e.s + " does not have constant schema, has " + lt);
+		}
+		if (! (rt instanceof SigExp.Const)) {
+			throw new RuntimeException(e.t + " does not have constant schema, has " + lt);
+		}
+		SigExp.Const lt0 = (SigExp.Const) lt;
+		SigExp.Const rt0 = (SigExp.Const) rt;
+		
+		List<Pair<String, String>> objs = new LinkedList<>();
+		List<Pair<String, String>> attrs = new LinkedList<>();
+		List<Pair<String, List<String>>> arrows = new LinkedList<>();
+
+		for (String n : lt0.nodes) {
+			if (!rt0.nodes.contains(n)) {
+				throw new RuntimeException("Not subset, missing node " + n);
+			}
+			objs.add(new Pair<>(n,n));
+		}
+		for (Triple<String, String, String> n : lt0.arrows) {
+			if (!rt0.arrows.contains(n)) {
+				throw new RuntimeException("Not subset, missing arrow " + n);
+			}
+			List<String> x = new LinkedList<>();
+			x.add(n.second);
+			x.add(n.first);
+			arrows.add(new Pair<>(n.first,x));
+		}
+		for (Triple<String, String, String> n : lt0.attrs) {
+			if (!rt0.attrs.contains(n)) {
+				throw new RuntimeException("Not subset, missing attribute " + n);
+			}
+			attrs.add(new Pair<>(n.first,n.first));
+		}
+		
+		return new Const(objs, attrs, arrows, lt, rt);
+	}
+
+	@Override
+	public fql.decl.SigExp.Const visit(FQLProgram env, Union e) {
+		return (SigExp.Const) e.typeOf(env);
+	}
+	
 }

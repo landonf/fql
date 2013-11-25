@@ -13,6 +13,8 @@ import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 import edu.uci.ics.jung.algorithms.layout.ISOMLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
@@ -279,8 +281,6 @@ public class Query {
 		 */
 		return pan;
 	}
-
-	
 
 	/**
 	 * Implements composition at the semantic level
@@ -550,8 +550,8 @@ public class Query {
 	/**
 	 * Implements composition at a syntactic level, adding to the environment.
 	 */
-	public static Query compose(Map<String, Type> types, Query q2,
-			Query q1) throws FQLException {
+	public static Query compose(Map<String, Type> types, Query q2, Query q1)
+			throws FQLException {
 		Mapping s0 = q1.project;
 		Mapping f0 = q1.join;
 		Mapping t0 = q1.union;
@@ -666,16 +666,13 @@ public class Query {
 
 	}
 
-	public static class ToQueryVisitor
-			implements
+	public static class ToQueryVisitor implements
 			QueryExpVisitor<Query, FQLProgram> {
 
 		List<String> seen = new LinkedList<>();
 
 		@Override
-		public Query visit(
-				FQLProgram env,
-				Const e) {
+		public Query visit(FQLProgram env, Const e) {
 			Mapping d = e.delta.toMap(env);
 			Mapping s = e.sigma.toMap(env);
 			Mapping p = e.pi.toMap(env);
@@ -687,25 +684,21 @@ public class Query {
 		}
 
 		@Override
-		public Query visit(
-				FQLProgram env,
-				Comp e) {
+		public Query visit(FQLProgram env, Comp e) {
 			List<String> x = new LinkedList<>(seen);
 			Query l = e.l.accept(env, this);
 			seen = x;
 			Query r = e.r.accept(env, this);
 			seen = x;
 			try {
-				return compose(env.enums, r, l); //yes, backwards
+				return compose(env.enums, r, l); // yes, backwards
 			} catch (FQLException fe) {
 				throw new RuntimeException(fe.getLocalizedMessage());
 			}
 		}
 
 		@Override
-		public Query visit(
-				FQLProgram env,
-				Var e) {
+		public Query visit(FQLProgram env, Var e) {
 			if (seen.contains(e.v)) {
 				throw new RuntimeException("Circular query: " + e.v);
 			}
@@ -717,6 +710,17 @@ public class Query {
 			return x.accept(env, this);
 		}
 
+		public JPanel text(FQLProgram p) {
+			JTextArea ta = new JTextArea(p.toString());
+			JPanel tap = new JPanel(new GridLayout(1, 1));
+			ta.setBorder(BorderFactory.createEmptyBorder());
+			tap.setBorder(BorderFactory.createEmptyBorder());
+			ta.setWrapStyleWord(true);
+			ta.setLineWrap(true);
+			JScrollPane xxx = new JScrollPane(ta);
+			tap.add(xxx);
+			return tap;
+		}
 	}
 
 }

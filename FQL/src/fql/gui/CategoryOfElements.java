@@ -2,6 +2,7 @@ package fql.gui;
 
 import java.awt.CardLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Paint;
@@ -79,7 +80,7 @@ public class CategoryOfElements {
 					if (c.isId(arr)) {
 						continue;
 					}
-					if (!DEBUG.ALL_GR_PATHS && arr.arr.path.size() != 1) {
+					if (!DEBUG.debug.ALL_GR_PATHS && arr.arr.path.size() != 1) {
 						continue;
 					}
 					if (doLookup(i, arr.arr, x.second, y.second)) {
@@ -122,7 +123,7 @@ public class CategoryOfElements {
 		 Layout<Pair<Node, Object>, Pair<Path, Integer>> layout = new FRLayout<>(sgv);
 	//	Layout<Pair<Node, Object>, Pair<Path, Integer>> layout = new ISOMLayout<>(sgv);
 		// Layout<String, String> layout = new CircleLayout(sgv);
-		//layout.setSize(new Dimension(600, 400));
+		layout.setSize(new Dimension(600, 400));
 		// BasicVisualizationServer<String, String> vv = new
 		// BasicVisualizationServer<String, String>(
 		// layout);
@@ -219,7 +220,7 @@ public class CategoryOfElements {
 
 		pane.add(new GraphZoomScrollPane(vv));
 		pane.add(cards);
-		pane.setResizeWeight(1.0d);
+		pane.setResizeWeight(.8d);
 		ret.add(pane);
 //		cards.setPreferredSize(new Dimension(400,100));
 		

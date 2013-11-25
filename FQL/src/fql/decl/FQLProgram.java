@@ -17,6 +17,7 @@ public class FQLProgram {
 			InstExp inst;
 			Integer line;
 			QueryExp query;
+			FullQueryExp full_query;
 			List<String> enums;
 
 //			Pair<SigExp, SigExp> map_t;
@@ -28,7 +29,11 @@ public class FQLProgram {
 				return ret;
 			}
 
-			
+			public static NewDecl fullQuery(String name, FullQueryExp full_query, Integer line) {
+				NewDecl ret = new NewDecl(name, line);
+				ret.full_query = full_query;
+				return ret;
+			}
 			
 			public static NewDecl transDecl(String name, Integer line, TransExp trans) {
 				NewDecl ret = new NewDecl(name, line);
@@ -81,6 +86,7 @@ public class FQLProgram {
 		public LinkedHashMap<String, SigExp> sigs = new LinkedHashMap<>();
 		public LinkedHashMap<String, MapExp> maps = new LinkedHashMap<>();
 		public LinkedHashMap<String, InstExp> insts = new LinkedHashMap<>();
+		public LinkedHashMap<String, FullQueryExp> full_queries = new LinkedHashMap<>();
 		public LinkedHashMap<String, QueryExp> queries = new LinkedHashMap<>();
 		public LinkedHashMap<String, TransExp> transforms = new LinkedHashMap<>();
 		
@@ -119,6 +125,10 @@ public class FQLProgram {
 					checkDup(decl.name, "transform");
 					transforms.put(decl.name, decl.trans);
 					lines.put(decl.name, decl.line);
+				} else if (decl.full_query != null) {
+					checkDup(decl.name, "full_query");
+					full_queries.put(decl.name, decl.full_query);
+					lines.put(decl.name, decl.line);
 				}
 				else {
 					throw new RuntimeException();
@@ -128,16 +138,10 @@ public class FQLProgram {
 			enums.put("string", new Type.Varchar());
 		}
 
-		@Override
-		public String toString() {
-			return "FQLProgram [sigs=" + sigs + ", maps=" + maps + ", insts="
-					+ insts + ", queries=" + queries + ", transforms="
-					+ transforms + ", lines=" + lines + ", drop=" + drop
-					+ ", order=" + order + "]";
-		}
+		
 
 		private <X, Y> void checkDup(X name, String s) {
-			if (sigs.containsKey(name) || maps.containsKey(name) || insts.containsKey(name) || queries.containsKey(name) || transforms.containsKey(name) || enums.containsKey(name)) {
+			if (full_queries.containsKey(name) || sigs.containsKey(name) || maps.containsKey(name) || insts.containsKey(name) || queries.containsKey(name) || transforms.containsKey(name) || enums.containsKey(name)) {
 				throw new RuntimeException("Duplicate " + s + " " + name);
 			}
 

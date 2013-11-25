@@ -289,7 +289,7 @@ public class Transform {
 					if (c.isId(arr)) {
 						continue;
 					}
-					if (!DEBUG.ALL_GR_PATHS && arr.arr.path.size() != 1) {
+					if (!DEBUG.debug.ALL_GR_PATHS && arr.arr.path.size() != 1) {
 						continue;
 					}
 					if (doLookup(src, arr.arr, x.second, y.second)) {
@@ -322,7 +322,7 @@ public class Transform {
 					if (c.isId(arr)) {
 						continue;
 					}
-					if (!DEBUG.ALL_GR_PATHS && arr.arr.path.size() != 1) {
+					if (!DEBUG.debug.ALL_GR_PATHS && arr.arr.path.size() != 1) {
 						continue;
 					}
 					if (doLookup(dst, arr.arr, x.second, y.second)) {
@@ -401,7 +401,7 @@ public class Transform {
 		// Layout<Pair<Node, Object>, Pair<Path, Integer>> layout = new
 		// ISOMLayout<>(sgv);
 		// Layout<String, String> layout = new CircleLayout(sgv);
-		//layout.setSize(new Dimension(600, 350));
+		layout.setSize(new Dimension(600, 350));
 		// BasicVisualizationServer<String, String> vv = new
 		// BasicVisualizationServer<String, String>(
 		// layout);

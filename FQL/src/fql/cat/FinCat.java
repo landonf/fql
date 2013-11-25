@@ -71,7 +71,7 @@ public class FinCat<Obj, Arrow> {
 		this.arrows = arrows;
 		this.composition = composition;
 		this.identities = identities;
-		if (DEBUG.VALIDATE) {
+		if (DEBUG.debug.VALIDATE) {
 			validate();
 		}
 	}

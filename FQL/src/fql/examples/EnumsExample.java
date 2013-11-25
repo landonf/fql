@@ -56,4 +56,3 @@ public class EnumsExample extends Example {
 
 }
 
-//TODO terminal instance with attributes, also add to example

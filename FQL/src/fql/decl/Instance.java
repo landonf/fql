@@ -1043,7 +1043,7 @@ public class Instance  {
 		// Layout<String, String> layout = new FRLayout(sgv);
 		Layout<String, String> layout = new ISOMLayout<String, String>(sgv);
 		// Layout<String, String> layout = new CircleLayout<>(sgv);
-		//layout.setSize(new Dimension(600, 400));
+		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
 				layout);
 		//vv.setPreferredSize(new Dimension(600, 400));
@@ -1131,7 +1131,7 @@ public class Instance  {
 
 
 		JSplitPane newthing = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-		newthing.setResizeWeight(1.0d); //setDividerLocation(.9d);
+		newthing.setResizeWeight(.8d); //setDividerLocation(.9d);
 		newthing.add(zzz);
 		newthing.add(vwr);
 		JPanel xxx = new JPanel(new GridLayout(1, 1));

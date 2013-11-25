@@ -11,15 +11,20 @@ import fql.FQLException;
 import fql.Fn;
 import fql.Pair;
 import fql.Quad;
+import fql.Triple;
+import fql.Unit;
+import fql.decl.FullQuery.FullQueryVisitor;
 import fql.decl.InstExp.Delta;
 import fql.decl.InstExp.Eval;
 import fql.decl.InstExp.External;
+import fql.decl.InstExp.FullEval;
 import fql.decl.InstExp.FullSigma;
 import fql.decl.InstExp.InstExpVisitor;
 import fql.decl.InstExp.Pi;
 import fql.decl.InstExp.Relationalize;
 import fql.decl.InstExp.Sigma;
 import fql.decl.InstExp.Two;
+import fql.decl.SigExp.Const;
 import fql.decl.TransExp.Case;
 import fql.decl.TransExp.Comp;
 import fql.decl.TransExp.FF;
@@ -45,7 +50,10 @@ import fql.sql.Relationalizer;
 import fql.sql.SQL;
 import fql.sql.Union;
 
-public class InstOps implements TransExpVisitor<List<PSM>, String>, InstExpVisitor<Pair<List<PSM>, Object>, String> {
+public class InstOps implements
+		FullQueryVisitor<Pair<List<PSM>, String>, String>,
+		TransExpVisitor<List<PSM>, String>,
+		InstExpVisitor<Pair<List<PSM>, Object>, String> {
 
 	FQLProgram prog;
 	int count = 0;
@@ -91,8 +99,8 @@ public class InstOps implements TransExpVisitor<List<PSM>, String>, InstExpVisit
 			from.put("right", er + "_" + k);
 
 			List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
-			where.add(new Pair<>(new Pair<>("left", "c1"), new Pair<>(
-					"right", "c0")));
+			where.add(new Pair<>(new Pair<>("left", "c1"), new Pair<>("right",
+					"c0")));
 
 			Map<String, Pair<String, String>> select = new HashMap<>();
 			select.put("c0", new Pair<>("left", "c0"));
@@ -127,8 +135,7 @@ public class InstOps implements TransExpVisitor<List<PSM>, String>, InstExpVisit
 
 		ret.addAll(PSMGen.makeTables("pre_" + dst, s, false));
 		for (Node k : s.nodes) {
-			Set<Map<Object, Object>> values = convert(lookup(k.string,
-					e.objs));
+			Set<Map<Object, Object>> values = convert(lookup(k.string, e.objs));
 			ret.add(new InsertValues("pre_" + dst + "_" + k.string, attrs,
 					values));
 
@@ -175,14 +182,13 @@ public class InstOps implements TransExpVisitor<List<PSM>, String>, InstExpVisit
 			ret.addAll(PSMGen.makeTables(temp1, s, false));
 			String temp2 = next();
 			ret.addAll(PSMGen.makeTables(temp2, s, false));
-			
+
 			Pair<Map<Node, List<String>>, List<PSM>> xxx = Relationalizer
 					.observations(s, temp1, e.tgt, false);
 			Pair<Map<Node, List<String>>, List<PSM>> yyy = Relationalizer
 					.observations(s, temp2, e.obj, false);
 			if (!xxx.first.equals(yyy.first)) {
-				throw new RuntimeException("not equal: " + xxx + " and "
-						+ yyy);
+				throw new RuntimeException("not equal: " + xxx + " and " + yyy);
 			}
 			ret.addAll(xxx.second);
 			ret.addAll(yyy.second);
@@ -199,7 +205,7 @@ public class InstOps implements TransExpVisitor<List<PSM>, String>, InstExpVisit
 						"t1_obs", "id")));
 				where.add(new Pair<>(new Pair<>("t2", "c0"), new Pair<>(
 						"t2_obs", "id")));
-				//System.out.println("77777" + cols);
+				// System.out.println("77777" + cols);
 				for (int i = 0; i < cols.size(); i++) {
 					where.add(new Pair<>(new Pair<>("t1_obs", "c" + i),
 							new Pair<>("t2_obs", "c" + i)));
@@ -211,10 +217,10 @@ public class InstOps implements TransExpVisitor<List<PSM>, String>, InstExpVisit
 				ret.add(new InsertSQL(dst + "_" + n, f));
 
 			}
-			
+
 			ret.addAll(PSMGen.dropTables(temp1, s));
 			ret.addAll(PSMGen.dropTables(temp2, s));
-			
+
 			return ret;
 
 		} catch (FQLException fe) {
@@ -236,8 +242,8 @@ public class InstOps implements TransExpVisitor<List<PSM>, String>, InstExpVisit
 		Signature t = k.type(prog).toSig(prog);
 
 		for (Node n : t.nodes) {
-			ret.add(new InsertSQL(dst + "_" + n.string, new CopyFlower(
-					e.obj + "_fst_" + n.string)));
+			ret.add(new InsertSQL(dst + "_" + n.string, new CopyFlower(e.obj
+					+ "_fst_" + n.string)));
 		}
 
 		return ret;
@@ -251,8 +257,8 @@ public class InstOps implements TransExpVisitor<List<PSM>, String>, InstExpVisit
 		Signature t = k.type(prog).toSig(prog);
 
 		for (Node n : t.nodes) {
-			ret.add(new InsertSQL(dst + "_" + n.string, new CopyFlower(
-					e.obj + "_snd_" + n.string)));
+			ret.add(new InsertSQL(dst + "_" + n.string, new CopyFlower(e.obj
+					+ "_snd_" + n.string)));
 		}
 
 		return ret;
@@ -266,8 +272,8 @@ public class InstOps implements TransExpVisitor<List<PSM>, String>, InstExpVisit
 		Signature t = k.type(prog).toSig(prog);
 
 		for (Node n : t.nodes) {
-			ret.add(new InsertSQL(dst + "_" + n.string, new CopyFlower(
-					e.obj + "_inl_" + n.string)));
+			ret.add(new InsertSQL(dst + "_" + n.string, new CopyFlower(e.obj
+					+ "_inl_" + n.string)));
 		}
 
 		return ret;
@@ -281,8 +287,8 @@ public class InstOps implements TransExpVisitor<List<PSM>, String>, InstExpVisit
 		Signature t = k.type(prog).toSig(prog);
 
 		for (Node n : t.nodes) {
-			ret.add(new InsertSQL(dst + "_" + n.string, new CopyFlower(
-					e.obj + "_inr_" + n.string)));
+			ret.add(new InsertSQL(dst + "_" + n.string, new CopyFlower(e.obj
+					+ "_inr_" + n.string)));
 		}
 
 		return ret;
@@ -307,8 +313,8 @@ public class InstOps implements TransExpVisitor<List<PSM>, String>, InstExpVisit
 		ret.addAll(PSMGen.makeTables(er, inst_type, false));
 		ret.addAll(e.r.accept(er, this));
 
-		ret.addAll(fn.of(new Quad<String, String, String, String>(el, er,
-				null, dst)));
+		ret.addAll(fn.of(new Quad<String, String, String, String>(el, er, null,
+				dst)));
 
 		ret.addAll(PSMGen.dropTables(el, inst_type));
 		ret.addAll(PSMGen.dropTables(er, inst_type));
@@ -334,8 +340,8 @@ public class InstOps implements TransExpVisitor<List<PSM>, String>, InstExpVisit
 		ret.addAll(PSMGen.makeTables(er, inst_type, false));
 		ret.addAll(e.r.accept(er, this));
 
-		ret.addAll(fn.of(new Quad<String, String, String, String>(el, er,
-				null, dst)));
+		ret.addAll(fn.of(new Quad<String, String, String, String>(el, er, null,
+				dst)));
 
 		ret.addAll(PSMGen.dropTables(el, inst_type));
 		ret.addAll(PSMGen.dropTables(er, inst_type));
@@ -372,11 +378,9 @@ public class InstOps implements TransExpVisitor<List<PSM>, String>, InstExpVisit
 		throw new RuntimeException("TBD");
 	}
 
-
 	@Override
 	public Pair<List<PSM>, Object> visit(String dst, fql.decl.InstExp.Zero e) {
-		return new Pair<List<PSM>, Object>(new LinkedList<PSM>(),
-				new Object());
+		return new Pair<List<PSM>, Object>(new LinkedList<PSM>(), new Object());
 	}
 
 	@Override
@@ -452,20 +456,20 @@ public class InstOps implements TransExpVisitor<List<PSM>, String>, InstExpVisit
 						Flower sql1 = PSMGen.compose(new String[] {
 								dst + "_" + n.string + "_subst_inv",
 								f + "_" + n.string /*
-													 * , dst + "_" +
-													 * n.string + "_subst"
+													 * , dst + "_" + n.string +
+													 * "_subst"
 													 */});
 						Flower sql2 = PSMGen.compose(new String[] {
 								dst + "_" + n.string + "_subst_inv",
 								g + "_" + n.string /*
-													 * , dst + "_" +
-													 * n.string + "_subst"
+													 * , dst + "_" + n.string +
+													 * "_subst"
 													 */});
 						List<Flower> flowers = new LinkedList<>();
 						flowers.add(sql1);
 						flowers.add(sql2);
-						ret.add(new InsertSQL(dst0 + "_" + n.string,
-								new Union(flowers)));
+						ret.add(new InsertSQL(dst0 + "_" + n.string, new Union(
+								flowers)));
 					}
 
 					return ret;
@@ -503,22 +507,19 @@ public class InstOps implements TransExpVisitor<List<PSM>, String>, InstExpVisit
 				for (Attribute<Node> a : s.attrsFor(n)) {
 					from.put("left_" + a.name, e.a + "_" + a.name);
 					from.put("right_" + a.name, e.b + "_" + a.name);
-					where.add(new Pair<>(
-							new Pair<>("left_" + a.name, "c0"), new Pair<>(
-									"left", "c0")));
-					where.add(new Pair<>(
-							new Pair<>("right_" + a.name, "c0"),
+					where.add(new Pair<>(new Pair<>("left_" + a.name, "c0"),
+							new Pair<>("left", "c0")));
+					where.add(new Pair<>(new Pair<>("right_" + a.name, "c0"),
 							new Pair<>("right", "c0")));
-					where.add(new Pair<>(
-							new Pair<>("left_" + a.name, "c1"), new Pair<>(
-									"right_" + a.name, "c1")));
+					where.add(new Pair<>(new Pair<>("left_" + a.name, "c1"),
+							new Pair<>("right_" + a.name, "c1")));
 					select.put(a.name, new Pair<>("left_" + a.name, "c1"));
 					attrs.add(a.name);
 					attrsM.put(a.name, a.target.toString());
 				}
 				Flower f = new Flower(select, from, where);
-				ret.add(new CreateTable(dst + "_prod_temp_" + n.string,
-						attrsM, false));
+				ret.add(new CreateTable(dst + "_prod_temp_" + n.string, attrsM,
+						false));
 				ret.add(new InsertSQL(dst + "_prod_temp_" + n.string, f));
 				Map<String, String> attrsM0 = new HashMap<>(attrsM);
 				attrsM0.put("guid", PSM.VARCHAR());
@@ -572,14 +573,14 @@ public class InstOps implements TransExpVisitor<List<PSM>, String>, InstExpVisit
 				from.put("srcGuid", dst + "_prod_guid_" + edge.source);
 				from.put("dstGuid", dst + "_prod_guid_" + edge.target);
 				List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
-				where.add(new Pair<>(new Pair<>("leftEdge", "c0"),
-						new Pair<>("srcGuid", "left")));
-				where.add(new Pair<>(new Pair<>("rightEdge", "c0"),
-						new Pair<>("srcGuid", "right")));
-				where.add(new Pair<>(new Pair<>("leftEdge", "c1"),
-						new Pair<>("dstGuid", "left")));
-				where.add(new Pair<>(new Pair<>("rightEdge", "c1"),
-						new Pair<>("dstGuid", "right")));
+				where.add(new Pair<>(new Pair<>("leftEdge", "c0"), new Pair<>(
+						"srcGuid", "left")));
+				where.add(new Pair<>(new Pair<>("rightEdge", "c0"), new Pair<>(
+						"srcGuid", "right")));
+				where.add(new Pair<>(new Pair<>("leftEdge", "c1"), new Pair<>(
+						"dstGuid", "left")));
+				where.add(new Pair<>(new Pair<>("rightEdge", "c1"), new Pair<>(
+						"dstGuid", "right")));
 				Map<String, Pair<String, String>> select = new HashMap<>();
 				select.put("c0", new Pair<>("srcGuid", "guid"));
 				select.put("c1", new Pair<>("dstGuid", "guid"));
@@ -604,8 +605,8 @@ public class InstOps implements TransExpVisitor<List<PSM>, String>, InstExpVisit
 						from.put("f", f + "_" + n.string);
 						from.put("g", g + "_" + n.string);
 						from.put("lim", dst + "_prod_guid_" + n.string);
-						where.add(new Pair<>(new Pair<>("f", "c0"),
-								new Pair<>("g", "c0")));
+						where.add(new Pair<>(new Pair<>("f", "c0"), new Pair<>(
+								"g", "c0")));
 						where.add(new Pair<>(new Pair<>("lim", "left"),
 								new Pair<>("f", "c1")));
 						where.add(new Pair<>(new Pair<>("lim", "right"),
@@ -632,12 +633,11 @@ public class InstOps implements TransExpVisitor<List<PSM>, String>, InstExpVisit
 	}
 
 	/*
-	 * @Override public List<PSM> visit(String dst, fql.decl.InstExp.Var e)
-	 * { return prog.insts.get(e.toString()).accept(dst, this); }
+	 * @Override public List<PSM> visit(String dst, fql.decl.InstExp.Var e) {
+	 * return prog.insts.get(e.toString()).accept(dst, this); }
 	 */
 	@Override
-	public Pair<List<PSM>, Object> visit(String dst,
-			fql.decl.InstExp.Const e) {
+	public Pair<List<PSM>, Object> visit(String dst, fql.decl.InstExp.Const e) {
 		try {
 			List<PSM> ret = new LinkedList<>();
 			Signature sig = e.sig.toSig(prog);
@@ -805,6 +805,94 @@ public class InstOps implements TransExpVisitor<List<PSM>, String>, InstExpVisit
 		}
 	}
 
+	@Override
+	public Pair<List<PSM>, Object> visit(String env, FullEval e) {
+		List<PSM> ret = new LinkedList<>();
+		Pair<List<PSM>, String> l = e.q.toFullQuery(prog).accept(e.e, this);
+		ret.addAll(l.first);
 
+		Const sig = e.q.type(prog).second.toConst(prog);
+		for (String n : sig.nodes) {
+			ret.add(new InsertSQL(env + "_" + n, new CopyFlower(l.second + "_"
+					+ n)));
+		}
+		for (Triple<String, String, String> n : sig.attrs) {
+			ret.add(new InsertSQL(env + "_" + n.first, new CopyFlower(l.second
+					+ "_" + n.first)));
+		}
+		for (Triple<String, String, String> n : sig.arrows) {
+			ret.add(new InsertSQL(env + "_" + n.first, new CopyFlower(l.second
+					+ "_" + n.first)));
+		}
+
+		return new Pair<>(ret, new Object());
+	}
+
+	@Override
+	public Pair<List<PSM>, String> visit(String dst, fql.decl.FullQuery.Comp e) {
+		Pair<List<PSM>, String> n1 = e.l.accept(dst, this);
+		Pair<List<PSM>, String> n2 = e.r.accept(n1.second, this);
+		List<PSM> ret = new LinkedList<>(n1.first);
+		ret.addAll(n2.first);
+		return new Pair<>(ret, n2.second);
+	}
+
+	@Override
+	public Pair<List<PSM>, String> visit(String src, fql.decl.FullQuery.Delta e) {
+		String dst = next();
+		List<PSM> ret = new LinkedList<>();
+		Mapping F0 = e.F;
+
+		ret.addAll(PSMGen.makeTables(dst, F0.source, false));
+		ret.addAll(PSMGen.delta(F0, src, dst));
+		// ret.addAll(PSMGen.dropTables(next, F0.target));
+		try {
+			ret.addAll(PSMGen.guidify(dst, F0.source));
+			return new Pair<>(ret, dst);
+		} catch (FQLException fe) {
+			throw new RuntimeException(fe.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public Pair<List<PSM>, String> visit(String src, fql.decl.FullQuery.Sigma e) {
+		try {
+			String dst = next();
+			List<PSM> ret = new LinkedList<>();
+			Mapping F0 = e.F;
+
+			ret.addAll(PSMGen.makeTables(dst, F0.target, false));
+			try {
+				ret.addAll(PSMGen.sigma(F0, dst, src));
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				ret.addAll(PSMGen.SIGMA(F0, dst, src));
+			}
+			// ret.addAll(PSMGen.dropTables(next, F0.target));
+			// ret.addAll(PSMGen.guidify(dst, F0.target));
+			return new Pair<>(ret, dst);
+		} catch (FQLException fe) {
+			throw new RuntimeException(fe.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public Pair<List<PSM>, String> visit(String src, fql.decl.FullQuery.Pi e) {
+		try {
+			String dst = next();
+			List<PSM> ret = new LinkedList<>();
+			Mapping F0 = e.F;
+
+			ret.addAll(PSMGen.makeTables(dst, F0.target, false));
+			ret.addAll(PSMGen.pi(F0, src, dst));
+
+			// ret.addAll(PSMGen.dropTables(next, F0.target));
+			// ret.addAll(PSMGen.guidify(dst, F0.target));
+			return new Pair<>(ret, dst);
+		} catch (FQLException fe) {
+			fe.printStackTrace();
+			throw new RuntimeException(fe.getLocalizedMessage());
+		}
+	}
 
 }

@@ -23,9 +23,9 @@ public class JDBCBridge {
 
 		try {
 			
-			Class.forName(DEBUG.jdbcClass);
+			Class.forName(DEBUG.debug.jdbcClass);
 			
-			Connection Conn = DriverManager.getConnection(DEBUG.jdbcUrl);
+			Connection Conn = DriverManager.getConnection(DEBUG.debug.jdbcUrl);
 						
 			Statement Stmt = Conn.createStatement();
 			Stmt.execute("set @guid := 0");

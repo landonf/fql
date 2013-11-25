@@ -239,7 +239,7 @@ public class Inst<Obj, Arrow, Y, X> {
 		this.objM = objM;
 		this.arrM = arrM;
 		this.cat = cat;
-		if (DEBUG.VALIDATE) {
+		if (DEBUG.debug.VALIDATE) {
 			validate();
 		}
 		// System.out.println("automorphisms are");

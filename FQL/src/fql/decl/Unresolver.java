@@ -8,6 +8,7 @@ import fql.decl.SigExp.One;
 import fql.decl.SigExp.Plus;
 import fql.decl.SigExp.SigExpVisitor;
 import fql.decl.SigExp.Times;
+import fql.decl.SigExp.Union;
 import fql.decl.SigExp.Var;
 import fql.decl.SigExp.Zero;
 
@@ -52,6 +53,12 @@ public class Unresolver implements SigExpVisitor<SigExp, Map<String, SigExp>> {
 			}
 		}
 		return e;
+	}
+
+	@Override
+	public SigExp visit(Map<String, SigExp> env, Union e) {
+		return new SigExp.Union(e.l.accept(env, this), e.r.accept(env, this));
+
 	}
 	
 }

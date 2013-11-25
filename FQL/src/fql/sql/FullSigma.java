@@ -9,6 +9,7 @@ import java.util.Set;
 import fql.FQLException;
 import fql.Pair;
 import fql.cat.Denotation;
+import fql.decl.Attribute;
 import fql.decl.Edge;
 import fql.decl.Instance;
 import fql.decl.Mapping;
@@ -33,9 +34,6 @@ public class FullSigma extends PSM {
 		this.f = f;
 		this.pre = pre;
 		this.inst = inst;
-		if (f.source.attrs.size() > 0) {
-			throw new RuntimeException("Cannot SIGMA with attributes");
-		}
 	}
 
 	@Override
@@ -46,22 +44,28 @@ public class FullSigma extends PSM {
 
 		try {
 			Instance I = new Instance(C, I0);
-			Denotation d = new Denotation(interp, f, I);
+			Instance J = Denotation.fullSigmaWithAttrs(interp, f, I);
+//			Denotation d = new Denotation(interp, f, I);
 		//	System.out.println("Exucuting fs on " + I);
 			//System.out.println("GUID is " + PSMInterp.guid);
 //			System.out.println(d);
-			Instance J = d.sigma(interp);
+//			Instance J = d.sigma(interp);
 		//	System.out.println("done " + J);
 			//System.out.println("GUID is " + PSMInterp.guid);
 
 			for (Node n : D.nodes) {
+		//		System.out.println("looking up " + n.string + " in " + J.data);
 				state.put(pre + "_" + n.string, conv(J.data.get(n.string)));
 			}
 			for (Edge n : D.edges) {
 				state.put(pre + "_" + n.name, conv(J.data.get(n.name)));
 			}
+			for (Attribute<Node> n : D.attrs) {
+				state.put(pre + "_" + n.name, conv(J.data.get(n.name)));
+			}
 			
 		} catch (FQLException e) {
+			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
 		

@@ -32,6 +32,7 @@ import fql.FQLException;
 import fql.Fn;
 import fql.Pair;
 import fql.Triple;
+import fql.decl.Attribute;
 import fql.decl.Edge;
 import fql.decl.Eq;
 import fql.decl.Instance;
@@ -61,7 +62,7 @@ public class Denotation {
 	public Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> toCategory()
 			throws FQLException {
 
-		if (!enumerate(DEBUG.MAX_DENOTE_ITERATIONS)) {
+		if (!enumerate(DEBUG.debug.MAX_DENOTE_ITERATIONS)) {
 			throw new FQLException("Category size exceeds allowed limit");
 		}
 
@@ -71,7 +72,7 @@ public class Denotation {
 		Map<Node, Arr<Node, Path>> identities = new HashMap<>();
 
 		final Fn<Path, Integer> fn = makeFn();
-		List<Path> paths = B.pathsLessThan(DEBUG.MAX_PATH_LENGTH);
+		List<Path> paths = B.pathsLessThan(DEBUG.debug.MAX_PATH_LENGTH);
 		final Map<Integer, Path> fn2 = new HashMap<>();
 		for (Path p : paths) {
 			Integer i = fn.of(p);
@@ -161,7 +162,7 @@ public class Denotation {
 		Map<String, Set<Pair<Object, Object>>> data = new HashMap<>();
 
 		if (!enumerate(128)) {
-			throw new FQLException("Too many enumerations");
+			throw new FQLException("Too many full sigma enumerations");
 		}
 
 		for (Edge e : Ltables.keySet()) {
@@ -173,6 +174,7 @@ public class Denotation {
 				data.put(x, conc(t));
 			}
 		}
+		
 		interp.guid = _FRESH + 1;
 		return new Instance(sig, data);
 	}
@@ -185,6 +187,130 @@ public class Denotation {
 		}
 
 		return ret;
+	}
+
+	
+	public static Instance fullSigmaWithAttrs(PSMInterp inter, Mapping f, Instance i) throws FQLException {
+		//System.out.println("Called with " + f + " on instance " + i);
+		Mapping F = deAttr(f);
+		//System.out.println("de-attred " + F);
+		Pair<Instance, Map<Object, Object>> I = deAttr(inter, i, F.source);
+		//System.out.println("deat2 " + I);
+		Denotation D = new Denotation(inter, F, I.first);
+		Instance j = D.sigma(inter);
+		//System.out.println("j " + j);
+		Instance J = reAttr(D, f.target, j, I.second);
+		//System.out.println(" J " + J);
+		return J;
+	}
+	
+	private static Instance reAttr(Denotation D, Signature thesig, Instance i,
+			Map<Object, Object> map) throws FQLException {
+		Map<String, Set<Pair<Object, Object>>> d = new HashMap<>();
+
+		for (Node k : i.thesig.nodes) {
+			d.put(k.string, i.data.get(k.string));
+		}
+		for (Edge k : i.thesig.edges) {
+			d.put(k.name, i.data.get(k.name));
+		}
+		for (Attribute<Node> k : thesig.attrs) {
+			Set<Pair<Object, Object>> t = new HashSet<>();
+			for (Pair<Object, Object> v : i.data.get(k.name + "_edge")) {
+				Integer v0 = (Integer) v.second;
+//				System.out.println("etables is " + D.etables);
+//				System.out.println("looking for " + k.name);
+				Object v1 = getFrom(D, map, v0);
+			//	System.out.println("v1 is " + v1);
+				t.add(new Pair<Object, Object>(v.first, v1));
+			}
+			d.put(k.name, t);
+		}
+		return new Instance(thesig, d);
+	}
+
+	private static Object getFrom(Denotation D, 
+			Map<Object, Object> saved, Integer newkey) {
+		List<Pair<Integer, Object>> pre = new LinkedList<>();
+		
+		for (Node kkk : D.etables.keySet()) {
+			Map<Integer, Integer> nt = D.etables.get(kkk);
+			for (Integer k : nt.keySet()) {
+				if (nt.get(k).equals(newkey)) {
+					pre.add(new Pair<>(k, saved.get(k)));
+				}
+			}
+		}
+	//	System.out.println("preimage " + pre);
+		if (pre.size() == 0) {
+			throw new RuntimeException("Full sigma not surjective: transform is " + D.etables + " saved " + saved + " new key " + newkey);
+		}
+		Set<Object> x = new HashSet<>(); 
+		for (Pair<Integer, Object> i : pre) {
+			x.add(i.second);
+		}
+		if (x.size() > 1) {
+			throw new RuntimeException("Full sigma not unique: transform is " + D.etables + " saved " + saved + " new key " + newkey);
+		}
+		for (Object ret : x) {
+			return ret;
+		}
+		throw new RuntimeException();
+	}
+
+	private static Pair<Instance, Map<Object, Object>> deAttr(PSMInterp inter,
+			Instance i, Signature sig) throws FQLException {
+		Map<String, Set<Pair<Object, Object>>> d = new HashMap<>();
+		Map<Object, Object> ret = new HashMap<>();
+
+		for (Node k : i.thesig.nodes) {
+			d.put(k.string, i.data.get(k.string));
+		}
+		for (Edge k : i.thesig.edges) {
+			d.put(k.name, i.data.get(k.name));
+		}
+		for (Attribute<Node> k : i.thesig.attrs) {
+			Set<Pair<Object, Object>> tn = new HashSet<>();
+			Set<Pair<Object, Object>> te = new HashSet<>();
+			for (Pair<Object, Object> v : i.data.get(k.name)) {
+				Integer x = new Integer(inter.guid++);
+				ret.put(x, v.second);
+				tn.add(new Pair<Object, Object>(x, x));
+				te.add(new Pair<Object, Object>(v.first, x));
+			}
+			d.put(k.name, tn);
+			d.put(k.name + "_edge", te);
+		}
+		return new Pair<>(new Instance(sig, d), ret);
+	}
+
+	private static Mapping deAttr(Mapping f) throws FQLException {
+		Mapping ret = f.clone();
+		deAttr(ret.source);
+		deAttr(ret.target);
+		
+		for (Attribute<Node> k : ret.am.keySet()) {
+			Attribute<Node> v = ret.am.get(k);
+			Node src = new Node(k.name);
+			Node dst = new Node(v.name);
+			Edge srcE = new Edge(k.name + "_edge", k.source, src);
+			Edge dstE = new Edge(v.name + "_edge", v.source, dst);
+			ret.nm.put(src, dst);
+			ret.em.put(srcE, new Path(ret.target, dstE));
+		}
+		ret.am.clear();
+		
+		return ret;
+	}
+
+	private static void deAttr(Signature source) {
+		for (Attribute<Node> a : source.attrs) {
+			Node dst = new Node(a.name);
+			source.nodes.add(dst);
+			source.edges.add(new Edge(a.name + "_edge", a.source, dst));
+		}
+		source.attrs.clear();
+		source.doColors();
 	}
 
 	public Denotation(PSMInterp inter, Mapping f, Instance I)
@@ -217,7 +343,7 @@ public class Denotation {
 
 		this.A = A;
 		this.B = B;
-		this.F = new Mapping(A, B, f.nm, ff);
+		this.F = new Mapping(A, B, f.nm, ff, new LinkedHashMap<Attribute<Node>, Attribute<Node>>());
 		this.X = new Instance(A, data);
 		this.R = B.eqs;
 
@@ -290,7 +416,7 @@ public class Denotation {
 	Map<Edge, Edge[]> ntables3 = new HashMap<>();
 
 	Instance L; // B-inst
-	Map<String, Map<Integer, Integer>> e = new HashMap<>();
+//	Map<String, Map<Integer, Integer>> e = new HashMap<>();
 
 	// node in B (paper switch A and B between main text and appendix)
 	Map<Node, Set<Pair<Integer, Integer>>> SA = new HashMap<>();
@@ -309,11 +435,12 @@ public class Denotation {
 			// checkRtables() ;
 			Pair<Node, Integer> a0 = smallest();
 			if (a0 == null) {
-				throw new RuntimeException("no smallest");
-			}
+		//		throw new RuntimeException("no smallest");
+			} else {
 			create(a0.first, a0.second);
 			// checkRtables() ;
 			deriveConsequences();
+			}
 			// checkRtables() ;
 			Node a;
 			// int x = 0;
@@ -386,7 +513,8 @@ public class Denotation {
 				return new Pair<>(n, i);
 			}
 		}
-		throw new RuntimeException("no smallest");
+		return null;
+//		throw new RuntimeException("no smallest");
 	}
 
 	List<Node> ekeys;
@@ -786,9 +914,9 @@ public class Denotation {
 
 		for (Edge k : Ltables.keySet()) {
 			Map<Integer, Integer> v = Ltables.get(k);
-			if (v.size() == 0) {
-				return true;
-			}
+			//if (v.size() == 0) {
+			//	return true;
+			//}
 			for (Integer i : v.keySet()) {
 				if (v.get(i) == null) {
 					return true;

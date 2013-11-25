@@ -245,7 +245,7 @@ public class PSMGen
 
 	public static String compile(Environment env, FQLProgram init)
 			throws FQLException {
-		return DEBUG.prelude + "\n\n" + prettyPrint(compile0(env, init));
+		return DEBUG.debug.prelude + "\n\n" + prettyPrint(compile0(env, init));
 	}
 
 	public static String prettyPrint(List<PSM> l) {
@@ -531,6 +531,7 @@ public class PSMGen
 		Signature D = F.target;
 		List<PSM> ret = new LinkedList<>();
 
+//		if (F.)
 		if (!FinFunctor.isDiscreteOpFib(F.toFunctor2().first)) {
 			throw new FQLException("Not a discrete op-fibration" /* + F */);
 		}

@@ -40,6 +40,8 @@ import fql.Pair;
 import fql.examples.Example;
 import fql.examples.Examples;
 import fql.sql.Chase;
+import fql.sql.SqlToFql.RAToFQL;
+import fql.sql.SqlToFql.SQLToFQL;
 
 @SuppressWarnings("serial")
 /**
@@ -50,7 +52,7 @@ import fql.sql.Chase;
  */
 public class GUI extends JPanel {
 
-	static JTabbedPane editors = new JTabbedPane();
+	public static JTabbedPane editors = new JTabbedPane();
 
 	public static Pair<JPanel, MenuBar> makeGUI() {
 
@@ -132,7 +134,9 @@ public class GUI extends JPanel {
 				InputEvent.CTRL_MASK);
 		MenuShortcut o = new MenuShortcut(ctrlO.getKeyCode());
 		openItem.setShortcut(o);
-
+		
+		Menu toolsMenu = new Menu("Tools");
+		
 		final Menu editMenu = new Menu("Edit");
 		MenuItem findItem = new MenuItem("Find");
 		editMenu.add(findItem);
@@ -152,12 +156,12 @@ public class GUI extends JPanel {
 		editMenu.add(optionsItem);
 		optionsItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				DEBUG.showOptions();
+				DEBUG.debug.showOptions();
 			}
 		});
 		
 		MenuItem chaseItem = new MenuItem("Run Chase");
-		editMenu.add(chaseItem);
+		toolsMenu.add(chaseItem);
 		chaseItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Chase.dostuff();
@@ -165,10 +169,26 @@ public class GUI extends JPanel {
 		});
 
 		MenuItem checkItem = new MenuItem("Type Check");
-		editMenu.add(checkItem);
+		toolsMenu.add(checkItem);
 		checkItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				checkAction();
+			}
+		});
+		
+		MenuItem raToFqlItem = new MenuItem("RA to FQL");
+		toolsMenu.add(raToFqlItem);
+		raToFqlItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				raToFqlAction();
+			}
+		});
+
+		MenuItem sqlToFqlItem = new MenuItem("SQL to FQL");
+		toolsMenu.add(sqlToFqlItem);
+		sqlToFqlItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				sqlToFqlAction();
 			}
 		});
 		
@@ -242,6 +262,7 @@ public class GUI extends JPanel {
 
 		menuBar.add(fileMenu);
 		menuBar.add(editMenu);
+		menuBar.add(toolsMenu);
 		// menuBar.add(optionsMenu);
 
 //		menuBar.add(webMenu);
@@ -338,9 +359,13 @@ public class GUI extends JPanel {
 		toolBar.add(optionsb);
 		optionsb.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				DEBUG.showOptions();
+				DEBUG.debug.showOptions();
 			}
 		});
+		
+		{
+			DEBUG.load(true);
+		}
 
 		// JPanel temp2 = new JPanel();
 		// temp2.add(l);
@@ -354,7 +379,9 @@ public class GUI extends JPanel {
 		pan.add(editors, BorderLayout.CENTER);
 
 		newAction(null, "");
-
+		
+		//editors.setFocusCycleRoot(true);
+		//editors.requestFocusInWindow();
 		return new Pair<>(pan, menuBar);
 	}
 
@@ -373,6 +400,13 @@ public class GUI extends JPanel {
 			return;
 		}
 		c.check();
+	}
+	
+	private static void sqlToFqlAction() {
+		new SQLToFQL();
+	}
+	private static void raToFqlAction() {
+		new RAToFQL();
 	}
 	
 	private static void abortAction() {
@@ -547,7 +581,9 @@ public class GUI extends JPanel {
 		editors.addTab(title, c);
 		editors.setTabComponentAt(i, new ButtonTabComponent(editors));
 		editors.setSelectedIndex(i);
-
+		//editors.requestFocus();
+		//editors.requestFocus(false); //requestDefaultFocus();
+		//c.dis
 		return c.id;
 		
 	}

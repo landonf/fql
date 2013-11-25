@@ -314,6 +314,10 @@ public class Relationalizer {
 		ret.add(new InsertKeygen(out + "_" +n.string + "_observables_guid", "id", out + "_" + n.string
 				+ "_observables_proj", new LinkedList<>(ty.keySet())));
 
+//		if (ty.keySet().size() == 0) {
+	//		throw new RuntimeException("Cannot compute observables for " + n + ": no attributes");
+//		}
+		
 		select = new HashMap<>();
 		where = new LinkedList<>();
 		from = new HashMap<>();

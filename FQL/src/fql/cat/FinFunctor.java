@@ -62,7 +62,7 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 		this.arrowMapping = arrowMapping;
 		this.srcCat = srcCat;
 		this.dstCat = dstCat;
-		if (DEBUG.VALIDATE) {
+		if (DEBUG.debug.VALIDATE) {
 			validate();
 		}
 	}

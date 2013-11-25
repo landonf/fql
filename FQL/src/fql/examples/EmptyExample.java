@@ -2,8 +2,6 @@ package fql.examples;
 
 public class EmptyExample extends Example {
 	
-	//TODO add drop to FQL syntax highlighting
-
 	@Override
 	public String getName() {
 		return "All Syntax";
@@ -22,6 +20,7 @@ public class EmptyExample extends Example {
 					+ "\nschema C2 = unit"
 					+ "\nschema C3 = (C + C)"
 					+ "\nschema C4 = (C * C)"
+					+ "\nschema C5 = (C union C)"
 					+ "\n//schema C4 = (C ^ C)"
 					+ "\n"
 					+ "\nmapping F = id C"
@@ -35,11 +34,18 @@ public class EmptyExample extends Example {
 					+ "\nmapping F8 = (F6 * F7)"
 					+ "\nmapping F9 = void C"
 					+ "\nmapping F10= unit C"
+					+ "\nmapping F13 = subschema C C5"
 					+ "\n//mapping F11= eval C C"
 					+ "\n//mapping F12= curry id (C*C)"
 					+ "\n"
 					+ "\nquery q = delta F pi F sigma F"
 					+ "\nquery p = (q then q)"
+					
+					+ "\n//see Schema Matching example for available strings"
+					+ "\nQUERY Q1 = delta F"
+					+ "\nQUERY Q2 = SIGMA F"
+					+ "\nQUERY Q3 = pi F"
+					+ "\nQUERY Q4 = match {} C C \"delta sigma forward\""
 					+ "\n"
 					+ "\ninstance I  = { nodes; attributes; arrows; } : C"
 					+ "\ninstance I1  = delta F I"
@@ -55,6 +61,7 @@ public class EmptyExample extends Example {
 					+ "\n//instance I3 = prop C"
 					+ "\ninstance I6  = external C name"
 					+ "\ninstance I7  = eval q I"
+					+ "\ninstance I7x  = EVAL Q1 I"
 					+ "\n"
 					+ "\ntransform t1 = id I"
 					+ "\ntransform t2 = (t1 then t1)"
@@ -70,10 +77,11 @@ public class EmptyExample extends Example {
 					+ "\n//transform t14 = I8.(t4^t5)"
 					+ "\n//transform curry"
 					+ "\n//transform eval"
-					+ "\n//transforms t15 = delta I1 I1 (id I1)"
-					+ "\n//transforms t16 = sigma I3 I3 (id I3)"
-					+ "\n//transforms t17 = pi I2 I2 (id I2)"
-					+ "\n//transforms t18 = relationalize I1 I1 (id I1)"
+					+ "\n//transform t15 = delta I1 I1 (id I1)"
+					+ "\n//transform t16 = sigma I3 I3 (id I3)"
+					+ "\n//transform t16 = SIGMA I3 I3 (id I3)"
+					+ "\n//transform t17 = pi I2 I2 (id I2)"
+					+ "\n//transform t18 = relationalize I1 I1 (id I1)"
 					
 					+ "\n\ndrop I t1\n\n";
 					

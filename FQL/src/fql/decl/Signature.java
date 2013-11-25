@@ -2,6 +2,7 @@ package fql.decl;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Paint;
@@ -180,7 +181,7 @@ public class Signature  {
 		Collections.sort(arrows);
 		
 		//System.out.println(this);
-		if (!DEBUG.ALLOW_INFINITES) {
+		if (!DEBUG.debug.ALLOW_INFINITES) {
 			toCategory2();
 		}
 		
@@ -799,7 +800,7 @@ public class Signature  {
 		// Layout<String, String> layout = new FRLayout(sgv);
 		Layout<String, String> layout = new ISOMLayout<String, String>(sgv);
 		// Layout<String, String> layout = new CircleLayout(sgv);
-		//layout.setSize(new Dimension(600, 400));
+		layout.setSize(new Dimension(600, 400));
 		// BasicVisualizationServer<String, String> vv = new
 		// BasicVisualizationServer<String, String>(
 		// layout);

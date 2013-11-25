@@ -163,7 +163,7 @@ public class CommaCat<ObjA, ArrowA, ObjB, ArrowB, ObjC, ArrowC>
 		projA();
 		projB();
 
-		if (DEBUG.VALIDATE) {
+		if (DEBUG.debug.VALIDATE) {
 			validate();
 		}
 		// System.out.println("result is " + this);

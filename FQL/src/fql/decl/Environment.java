@@ -18,13 +18,15 @@ public class Environment {
 
 	public Environment(Map<String, Signature> signatures,
 			Map<String, Mapping> mappings, Map<String, Instance> instances,
-			Map<String, Query> queries, Map<String, Transform> transforms) {
+			Map<String, Query> queries, Map<String, Transform> transforms,
+			Map<String, FullQuery> full_queries) {
 		super();
 		this.signatures = signatures;
 		this.mappings = mappings;
 		this.instances = instances;
 		this.queries = queries;
 		this.transforms = transforms;
+		this.full_queries = full_queries;
 		//doColors();
 	}
 
@@ -51,6 +53,7 @@ public class Environment {
 	public Map<String, Signature> signatures;
 	public Map<String, Mapping> mappings;
 	public Map<String, Query> queries;
+	public Map<String, FullQuery> full_queries;
 	public Map<String, Instance> instances;
 	public Map<String, Transform> transforms;
 

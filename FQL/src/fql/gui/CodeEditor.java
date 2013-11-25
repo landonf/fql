@@ -70,8 +70,9 @@ public class CodeEditor extends JPanel implements Runnable {
 
 	private static final long serialVersionUID = 1L;
 
-	RSyntaxTextArea topArea = new RSyntaxTextArea();
+	public RSyntaxTextArea topArea = new RSyntaxTextArea();
 
+	
 	FQLTextPanel respArea = new FQLTextPanel("Compiler response", "");
 
 	final JTextField searchField = new JTextField();
@@ -151,6 +152,7 @@ public class CodeEditor extends JPanel implements Runnable {
 		// context.setRegularExpression(regexCB.isSelected());
 		context.setSearchForward(b);
 		context.setWholeWord(wholeCB.isSelected());
+		
 
 		if (replaceCB.isSelected()) {
 			context.setReplaceWith(replaceField.getText());
@@ -284,17 +286,22 @@ public class CodeEditor extends JPanel implements Runnable {
 		ctm.addTemplate(ct);
 
 		ct = new StaticCodeTemplate("query", "query ", " = delta pi sigma");
+		ctm.addTemplate(ct);
 
+		ct = new StaticCodeTemplate("QUERY", "QUERY ", " = match {} src dst \"deta sigma forward\" ");
+		ctm.addTemplate(ct);
+		
 		ct = new StaticCodeTemplate("transform", "transform ",
 				" = {\n\tnodes;\n} :  -> ");
 		ctm.addTemplate(ct);
 
 		InputMap inputMap = topArea.getInputMap();
 
-	//	KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_A, Event.META_MASK);
+		// KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_A,
+		// Event.META_MASK);
 		KeyStroke key2 = KeyStroke.getKeyStroke(KeyEvent.VK_A, Event.CTRL_MASK);
 
-		//inputMap.put(key, DefaultEditorKit.beginLineAction);
+		// inputMap.put(key, DefaultEditorKit.beginLineAction);
 		inputMap.put(key2, DefaultEditorKit.beginLineAction);
 
 		KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_E, Event.META_MASK);
@@ -303,30 +310,45 @@ public class CodeEditor extends JPanel implements Runnable {
 		inputMap.put(key, DefaultEditorKit.endLineAction);
 		inputMap.put(key2, DefaultEditorKit.endLineAction);
 
-		 key = KeyStroke.getKeyStroke(KeyEvent.VK_K, Event.META_MASK);
-		 key2 = KeyStroke.getKeyStroke(KeyEvent.VK_K, Event.CTRL_MASK);
+		Action alx = new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				topArea.redoLastAction();
+			}
+		};
+		key = KeyStroke.getKeyStroke(KeyEvent.VK_Z, Event.SHIFT_MASK
+				| Event.CTRL_MASK);
+		inputMap.put(key, alx);
+		key = KeyStroke.getKeyStroke(KeyEvent.VK_Z, Event.SHIFT_MASK
+				| Event.META_MASK);
+		inputMap.put(key, alx);
 
-		 Action al = new AbstractAction() {
+		key = KeyStroke.getKeyStroke(KeyEvent.VK_K, Event.META_MASK);
+		key2 = KeyStroke.getKeyStroke(KeyEvent.VK_K, Event.CTRL_MASK);
+
+		Action al = new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					int len = topArea.getLineEndOffsetOfCurrentLine();
-					int offs = topArea.getCaretPosition();
-					try {
-						//System.out.println("xxx " + offs + " xxx " + len);
-						//System.out.println(topArea.getDocument().getText(offs, len - 1));
-						if (len - offs - 1 > 0) {
-							topArea.getDocument().remove(offs, len - offs - 1 );
-						}
-					} catch (BadLocationException e1) {
-						e1.printStackTrace();
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int len = topArea.getLineEndOffsetOfCurrentLine();
+				int offs = topArea.getCaretPosition();
+				try {
+					// System.out.println("xxx " + offs + " xxx " + len);
+					// System.out.println(topArea.getDocument().getText(offs,
+					// len - 1));
+					if (len - offs - 1 > 0) {
+						topArea.getDocument().remove(offs, len - offs - 1);
 					}
+				} catch (BadLocationException e1) {
+					e1.printStackTrace();
 				}
-			};
-			topArea.getActionMap().put("RemoveToEndOfLine", al);
+			}
+		};
+		topArea.getActionMap().put("RemoveToEndOfLine", al);
 		inputMap.put(key, "RemoveToEndOfLine");
-		inputMap.put(key2,"RemoveToEndOfLine");
+		inputMap.put(key2, "RemoveToEndOfLine");
 
 		// topArea.setBracketMatchingEnabled(true);
 		// topArea.setAutoIndentEnabled(true);
@@ -408,19 +430,23 @@ public class CodeEditor extends JPanel implements Runnable {
 			respArea.setText(e.getLocalizedMessage());
 		}
 	}
-	
+
 	String toDisplay = null;
 	Thread thread;
+
 	public void runAction() {
 		if (thread != null) {
-			JOptionPane.showMessageDialog(null, "Cannot compile - wait for current compile to finish, or abort it from the edit menu");
+			JOptionPane
+					.showMessageDialog(
+							null,
+							"Cannot compile - wait for current compile to finish, or abort it from the edit menu");
 			return;
 		}
 		toDisplay = null;
 		DateFormat format = DateFormat.getTimeInstance();
 		String foo = format.format(new Date(System.currentTimeMillis()));
 
-//		respArea.setText("Compilation and visualization started at " + foo);
+		// respArea.setText("Compilation and visualization started at " + foo);
 		thread = new Thread(this);
 		Thread temp = new Thread(new Runnable() {
 			@Override
@@ -437,10 +463,10 @@ public class CodeEditor extends JPanel implements Runnable {
 						} else if (thread != null) {
 							respArea.setText(respArea.getText() + ".");
 							counter++;
-							if (counter == 40) {
+							if (counter == 80) {
 								counter = 0;
 								respArea.setText(respArea.getText() + "\n");
-								//respArea.s
+								// respArea.s
 							}
 						}
 					}
@@ -452,6 +478,7 @@ public class CodeEditor extends JPanel implements Runnable {
 		temp.start();
 		thread.start();
 	}
+
 	public void run() {
 		String program = topArea.getText();
 
@@ -487,7 +514,7 @@ public class CodeEditor extends JPanel implements Runnable {
 		}
 
 		try {
-//			Driver.check(init);
+			// Driver.check(init);
 			Pair<Environment, String> envX = Driver.makeEnv(init);
 			env = envX.first;
 			env2 = envX.second;
@@ -508,14 +535,14 @@ public class CodeEditor extends JPanel implements Runnable {
 		}
 
 		try {
-			if (display != null && !DEBUG.MultiView) {
+			if (display != null && !DEBUG.debug.MultiView) {
 				display.close();
 			}
 			DateFormat format = DateFormat.getTimeInstance();
 			// try {
 			display = new Display(init, env);
 			String foo = GUI.getTitle(id);
-			if (DEBUG.MultiView) {
+			if (DEBUG.debug.MultiView) {
 				foo += " - "
 						+ format.format(new Date(System.currentTimeMillis()));
 			}
@@ -529,7 +556,7 @@ public class CodeEditor extends JPanel implements Runnable {
 			thread = null;
 			return;
 		}
-		
+
 		thread = null;
 
 	}

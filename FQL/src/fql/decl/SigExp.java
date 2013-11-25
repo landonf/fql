@@ -32,6 +32,57 @@ public abstract class SigExp {
 		}
 	}
 
+	public static class Union extends SigExp {
+		SigExp l, r;
+
+		public Union(SigExp l, SigExp r) {
+			super();
+			this.l = l;
+			this.r = r;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((l == null) ? 0 : l.hashCode());
+			result = prime * result + ((r == null) ? 0 : r.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Union other = (Union) obj;
+			if (l == null) {
+				if (other.l != null)
+					return false;
+			} else if (!l.equals(other.l))
+				return false;
+			if (r == null) {
+				if (other.r != null)
+					return false;
+			} else if (!r.equals(other.r))
+				return false;
+			return true;
+		}
+
+		@Override
+		public <R, E> R accept(E env, SigExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+		@Override
+		public String toString() {
+			return "(" + l + " union " + r + ")";
+		}
+	}
+	
 	public static class Const extends SigExp {
 		public List<String> nodes;
 		public List<Triple<String, String, String>> attrs;
@@ -475,6 +526,7 @@ public abstract class SigExp {
 		public R visit (E env, Exp e) ;
 		public R visit (E env, Var e) ;
 		public R visit (E env, Const e) ;
+		public R visit (E env, Union e) ;
 	}
 	
 }
