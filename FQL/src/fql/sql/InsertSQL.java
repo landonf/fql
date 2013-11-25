@@ -27,7 +27,7 @@ public class InsertSQL extends PSM {
 	@Override
 	public void exec(PSMInterp interp, Map<String, Set<Map<Object, Object>>> state) {
 		if (!state.containsKey(name)) {
-			throw new RuntimeException("does not contain key " + name + "\n\n" + state);
+			throw new RuntimeException("does not contain key " + name + "\n\n" + state + " sql was " + this);
 		}
 		if (state.get(name).size() > 0) {
 			throw new RuntimeException(name + ": already " + state.get(name) + " in " + this);

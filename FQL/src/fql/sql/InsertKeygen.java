@@ -47,7 +47,7 @@ public class InsertKeygen extends PSM {
 			a += attr;
 		}
 
-		return "INSERT INTO " + name + "(" + a + ", " + col + " SELECT " + a
+		return "INSERT INTO " + name + "(" + a + ", " + col + " ) SELECT " + a
 				+ ", @guid:=@guid+1 AS " + col + " FROM " + r;
 
 	}

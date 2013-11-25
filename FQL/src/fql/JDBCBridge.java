@@ -28,9 +28,15 @@ public class JDBCBridge {
 			Connection Conn = DriverManager.getConnection(DEBUG.debug.jdbcUrl);
 						
 			Statement Stmt = Conn.createStatement();
-			Stmt.execute("set @guid := 0");
+			
+			String[] prel = DEBUG.debug.prelude.split(";");
+			for (String s : prel) {
+				Stmt.execute(s);
+			}
+			
+//			Stmt.execute("set @guid := 0");
 			for (PSM sql : sqls) {
-				//System.out.println("exec " + sql.toPSM());
+		//		System.out.println(sql);
 				Stmt.execute(sql.toPSM());
 			}
 
@@ -77,7 +83,7 @@ public class JDBCBridge {
 			
 			for (String k : prog.transforms.keySet()) {
 				TransExp v = prog.transforms.get(k);
-				SigExp.Const t = prog.insts.get(v.type(prog)).type(prog).toConst(prog);
+				SigExp.Const t = prog.insts.get(v.type(prog).first).type(prog).toConst(prog);
 				for (String n : t.nodes) {
 					ResultSet RS = Stmt.executeQuery("SELECT c0,c1 FROM " + k + "_" + n);
 					Set<Map<Object, Object>> ms = new HashSet<>();
@@ -90,11 +96,25 @@ public class JDBCBridge {
 					RS.close(); 
 					ret.put(k + "_" + n, ms);
 				}
+				for (Triple<String, String, String> n : t.arrows) {
+					ret.put(k + "_" + n.first, new HashSet<Map<Object, Object>>());
+				}
+				for (Triple<String, String, String> n : t.attrs) {
+					ret.put(k + "_" + n.first, new HashSet<Map<Object, Object>>());
+				}
 			}
 
 			for (PSM k : drops) {
 				Stmt.execute(k.toPSM());
 			}
+			
+			String[] prel0 = DEBUG.debug.afterlude.split(";");
+			for (String s : prel0) {
+				if (s.trim().length() > 0) {
+					Stmt.execute(s);
+				}
+			}
+
 //			Conn.commit();
 			
 			return ret;

@@ -203,8 +203,9 @@ public class Driver {
 			res = JDBCBridge.go(psm, drops, prog);
 		} else {
 			res = new PSMInterp().interp(psm);
-//			System.out.println(res);
 		}
+//		System.out.println(res);
+
 		for (String k : prog.insts.keySet()) {
 			try {
 				Signature s = prog.insts.get(k).type(prog).toSig(prog);

@@ -69,7 +69,9 @@ public class DEBUG implements Serializable {
 
 	public String prelude = "DROP DATABASE FQL; CREATE DATABASE FQL; USE FQL; SET @guid := 0;";
 
-	public String jdbcUrl = "jdbc:mysql://localhost:3306/fql?user=root";
+	public String afterlude = ""; //DROP DATABASE FQL;";
+	
+	public String jdbcUrl = "jdbc:mysql://localhost:3306/?user=root";
 	public boolean useJDBC = false;
 	public String jdbcClass = "com.mysql.jdbc.Driver";
 
@@ -126,7 +128,7 @@ public class DEBUG implements Serializable {
 	static String labelMtext = "Allows multiple viewers for the same editor.";
 
 	public void showOptions() {
-		JPanel p = new JPanel(new GridLayout(15, 2));
+		JPanel p = new JPanel(new GridLayout(16, 2));
 		/*
 		 * JCheckBox ed = new JCheckBox("", VALIDATE_WITH_EDS);
 		 * ed.setToolTipText
@@ -209,6 +211,14 @@ public class DEBUG implements Serializable {
 		p.add(areaLabel);
 		p.add(area);
 		area.setMaximumSize(new Dimension(200, 300));
+		
+		JTextField area2 = new JTextField(12);
+		area2.setText(afterlude);
+		JLabel areaLabel2 = new JLabel("Generated SQL postlude:");
+		areaLabel2.setToolTipText("Set the postlude for the generated SQL.");
+		p.add(areaLabel2);
+		p.add(area2);
+		area2.setMaximumSize(new Dimension(200, 300));
 
 		JPanel schemaArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JCheckBox schema_graphical_box = new JCheckBox("Graph",
@@ -307,7 +317,8 @@ public class DEBUG implements Serializable {
 			MAX_DENOTE_ITERATIONS = b;
 			varlen = d;
 			prelude = area.getText();
-
+			afterlude = area2.getText();
+			
 			schema_denotation = schema_denotation_box.isSelected();
 			schema_ed = schema_ed_box.isSelected();
 			schema_graphical = schema_graphical_box.isSelected();

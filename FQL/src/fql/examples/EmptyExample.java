@@ -77,7 +77,7 @@ public class EmptyExample extends Example {
 					+ "\n//transform t14 = I8.(t4^t5)"
 					+ "\n//transform curry"
 					+ "\n//transform eval"
-					+ "\n//transform t15 = delta I1 I1 (id I1)"
+					+ "\ntransform t15 = delta I1 I1 id I"
 					+ "\n//transform t16 = sigma I3 I3 (id I3)"
 					+ "\n//transform t16 = SIGMA I3 I3 (id I3)"
 					+ "\n//transform t17 = pi I2 I2 (id I2)"

@@ -51,7 +51,7 @@ public class Examples {
 	public static Example match2 = new MatchExample2();
 	
 	public static Example[] examples = new Example[] { match2, match, sub, terminal, functor, enums, people, external, plusSig2, products2,
-			typeddelta, delta, pi, typedPi, typedsigma, sigma, full, employess,
+			 typeddelta,  delta, pi, typedPi, typedsigma, sigma, full, employess,
 			typedemployees, composition, tcomp, iso, triangle, cyclicgroup, transform2,
 			dihedral, empty, foil, typedFoil, sql2fql, weird, written, monad,
 			typedWeird, relative, sotgd, plusSig, products, transform, gene };

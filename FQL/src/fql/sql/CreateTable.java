@@ -21,6 +21,11 @@ public class CreateTable extends PSM {
 		this.name = name;
 		this.attrs = attrs;
 		this.suppress = suppress;
+		for (String k : attrs.values()) {
+			if (!(k.equals(PSM.VARCHAR()) || k.equals(PSM.INTEGER))) {
+				throw new RuntimeException(attrs.toString() + " and " + k);
+			}
+		}
 	}
 
 	boolean suppress;

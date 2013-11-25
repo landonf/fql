@@ -201,13 +201,13 @@ public class ToFullQueryExp implements
 		}
 
 //		System.out.println("before merge");
-		System.out.println(nodeEqcs);
-		System.out.println(attEqcs);
+		//System.out.println(nodeEqcs);
+		//System.out.println(attEqcs);
 		mergeEqcs(nodeEqcs);
 		mergeEqcs(attEqcs);
 	//	System.out.println("after merge");
-		System.out.println(nodeEqcs);
-		System.out.println(attEqcs);
+		//System.out.println(nodeEqcs);
+		//System.out.println(attEqcs);
 
 		int count = 0;
 		for (Set<Pair<String, String>> k : nodeEqcs) {
@@ -286,13 +286,13 @@ public class ToFullQueryExp implements
 
 	private String lookupNode(String pre, String n,
 			Map<Set<Pair<String, String>>, String> node_map) {
-		System.out.println("looking up " + n + " in " + node_map);
+	//	System.out.println("looking up " + n + " in " + node_map);
 		for (Set<Pair<String, String>> k : node_map.keySet()) {
 			if (k.contains(new Pair<>(pre, n))) {
 				return node_map.get(k);
 			}
 		}
-		System.out.println("no hit");
+		//System.out.println("no hit");
 		return pre + "_" + n;
 	}
 

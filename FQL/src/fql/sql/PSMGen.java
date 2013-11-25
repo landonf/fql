@@ -1079,7 +1079,9 @@ public class PSMGen
 			ret.add(new Pair<>(e.name, gather0(v)));
 		}
 		for (Attribute<Node> a : sig.attrs) {
+		//	System.out.println("looking for " + pre + "_" + "a.name");
 			Set<Map<Object, Object>> v = state.get(pre + "_" + a.name);
+		//	System.out.println("result " + v);
 			ret.add(new Pair<>(a.name, gather0(v)));
 		}
 

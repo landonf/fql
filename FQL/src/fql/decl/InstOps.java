@@ -59,7 +59,7 @@ public class InstOps implements
 	int count = 0;
 
 	public String next() {
-		return "trans" + count++;
+		return "inst_ops_temp" + count++;
 	}
 
 	public InstOps(FQLProgram prog) {
@@ -349,9 +349,30 @@ public class InstOps implements
 		return ret;
 	}
 
+	//TODO HERE
 	@Override
-	public List<PSM> visit(String env, fql.decl.TransExp.Delta e) {
-		throw new RuntimeException("TBD");
+	public List<PSM> visit(String dst, fql.decl.TransExp.Delta e) {		
+		List<PSM> ret = new LinkedList<>();
+		Pair<String, String> ht = e.h.type(prog);
+		Signature sig = prog.insts.get(ht.first).type(prog).toSig(prog);
+
+//		Signature sig = prog.insts.get(e.src).type(prog).toSig(prog);
+		
+		Mapping F = ((Delta)prog.insts.get(e.src)).F.toMap(prog);
+		
+		String next = next();
+		ret.addAll(PSMGen.makeTables(next, sig, false));
+		ret.addAll(e.h.accept(next, this));
+
+		Signature sig2 = prog.insts.get(e.src).type(prog).toSig(prog);
+
+		for (Node n : sig2.nodes) {
+			String fc = F.nm.get(n).string;
+			ret.add(new InsertSQL(dst + "_" + n.string, PSMGen.compose(new String[] {e.src + "_" + n.string + "_subst_inv", next + "_" + fc, e.dst + "_" + n.string + "_subst"})));
+		}
+		
+		ret.addAll(PSMGen.dropTables(next, sig));
+		return ret;
 	}
 
 	@Override
@@ -661,12 +682,14 @@ public class InstOps implements
 		ret.addAll(PSMGen.delta(F0, e.I, dst));
 		// ret.addAll(PSMGen.dropTables(next, F0.target));
 		try {
-			ret.addAll(PSMGen.guidify(dst, F0.source));
+			ret.addAll(PSMGen.guidify(dst, F0.source, true));
 			return new Pair<>(ret, new Object());
 		} catch (FQLException fe) {
 			throw new RuntimeException(fe.getLocalizedMessage());
 		}
 	}
+	
+	//TODO remember sigma, pi substs
 
 	@Override
 	public Pair<List<PSM>, Object> visit(String dst, Sigma e) {
@@ -828,6 +851,8 @@ public class InstOps implements
 		return new Pair<>(ret, new Object());
 	}
 
+	////////////////////////////////////////
+	
 	@Override
 	public Pair<List<PSM>, String> visit(String dst, fql.decl.FullQuery.Comp e) {
 		Pair<List<PSM>, String> n1 = e.l.accept(dst, this);

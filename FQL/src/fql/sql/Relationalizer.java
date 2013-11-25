@@ -234,7 +234,7 @@ public class Relationalizer {
 					Pair<String, String> rhs = new Pair<>(a.name, "c0");
 					where.add(new Pair<>(lhs, rhs));
 					select.put("c" + i, new Pair<>(a.name, "c1"));
-					types.put("c" + i, a.target.toString());
+					types.put("c" + i, a.target.psm());
 					attrs.get(n).add(p.toString() + "." + a.name);
 					i++;
 				}
@@ -254,6 +254,7 @@ public class Relationalizer {
 			from.put(in + "_" + n.string, in + "_" + n.string);
 			Map<String, String> ty = new HashMap<>();
 			int u = 0;
+			ty.put("id", PSM.VARCHAR());
 			select.put("id", new Pair<>(in + "_" + n.string, "c0"));
 			for (int i = 0; i < count; i++) {
 				Map<String, String> types = alltypes.get(i);
@@ -312,7 +313,7 @@ public class Relationalizer {
 
 		ret.add(new CreateTable(out + "_" +n.string + "_observables_guid", ty, false));
 		ret.add(new InsertKeygen(out + "_" +n.string + "_observables_guid", "id", out + "_" + n.string
-				+ "_observables_proj", new LinkedList<>(ty.keySet())));
+				+ "_observables_proj", new LinkedList<>(ty0.keySet())));
 
 //		if (ty.keySet().size() == 0) {
 	//		throw new RuntimeException("Cannot compute observables for " + n + ": no attributes");
@@ -479,7 +480,7 @@ public class Relationalizer {
 		for (Attribute<Node> n : sig.attrs) {
 			Map<String, String> attrs = new HashMap<>();
 			attrs.put("c0", PSM.VARCHAR());
-			attrs.put("c1", n.target.toString());
+			attrs.put("c1", n.target.psm());
 			// ret.add(new CreateTable(out + "_" + n.name, attrs, false));
 			ret.add(new InsertSQL(out + "_" + n.name, new CopyFlower(in + "_"
 					+ n.name)));
