@@ -14,7 +14,7 @@ import org.fife.ui.rsyntaxtextarea.*;
 /**
  * 
  */
-
+@SuppressWarnings("unused")
 public class FqlTokenMaker extends AbstractJFlexCTokenMaker {
 
   /** This character denotes the end of file */
@@ -481,7 +481,7 @@ public class FqlTokenMaker extends AbstractJFlexCTokenMaker {
   /** 
    * zzAtBOL == true <=> the scanner is currently at the beginning of a line
    */
-  private boolean zzAtBOL = true;
+private boolean zzAtBOL = true;
 
   /** zzAtEOF == true <=> the scanner is at the EOF */
   private boolean zzAtEOF;

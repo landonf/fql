@@ -40,8 +40,8 @@ import fql.Pair;
 import fql.examples.Example;
 import fql.examples.Examples;
 import fql.sql.Chase;
-import fql.sql.SqlToFql.RAToFQL;
-import fql.sql.SqlToFql.SQLToFQL;
+import fql.sql.RaToFql;
+import fql.sql.SqlToFql;
 
 @SuppressWarnings("serial")
 /**
@@ -403,10 +403,10 @@ public class GUI extends JPanel {
 	}
 	
 	private static void sqlToFqlAction() {
-		new SQLToFQL();
+		new SqlToFql();
 	}
 	private static void raToFqlAction() {
-		new RAToFQL();
+		new RaToFql();
 	}
 	
 	private static void abortAction() {

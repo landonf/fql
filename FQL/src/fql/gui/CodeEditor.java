@@ -443,8 +443,8 @@ public class CodeEditor extends JPanel implements Runnable {
 			return;
 		}
 		toDisplay = null;
-		DateFormat format = DateFormat.getTimeInstance();
-		String foo = format.format(new Date(System.currentTimeMillis()));
+		//DateFormat format = DateFormat.getTimeInstance();
+		//String foo = format.format(new Date(System.currentTimeMillis()));
 
 		// respArea.setText("Compilation and visualization started at " + foo);
 		thread = new Thread(this);

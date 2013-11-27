@@ -39,7 +39,7 @@ public class TypedDeltaExample extends Example {
 					+ "\n equations;"
 					+ "\n}"
 					+ "\n"
-					+ "\nmapping F : C -> D = {"
+					+ "\nmapping F  = {"
 					+ "\n nodes"
 					+ "\n	SSN    -> SSN,"
 					+ "\n	First  -> First,"
@@ -55,9 +55,9 @@ public class TypedDeltaExample extends Example {
 					+ "\n	t1_last   -> T.last0,"
 					+ "\n	t2_last   -> T.last0,"
 					+ "\n	t2_salary -> T.salary0;"
-					+ "\n}"
+					+ "\n} : C -> D"
 					+ "\n"
-					+ "\ninstance J : D = {"
+					+ "\ninstance J = {"
 					+ "\n nodes"
 					+ "\n	T -> { XF667,XF891,XF221 },"
 					+ "\n	SSN -> { 115234,112988,198887 },"
@@ -70,11 +70,11 @@ public class TypedDeltaExample extends Example {
 					+ "\n	first0 -> { (XF667,Bob),(XF891,Sue),(XF221,Alice) },"
 					+ "\n	last0 -> { (XF667,Smith),(XF891,Smith),(XF221,Jones) },"
 					+ "\n	salary0 -> { (XF667,250),(XF891,300),(XF221,100) };"
-					+ "\n}"
+					+ "\n} : D"
 					+ "\n"
-					+ "\ninstance I  : C = delta F J"
+					+ "\ninstance I   = delta F J"
 					+ "\n"
-					+ "\ninstance J0 : D = pi F I";
+					+ "\ninstance J0  = pi F I";
 
 
 

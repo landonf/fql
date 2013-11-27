@@ -54,24 +54,13 @@ public class Driver {
 			try {
 				InstExp i = p.insts.get(k);
 				SigExp y = i.type(p);
-				// ret += "instance " + k + ": " + y.unresolve(p.sigs) + "\n\n";
+				 ret += "instance " + k + ": " + y.unresolve(p.sigs) + "\n\n";
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
 				throw new LineException(ex.getLocalizedMessage(), k, "instance");
 			}
 		}
 
-		for (String k : p.transforms.keySet()) {
-			try {
-				Pair<String, String> v = p.transforms.get(k).type(p);
-				// ret += "instance " + k + ": " + v.first + " ->" + v.second +
-				// "\n\n";
-			} catch (RuntimeException re) {
-				re.printStackTrace();
-				throw new LineException(re.getLocalizedMessage(), k,
-						"transform");
-			}
-		}
 
 		for (String k : p.queries.keySet()) {
 			try {

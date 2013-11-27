@@ -1,7 +1,6 @@
 package fql;
 
 import java.awt.MenuBar;
-import java.awt.event.MouseEvent;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;

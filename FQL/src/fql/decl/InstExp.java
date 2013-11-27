@@ -174,14 +174,14 @@ public abstract class InstExp {
 
 		@Override
 		public String toString() {
-			String x = "nodes ";
+			String x = "\nnodes\n";
 			boolean b = false;
 			for (Pair<String, List<Pair<Object, Object>>> k : nodes) {
 				if (b) {
 					x += ", \n";
 				}
 				b = true;
-				x += k.first + " -> {";
+				x += " " + k.first + " -> {";
 				boolean d = false;
 				for (Pair<Object, Object> v : k.second) {
 					if (d) {
@@ -193,14 +193,14 @@ public abstract class InstExp {
 				x += "}";
 			}
 			x += ";\n";
-			x += "attributes ";
+			x += "attributes\n";
 			b = false;
 			for (Pair<String, List<Pair<Object, Object>>> k : attrs) {
 				if (b) {
 					x += ", \n";
 				}
 				b = true;
-				x += k.first + " -> {";
+				x += " " + k.first + " -> {";
 				boolean d = false;
 				for (Pair<Object, Object> v : k.second) {
 					if (d) {
@@ -209,17 +209,17 @@ public abstract class InstExp {
 					d = true;
 					x += "(" + v.first + ", " + v.second + ")";
 				}
-				x += "};\n";
+				x += "}";
 			}
-
-			x += "arrows ";
+			x += ";\n";
+			x += "arrows\n";
 			b = false;
 			for (Pair<String, List<Pair<Object, Object>>> k : arrows) {
 				if (b) {
 					x += ", \n";
 				}
 				b = true;
-				x += k.first + " -> {";
+				x += " " + k.first + " -> {";
 				boolean d = false;
 				for (Pair<Object, Object> v : k.second) {
 					if (d) {
@@ -228,10 +228,10 @@ public abstract class InstExp {
 					d = true;
 					x += "(" + v.first + ", " + v.second + ")";
 				}
-				x += "};";
+				x += "}";
 			}
 
-			return "{" + x + "}";
+			return "{" + x + ";\n}";
 		}
 
 		@Override
@@ -243,6 +243,8 @@ public abstract class InstExp {
 
 	}
 
+	//TODO shred, unshred queries
+	
 	/*
 	 * public static class Var extends InstExp { String v;
 	 * 

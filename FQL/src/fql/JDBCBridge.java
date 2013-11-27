@@ -18,6 +18,29 @@ import fql.sql.PSM;
 
 public class JDBCBridge {
 
+	/*
+	public static String populate() {
+		try {
+			String ret = "";
+			Class.forName(DEBUG.debug.jdbcClass);	
+			Connection Conn = DriverManager.getConnection(DEBUG.debug.jdbcUrl);
+			DatabaseMetaData m = Conn.getMetaData();
+			ResultSet RS = m.getSchemas();
+			while (RS.next() != false) { 
+				String r = RS.getString("TABLE_SCHEM");
+				ret += r;
+			}
+			m.
+			
+			return ret;
+		} (Exception e) {
+			e.printStackTrace();
+			return e.getLocalizedMessage();
+		}
+	}
+	*/
+
+	
 	public static Map<String, Set<Map<Object, Object>>>  go(List<PSM> sqls, List<PSM> drops, FQLProgram prog) {
 		Map<String, Set<Map<Object, Object>>> ret = new HashMap<>();
 

@@ -5,7 +5,6 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -22,6 +21,7 @@ import javax.swing.JTextField;
  * 
  *         Contains global constants for debugging.
  */
+@SuppressWarnings("serial")
 public class DEBUG implements Serializable {
 
 	public static DEBUG debug = new DEBUG();
@@ -67,9 +67,9 @@ public class DEBUG implements Serializable {
 		return null;
 	}
 
-	public String prelude = "DROP DATABASE FQL; CREATE DATABASE FQL; USE FQL; SET @guid := 0;";
+	public String prelude = "CREATE DATABASE FQL; USE FQL; SET @guid := 0;";
 
-	public String afterlude = ""; //DROP DATABASE FQL;";
+	public String afterlude = "DROP DATABASE FQL; "; //DROP DATABASE FQL;";
 	
 	public String jdbcUrl = "jdbc:mysql://localhost:3306/?user=root";
 	public boolean useJDBC = false;

@@ -196,9 +196,9 @@ public abstract class SigExp {
 			boolean b = false;
 			for (String n : nodes) {
 				if (b) {
-					printNodes += ", ";
+					printNodes += ",\n";
 				}
-				printNodes += n;
+				printNodes += " " + n;
 				b = true;
 			}
 
@@ -206,9 +206,9 @@ public abstract class SigExp {
 			b = false;
 			for (Triple<String, String, String> a : attrs) {
 				if (b) {
-					printAttrs += ", ";
+					printAttrs += ",\n";
 				}
-				printAttrs += a.first + ": " + a.second + " -> " + a.third;
+				printAttrs += " " + a.first + ": " + a.second + " -> " + a.third;
 				b = true;
 			}
 
@@ -216,9 +216,9 @@ public abstract class SigExp {
 			b = false;
 			for (Triple<String, String, String> a : arrows) {
 				if (b) {
-					printArrows += ", ";
+					printArrows += ",\n";
 				}
-				printArrows += a.first + ": " + a.second + " -> " + a.third;
+				printArrows += " " + a.first + ": " + a.second + " -> " + a.third;
 				b = true;
 			}
 
@@ -226,15 +226,15 @@ public abstract class SigExp {
 			b = false;
 			for (Pair<List<String>, List<String>> a : eqs) {
 				if (b) {
-					printEqs += ", ";
+					printEqs += ",\n";
 				}
-				printEqs += printOneEq(a.first) + " = " + printOneEq(a.second);
+				printEqs += " " + printOneEq(a.first) + " = " + printOneEq(a.second);
 				b = true;
 			}
 
-			return "{nodes " + printNodes + "; attributes " + printAttrs
-					+ "; arrows " + printArrows + "; equations " + printEqs
-					+ ";}";
+			return "{\nnodes\n" + printNodes + ";\nattributes\n" + printAttrs
+					+ ";\narrows\n" + printArrows + ";\nequations\n" + printEqs
+					+ ";\n}";
 		}
 		
 		private String printOneEq(List<String> l) {

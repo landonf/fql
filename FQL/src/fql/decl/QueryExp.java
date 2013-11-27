@@ -1,7 +1,5 @@
 package fql.decl;
 
-import java.util.Set;
-
 import fql.Pair;
 
 

@@ -66,6 +66,8 @@ public class FQLParser {
 	public static Parser<?> ident() {
 		return Terminals.Identifier.PARSER;
 	}
+	
+	
 
 	public static final Parser<?> program = program().from(TOKENIZER, IGNORED);
 
@@ -861,6 +863,7 @@ public class FQLParser {
 		}
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public static FullQueryExp toFullQuery(Object o) {
 		if (o instanceof Tuple5) {
 			Tuple5 t = (Tuple5) o;
@@ -883,7 +886,7 @@ public class FQLParser {
 		throw new RuntimeException();
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static Set<Pair<String, String>> toMatch(Object b) {
 		List<Tuple3> l = (List<Tuple3>) b;
 		Set<Pair<String, String>> ret = new HashSet<>();

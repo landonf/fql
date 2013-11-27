@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import fql.Pair;
-import fql.Triple;
 import fql.decl.QueryExp.Comp;
 import fql.decl.QueryExp.Const;
 import fql.decl.QueryExp.QueryExpVisitor;
@@ -61,7 +60,7 @@ public class QueryChecker implements
 	}
 
 	
-
+/*
 	private boolean contains(List<Triple<String, String, String>> attrs,
 			String s) {
 		for (Triple<String, String, String> a : attrs) {
@@ -70,5 +69,5 @@ public class QueryChecker implements
 			}
 		}
 		return false;
-	}
+	} */
 }

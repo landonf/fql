@@ -1,13 +1,11 @@
 package fql.decl;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Paint;
-import java.awt.Stroke;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -122,9 +120,9 @@ public abstract class FullQuery {
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		// Set up a new stroke Transformer for the edges
-		float dash[] = { 1.0f };
-		final Stroke edgeStroke = new BasicStroke(0.5f, BasicStroke.CAP_BUTT,
-				BasicStroke.JOIN_MITER, 10.0f, dash, 10.0f);
+		//float dash[] = { 1.0f };
+//		final Stroke edgeStroke = new BasicStroke(0.5f, BasicStroke.CAP_BUTT,
+	//			BasicStroke.JOIN_MITER, 10.0f, dash, 10.0f);
 		// Transformer<String, Stroke> edgeStrokeTransformer = new
 		// Transformer<String, Stroke>() {
 		// public Stroke transform(String s) {
@@ -358,6 +356,7 @@ public abstract class FullQuery {
 		public MyVertexT() {
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public <T> Component getVertexLabelRendererComponent(JComponent arg0,
 				Object arg1, Font arg2, boolean arg3, T arg4) {

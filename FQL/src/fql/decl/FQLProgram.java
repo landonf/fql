@@ -8,6 +8,32 @@ import java.util.List;
 public class FQLProgram {
 
 
+		public FQLProgram(LinkedHashMap<String, Type> enums,
+			LinkedHashMap<String, SigExp> sigs,
+			LinkedHashMap<String, MapExp> maps,
+			LinkedHashMap<String, InstExp> insts,
+			LinkedHashMap<String, FullQueryExp> full_queries,
+			LinkedHashMap<String, QueryExp> queries,
+			LinkedHashMap<String, TransExp> transforms,
+			LinkedHashMap<String, Integer> lines, List<String> drop,
+			List<String> order) {
+		super();
+		this.enums = enums;
+		this.sigs = sigs;
+		this.maps = maps;
+		this.insts = insts;
+		this.full_queries = full_queries;
+		this.queries = queries;
+		this.transforms = transforms;
+		this.lines = lines;
+		this.drop = drop;
+		this.order = order;
+	}
+		
+		public FQLProgram() { }
+
+
+
 		public static class NewDecl {
 			List<String> drop;
 			TransExp trans;

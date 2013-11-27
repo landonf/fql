@@ -39,14 +39,14 @@ import fql.decl.SigExp;
 import fql.examples.Example;
 import fql.gui.FQLTextPanel;
 
-public class SqlToFql {
+public class RaToFql {
 
 	protected Example[] examples = { new PeopleExample() };
 
-	String help = "SQL schemas and instances in categorical normal form (CNF) can be treated as FQL instances directly.  To be in CNF, every table must have a primary key column called id.  This column will be treated as a meaningless ID.  Every column in a table must either be a string, an integer, or a foreign key to another table.  Inserted values must be quoted.  See the People example for details.";
+	String help = "Bags of tuples can be represented in FQL using an explicit active domain construction.  See the People example.  Unions of conjunctive queries are supported, using DISTINCT and ALL for set semantics.  Primary and foreign keys are not supported by this encoding.  WHERE clauses must have equalities between variables, not constants.";
 
 	protected String kind() {
-		return "SQL";
+		return "RA";
 	}
 
 	static class PeopleExample extends Example {
@@ -66,7 +66,7 @@ public class SqlToFql {
 		return transSQLSchema(list);
 	}
 
-	public SqlToFql() {
+	public RaToFql() {
 		final FQLTextPanel input = new FQLTextPanel(kind() + " Input", "");
 		final FQLTextPanel output = new FQLTextPanel("FQL Output", "");
 
@@ -76,10 +76,10 @@ public class SqlToFql {
 		JButton helpButton = new JButton("Help");
 		// JButton runButton2 = new JButton("Run FQL");
 		// JCheckBox jdbcBox = new JCheckBox("Run using JDBC");
-		// JLabel lbl = new JLabel("Suffix (optional):", JLabel.RIGHT);
+	//	JLabel lbl = new JLabel("Suffix:", JLabel.RIGHT);
 		// lbl.setToolTipText("FQL will translate table T to T_suffix, and generate SQL to load T into T_suffix");
-		// final JTextField field = new JTextField(8);
-		// field.setText("fql");
+		//final JTextField field = new JTextField(8);
+	//	field.setText("fql");
 
 		final JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
@@ -89,33 +89,8 @@ public class SqlToFql {
 				input.setText(((Example) box.getSelectedItem()).getText());
 			}
 		});
-		/*
-		 * jdbcButton.addActionListener(new ActionListener() {
-		 * 
-		 * @Override public void actionPerformed(ActionEvent e) { // TODO load
-		 * from jdbc sql to fql } });
-		 */
-		/*
-		 * runButton.addActionListener(new ActionListener() {
-		 * 
-		 * @Override public void actionPerformed(ActionEvent e) { // TODO run
-		 * sql sql to fql } });
-		 */
 
-		/*
-		 * transButton.addActionListener(new ActionListener() {
-		 * 
-		 * @Override public void actionPerformed(ActionEvent e) { String program
-		 * = output.getText(); FQLProgram init; Environment env; // =
-		 * Driver.intemp1; try { init = FQLParser.program(program);
-		 * Pair<Environment, String> envX = Driver.makeEnv(init); env =
-		 * envX.first; // env2 = envX.second; DateFormat format =
-		 * DateFormat.getTimeInstance(); Display display = new Display(init,
-		 * env); String foo = "Translated SQL"; foo += " - " + format.format(new
-		 * Date(System.currentTimeMillis())); display.display(foo, init.order);
-		 * } catch (Exception ee) { ee.printStackTrace();
-		 * output.setText(ee.getLocalizedMessage()); } } });
-		 */
+		// TODO shred and unshred queries
 
 		transButton.addActionListener(new ActionListener() {
 			@Override
@@ -135,17 +110,19 @@ public class SqlToFql {
 			public void actionPerformed(ActionEvent e) {
 				JTextArea jta = new JTextArea(help);
 				jta.setWrapStyleWord(true);
-				//jta.setEditable(false);
+				// jta.setEditable(false);
 				jta.setLineWrap(true);
-				JScrollPane p = new JScrollPane(jta, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-				p.setPreferredSize(new Dimension(300,200));
+				JScrollPane p = new JScrollPane(jta,
+						JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+						JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+				p.setPreferredSize(new Dimension(300, 200));
 
 				JOptionPane pane = new JOptionPane(p);
-				 // Configure via set methods
-				 JDialog dialog = pane.createDialog(null, "Help on SQL to FQL");
-				 dialog.setModal(false);
-				 dialog.setVisible(true);
-				 dialog.setResizable(true);
+				// Configure via set methods
+				JDialog dialog = pane.createDialog(null, "Help on RA to FQL");
+				dialog.setModal(false);
+				dialog.setVisible(true);
+				dialog.setResizable(true);
 
 			}
 		});
@@ -169,6 +146,8 @@ public class SqlToFql {
 		// tp.add(jdbcButton);
 		// tp.add(helpButton);
 		tp.add(new JLabel());
+		//tp.add(lbl);
+	//	tp.add(field);
 		tp.add(new JLabel("Load Example", JLabel.RIGHT));
 		tp.add(box);
 
@@ -190,21 +169,14 @@ public class SqlToFql {
 	}
 
 	static String extext1 = "CREATE TABLE Place ("
-			+ "\n id INT PRIMARY KEY, "
-			+ "\n description VARCHAR(255)"
-			+ "\n);  "
-			+ "\n"
-			+ "\nCREATE TABLE Person ("
-			+ "\n id INT PRIMARY KEY, "
-			+ "\n name VARCHAR(255), "
-			+ "\n home INT,"
-			+ "\n FOREIGN KEY (home) REFERENCES Place(id)"
-			+ "\n);"
-			+ "\n"
-			+ "\nINSERT INTO Place VALUES (\"100\", \"New York\"),(\"200\", \"Chicago\");"
-			+ "\nINSERT INTO Person VALUES (\"7\", \"Alice\", \"200\");";
+			+ "\n description VARCHAR(255)" + "\n);  " + "\n"
+			+ "\nCREATE TABLE Person (" + "\n name VARCHAR(255), "
+			+ "\n home VARCHAR(255)" + "\n);" + "\n"
+			+ "\nINSERT INTO Place VALUES (\"New York\"),(\"Chicago\"),(\"New York\"); //bag semantics "
+			+ "\nINSERT INTO Person VALUES (\"Alice\", \"Los Angeles\");";
 
 	public static String transSQLSchema(List<EExternal> in) {
+		// TODO wrong: every attribute becomes an edge to "dom"
 		List<Pair<List<String>, List<String>>> eqs = new LinkedList<>();
 		List<Triple<String, String, String>> arrows = new LinkedList<>();
 		List<Triple<String, String, String>> attrs = new LinkedList<>();
@@ -213,7 +185,17 @@ public class SqlToFql {
 		List<Pair<String, List<Pair<Object, Object>>>> inodes = new LinkedList<>();
 		List<Pair<String, List<Pair<Object, Object>>>> iattrs = new LinkedList<>();
 		List<Pair<String, List<Pair<Object, Object>>>> iarrows = new LinkedList<>();
-
+		String adom = "adom";
+		nodes.add(adom);
+		List<Pair<Object, Object>> adomT = new LinkedList<>();
+		LinkedList<Pair<Object, Object>> attT = new LinkedList<>();
+		inodes.add(new Pair<String, List<Pair<Object, Object>>>(adom, adomT));
+		iattrs.add(new Pair<String, List<Pair<Object, Object>>>("att", attT));
+		attrs.add(new Triple<>("att", adom, "string"));
+		
+		HashMap<String, Integer> dom1 = new HashMap<String, Integer>();
+		
+		int count = 0;
 		Set<String> seen = new HashSet<>();
 		HashMap<String, List<String>> cols = new HashMap<String, List<String>>();
 		for (EExternal k0 : in) {
@@ -222,60 +204,28 @@ public class SqlToFql {
 				if (seen.contains(k.name)) {
 					throw new RuntimeException("Duplicate name: " + k.name);
 				}
+				if (k.name.equals("adom") || k.name.equals("att")) {
+					throw new RuntimeException("The names adom and att cannot be used.");
+				}
 				seen.add(k.name);
 				nodes.add(k.name);
 				inodes.add(new Pair<String, List<Pair<Object, Object>>>(k.name,
 						new LinkedList<Pair<Object, Object>>()));
-				boolean found = false;
 				List<String> lcols = new LinkedList<>();
 				for (Pair<String, String> col : k.types) {
 					lcols.add(col.first);
-					if (col.first.equals("id")) {
-						found = true;
-						continue;
-					}
 					if (seen.contains(col.first)) {
 						throw new RuntimeException("Duplicate name: " + k.name);
 					}
 					seen.add(col.first);
-					String ref = lookup(col.first, k.fks);
-					if (ref == null) {
-						String col_t = col.second.equals("int") ? "int"
-								: "string";
-						attrs.add(new Triple<>(k.name + "_" + col.first,
-								k.name, col_t));
-						iattrs.add(new Pair<String, List<Pair<Object, Object>>>(
-								k.name + "_" + col.first,
-								new LinkedList<Pair<Object, Object>>()));
-					} else {
-						if (!nodes.contains(ref)) {
-							throw new RuntimeException(
-									"Missing table in foreign key " + ref
-											+ " in " + k);
-						}
-						arrows.add(new Triple<>(k.name + "_" + col.first,
-								k.name, ref));
-						iarrows.add(new Pair<String, List<Pair<Object, Object>>>(
-								k.name + "_" + col.first,
-								new LinkedList<Pair<Object, Object>>()));
-					}
-				}
-				if (!found) {
-					throw new RuntimeException("No id column in " + k);
-				}
-				for (Pair<String, String> fk : k.fks) {
-					if (fk.first.equals("id")) {
-						throw new RuntimeException(
-								"Primary keys cannot be foreign keys.");
-					}
-					if (lookup(fk.first, k.types) == null) {
-						throw new RuntimeException("Missing column " + fk.first
-								+ " in " + fk);
-					}
+					arrows.add(new Triple<>(k.name + "_" + col.first, k.name,
+							adom));
+					iarrows.add(new Pair<String, List<Pair<Object, Object>>>(
+							k.name + "_" + col.first,
+							new LinkedList<Pair<Object, Object>>()));
 				}
 				cols.put(k.name, lcols);
 			}
-			// TODO add inst_ prefix below
 			if (k0 instanceof EInsertValues) {
 				EInsertValues k = (EInsertValues) k0;
 				List<String> lcols = cols.get(k.target);
@@ -288,23 +238,28 @@ public class SqlToFql {
 					if (node == null) {
 						throw new RuntimeException("Missing table " + k.target);
 					}
-					node.add(new Pair<Object, Object>(tuple.get(0), tuple
-							.get(0)));
 
-					for (int colNum = 1; colNum < tuple.size(); colNum++) {
-						List<Pair<Object, Object>> xxx = lookup2(k.target + "_"
-								+ lcols.get(colNum), iattrs);
+					String id = "" + count++;
+					node.add(new Pair<Object, Object>(id, id));
+
+					for (int colNum = 0; colNum < tuple.size(); colNum++) {
+						Integer xxx = dom1.get(tuple.get(colNum));
 						if (xxx == null) {
-							xxx = lookup2(k.target + "_" + lcols.get(colNum),
-									iarrows);
+							dom1.put(tuple.get(colNum), count);
+							adomT.add(new Pair<Object, Object>(count, count));
+							attT.add(new Pair<Object, Object>(count, "\"" + tuple.get(colNum) + "\""));
+							xxx = count;
+							count++;
 						}
-						xxx.add(new Pair<Object, Object>(tuple.get(0),
-								maybeQuote(tuple.get(colNum))));
+						
+						List<Pair<Object, Object>> yyy = lookup2(k.target + "_"
+								+ lcols.get(colNum), iarrows);
+						
+						yyy.add(new Pair<Object, Object>(id, xxx));						
 					}
 				}
 			}
 		}
-		// TODO add initial sets to inodes, attrs, etc
 
 		SigExp.Const exp = new SigExp.Const(nodes, attrs, arrows, eqs);
 		InstExp.Const inst = new InstExp.Const(inodes, iattrs, iarrows,
@@ -341,14 +296,14 @@ public class SqlToFql {
 		// throw new RuntimeException("Not found: " + target + " in " + inodes);
 	}
 
-	private static String lookup(String s, List<Pair<String, String>> fks) {
+/*	private static String lookup(String s, List<Pair<String, String>> fks) {
 		for (Pair<String, String> k : fks) {
 			if (k.first.equals(s)) {
 				return k.second;
 			}
 		}
 		return null;
-	}
+	} */
 
 	public static class EInsertValues extends EExternal {
 		String target;
@@ -368,14 +323,11 @@ public class SqlToFql {
 	public static class ECreateTable extends EExternal {
 		String name;
 		List<Pair<String, String>> types;
-		List<Pair<String, String>> fks;
 
-		public ECreateTable(String name, List<Pair<String, String>> types,
-				List<Pair<String, String>> fks) {
+		public ECreateTable(String name, List<Pair<String, String>> types) {
 			super();
 			this.name = name;
 			this.types = types;
-			this.fks = fks;
 		}
 	}
 
@@ -393,8 +345,7 @@ public class SqlToFql {
 
 	static String[] res = new String[] { "VARCHAR", "INT", "SELECT", "FROM",
 			"WHERE", "DISTINCT", "UNION", "ALL", "CREATE", "TABLE", "AS",
-			"PRIMARY", "KEY", "FOREIGN", "REFERENCES", "id", "AND", "OR",
-			"NOT", "INSERT", "INTO", "VALUES" };
+			"AND", "OR", "NOT", "INSERT", "INTO", "VALUES" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -414,7 +365,7 @@ public class SqlToFql {
 		return Terminals.Identifier.PARSER;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final List<EExternal> program(String s) {
 		List<EExternal> ret = new LinkedList<>();
 		List<Tuple3> decls = (List<Tuple3>) program.parse(s);
@@ -440,19 +391,12 @@ public class SqlToFql {
 		List t1 = (List) t0.b;
 
 		List<Pair<String, String>> types = new LinkedList<>();
-		List<Pair<String, String>> fks = new LinkedList<>();
 
 		for (Object o : t1) {
 			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;
-			if (p.a.toString().equals("FOREIGN")) {
-				Tuple5 x = (Tuple5) o;
-				Tuple3 y = (Tuple3) x.b;
-				fks.add(new Pair<>(y.b.toString(), x.d.toString()));
-			} else {
-				types.add(new Pair<>(p.a.toString(), p.b.toString()));
-			}
+			types.add(new Pair<>(p.a.toString(), p.b.toString()));
 		}
-		return new ECreateTable(name, types, fks);
+		return new ECreateTable(name, types);
 	}
 
 	public static final Parser<?> program = program().from(TOKENIZER, IGNORED);
@@ -478,16 +422,10 @@ public class SqlToFql {
 	}
 
 	public static final Parser<?> createTable() {
-		Parser<?> q1 = Parsers.tuple(term("id"), term("INT"), term("PRIMARY"),
-				term("KEY"));
 		Parser<?> q2 = Parsers.tuple(ident(), term("INT"));
 		Parser<?> q3 = Parsers.tuple(ident(), term("VARCHAR"),
 				Terminals.IntegerLiteral.PARSER.between(term("("), term(")")));
-		Parser<?> q4 = Parsers.tuple(term("FOREIGN").followedBy(term("KEY")),
-				Parsers.tuple(term("("), ident(), term(")")),
-				term("REFERENCES"), ident(),
-				term("id").between(term("("), term(")")));
-		Parser<?> p = Parsers.or(q1, q2, q3, q4).sepBy(term(","));
+		Parser<?> p = Parsers.or(q2, q3).sepBy(term(","));
 
 		return Parsers.tuple(term("CREATE"), term("TABLE"), ident(),
 				Parsers.tuple(term("("), p, term(")")), term(";"));

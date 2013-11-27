@@ -12,7 +12,6 @@ import fql.Fn;
 import fql.Pair;
 import fql.Quad;
 import fql.Triple;
-import fql.Unit;
 import fql.decl.FullQuery.FullQueryVisitor;
 import fql.decl.InstExp.Delta;
 import fql.decl.InstExp.Eval;
