@@ -12,8 +12,8 @@ public class RelationalizerExample extends Example {
 		return s;
 	}
 	
-	String s ="//Illustrates the paper's relationalize operation\n"
-			+ "\nschema C={nodes A;attributes att:A->string;arrows f:A->A;equations A.f.f.f.f=A.f.f;}"
+	String s =
+			 "\nschema C={nodes A;attributes att:A->string;arrows f:A->A;equations A.f.f.f.f=A.f.f;}"
 			+ "\n"
 			+ "\ninstance I ={"
 			+ "\n	nodes A->{1,2,3,4,5,6,7};"
@@ -21,7 +21,26 @@ public class RelationalizerExample extends Example {
 			+ "\n	arrows f->{(1,2),(2,3),(3,5),(4,2),(5,3),(6,7),(7,6)};"
 			+ "\n	} : C"
 			+ "\n"
-			+ "\ninstance RelI=relationalize I\n";
+			+ "\ninstance RelI=relationalize I"
+			+ "\n"
+			+ "\ntransform trans = RelI.relationalize"
+			+ "\n"
+			+ "\ninstance J ={"
+			+ "\n	nodes A->{1,2,3,4,5};"
+			+ "\n	attributes att->{(1,1),(2,2),(3,3),(4,1),(5,5)};"
+			+ "\n	arrows f->{(1,2),(2,3),(3,5),(4,2),(5,3)};"
+			+ "\n	} : C"
+			+ "\n"
+			+ "\ninstance RelJ=relationalize J"
+			+ "\n"
+			+ "\ntransform t = {"
+			+ "\n	nodes A -> {(1,1),(2,2),(3,3),(4,4),(5,5)};"
+			+ "\n} : J -> I "
+			+ "\n"
+			+ "\ntransform h = relationalize RelJ RelI t"
+
+
+;
 
 
 

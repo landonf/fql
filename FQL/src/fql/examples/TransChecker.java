@@ -25,6 +25,7 @@ import fql.decl.TransExp.Prod;
 import fql.decl.TransExp.Relationalize;
 import fql.decl.TransExp.Sigma;
 import fql.decl.TransExp.Snd;
+import fql.decl.TransExp.Squash;
 import fql.decl.TransExp.TT;
 import fql.decl.TransExp.TransExpVisitor;
 import fql.decl.TransExp.Var;
@@ -298,7 +299,26 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 
 	@Override
 	public Pair<String, String> visit(FQLProgram env, FullSigma e) {
-		throw new RuntimeException();
+		Pair<String, String> ht = e.h.type(env);
+		InstExp i1 = env.insts.get(e.src);		
+		if (!(i1 instanceof InstExp.FullSigma)) {
+			throw new RuntimeException(i1 + " is not a full sigma in " + e);
+		}
+		String i1x = ((InstExp.FullSigma) i1).I;
+
+		if (!i1x.equals(ht.first)) {
+ 			throw new RuntimeException("Source mismatch on " + e + ": " + i1x + " and " + ht.first);
+		}
+		InstExp i2 = env.insts.get(e.dst);		
+		if (!(i2 instanceof InstExp.FullSigma)) {
+			throw new RuntimeException(i2 + " is not a fullsigma in " + e);
+		}
+		String i2x = ((InstExp.FullSigma) i2).I;
+
+		if (!i2x.equals(ht.second)) {
+ 			throw new RuntimeException("Target mismatch on " + e + ": " + i2x + " and " + ht.second);
+		}
+		return new Pair<>(e.src, e.dst);
 	}
 
 	@Override
@@ -346,6 +366,16 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
  			throw new RuntimeException("Target mismatch on " + e + ": " + i2x + " and " + ht.second);
 		}
 		return new Pair<>(e.src, e.dst);
+	}
+
+	@Override
+	public Pair<String, String> visit(FQLProgram env, Squash e) {
+		InstExp s = env.insts.get(e.src);
+		if (!(s instanceof fql.decl.InstExp.Relationalize)) {
+			throw new RuntimeException("Not a relationalize: " + e);
+		}
+		fql.decl.InstExp.Relationalize xxx = (fql.decl.InstExp.Relationalize) s;
+		return new Pair<>(xxx.I, e.src);
 	}
 
 }

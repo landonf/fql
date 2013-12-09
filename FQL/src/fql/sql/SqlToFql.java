@@ -89,33 +89,7 @@ public class SqlToFql {
 				input.setText(((Example) box.getSelectedItem()).getText());
 			}
 		});
-		/*
-		 * jdbcButton.addActionListener(new ActionListener() {
-		 * 
-		 * @Override public void actionPerformed(ActionEvent e) { // TODO load
-		 * from jdbc sql to fql } });
-		 */
-		/*
-		 * runButton.addActionListener(new ActionListener() {
-		 * 
-		 * @Override public void actionPerformed(ActionEvent e) { // TODO run
-		 * sql sql to fql } });
-		 */
-
-		/*
-		 * transButton.addActionListener(new ActionListener() {
-		 * 
-		 * @Override public void actionPerformed(ActionEvent e) { String program
-		 * = output.getText(); FQLProgram init; Environment env; // =
-		 * Driver.intemp1; try { init = FQLParser.program(program);
-		 * Pair<Environment, String> envX = Driver.makeEnv(init); env =
-		 * envX.first; // env2 = envX.second; DateFormat format =
-		 * DateFormat.getTimeInstance(); Display display = new Display(init,
-		 * env); String foo = "Translated SQL"; foo += " - " + format.format(new
-		 * Date(System.currentTimeMillis())); display.display(foo, init.order);
-		 * } catch (Exception ee) { ee.printStackTrace();
-		 * output.setText(ee.getLocalizedMessage()); } } });
-		 */
+		
 
 		transButton.addActionListener(new ActionListener() {
 			@Override
@@ -304,14 +278,11 @@ public class SqlToFql {
 				}
 			}
 		}
-		// TODO add initial sets to inodes, attrs, etc
 
 		SigExp.Const exp = new SigExp.Const(nodes, attrs, arrows, eqs);
 		InstExp.Const inst = new InstExp.Const(inodes, iattrs, iarrows,
 				new SigExp.Var("S"));
 
-		// FQLProgram ret = new FQLProgram();
-		// ret.sigs.put("S", exp);
 		return "schema S = " + exp + "\n\ninstance I = " + inst + " : S";
 	}
 

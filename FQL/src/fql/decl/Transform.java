@@ -51,9 +51,19 @@ import fql.cat.FinCat;
 
 public class Transform {
 
-	Instance src, dst;
-	Map<String, Set<Pair<Object, Object>>> data;
+	public Instance src, dst;
+	public Map<String, Set<Pair<Object, Object>>> data;
 
+	public List<Pair<String, List<Pair<Object, Object>>>> data() {
+		List<Pair<String, List<Pair<Object, Object>>>> ret = new LinkedList<>();
+		
+		for (String k : data.keySet()) {
+			ret.add(new Pair<String, List<Pair<Object, Object>>>(k, new LinkedList<Pair<Object, Object>>(data.get(k))));
+		}
+		
+		return ret;
+	}
+	
 	public Transform(Instance src, Instance dst,
 			List<Pair<String, List<Pair<Object, Object>>>> b) {
 		this.src = src;
@@ -82,7 +92,7 @@ public class Transform {
 				try {
 					lookup(data.get(n.string), k.first);
 				} catch (RuntimeException re) {
-					throw new RuntimeException("Not total: " + n.string + "\n\n" + this);
+					throw new RuntimeException("Not total: " + n.string + "\n\n" + this + "\n\nsrc " + src + "\n\ndst " + dst);
 				}
 			}
 			for (Pair<Object, Object> k : v) {
@@ -127,7 +137,60 @@ public class Transform {
 		
 	}
 
-	private Set<Pair<Object, Object>> compose(Set<Pair<Object, Object>> l,
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((data == null) ? 0 : data.hashCode());
+		result = prime * result + ((dst == null) ? 0 : dst.hashCode());
+		result = prime * result + ((src == null) ? 0 : src.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Transform other = (Transform) obj;
+		if (data == null) {
+			if (other.data != null)
+				return false;
+		} else if (!data.equals(other.data))
+			return false;
+		if (dst == null) {
+			if (other.dst != null)
+				return false;
+		} else if (!dst.equals(other.dst))
+			return false;
+		if (src == null) {
+			if (other.src != null)
+				return false;
+		} else if (!src.equals(other.src))
+			return false;
+		return true;
+	}
+
+	public static Transform composeX(Transform l, Transform r) {
+		if (!(l.dst.equals(r.src))) {
+			throw new RuntimeException();
+		}
+		List<Pair<String, List<Pair<Object, Object>>>> xxx = new LinkedList<>();
+		
+		for (String k : l.data.keySet()) {
+			Set<Pair<Object, Object>> v = l.data.get(k);
+			Set<Pair<Object, Object>> v0 = r.data.get(k);
+			xxx.add(new Pair<String, List<Pair<Object, Object>>>(k, new LinkedList<>(compose(v, v0))));
+		}
+		
+		return new Transform(l.src, r.dst, xxx);
+	}
+	
+	
+	private static Set<Pair<Object, Object>> compose(Set<Pair<Object, Object>> l,
 			Set<Pair<Object, Object>> r) {
 		Set<Pair<Object, Object>> ret = new HashSet<>();
 		for (Pair<Object, Object> k : l) {

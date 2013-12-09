@@ -535,6 +535,8 @@ public class PSMGen
 		if (!FinFunctor.isDiscreteOpFib(F.toFunctor2().first)) {
 			throw new FQLException("Not a discrete op-fibration" /* + F */);
 		}
+		
+		//TODO check postlude is going in respArea output
 
 		for (Node d : D.nodes) {
 			List<Flower> tn = new LinkedList<>();
@@ -637,7 +639,7 @@ public class PSMGen
 
 	// int
 
-	public static List<PSM> pi(Mapping F0, String src, String dst)
+	public static Pair<List<PSM>,Map<String, Triple<Node, Node, Arr<Node, Path>>[]>> pi(Mapping F0, String src, String dst)
 			throws FQLException {
 		try {
 		tempTables = 0;
@@ -818,14 +820,14 @@ public class PSMGen
 		
 		for (Node d0 : D.objects) {
 			ret.add(new DropTable(dst + "_" + d0.string + "_limnoguid")); 
-			ret.add(new DropTable(dst + "_" + d0.string + "_limit"));
+		//	ret.add(new DropTable(dst + "_" + d0.string + "_limit"));
 		}
 		
 		for (int ii = 0; ii < tempTables; ii++) {
 			ret.add(new DropTable("temp" + ii));
 		}
 
-		return ret;
+		return new Pair<>(ret, colmap);
 		} catch (NullPointerException npe) {
 			npe.printStackTrace();
 			throw new RuntimeException();

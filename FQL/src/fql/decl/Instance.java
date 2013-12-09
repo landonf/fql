@@ -788,9 +788,10 @@ public class Instance  {
 			// foo.set
 			// foo.setAutoCreateRowSorter(true);
 			p.add(new JScrollPane(foo));
+		
 			// p.setMaximumSize(new Dimension(200,200));
 			p.setBorder(BorderFactory.createTitledBorder(
-					BorderFactory.createEmptyBorder(), name));
+					BorderFactory.createEmptyBorder(), name + " (" + ids.size() + " rows)" ));
 			vwr.add(p, name);
 
 			// foo.setMaximumSize(new Dimension(600,200));

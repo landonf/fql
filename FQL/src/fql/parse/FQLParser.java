@@ -42,7 +42,8 @@ public class FQLParser {
 
 	//TODO keyword 1 vs keyword 2 highlight color
 	
-	static String[] res = new String[] { "EVAL", "QUERY", "union", "subschema", "match", "drop", "nodes", "attributes", "enum",
+	static String[] res = new String[] { "EVAL", "QUERY", "union", 
+		"subschema", "match", "drop", "nodes", "attributes", "enum",
 			"ASWRITTEN", "schema", "transform", "dist1", "dist2", "arrows",
 			"equations", "id", "delta", "sigma", "pi", "SIGMA", "apply", "eq",
 			"relationalize", "external", "then", "query", "instance", "fst",
@@ -287,6 +288,7 @@ public class FQLParser {
 				Parsers.tuple(ident(), term("."), term("snd")),
 				Parsers.tuple(ident(), term("."), term("inl")),
 				Parsers.tuple(ident(), term("."), term("inr")),
+				Parsers.tuple(ident(), term("."), term("relationalize")),
 				Parsers.tuple(term("delta"), ident(), ident(), ref.lazy()),
 				Parsers.tuple(term("sigma"), ident(), ident(), ref.lazy()),
 				Parsers.tuple(term("SIGMA"), ident(), ident(), ref.lazy()),
@@ -397,6 +399,8 @@ public class FQLParser {
 
 			if (p3.toString().equals("fst")) {
 				return new TransExp.Fst(p1);
+			} if (p3.toString().equals("relationalize")) {
+				return new TransExp.Squash(p1);
 			} else if (p3.toString().equals("snd")) {
 				return new TransExp.Snd(p1);
 			} else if (p3.toString().equals("inl")) {
@@ -565,7 +569,6 @@ public class FQLParser {
 
 		}
 
-		//TODO add sql to fql, ra to fql to manual
 		try {
 			Tuple3 p = (Tuple3) o;
 

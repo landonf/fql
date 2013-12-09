@@ -33,6 +33,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
+import javax.swing.filechooser.FileFilter;
 
 import fql.DEBUG;
 import fql.FQLApplet;
@@ -93,7 +94,7 @@ public class GUI extends JPanel {
 		});
 
 		// respArea.setWrapStyleWord();
-		
+
 		KeyStroke ctrlS = KeyStroke.getKeyStroke(KeyEvent.VK_S,
 				InputEvent.CTRL_MASK);
 		MenuShortcut s = new MenuShortcut(ctrlS.getKeyCode());
@@ -134,9 +135,9 @@ public class GUI extends JPanel {
 				InputEvent.CTRL_MASK);
 		MenuShortcut o = new MenuShortcut(ctrlO.getKeyCode());
 		openItem.setShortcut(o);
-		
+
 		Menu toolsMenu = new Menu("Tools");
-		
+
 		final Menu editMenu = new Menu("Edit");
 		MenuItem findItem = new MenuItem("Find");
 		editMenu.add(findItem);
@@ -150,7 +151,7 @@ public class GUI extends JPanel {
 				InputEvent.CTRL_MASK);
 		MenuShortcut q = new MenuShortcut(ctrlQ.getKeyCode());
 		exitItem.setShortcut(q);
-		
+
 		// Menu optionsMenu = new Menu("Options");
 		MenuItem optionsItem = new MenuItem("Show Options");
 		editMenu.add(optionsItem);
@@ -159,7 +160,7 @@ public class GUI extends JPanel {
 				DEBUG.debug.showOptions();
 			}
 		});
-		
+
 		MenuItem chaseItem = new MenuItem("Run Chase");
 		toolsMenu.add(chaseItem);
 		chaseItem.addActionListener(new ActionListener() {
@@ -175,7 +176,7 @@ public class GUI extends JPanel {
 				checkAction();
 			}
 		});
-		
+
 		MenuItem raToFqlItem = new MenuItem("RA to FQL");
 		toolsMenu.add(raToFqlItem);
 		raToFqlItem.addActionListener(new ActionListener() {
@@ -191,7 +192,7 @@ public class GUI extends JPanel {
 				sqlToFqlAction();
 			}
 		});
-		
+
 		MenuItem abortItem = new MenuItem("Abort");
 		editMenu.add(abortItem);
 		abortItem.addActionListener(new ActionListener() {
@@ -201,14 +202,11 @@ public class GUI extends JPanel {
 		});
 
 		/*
-		MenuItem jsonItem = new MenuItem("JSON Input");
-		editMenu.add(jsonItem);
-		jsonItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JsonPanel.showPanel(new FQLBackEnd());
-			}
-		});
-		*/
+		 * MenuItem jsonItem = new MenuItem("JSON Input");
+		 * editMenu.add(jsonItem); jsonItem.addActionListener(new
+		 * ActionListener() { public void actionPerformed(ActionEvent e) {
+		 * JsonPanel.showPanel(new FQLBackEnd()); } });
+		 */
 
 		Menu helpMenu = new Menu("About");
 		MenuItem helpItem = new MenuItem("Help");
@@ -265,7 +263,7 @@ public class GUI extends JPanel {
 		menuBar.add(toolsMenu);
 		// menuBar.add(optionsMenu);
 
-//		menuBar.add(webMenu);
+		// menuBar.add(webMenu);
 		menuBar.add(helpMenu);
 
 		// JSplitPane p = new FQLSplit(.8, JSplitPane.HORIZONTAL_SPLIT);
@@ -362,7 +360,7 @@ public class GUI extends JPanel {
 				DEBUG.debug.showOptions();
 			}
 		});
-		
+
 		{
 			DEBUG.load(true);
 		}
@@ -374,14 +372,14 @@ public class GUI extends JPanel {
 		// toolBar.add(temp2);
 		toolBar.add(l);
 		toolBar.add(box);
-		
+
 		pan.add(toolBar, BorderLayout.PAGE_START);
 		pan.add(editors, BorderLayout.CENTER);
 
 		newAction(null, "");
-		
-		//editors.setFocusCycleRoot(true);
-		//editors.requestFocusInWindow();
+
+		// editors.setFocusCycleRoot(true);
+		// editors.requestFocusInWindow();
 		return new Pair<>(pan, menuBar);
 	}
 
@@ -401,14 +399,15 @@ public class GUI extends JPanel {
 		}
 		c.check();
 	}
-	
+
 	private static void sqlToFqlAction() {
 		new SqlToFql();
 	}
+
 	private static void raToFqlAction() {
 		new RaToFql();
 	}
-	
+
 	private static void abortAction() {
 		int i = editors.getSelectedIndex();
 		CodeEditor c = (CodeEditor) editors.getComponentAt(i);
@@ -417,7 +416,7 @@ public class GUI extends JPanel {
 		}
 		c.abortAction();
 	}
-	
+
 	private static void closeAction() {
 		delay();
 		int i = editors.getSelectedIndex();
@@ -435,24 +434,25 @@ public class GUI extends JPanel {
 		titles.remove(c.id);
 	}
 
-
 	static void helpAction() {
 		JTextArea jta = new JTextArea(Examples.helpString);
 		jta.setWrapStyleWord(true);
-		//jta.setEditable(false);
+		// jta.setEditable(false);
 		jta.setLineWrap(true);
-		JScrollPane p = new JScrollPane(jta, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		p.setPreferredSize(new Dimension(650,300));
+		JScrollPane p = new JScrollPane(jta,
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		p.setPreferredSize(new Dimension(650, 300));
 
 		JOptionPane pane = new JOptionPane(p);
-		 // Configure via set methods
-		 JDialog dialog = pane.createDialog(null, "Help");
-		 dialog.setModal(false);
-		 dialog.setVisible(true);
-		 dialog.setResizable(true);
-		 
-		//JOptionPane.showMessageDialog(null, p, "Help",
-			//	JOptionPane.PLAIN_MESSAGE, null);
+		// Configure via set methods
+		JDialog dialog = pane.createDialog(null, "Help");
+		dialog.setModal(false);
+		dialog.setVisible(true);
+		dialog.setResizable(true);
+
+		// JOptionPane.showMessageDialog(null, p, "Help",
+		// JOptionPane.PLAIN_MESSAGE, null);
 	}
 
 	public static void exitAction() {
@@ -504,13 +504,29 @@ public class GUI extends JPanel {
 		}
 	}
 
+	public static class Filter extends FileFilter {
+		@Override
+		public boolean accept(File f) {
+			return f.getName().toLowerCase().endsWith(".fql")
+					|| f.isDirectory();
+		}
+		@Override
+		public String getDescription() {
+			return "FQL files (*.fql)";
+		}
+	}
+
 	protected static void saveAsAction() {
 		delay();
 		JFileChooser jfc = new JFileChooser();
+		jfc.setFileFilter(new Filter());
 		jfc.showSaveDialog(null);
 		File f = jfc.getSelectedFile();
 		if (f == null) {
 			return;
+		}
+		if(!jfc.getSelectedFile().getAbsolutePath().endsWith(".fql")){
+		    f = new File(jfc.getSelectedFile() + ".fql");
 		}
 		CodeEditor e = (CodeEditor) editors.getComponentAt(editors
 				.getSelectedIndex());
@@ -530,15 +546,15 @@ public class GUI extends JPanel {
 		files.put(i, f);
 	}
 
-	
 	static protected void openAction() {
 		delay();
 		JFileChooser jfc = new JFileChooser();
+		jfc.setFileFilter(new Filter());
 		jfc.showOpenDialog(null);
 		File f = jfc.getSelectedFile();
 		if (f == null) {
 			return;
-		}
+		}		
 		doOpen(f);
 	}
 
@@ -565,7 +581,6 @@ public class GUI extends JPanel {
 		return titles.get(i);
 	}
 
-	
 	static Integer newAction(String title, String content) {
 		untitled_count++;
 		CodeEditor c = new CodeEditor(untitled_count, content);
@@ -581,13 +596,12 @@ public class GUI extends JPanel {
 		editors.addTab(title, c);
 		editors.setTabComponentAt(i, new ButtonTabComponent(editors));
 		editors.setSelectedIndex(i);
-		//editors.requestFocus();
-		//editors.requestFocus(false); //requestDefaultFocus();
-		//c.dis
+		// editors.requestFocus();
+		// editors.requestFocus(false); //requestDefaultFocus();
+		// c.dis
 		return c.id;
-		
-	}
 
+	}
 
 	static private String readFile(String file) {
 		try {

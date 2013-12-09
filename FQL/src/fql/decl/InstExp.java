@@ -243,29 +243,7 @@ public abstract class InstExp {
 
 	}
 
-	//TODO shred, unshred queries
 	
-	/*
-	 * public static class Var extends InstExp { String v;
-	 * 
-	 * public Var(String v) { if (v.contains(" ")) { throw new
-	 * RuntimeException(); } this.v = v; }
-	 * 
-	 * @Override public String toString() { return v; }
-	 * 
-	 * @Override public int hashCode() { final int prime = 31; int result = 1;
-	 * result = prime * result + ((v == null) ? 0 : v.hashCode()); return
-	 * result; }
-	 * 
-	 * @Override public boolean equals(Object obj) { if (this == obj) return
-	 * true; if (obj == null) return false; if (getClass() != obj.getClass())
-	 * return false; Var other = (Var) obj; if (v == null) { if (other.v !=
-	 * null) return false; } else if (!v.equals(other.v)) return false; return
-	 * true; }
-	 * 
-	 * @Override public <R, E> R accept(E env, InstExpVisitor<R, E> v) { return
-	 * v.visit(env, this); } }
-	 */
 
 	public static class Zero extends InstExp {
 

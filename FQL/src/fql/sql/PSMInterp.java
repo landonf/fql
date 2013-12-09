@@ -14,6 +14,9 @@ import java.util.Set;
 public class PSMInterp {
 
 	public int guid = 0;
+	
+	public Map<String, Integer> sigmas = new HashMap<>();
+	public Map<String, Integer> sigmas2 = new HashMap<>();
 
 	// wraps with binary tables
 //	public static String interp0(List<PSM> prog) {

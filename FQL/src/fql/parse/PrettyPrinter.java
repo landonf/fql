@@ -1,6 +1,8 @@
 package fql.parse;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 
@@ -22,6 +24,18 @@ public class PrettyPrinter {
 			s += delim + o.get(i);
 		}
 		return s;
+	}
+
+	public static void printDB(Map<String, Set<Map<Object, Object>>> res) {
+		for (String k : res.keySet()) {
+			Set<Map<Object, Object>> v = res.get(k);
+			System.out.println(k + " = ");
+			for (Map<Object, Object> g : v) {
+				System.out.print(g);
+			}
+			
+			System.out.println("\n");
+		}
 	}
 
 	

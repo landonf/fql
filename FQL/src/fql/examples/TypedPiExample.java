@@ -61,5 +61,27 @@ public class TypedPiExample extends Example {
 					+ "\n arrows;"
 					+ "\n} : C -> D"
 					+ "\n"
-					+ "\ninstance J = pi F I\n";
+					+ "\ninstance J = pi F I"
+					+ "\n"
+					+ "\ninstance I0 = {"
+					+ "\n nodes"
+					+ "\n	c1   -> { 1 },"
+					+ "\n	c2   -> { 1,2 };"
+					+ "\n attributes"
+					+ "\n	att1 -> { (1,David) },"
+					+ "\n	att2 -> { (1,Spivak) },"
+					+ "\n	att3 -> { (1,MIT), (2,Harvard) };"
+					+ "\n arrows;"
+					+ "\n} : C"
+					+ "\n"
+					+ "\ntransform t = {"
+					+ "\n	nodes c1 -> {(1,1)}, c2 -> {(1,1),(2,2)} ;"
+					+ "\n} : I0 -> I "
+					+ "\n"
+					+ "\ninstance J0 = pi F I0"
+					+ "\n"
+					+ "\ntransform t0 = pi J0 J t";
+
+
+
 }

@@ -10,6 +10,7 @@ import fql.DEBUG;
 import fql.JDBCBridge;
 import fql.LineException;
 import fql.Pair;
+import fql.parse.PrettyPrinter;
 import fql.sql.PSM;
 import fql.sql.PSMGen;
 import fql.sql.PSMInterp;
@@ -193,7 +194,7 @@ public class Driver {
 		} else {
 			res = new PSMInterp().interp(psm);
 		}
-//		System.out.println(res);
+		//PrettyPrinter.printDB(res);
 
 		for (String k : prog.insts.keySet()) {
 			try {

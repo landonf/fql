@@ -475,7 +475,9 @@ public class CodeEditor extends JPanel implements Runnable {
 				}
 			}
 		});
+		temp.setPriority(Thread.MIN_PRIORITY);
 		temp.start();
+		thread.setPriority(Thread.MIN_PRIORITY);
 		thread.start();
 	}
 

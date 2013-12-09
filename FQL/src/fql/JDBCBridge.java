@@ -14,6 +14,7 @@ import fql.decl.FQLProgram;
 import fql.decl.InstExp;
 import fql.decl.SigExp;
 import fql.decl.TransExp;
+import fql.sql.FullSigma;
 import fql.sql.PSM;
 
 public class JDBCBridge {
@@ -44,6 +45,13 @@ public class JDBCBridge {
 	public static Map<String, Set<Map<Object, Object>>>  go(List<PSM> sqls, List<PSM> drops, FQLProgram prog) {
 		Map<String, Set<Map<Object, Object>>> ret = new HashMap<>();
 
+		for (PSM sql : sqls) {
+			if (sql instanceof FullSigma) {
+				throw new RuntimeException("Cannot use JDBC with full sigma");
+			}
+		}
+
+		//TODO jdbc for full sigma
 		try {
 			
 			Class.forName(DEBUG.debug.jdbcClass);

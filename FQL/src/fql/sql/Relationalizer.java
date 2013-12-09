@@ -333,8 +333,8 @@ public class Relationalizer {
 		select.put("c1", new Pair<>(n.string + "_observables_guid", "id"));
 
 		Flower k = new Flower(select, from, where);
-		ret.add(new CreateTable(out + "_" +n.string + "_subst", edge_types, false));
-		ret.add(new InsertSQL(out + "_" +n.string + "_subst", k));
+		ret.add(new CreateTable(out + "_" +n.string + "_squash", edge_types, false));
+		ret.add(new InsertSQL(out + "_" +n.string + "_squash", k));
 		
 		//TODO drops for observables
 	//	ret.add(new DropTable(n.string + "_observables"));
@@ -343,7 +343,7 @@ public class Relationalizer {
 		
 		ret.addAll(applySubst(sig, n, out));
 
-		ret.add(new DropTable(out + "_" +n.string + "_subst"));
+//		ret.add(new DropTable(out + "_" +n.string + "_squash"));
 
 		return ret;
 	}
@@ -359,9 +359,9 @@ public class Relationalizer {
 		Map<String, String> from = new HashMap<>();
 		Map<String, Pair<String, String>> select = new HashMap<>();
 
-		from.put(N + "_subst", out + "_" +N + "_subst");
-		select.put("c1", new Pair<>(N + "_subst", "c1"));
-		select.put("c0", new Pair<>(N + "_subst", "c1"));
+		from.put(N + "_squash", out + "_" +N + "_squash");
+		select.put("c1", new Pair<>(N + "_squash", "c1"));
+		select.put("c0", new Pair<>(N + "_squash", "c1"));
 
 		Flower f = new Flower(select, from, where);
 
@@ -384,11 +384,11 @@ public class Relationalizer {
 			from = new HashMap<>();
 			select = new HashMap<>();
 
-			from.put(N + "_subst", out + "_" +N + "_subst");
+			from.put(N + "_squash", out + "_" +N + "_squash");
 			from.put(out + "_" + n.name, out + "_" + n.name);
-			where.add(new Pair<>(new Pair<>(N + "_subst", "c0"), new Pair<>(out
+			where.add(new Pair<>(new Pair<>(N + "_squash", "c0"), new Pair<>(out
 					+ "_" + n.name, "c0")));
-			select.put("c0", new Pair<>(N + "_subst", "c1"));
+			select.put("c0", new Pair<>(N + "_squash", "c1"));
 			select.put("c1", new Pair<>(out + "_" + n.name, "c1"));
 
 			f = new Flower(select, from, where);
@@ -412,11 +412,11 @@ public class Relationalizer {
 			from = new HashMap<>();
 			select = new HashMap<>();
 
-			from.put(N + "_subst", out + "_" +N + "_subst");
+			from.put(N + "_squash", out + "_" +N + "_squash");
 			from.put(out + "_" + n.name, out + "_" + n.name);
-			where.add(new Pair<>(new Pair<>(N + "_subst", "c0"), new Pair<>(out
+			where.add(new Pair<>(new Pair<>(N + "_squash", "c0"), new Pair<>(out
 					+ "_" + n.name, "c0")));
-			select.put("c0", new Pair<>(N + "_subst", "c1"));
+			select.put("c0", new Pair<>(N + "_squash", "c1"));
 			select.put("c1", new Pair<>(out + "_" + n.name, "c1"));
 
 			f = new Flower(select, from, where);
@@ -440,11 +440,11 @@ public class Relationalizer {
 			from = new HashMap<>();
 			select = new HashMap<>();
 
-			from.put(N + "_subst", out + "_" +N + "_subst");
+			from.put(N + "_squash", out + "_" +N + "_squash");
 			from.put(out + "_" + n.name, out + "_" + n.name);
-			where.add(new Pair<>(new Pair<>(N + "_subst", "c0"), new Pair<>(out
+			where.add(new Pair<>(new Pair<>(N + "_squash", "c0"), new Pair<>(out
 					+ "_" + n.name, "c1")));
-			select.put("c1", new Pair<>(N + "_subst", "c1"));
+			select.put("c1", new Pair<>(N + "_squash", "c1"));
 			select.put("c0", new Pair<>(out + "_" + n.name, "c0"));
 
 			f = new Flower(select, from, where);

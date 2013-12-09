@@ -8,6 +8,7 @@ import java.util.Set;
 
 import fql.FQLException;
 import fql.Pair;
+import fql.Triple;
 import fql.cat.Denotation;
 import fql.decl.Attribute;
 import fql.decl.Edge;
@@ -44,7 +45,11 @@ public class FullSigma extends PSM {
 
 		try {
 			Instance I = new Instance(C, I0);
-			Instance J = Denotation.fullSigmaWithAttrs(interp, f, I);
+			interp.sigmas.put(pre, interp.guid);
+			Triple<Instance, Map<Node, Map<Integer, Integer>>, Map<Node, Map<Integer, Integer>>> xxx = Denotation.fullSigmaWithAttrs(interp, f, I, null, null, null);
+			interp.sigmas2.put(pre, interp.guid);
+			Instance J = xxx.first;
+			Map<Node, Map<Integer, Integer>> yyy = xxx.second;
 //			Denotation d = new Denotation(interp, f, I);
 		//	System.out.println("Exucuting fs on " + I);
 			//System.out.println("GUID is " + PSMInterp.guid);
@@ -52,6 +57,13 @@ public class FullSigma extends PSM {
 //			Instance J = d.sigma(interp);
 		//	System.out.println("done " + J);
 			//System.out.println("GUID is " + PSMInterp.guid);
+			
+	//		System.out.println("********");
+	//		System.out.println("input instance " + I);
+	//		System.out.println("etables " + yyy);
+			for (Node n : C.nodes) {
+				state.put(pre + "_" + n.string + "_e", conv2(yyy.get(n)));				
+			}
 
 			for (Node n : D.nodes) {
 		//		System.out.println("looking up " + n.string + " in " + J.data);
@@ -71,7 +83,21 @@ public class FullSigma extends PSM {
 		
 	}
 
-	private Set<Map<Object, Object>> conv(Set<Pair<Object, Object>> set) {
+	private Set<Map<Object, Object>> conv2(Map<Integer, Integer> map) {
+		Set<Map<Object, Object>> ret = new HashSet<>();
+		
+		for (Integer k : map.keySet()) {
+			Integer v = map.get(k);
+			Map<Object, Object> m = new HashMap<>();
+			m.put("c0", k);
+			m.put("c1", v);
+			ret.add(m);
+		}
+		
+		return ret;
+	}
+
+	static Set<Map<Object, Object>> conv(Set<Pair<Object, Object>> set) {
 		Set<Map<Object, Object>> ret = new HashSet<>();
 		for (Pair<Object, Object> p : set) {
 			Map<Object, Object> m = new HashMap<>();

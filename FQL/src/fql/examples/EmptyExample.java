@@ -46,6 +46,7 @@ public class EmptyExample extends Example {
 					+ "\nQUERY Q2 = SIGMA F"
 					+ "\nQUERY Q3 = pi F"
 					+ "\nQUERY Q4 = match {} C C \"delta sigma forward\""
+					+ "\nQUERY Q5 = (Q1 then Q2)"
 					+ "\n"
 					+ "\ninstance I  = { nodes; attributes; arrows; } : C"
 					+ "\ninstance I1  = delta F I"
@@ -78,11 +79,11 @@ public class EmptyExample extends Example {
 					+ "\n//transform curry"
 					+ "\n//transform eval"
 					+ "\ntransform t15 = delta I1 I1 id I"
-					+ "\n//transform t16 = sigma I3 I3 (id I3)"
-					+ "\n//transform t16 = SIGMA I3 I3 (id I3)"
-					+ "\n//transform t17 = pi I2 I2 (id I2)"
-					+ "\n//transform t18 = relationalize I1 I1 (id I1)"
-					
+					+ "\ntransform t16 = sigma I3 I3 id I"
+					+ "\ntransform t20 = SIGMA I5 I5 id I"
+					+ "\ntransform t17 = pi I2 I2 id I"
+					+ "\ntransform t18 = relationalize I4 I4 id I"
+					+ "\ntransform t19 = I4.relationalize"
 					+ "\n\ndrop I t1\n\n";
 					
 

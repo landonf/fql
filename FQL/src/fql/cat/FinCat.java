@@ -322,8 +322,8 @@ public class FinCat<Obj, Arrow> {
 			j += "\t" + "id_" + oo + " = " + identities.get(oo) + "\n";
 		}
 
-		return "objects:\n" + o + "\n\narrows:\n" + a + "\n\ncomposition:\n"
-				+ c + "\n\nidentities:\n" + j;
+		return "objects (" + objects.size() + "):\n" + o + "\n\narrows (" + arrows.size() + "):\n" + a + "\n\ncomposition (" + composition.size() + "):\n"
+				+ c + "\n\nidentities (" + identities.size() + "):\n" + j;
 	}
 
 	@Override

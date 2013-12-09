@@ -270,38 +270,38 @@ public abstract class MapExp {
 		public String toString() {
 			String ret = "";
 			
-			String nm = "nodes ";
+			String nm = "\nnodes\n";
 			boolean b = false;
 			for (Pair<String, String> k : objs) {
 				if (b) {
-					nm += ",";
+					nm += ",\n";
 				}
 				b = true;
-				nm += k.first + " -> " + k.second;
+				nm += " " + k.first + " -> " + k.second;
 			}
 			nm += ";\n";
 			ret += nm;
 
-			nm = "attributes ";
+			nm = "attributes\n";
 			b = false;
 			for (Pair<String, String> k : attrs) {
 				if (b) {
-					nm += ",";
+					nm += ",\n";
 				}
 				b = true;
-				nm += k.first + " -> " + k.second;
+				nm += " " + k.first + " -> " + k.second;
 			}
 			nm += ";\n";
 			ret += nm;
 			
-			nm = "arrows ";
+			nm = "arrows\n";
 			b = false;
 			for (Pair<String, List<String>> k : arrows) {
 				if (b) {
-					nm += ",";
+					nm += ",\n";
 				}
 				b = true;
-				nm += k.first + " -> " + PrettyPrinter.sep0(".", k.second);
+				nm += " " + k.first + " -> " + PrettyPrinter.sep0(".", k.second);
 			}
 			nm += ";\n";
 			ret += nm;

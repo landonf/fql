@@ -7,11 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cern.colt.Arrays;
+
 import fql.FQLException;
 import fql.Fn;
 import fql.Pair;
 import fql.Quad;
 import fql.Triple;
+import fql.cat.Arr;
 import fql.decl.FullQuery.FullQueryVisitor;
 import fql.decl.InstExp.Delta;
 import fql.decl.InstExp.Eval;
@@ -33,6 +36,7 @@ import fql.decl.TransExp.Inl;
 import fql.decl.TransExp.Inr;
 import fql.decl.TransExp.Prod;
 import fql.decl.TransExp.Snd;
+import fql.decl.TransExp.Squash;
 import fql.decl.TransExp.TT;
 import fql.decl.TransExp.TransExpVisitor;
 import fql.decl.TransExp.Var;
@@ -40,6 +44,7 @@ import fql.sql.CopyFlower;
 import fql.sql.CreateTable;
 import fql.sql.DropTable;
 import fql.sql.Flower;
+import fql.sql.FullSigmaTrans;
 import fql.sql.InsertKeygen;
 import fql.sql.InsertSQL;
 import fql.sql.InsertValues;
@@ -348,17 +353,16 @@ public class InstOps implements
 		return ret;
 	}
 
-	//TODO HERE
 	@Override
-	public List<PSM> visit(String dst, fql.decl.TransExp.Delta e) {		
+	public List<PSM> visit(String dst, fql.decl.TransExp.Delta e) {
 		List<PSM> ret = new LinkedList<>();
 		Pair<String, String> ht = e.h.type(prog);
 		Signature sig = prog.insts.get(ht.first).type(prog).toSig(prog);
 
-//		Signature sig = prog.insts.get(e.src).type(prog).toSig(prog);
-		
-		Mapping F = ((Delta)prog.insts.get(e.src)).F.toMap(prog);
-		
+		// Signature sig = prog.insts.get(e.src).type(prog).toSig(prog);
+
+		Mapping F = ((Delta) prog.insts.get(e.src)).F.toMap(prog);
+
 		String next = next();
 		ret.addAll(PSMGen.makeTables(next, sig, false));
 		ret.addAll(e.h.accept(next, this));
@@ -367,35 +371,183 @@ public class InstOps implements
 
 		for (Node n : sig2.nodes) {
 			String fc = F.nm.get(n).string;
-			ret.add(new InsertSQL(dst + "_" + n.string, PSMGen.compose(new String[] {e.src + "_" + n.string + "_subst_inv", next + "_" + fc, e.dst + "_" + n.string + "_subst"})));
+			ret.add(new InsertSQL(
+					dst + "_" + n.string,
+					PSMGen.compose(new String[] {
+							e.src + "_" + n.string + "_subst_inv",
+							next + "_" + fc, e.dst + "_" + n.string + "_subst" })));
 		}
-		
+
 		ret.addAll(PSMGen.dropTables(next, sig));
 		return ret;
 	}
 
+	// TODO remove comma seps in FQL 4 for tuples
+
 	@Override
-	public List<PSM> visit(String env, fql.decl.TransExp.Sigma e) {
-		// TODO Auto-generated method stub
-		throw new RuntimeException("TBD");
+	public List<PSM> visit(String dst, fql.decl.TransExp.Sigma e) {
+		List<PSM> ret = new LinkedList<>();
+		Pair<String, String> ht = e.h.type(prog);
+		Signature sig = prog.insts.get(ht.first).type(prog).toSig(prog);
+
+		Mapping F = ((Sigma) prog.insts.get(e.src)).F.toMap(prog);
+
+		String next = next();
+		ret.addAll(PSMGen.makeTables(next, sig, false));
+		ret.addAll(e.h.accept(next, this));
+
+		Signature sig2 = prog.insts.get(e.src).type(prog).toSig(prog);
+		String xxx = "sigfunc";
+		ret.addAll(PSMGen.makeTables(xxx, sig2, false));
+
+		for (Node n : sig2.nodes) {
+			List<Flower> l = new LinkedList<>();
+			for (Node m : F.source.nodes) {
+				if (F.nm.get(m).equals(n)) {
+					l.add(new CopyFlower(next + "_" + m.string));
+				}
+			}
+			String yyy = xxx + "_" + n.string;
+			if (l.size() == 0) {
+
+			} else if (l.size() == 0) {
+				ret.add(new InsertSQL(yyy, l.get(0)));
+			} else {
+				ret.add(new InsertSQL(yyy, new Union(l)));
+			}
+			ret.add(new InsertSQL(dst + "_" + n.string, PSMGen
+					.compose(new String[] {
+							e.src + "_" + n.string + "_subst_inv", yyy,
+							e.dst + "_" + n.string + "_subst" })));
+		}
+		ret.addAll(PSMGen.dropTables(xxx, sig2));
+		ret.addAll(PSMGen.dropTables(next, sig));
+		return ret;
+
 	}
 
 	@Override
-	public List<PSM> visit(String env, fql.decl.TransExp.FullSigma e) {
-		// TODO Auto-generated method stub
-		throw new RuntimeException("TBD");
+	public List<PSM> visit(String dst, fql.decl.TransExp.FullSigma e) {
+		List<PSM> ret = new LinkedList<>();
+
+		Mapping F0 = ((FullSigma) prog.insts.get(e.src)).F.toMap(prog);
+
+		Pair<String, String> t = e.h.type(prog);
+
+		String next = next();
+		ret.addAll(PSMGen.makeTables(next, F0.source, false));
+		ret.addAll(e.h.accept(next, this));
+		ret.add(new FullSigmaTrans(F0, t.first, e.src, t.second, e.dst, next, dst));
+
+		return ret;
 	}
 
 	@Override
-	public List<PSM> visit(String env, fql.decl.TransExp.Pi e) {
-		// TODO Auto-generated method stub
-		throw new RuntimeException("TBD");
+	public List<PSM> visit(String dst, fql.decl.TransExp.Pi e) {
+		try {
+			List<PSM> ret = new LinkedList<>();
+			Pair<String, String> ht = e.h.type(prog);
+			Signature sig = prog.insts.get(ht.first).type(prog).toSig(prog);
+
+			Mapping F = ((Pi) prog.insts.get(e.src)).F.toMap(prog);
+
+			Map<String, Triple<Node, Node, Arr<Node, Path>>[]> colmap1x = PSMGen
+					.pi(F, e.h.type(prog).first, e.src).second;
+
+			String next = next();
+			ret.addAll(PSMGen.makeTables(next, sig, false));
+			ret.addAll(e.h.accept(next, this));
+
+			Signature sig2 = prog.insts.get(e.src).type(prog).toSig(prog);
+
+			for (Node n : sig2.nodes) {
+				// System.out.println("node is " + n.string);
+				// System.out.println("colmap1 " +
+				// Arrays.toString(colmap1x.get(n.string)));
+
+				List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
+				Map<String, String> from = new HashMap<>();
+				from.put("limit1", e.src + "_" + n.string + "_limit");
+				from.put("limit2", e.dst + "_" + n.string + "_limit");
+				Map<String, Pair<String, String>> select = new HashMap<>();
+				int i = 0;
+				for (Triple<Node, Node, Arr<Node, Path>> col : colmap1x
+						.get(n.string)) {
+					from.put("l" + i, next + "_" + col.second.string);
+					where.add(new Pair<>(new Pair<>("l" + i, "c0"), new Pair<>(
+							"limit1", "c" + i)));
+					where.add(new Pair<>(new Pair<>("l" + i, "c1"), new Pair<>(
+							"limit2", "c" + i)));
+					i++;
+				}
+				for (Attribute<Node> a : sig2.attrsFor(n)) {
+					where.add(new Pair<>(new Pair<>("limit1", "c" + i),
+							new Pair<>("limit2", "c" + i)));
+					i++;
+				}
+				select.put("c0", new Pair<>("limit1", "guid"));
+				select.put("c1", new Pair<>("limit2", "guid"));
+				Flower f = new Flower(select, from, where);
+				System.out.println("flower " + f);
+				ret.add(new InsertSQL(dst + "_" + n.string, f));
+			}
+			// ret.addAll(PSMGen.dropTables(xxx, sig2));
+			// ret.addAll(PSMGen.dropTables(next, sig));
+			return ret;
+		} catch (FQLException fe) {
+			fe.printStackTrace();
+			throw new RuntimeException(fe.getLocalizedMessage());
+		}
+
 	}
 
 	@Override
-	public List<PSM> visit(String env, fql.decl.TransExp.Relationalize e) {
-		// TODO Auto-generated method stub
-		throw new RuntimeException("TBD");
+	public List<PSM> visit(String dst, fql.decl.TransExp.Relationalize e) {
+		List<PSM> ret = new LinkedList<>();
+		Pair<String, String> ht = e.h.type(prog);
+		Signature sig = prog.insts.get(ht.first).type(prog).toSig(prog);
+
+		// Signature sig = prog.insts.get(e.src).type(prog).toSig(prog);
+
+		// Mapping F = ((Relationalize)prog.insts.get(e.src)).F.toMap(prog);
+
+		String next = next();
+		ret.addAll(PSMGen.makeTables(next, sig, false));
+		ret.addAll(e.h.accept(next, this));
+
+		// Signature sig2 = prog.insts.get(e.src).type(prog).toSig(prog);
+		Map<String, String> attrs = new HashMap<>();
+		attrs.put("c0", PSM.VARCHAR());
+		attrs.put("c1", PSM.VARCHAR());
+		for (Node n : sig.nodes) {
+			// String fc = F.nm.get(n).string;
+
+			ret.add(new CreateTable(n.string + "xxx_temp", attrs, false));
+			ret.add(new CreateTable(n.string + "yyy_temp", attrs, false));
+
+			Map<String, Pair<String, String>> select = new HashMap<>();
+			select.put("c0", new Pair<>("l", "c0"));
+			select.put("c1", new Pair<>("r", "c0"));
+			Map<String, String> from = new HashMap<>();
+			from.put("l", e.src + "_" + n.string + "_subst_inv");
+			from.put("r", e.src + "_" + n.string + "_squash");
+			List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
+			where.add(new Pair<>(new Pair<>("l", "c1"), new Pair<>("r", "c1")));
+			Flower jk = new Flower(select, from, where);
+			ret.add(new InsertSQL(n.string + "yyy_temp", jk));
+			ret.add(new InsertSQL(n.string + "xxx_temp", PSMGen
+					.compose(new String[] { next + "_" + n.string,
+							e.dst + "_" + n.string + "_squash",
+							e.dst + "_" + n.string + "_subst" })));
+			ret.add(new InsertSQL(dst + "_" + n.string, PSMGen
+					.compose(new String[] { n.string + "yyy_temp",
+							n.string + "xxx_temp" })));
+			ret.add(new DropTable(n.string + "xxx_temp"));
+			ret.add(new DropTable(n.string + "yyy_temp"));
+		}
+
+		ret.addAll(PSMGen.dropTables(next, sig));
+		return ret;
 	}
 
 	@Override
@@ -687,8 +839,6 @@ public class InstOps implements
 			throw new RuntimeException(fe.getLocalizedMessage());
 		}
 	}
-	
-	//TODO remember sigma, pi substs
 
 	@Override
 	public Pair<List<PSM>, Object> visit(String dst, Sigma e) {
@@ -703,7 +853,7 @@ public class InstOps implements
 			ret.addAll(PSMGen.sigma(F0, dst, e.I)); // yes, sigma is
 													// backwards
 			// ret.addAll(PSMGen.dropTables(next, F0.source));
-			ret.addAll(PSMGen.guidify(dst, F0.target));
+			ret.addAll(PSMGen.guidify(dst, F0.target, true));
 			return new Pair<>(ret, new Object());
 		} catch (FQLException fe) {
 			fe.printStackTrace();
@@ -721,11 +871,13 @@ public class InstOps implements
 			F0.okForPi();
 			// ret.addAll(PSMGen.makeTables(next, F0.source, false));
 			// ret.addAll(e.I.accept(next, this));
-			ret.addAll(PSMGen.pi(F0, e.I, dst));
+			Pair<List<PSM>, Map<String, Triple<Node, Node, Arr<Node, Path>>[]>> xxx = PSMGen
+					.pi(F0, e.I, dst);
+			ret.addAll(xxx.first);
 			// ret.addAll(PSMGen.dropTables(next, F0.source));
 			// ret.addAll(PSMGen.guidify(dst, F0.target)); //not necessary,
 			// pi creates all new guids
-			return new Pair<>(ret, new Object());
+			return new Pair<>(ret, (Object) xxx.second);
 		} catch (FQLException fe) {
 			fe.printStackTrace();
 			throw new RuntimeException(fe.getLocalizedMessage());
@@ -744,7 +896,7 @@ public class InstOps implements
 		try {
 			ret.addAll(PSMGen.SIGMA(F0, dst, e.I)); // yes, backwards
 			// ret.addAll(PSMGen.dropTables(next, F0.source));
-			ret.addAll(PSMGen.guidify(dst, F0.target));
+			// ret.addAll(PSMGen.guidify(dst, F0.target));
 			return new Pair<>(ret, new Object());
 		} catch (FQLException fe) {
 			fe.printStackTrace();
@@ -766,7 +918,7 @@ public class InstOps implements
 			// mktable done by relationalizer
 			// ret.addAll(e.I.accept(next, this));
 			ret.addAll(Relationalizer.compile(sig, dst, e.I).second);
-			ret.addAll(PSMGen.guidify(dst, sig));
+			ret.addAll(PSMGen.guidify(dst, sig, true));
 			// ret.addAll(PSMGen.dropTables(next, sig));
 		} catch (FQLException fe) {
 			fe.printStackTrace();
@@ -812,7 +964,7 @@ public class InstOps implements
 			ret.addAll(PSMGen.delta(q.project, next, next1));
 			ret.addAll(PSMGen.guidify(next1, q.project.source));
 
-			ret.addAll(PSMGen.pi(q.join, next1, next2));
+			ret.addAll(PSMGen.pi(q.join, next1, next2).first);
 
 			ret.addAll(PSMGen.sigma(q.union, dst, next2)); // backwards
 			ret.addAll(PSMGen.guidify(dst, q.union.target));
@@ -850,8 +1002,8 @@ public class InstOps implements
 		return new Pair<>(ret, new Object());
 	}
 
-	////////////////////////////////////////
-	
+	// //////////////////////////////////////
+
 	@Override
 	public Pair<List<PSM>, String> visit(String dst, fql.decl.FullQuery.Comp e) {
 		Pair<List<PSM>, String> n1 = e.l.accept(dst, this);
@@ -893,7 +1045,7 @@ public class InstOps implements
 				ret.addAll(PSMGen.SIGMA(F0, dst, src));
 			}
 			// ret.addAll(PSMGen.dropTables(next, F0.target));
-			// ret.addAll(PSMGen.guidify(dst, F0.target));
+			ret.addAll(PSMGen.guidify(dst, F0.target));
 			return new Pair<>(ret, dst);
 		} catch (FQLException fe) {
 			throw new RuntimeException(fe.getLocalizedMessage());
@@ -908,7 +1060,7 @@ public class InstOps implements
 			Mapping F0 = e.F;
 
 			ret.addAll(PSMGen.makeTables(dst, F0.target, false));
-			ret.addAll(PSMGen.pi(F0, src, dst));
+			ret.addAll(PSMGen.pi(F0, src, dst).first);
 
 			// ret.addAll(PSMGen.dropTables(next, F0.target));
 			// ret.addAll(PSMGen.guidify(dst, F0.target));
@@ -917,6 +1069,27 @@ public class InstOps implements
 			fe.printStackTrace();
 			throw new RuntimeException(fe.getLocalizedMessage());
 		}
+	}
+
+	@Override
+	public List<PSM> visit(String dst, Squash e) {
+		List<PSM> ret = new LinkedList<>();
+
+		InstExp s = prog.insts.get(e.src);
+		Signature ty = s.type(prog).toSig(prog);
+		// if (!(s instanceof fql.decl.InstExp.Relationalize)) {
+		// throw new RuntimeException("Not a relationalize: " + e);
+		// }
+		// fql.decl.InstExp.Relationalize xxx = (fql.decl.InstExp.Relationalize)
+		// s;
+
+		for (Node n : ty.nodes) {
+			ret.add(new InsertSQL(dst + "_" + n.string, PSMGen
+					.compose(new String[] { e.src + "_" + n.string + "_squash",
+							e.src + "_" + n.string + "_subst" })));
+		}
+
+		return ret;
 	}
 
 }

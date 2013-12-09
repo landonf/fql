@@ -11,6 +11,54 @@ public abstract class TransExp {
 		return accept(p, new TransChecker());
 	}
 	
+	//TODO performance check
+	
+	public static class Squash extends TransExp {
+
+		public String src;
+		
+		@Override
+		public String toString() {
+			return src + ".relationalize";
+		}
+		
+		public Squash(String src) {
+			super();
+			this.src = src;
+		}
+
+		@Override
+		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Squash other = (Squash) obj;
+			if (src == null) {
+				if (other.src != null)
+					return false;
+			} else if (!src.equals(other.src))
+				return false;
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((src == null) ? 0 : src.hashCode());
+			return result;
+		}
+		
+	}
+	
 	public static class Delta extends TransExp {
 		public TransExp h;
 		public Delta(TransExp h, String src, String dst) {
@@ -1183,39 +1231,25 @@ public abstract class TransExp {
 	public interface TransExpVisitor<R, E> {
 
 		public R visit(E env, Id e);
-
 		public R visit(E env, Comp e);
-
 		public R visit(E env, Var e);
-
 		public R visit(E env, Const e);
-
 		public R visit(E env, TT e);
-
 		public R visit(E env, FF e);
-
 		public R visit(E env, Fst e);
-
 		public R visit(E env, Snd e);
-
 		public R visit(E env, Inl e);
-
 		public R visit(E env, Inr e);
-
 		public R visit(E env, Delta e);
 		public R visit(E env, Sigma e);
 		public R visit(E env, FullSigma e);
 		public R visit(E env, Pi e);
 		public R visit(E env, Relationalize e);
-		
+		public R visit(E env, Squash e);
 //		public R visit(E env, Apply e);
-
 	//	public R visit(E env, Curry e);
-
 		public R visit(E env, Case e);
-
 		public R visit(E env, Prod e);
-
 	}
 
 

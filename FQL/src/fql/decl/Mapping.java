@@ -451,7 +451,7 @@ public class Mapping {
 
 		String pi = "";
 		try {
-			pi = printNicely(PSMGen.pi(this, "input", "output"));
+			pi = printNicely(PSMGen.pi(this, "input", "output").first);
 		} catch (Exception e) {
 			pi = e.toString();
 		}
