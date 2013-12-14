@@ -165,15 +165,16 @@ public class Path  {
 	
 	public static Path append2(Signature s, Path arr2, Path arr)
 			throws FQLException {
-		if (!arr.target.equals(arr2.source)) {
+		return append(s, arr, arr2);
+/*		if (!arr.target.equals(arr2.source)) {
 			throw new RuntimeException("bad path append");
 		}
 		List<String> x = new LinkedList<>(arr.asList());
 		List<String> y = new LinkedList<>(arr2.asList());
 		y.remove(0);
 		x.addAll(y);
-		return new Path(s, x);
-	}
+		return new Path(s, x); */
+	} 
 
 	private static List<String> foo(Node a) {
 		List<String> ret = new LinkedList<>();

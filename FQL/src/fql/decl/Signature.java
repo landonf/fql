@@ -20,6 +20,7 @@ import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -182,7 +183,19 @@ public class Signature  {
 		
 		//System.out.println(this);
 		if (!DEBUG.debug.ALLOW_INFINITES) {
-			toCategory2();
+		//	try {
+				toCategory2();
+		//	} catch (FQLException fe) {
+		/*		try {
+					JPanel p = denotation();
+					JFrame fr = new JFrame("Category Denotation Debugger");
+					fr.setContentPane(p);
+					fr.pack();
+					fr.setSize(600, 400);
+					fr.setVisible(true);
+				} catch (Throwable fex) { fex.printStackTrace(); } */
+			//	throw fe;
+			//}
 		}
 		
 		doColors();
@@ -757,7 +770,7 @@ public class Signature  {
 		return ret;
 	}
 
-	private Set<Edge> outEdges(Node n) {
+	public Set<Edge> outEdges(Node n) {
 		Set<Edge> ret = new HashSet<Edge>();
 		for (Edge e : edges) {
 			if (e.source.equals(n)) {

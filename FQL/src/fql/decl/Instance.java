@@ -66,7 +66,7 @@ public class Instance  {
 	//TODO better drop handling, by kind, visitor
 	
 	public void conformsTo(Signature s) throws FQLException {
-//		System.out.println("Checking " + this + " against " + s);
+		
 		for (Node n : s.nodes) {
 			Set<Pair<Object, Object>> i = data.get(n.string);
 			if (i == null) {
@@ -266,6 +266,8 @@ public class Instance  {
 		}
 		conformsTo(thesig);
 	}
+	
+	//TODO GUI observables using JDBC
 
 	public Instance(Signature thesig,
 			List<Pair<String, List<Pair<Object, Object>>>> data)
@@ -273,14 +275,36 @@ public class Instance  {
 		//this.name = n;
 		this.thesig = thesig;
 		this.data = new HashMap<>();
+		
+		for (Pair<String, List<Pair<Object, Object>>> k : data) {
+			if (!thesig.contains(k.first)) {
+				throw new FQLException("Extraneous table: " + k.first);
+			}
+		}
+		
+		List<String> seen = new LinkedList<>();
 		for (Node node : thesig.nodes) {
+			if (seen.contains(node.string)) {
+				throw new FQLException("Duplicate table: " + node.string);
+			}
+			seen.add(node.string);
 			this.data.put(node.string, makeFirst(node.string, data));
 			// this.data.put(data(node.string), lookup(node.string, data));
 		}
 		for (Edge e : thesig.edges) {
+			if (seen.contains(e.name)) {
+				throw new FQLException("Duplicate table: " + e.name);
+			}
+			seen.add(e.name);
+
 			this.data.put(e.name, lookup(e.name, data));
 		}
 		for (Attribute<Node> a : thesig.attrs) {
+			if (seen.contains(a.name)) {
+				throw new FQLException("Duplicate table: " + a.name);
+			}
+			seen.add(a.name);
+
 			this.data.put(a.name, lookup(a.name, data));
 		}
 		if (!typeCheck(thesig)) {

@@ -52,27 +52,7 @@ public class TransformExample extends Example {
 
 	+ "\n"
 
-	+ "\ntransform h = {"
-
-	+ "\n	nodes a -> {(a,1),(b,2)}, b -> {};"
-
-	+ "\n} : j -> i"
-
-	+ "\n"
-
-	+ "\ntransform f = {"
-
-	+ "\n	nodes a -> {(1,1),(2,1),(3,1)}, b -> {(4,4)};	"
-
-	+ "\n} : i -> i"
-
-	+ "\n"
-
 	+ "\ntransform g = id i"
-
-	+ "\n"
-
-	+ "\ntransform k = (h then f)"
 
 	+ "\n"
 

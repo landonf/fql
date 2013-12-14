@@ -5,6 +5,7 @@ import java.util.Map;
 import fql.decl.SigExp.Const;
 import fql.decl.SigExp.Exp;
 import fql.decl.SigExp.One;
+import fql.decl.SigExp.Opposite;
 import fql.decl.SigExp.Plus;
 import fql.decl.SigExp.SigExpVisitor;
 import fql.decl.SigExp.Times;
@@ -59,6 +60,11 @@ public class Unresolver implements SigExpVisitor<SigExp, Map<String, SigExp>> {
 	public SigExp visit(Map<String, SigExp> env, Union e) {
 		return new SigExp.Union(e.l.accept(env, this), e.r.accept(env, this));
 
+	}
+
+	@Override
+	public SigExp visit(Map<String, SigExp> env, Opposite e) {
+		return new SigExp.Opposite(e.e.accept(env, this));
 	}
 	
 }

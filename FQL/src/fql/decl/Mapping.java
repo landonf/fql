@@ -932,19 +932,20 @@ public class Mapping {
 
 	public void okForPi() throws FQLException {
 		for (Attribute<Node> n : target.attrs) {
+//			Set<Attribute<Node>> set = new HashSet<>
 			boolean found = false;
 			for (Attribute<Node> a : source.attrs) {
 				Attribute<Node> c = am.get(a);
 				if (c.equals(n)) {
-					if (found) {
-						throw new FQLException("Not attribute bijection "
-								+ this);
-					}
+//					if (found) {
+	//					throw new FQLException("Not attribute bijection "
+		//						+ this);
+		//			}
 					found = true;
 				}
 			}
 			if (!found) {
-				throw new FQLException("Not attribute bijection " + this);
+				throw new FQLException("Not surjective: " + this);
 			}
 		}
 

@@ -518,7 +518,7 @@ public class GUI extends JPanel {
 
 	protected static void saveAsAction() {
 		delay();
-		JFileChooser jfc = new JFileChooser();
+		JFileChooser jfc = new JFileChooser(DEBUG.debug.FILE_PATH);
 		jfc.setFileFilter(new Filter());
 		jfc.showSaveDialog(null);
 		File f = jfc.getSelectedFile();
@@ -548,7 +548,7 @@ public class GUI extends JPanel {
 
 	static protected void openAction() {
 		delay();
-		JFileChooser jfc = new JFileChooser();
+		JFileChooser jfc = new JFileChooser(DEBUG.debug.FILE_PATH);
 		jfc.setFileFilter(new Filter());
 		jfc.showOpenDialog(null);
 		File f = jfc.getSelectedFile();

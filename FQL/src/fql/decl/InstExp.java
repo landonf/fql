@@ -136,6 +136,26 @@ public abstract class InstExp {
 			this.arrows = arrows;
 			this.sig = sig;
 			data = new LinkedList<>();
+			List<String> seen = new LinkedList<>();
+			for (Pair<String, List<Pair<Object, Object>>> k : nodes) {
+				if (seen.contains(k.first)) {
+					throw new RuntimeException("Duplicate table: " + k.first);
+				}
+				seen.add(k.first);
+			}
+			for (Pair<String, List<Pair<Object, Object>>> k : attrs) {
+				if (seen.contains(k.first)) {
+					throw new RuntimeException("Duplicate table: " + k.first);
+				}
+				seen.add(k.first);
+			}
+			for (Pair<String, List<Pair<Object, Object>>> k : arrows) {
+				if (seen.contains(k.first)) {
+					throw new RuntimeException("Duplicate table: " + k.first);
+				}
+				seen.add(k.first);
+			}
+			
 			data.addAll(nodes);
 			data.addAll(attrs);
 			data.addAll(arrows);

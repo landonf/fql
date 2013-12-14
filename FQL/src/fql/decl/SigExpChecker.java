@@ -11,6 +11,7 @@ import fql.Triple;
 import fql.decl.SigExp.Const;
 import fql.decl.SigExp.Exp;
 import fql.decl.SigExp.One;
+import fql.decl.SigExp.Opposite;
 import fql.decl.SigExp.Plus;
 import fql.decl.SigExp.SigExpVisitor;
 import fql.decl.SigExp.Times;
@@ -109,6 +110,11 @@ public class SigExpChecker implements SigExpVisitor<SigExp, FQLProgram>{
 		eqs.addAll(rt0.eqs);
 		
 		return new SigExp.Const(new LinkedList<>(nodes), new LinkedList<>(attrs), new LinkedList<>(arrows), new LinkedList<>(eqs));
+	}
+
+	@Override
+	public SigExp visit(FQLProgram env, Opposite e) {
+		return new SigExp.Opposite(e.e.accept(env, this));
 	}
 	
 }

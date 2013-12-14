@@ -488,7 +488,7 @@ public class InstOps implements
 				select.put("c0", new Pair<>("limit1", "guid"));
 				select.put("c1", new Pair<>("limit2", "guid"));
 				Flower f = new Flower(select, from, where);
-				System.out.println("flower " + f);
+				//System.out.println("flower " + f);
 				ret.add(new InsertSQL(dst + "_" + n.string, f));
 			}
 			// ret.addAll(PSMGen.dropTables(xxx, sig2));
@@ -687,7 +687,7 @@ public class InstOps implements
 							new Pair<>("right_" + a.name, "c1")));
 					select.put(a.name, new Pair<>("left_" + a.name, "c1"));
 					attrs.add(a.name);
-					attrsM.put(a.name, a.target.toString());
+					attrsM.put(a.name, a.target.psm());
 				}
 				Flower f = new Flower(select, from, where);
 				ret.add(new CreateTable(dst + "_prod_temp_" + n.string, attrsM,
@@ -946,8 +946,8 @@ public class InstOps implements
 		Query q = Query.toQuery(prog, e.q);
 
 		String next = e.e;
-		String next1 = "query_temp1";
-		String next2 = "query_temp2";
+		String next1 = next();
+		String next2 = next();
 
 		List<PSM> ret = new LinkedList<>();
 

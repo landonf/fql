@@ -46,17 +46,6 @@ public class MatchExample extends Example {
 			+ "\n		Amphibian.IsAL.IsALL=Amphibian.IsAW.IsAWW;"
 			+ "\n}"
 			+ "\n"
-			+ "\n{nodes match_node0, match_node1, right_LandAnimal, right_WaterAnimal; "
-			+ "\nattributes match_att2: match_node1 -> string, match_att1: match_node0 -> string, match_att0: match_node1 -> string; "
-			+ "\narrows right_IsAWW: right_WaterAnimal -> match_node1, "
-			+ "\nright_IsAW: match_node0 -> right_WaterAnimal, "
-			+ "\nright_IsALL: right_LandAnimal -> match_node1, "
-			+ "\nright_IsAL: match_node0 -> right_LandAnimal, "
-			+ "\nleft_IsAW: match_node0 -> match_node1, "
-			+ "\nleft_IsAL: match_node0 -> match_node1; "
-			+ "\nequations match_node0.right_IsAL.right_IsALL = match_node0.right_IsAW.right_IsAWW;}"
-			+ "\n"
-			+ "\n"
 			+ "\ninstance I = {"
 			+ "\n	nodes "
 			+ "\n		Amphibian->{1,2},"
@@ -79,8 +68,8 @@ public class MatchExample extends Example {
 			+ "\n"
 			+ "\n//instance out1 = EVAL q1 I // - I has wrong type"
 			+ "\n//instance out2 = EVAL q2 I // - I has wrong type"
-			+ "\ninstance out3 = EVAL q3 I // SIGMA fails"
-			+ "\n//instance out4 = EVAL q4 I // has 800 rows!";
+			+ "\n//instance out3 = EVAL q3 I // SIGMA fails if it can't create nulls"
+			+ "\n//instance out4 = EVAL q4 I // has 800 rows! (takes minutes to run)";
 
 
 

@@ -18,6 +18,7 @@ import fql.decl.MapExp.Id;
 import fql.decl.MapExp.Inl;
 import fql.decl.MapExp.Inr;
 import fql.decl.MapExp.MapExpVisitor;
+import fql.decl.MapExp.Opposite;
 import fql.decl.MapExp.Prod;
 import fql.decl.MapExp.Snd;
 import fql.decl.MapExp.Sub;
@@ -103,7 +104,14 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, FQLPro
 	public Pair<SigExp, SigExp> visit(
 			FQLProgram env, TT e) {
 		SigExp x = e.t.typeOf(env);
-		return new Pair<SigExp, SigExp>(x, new SigExp.One());
+		
+		for (String s : e.attrs) {
+			if (!(s.equals("string") || s.equals("int") || env.enums.containsKey(s))) {
+				throw new RuntimeException("Invalid enum: " + s);
+			}
+		}
+		
+		return new Pair<SigExp, SigExp>(x, new SigExp.One(e.attrs));
 	}
 
 	@Override
@@ -223,6 +231,13 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, FQLPro
 			}
 		}
 		return new Pair<>(lt, rt);
+	}
+
+	@Override
+	public Pair<SigExp, SigExp> visit(FQLProgram env, Opposite e) {
+		Pair<SigExp, SigExp> k = e.e.accept(env, this);
+		
+		return new Pair<SigExp, SigExp>(new SigExp.Opposite(k.first), new SigExp.Opposite(k.second));
 	}
 
 }

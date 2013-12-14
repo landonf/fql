@@ -1,7 +1,10 @@
 package fql.sql;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -153,7 +156,7 @@ public class Flower extends SQL {
 	}
 
 	private Set<Map<Pair<Object, Object>, Object>> evalFrom(
-			Map<String, Set<Map<Object, Object>>> state) {
+			final Map<String, Set<Map<Object, Object>>> state) {
 		Set<Map<Pair<Object, Object>, Object>> ret = null; // ok
 
 		// int sz = 1;
@@ -165,8 +168,19 @@ public class Flower extends SQL {
 		// throw new RuntimeException("Maximum of " + sz +
 		// " tuples exceeds limit on " + this);
 		// }
+		
+		List<String> ordered = new LinkedList<>(from.keySet());
+		Comparator<String> c = new Comparator<String>() {
 
-		for (String k : from.keySet()) {
+			@Override
+			public int compare(String o1, String o2) {
+				return Integer.compare(state.get(from.get(o1)).size(), state.get(from.get(o2)).size()); 
+			}
+		};
+		Collections.sort(ordered, c);
+	//	System.out.println("***");
+		for (String k : ordered) {
+		//	System.out.println(state.get(from.get(k)).size());
 			if (ret == null) {
 				if (state.get(from.get(k)) == null) {
 					throw new RuntimeException("cannot find " + from.get(k)

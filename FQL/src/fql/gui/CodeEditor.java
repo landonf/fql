@@ -258,6 +258,7 @@ public class CodeEditor extends JPanel implements Runnable {
 		// JPanel cp = new JPanel(new BorderLayout());
 
 		topArea = new RSyntaxTextArea();
+		//topArea.set
 		// topArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
 
 		AbstractTokenMakerFactory atmf = (AbstractTokenMakerFactory) TokenMakerFactory
@@ -423,9 +424,10 @@ public class CodeEditor extends JPanel implements Runnable {
 			return;
 		}
 		try {
-			thread.stop();
+			Thread ttt = thread;
 			thread = null;
 			respArea.setText("Aborted");
+			ttt.stop();
 		} catch (Exception e) {
 			respArea.setText(e.getLocalizedMessage());
 		}

@@ -12,7 +12,7 @@ public class GeneExample extends Example {
 		return (p + s);
 	}
 	
-	String p = "//This example comes via Peter C Marks - peter.c.marks@gmail.com\n" +
+	String p = "//This example is courtesy of Peter C Marks - peter.c.marks@gmail.com\n" +
 			"//to compile it, you must disable the elements and observables GUI panes.\n\n";
 	
 	String s = 

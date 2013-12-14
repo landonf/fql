@@ -13,6 +13,7 @@ import fql.decl.MapExp.Id;
 import fql.decl.MapExp.Inl;
 import fql.decl.MapExp.Inr;
 import fql.decl.MapExp.MapExpVisitor;
+import fql.decl.MapExp.Opposite;
 import fql.decl.MapExp.Prod;
 import fql.decl.MapExp.Snd;
 import fql.decl.MapExp.Sub;
@@ -104,6 +105,11 @@ public class PrintNiceMapExpVisitor implements MapExpVisitor<String, FQLProgram>
 	@Override
 	public String visit(FQLProgram env, Sub e) {
 		return "subschema " + e.s.unresolve(env.sigs) + " " + e.t.unresolve(env.sigs);
+	}
+
+	@Override
+	public String visit(FQLProgram env, Opposite e) {
+		return "opposite " + e.e.accept(env, this);
 	}
 
 }

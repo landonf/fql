@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import cern.colt.Arrays;
+
 import fql.DEBUG;
 import fql.FQLException;
 import fql.Fn;
@@ -531,12 +533,10 @@ public class PSMGen
 		Signature D = F.target;
 		List<PSM> ret = new LinkedList<>();
 
-//		if (F.)
 		if (!FinFunctor.isDiscreteOpFib(F.toFunctor2().first)) {
 			throw new FQLException("Not a discrete op-fibration" /* + F */);
 		}
 		
-		//TODO check postlude is going in respArea output
 
 		for (Node d : D.nodes) {
 			List<Flower> tn = new LinkedList<>();
@@ -641,7 +641,7 @@ public class PSMGen
 
 	public static Pair<List<PSM>,Map<String, Triple<Node, Node, Arr<Node, Path>>[]>> pi(Mapping F0, String src, String dst)
 			throws FQLException {
-		try {
+		//try {
 		tempTables = 0;
 		Signature D0 = F0.target;
 		Signature C0 = F0.source;
@@ -666,9 +666,11 @@ public class PSMGen
 			List<PSM> xxx3 = deltaX(src, xxx1, xxx2, B.projB);
 			ret.addAll(xxx3);
 
-			//System.out.println("doing limit for " + d0);
+//			System.out.println("doing limit for " + d0);
 			Triple<Flower, Triple<Node, Node, Arr<Node, Path>>[], Attribute<Node>[]> 
 			xxx = lim(src, C0, D, B, xxx1, xxx2);
+//			System.out.println(xxx.first);
+//			System.out.println(Arrays.toString(xxx.second));
 			
 			//comma cat is empty, need unit for product
 			if (xxx == null) {
@@ -695,6 +697,32 @@ public class PSMGen
 
 	//		System.out.println("done with limit");
 			Flower r = xxx.first;
+		//	System.out.println("r fl is " + r);
+			for (Attribute<Node> a : D0.attrsFor(d0)) {
+				List<Attribute<Node>> ls = new LinkedList<>();
+				for (Attribute<Node> aa : C0.attrs) {
+					if (F.am.get(aa).equals(a)) {
+						ls.add(aa);
+					}
+				}
+	//			int hjk = cnamelkp(xxx.third, ls.get(0));
+				for (int jj = 1; jj < ls.size(); jj++) {
+		//			int hjk0 = cnamelkp(xxx.third, ls.get(jj));
+				//	int xxx01 = cnamelkp(xxx.second, new Triple<>(d0, ls.get(0).source, new Arr<Node, Path>(new Path(D0, d0), d0, d0)));
+					int xxx02 = cnamelkp(xxx.third, ls.get(0));
+				//	int xxx03 = cnamelkp(xxx.second, new Triple<>(d0, ls.get(jj).source, new Arr<Node, Path>(new Path(D0, d0), d0, d0)));
+					int xxx04 = cnamelkp(xxx.third, ls.get(jj));
+					r.where.add(new Pair<>(
+							    new Pair<>("t" + (xxx02 + xxx.second.length), "c1"),
+						      	new Pair<>("t" + (xxx04 + xxx.second.length), "c1")));
+
+//					r.where.add(new Pair<>(new Pair<>(,)), new Pair<>(,));
+				}
+			}
+		//	System.out.println("after " + r);
+			
+			//for each node in c, find the attrs that map to it, and equate them
+
 
 			colmap.put(d0.string, cols);
 			//System.out.println("adding amap " + d0.string + " and ");
@@ -727,8 +755,6 @@ public class PSMGen
 			// ret.add(new CreateTable(dst + "_" + d0.string, twocol_attrs));
 			ret.add(new InsertSQL(dst + "_" + d0.string, new SquishFlower(dst
 					+ "_" + d0.string + "_limit")));
-
-			
 		}
 
 		for (Edge s : F0.target.edges) {
@@ -785,17 +811,22 @@ public class PSMGen
 //			}
 			boolean found = false;
 			int u = 0;
-			int j = -1;
+	//		int j = -1;
+			List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
+			Map<String, Pair<String, String>> select = new HashMap<>();
+			Map<String, String> from = new HashMap<>();
+			List<Integer> xxx = new LinkedList<>();
 			for (Attribute<Node> b : y) {
 				if (!F0.am.get(b).equals(a)) {
 					u++;
 					continue;
 				}
-				if (found) {
-					throw new FQLException("Attribute mapping not bijection " + a);
-				}
+//				if (found) {
+//					throw new FQLException("Attribute mapping not bijection " + a);
+//				}
 				found = true;
-				j = u;
+				//j = u;
+				xxx.add(u);
 				u++;
 			}
 			if (!found) {
@@ -803,12 +834,13 @@ public class PSMGen
 			}
 			//System.out.println("i is " + i);
 			//System.out.println("u is " + u);
-			Map<String, Pair<String, String>> select = new HashMap<>();
-			Map<String, String> from = new HashMap<>();
 			from.put(dst + "_" + a.source + "_limit", dst + "_" + a.source + "_limit");
 			select.put("c0", new Pair<>(dst + "_" + a.source + "_limit", "guid"));
-			select.put("c1", new Pair<>(dst + "_" + a.source + "_limit", "c" + (j+i)));
-			List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
+			for (int jj = 1; jj < xxx.size(); jj++) {
+				where.add(new Pair<>(new Pair<>(dst + "_" + a.source + "_limit", "c" + (xxx.get( 0)+i)),
+						  new Pair<>(dst + "_" + a.source + "_limit", "c" + (xxx.get(jj)+i))));
+			}
+			select.put("c1", new Pair<>(dst + "_" + a.source + "_limit", "c" + (xxx.get(0)+i)));
 			Flower f = new Flower(select, from, where);
 
 			//System.out.println("attr flower is " + f);
@@ -820,18 +852,17 @@ public class PSMGen
 		
 		for (Node d0 : D.objects) {
 			ret.add(new DropTable(dst + "_" + d0.string + "_limnoguid")); 
-		//	ret.add(new DropTable(dst + "_" + d0.string + "_limit"));
 		}
 		
 		for (int ii = 0; ii < tempTables; ii++) {
 			ret.add(new DropTable("temp" + ii));
-		}
+		} 
 
 		return new Pair<>(ret, colmap);
-		} catch (NullPointerException npe) {
-			npe.printStackTrace();
-			throw new RuntimeException();
-		}
+//		} catch (NullPointerException npe) {
+	//		npe.printStackTrace();
+	//		throw new RuntimeException();
+	//	}
 	}
 
 	private static List<Pair<Pair<String, String>, Pair<String, String>>> subset(
@@ -955,14 +986,13 @@ public class PSMGen
 			select.put("c" + temp, new Pair<>("t" + temp, "c0"));
 			temp++;
 			//System.out.println("&&&" + n);
-		
 		}
 		
 		for (Triple<Node, Node, Arr<Node, Path>> n : b.objects) {
-			//System.out.println("doing triple " + n);
+	//		System.out.println("doing triple " + n);
 			if (cat.isId(n.third)) {
 //				System.out.println("is id " + n);
-//				System.out.println("attrs for " + n.second + " are " + sig.attrsFor(n.second) + " sig " + sig);
+			//	System.out.println("attrs for " + n.second + " are " + sig.attrsFor(n.second));
 				for (Attribute<Node> a : sig.attrsFor(n.second)) {
 					anames0.add(a);
 				//	System.out.println("adding " + a);
@@ -977,6 +1007,7 @@ public class PSMGen
 				}
 			}
 		}
+		
 
 		// Set<String> cnames_set = new HashSet<>();
 		// System.out.println("***");
@@ -991,16 +1022,21 @@ public class PSMGen
 		// }
 
 		//temp = 0; VERY VERY BAD
+//		System.out.println("Col map is " + )
 		for (Arr<Triple<Node, Node, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Node, Path>>> e : b.arrows) {
 			if (b.isId(e)) {
 				continue;
 			}
-			//System.out.println("DOING ARR " + e);
+	//		System.out.println("DOING ARR " + e);
 			from.put("t" + temp, map2.get(e.arr));
+	
 			where.add(new Pair<>(new Pair<>("t" + temp, "c0"), new Pair<>("t"
-					+ cnamelkp(cnames, e.src), "c0")));
+					+ cnamelkp(cnames, e.src), "c0"))); 
 			where.add(new Pair<>(new Pair<>("t" + temp, "c1"), new Pair<>("t"
-					+ cnamelkp(cnames, e.dst), "c1")));
+					+ cnamelkp(cnames, e.dst), "c0"))); 
+	
+			
+		//	System.out.println("adding filter: " + e.src + " and " + e.dst + " col 1");
 			temp++;
 		}
 
@@ -1020,7 +1056,7 @@ public class PSMGen
 			}
 		}
 		throw new FQLException("Cannot lookup position of " + s + " in "
-				+ cnames.toString());
+				+ Arrays.toString(cnames));
 	}
 
 	static int tempTables = 0;

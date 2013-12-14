@@ -228,7 +228,7 @@ public class Driver {
 		String str = "";
 		try {
 			str = DEBUG.debug.prelude + "\n\n" + PSMGen.prettyPrint(psm) + "\n\n"
-					+ PSMGen.prettyPrint(drops) + "\n\n";			
+					+ PSMGen.prettyPrint(drops) + "\n\n" + DEBUG.debug.afterlude + "\n\n";			
 		} catch (RuntimeException re) {
 			str = re.getLocalizedMessage();
 		}

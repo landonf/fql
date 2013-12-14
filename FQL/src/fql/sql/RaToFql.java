@@ -629,7 +629,6 @@ public class RaToFql {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|" };
 
-	// TODO keyword 1 vs keyword 2 highlight color
 
 	static String[] res = new String[] { "VARCHAR", "INT", "SELECT", "FROM",
 			"WHERE", "DISTINCT", "UNION", "ALL", "CREATE", "TABLE", "AS",

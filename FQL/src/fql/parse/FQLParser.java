@@ -40,9 +40,8 @@ public class FQLParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|" };
 
-	//TODO keyword 1 vs keyword 2 highlight color
 	
-	static String[] res = new String[] { "EVAL", "QUERY", "union", 
+	static String[] res = new String[] { "opposite", "EVAL", "QUERY", "union", 
 		"subschema", "match", "drop", "nodes", "attributes", "enum",
 			"ASWRITTEN", "schema", "transform", "dist1", "dist2", "arrows",
 			"equations", "id", "delta", "sigma", "pi", "SIGMA", "apply", "eq",
@@ -97,8 +96,12 @@ public class FQLParser {
 		Parser<?> unionTy = Parsers.between(term("("),
 				Parsers.tuple(ref.lazy(), term("union"), ref.lazy()), term(")"));
 
-		Parser<?> a = Parsers.or(new Parser<?>[] { term("void"), term("unit"),
-				plusTy, prodTy, expTy, unionTy, ident(), schemaConst() });
+		Parser<?> xxx = ident().sepBy(term(",")).between(term("{"), term("}"));
+		
+		Parser<?> op = Parsers.tuple(term("opposite"), ref.lazy());
+		
+		Parser<?> a = Parsers.or(new Parser<?>[] { term("void"), Parsers.tuple(term("unit"), xxx),
+				plusTy, prodTy, expTy, unionTy, ident(), schemaConst(), op });
 
 		ref.set(a);
 
@@ -118,7 +121,6 @@ public class FQLParser {
 		return Parsers.tuple(term("QUERY"), ident(), term("="), fullQuery());
 	}
 
-	//TODO make parsers into visitors
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final Parser<?> query() {
@@ -197,9 +199,17 @@ public class FQLParser {
 		}
 
 		try {
-			if (o.toString().equals("unit")) {
-				return new SigExp.One();
-			} else if (o.toString().equals("void")) {
+			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;	
+			if (p.a.toString().equals("unit")) {
+				return new SigExp.One(new HashSet<>((List<String>) p.b));
+			} else if (p.a.toString().equals("opposite")) {
+				return new SigExp.Opposite(toSchema(p.b));
+			}
+		} catch (RuntimeException cce) {
+		}
+		
+		try {
+			if (o.toString().equals("void")) {
 				return new SigExp.Zero();
 			}
 			throw new RuntimeException();
@@ -471,14 +481,18 @@ public class FQLParser {
 		Parser compTy = Parsers.between(term("("),
 				Parsers.tuple(ref.lazy(), term("then"), ref.lazy()), term(")"));
 
+		Parser<?> xxx = ident().sepBy(term(",")).between(term("{"), term("}"));
+
+		
 		Parser a = Parsers.or(new Parser[] {
-				Parsers.tuple(term("unit"), schema()),
+				Parsers.tuple(term("unit"), xxx, schema()),
 				Parsers.tuple(term("void"), schema()),
 				Parsers.tuple(term("fst"), schema(), schema()),
 				Parsers.tuple(term("snd"), schema(), schema()),
 				Parsers.tuple(term("inl"), schema(), schema()),
 				Parsers.tuple(term("inr"), schema(), schema()),
 				Parsers.tuple(term("apply"), schema(), schema()),
+				Parsers.tuple(term("opposite"), ref.lazy()),
 				Parsers.tuple(term("curry"), ref.lazy()),
 				Parsers.tuple(term("eq"), schema()),
 				Parsers.tuple(term("id"), schema()),
@@ -581,6 +595,8 @@ public class FQLParser {
 				return new MapExp.Fst(toSchema(p2), toSchema(p3));
 			} else if (p1.equals("snd")) {
 				return new MapExp.Snd(toSchema(p2), toSchema(p3));
+			} else if (p1.equals("unit")) {
+				return new MapExp.TT(toSchema(p3), new HashSet<>((List<String>)p2));
 			} else if (p1.equals("subschema")) {
 				return new MapExp.Sub(toSchema(p2), toSchema(p3));
 			} else if (p1.equals("inl")) {
@@ -618,11 +634,11 @@ public class FQLParser {
 				return new MapExp.Id(toSchema(p2));
 			} else if (p1.equals("curry")) {
 				return new MapExp.Curry(toMapping(p2));
-			} else if (p1.equals("unit")) {
-				return new MapExp.TT(toSchema(p2));
 			} else if (p1.equals("void")) {
 				return new MapExp.FF(toSchema(p2));
-			}
+			} else if (p1.equals("opposite")) {
+				return new MapExp.Opposite(toMapping(p2));
+			} 
 		} catch (RuntimeException re) {
 
 		}
@@ -707,7 +723,7 @@ public class FQLParser {
 		List nodes0 = (List) nodes.b;
 		List arrows0 = (List) arrows.b;
 
-		List<Object> seen = new LinkedList<>();
+		//List<Object> seen = new LinkedList<>();
 
 		List<Pair<String, List<Pair<Object, Object>>>> nodesX = new LinkedList<>();
 		for (Object o : nodes0) {
@@ -718,14 +734,14 @@ public class FQLParser {
 			for (Object h : m) {
 				l.add(new Pair<>(h, h));
 			}
-			if (seen.contains(n)) {
-				throw new RuntimeException("duplicate field: " + o);
-			}
-			seen.add(n);
+		//	if (seen.contains(n)) {
+			//	throw new RuntimeException("duplicate field: " + o);
+			//}
+			//seen.add(n);
 			nodesX.add(new Pair<>(n, l));
 		}
 
-		RuntimeException toThrow = null;
+	//	RuntimeException toThrow = null;
 
 		List<Pair<String, List<Pair<Object, Object>>>> attrsX = new LinkedList<>();
 		if (attrs.b.toString().equals("ASWRITTEN")) {
@@ -745,12 +761,11 @@ public class FQLParser {
 					Tuple3 k = (Tuple3) h;
 					l.add(new Pair<>(k.a, k.c));
 				}
-				if (seen.contains(n)) {
-					toThrow = new RuntimeException("duplicate field: " + o
-							+ " in " + decl);
-					throw toThrow;
-				}
-				seen.add(n);
+//				if (seen.contains(n)) {
+	//				toThrow = new RuntimeException("duplicate field: " + n );
+		//			throw toThrow;
+		//		}
+			//	seen.add(n); 
 				attrsX.add(new Pair<>(n, l));
 			}
 		}
@@ -764,10 +779,10 @@ public class FQLParser {
 				Tuple3 k = (Tuple3) h;
 				l.add(new Pair<>(k.a, k.c));
 			}
-			if (seen.contains(n)) {
-				throw new RuntimeException("duplicate field: " + o);
-			}
-			seen.add(n);
+			//if (seen.contains(n)) {
+			//	throw new RuntimeException("duplicate field: " + o);
+			//}
+			//seen.add(n);
 			arrowsX.add(new Pair<>(n, l));
 		}
 		fql.decl.InstExp.Const ret = new InstExp.Const(nodesX, attrsX, arrowsX,

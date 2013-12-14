@@ -3,6 +3,7 @@ package fql.decl;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import fql.FQLException;
 import fql.Pair;
@@ -417,15 +418,18 @@ public abstract class MapExp {
 
 	public static class TT extends MapExp {
 		SigExp t;
+		Set<String> attrs;
 
-		public TT(SigExp t) {
+		public TT(SigExp t, Set<String> attrs) {
 			this.t = t;
+			this.attrs = attrs;
 		}
 
 		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
+			result = prime * result + ((attrs == null) ? 0 : attrs.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
 			return result;
 		}
@@ -439,6 +443,11 @@ public abstract class MapExp {
 			if (getClass() != obj.getClass())
 				return false;
 			TT other = (TT) obj;
+			if (attrs == null) {
+				if (other.attrs != null)
+					return false;
+			} else if (!attrs.equals(other.attrs))
+				return false;
 			if (t == null) {
 				if (other.t != null)
 					return false;
@@ -449,7 +458,7 @@ public abstract class MapExp {
 
 		@Override
 		public String toString() {
-			return "unit " + t;
+			return "unit {" + PrettyPrinter.sep0(",", new LinkedList<>(attrs)) + "} " + t;
 		}
 
 		@Override
@@ -950,44 +959,72 @@ public abstract class MapExp {
 		}
 
 	}
+	
+	public static class Opposite extends MapExp {
+		MapExp e;
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((e == null) ? 0 : e.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Opposite other = (Opposite) obj;
+			if (e == null) {
+				if (other.e != null)
+					return false;
+			} else if (!e.equals(other.e))
+				return false;
+			return true;
+		}
+		
+		public String toString() {
+			return "opposite " + e;
+		}
+
+		public Opposite(MapExp e) {
+			super();
+			this.e = e;
+		}
+
+		@Override
+		public <R, E> R accept(E env, MapExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+	}
 
 	public abstract int hashCode();
 
 	public interface MapExpVisitor<R, E> {
-
 		public R visit(E env, Id e);
-
 		public R visit(E env, Comp e);
-
 		public R visit(E env, Dist1 e);
-
 		public R visit(E env, Dist2 e);
-
 		public R visit(E env, Var e);
-
 		public R visit(E env, Const e);
-
 		public R visit(E env, TT e);
-
 		public R visit(E env, FF e);
-
 		public R visit(E env, Fst e);
-
 		public R visit(E env, Snd e);
-
 		public R visit(E env, Inl e);
-
 		public R visit(E env, Inr e);
-
 		public R visit(E env, Apply e);
-
 		public R visit(E env, Curry e);
-
 		public R visit(E env, Case e);
-
 		public R visit(E env, Prod e);
-
 		public R visit(E env, Sub e);
+		public R visit(E env, Opposite e);
 	}
 
 	public String printNicely(FQLProgram p) {

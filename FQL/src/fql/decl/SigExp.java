@@ -2,17 +2,19 @@ package fql.decl;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import fql.FQLException;
 import fql.Pair;
 import fql.Triple;
+import fql.parse.PrettyPrinter;
 
 public abstract class SigExp {
 	
 //	public static final Comparator<? super String>  = null;
-
 
 	public SigExp unresolve(Map<String, SigExp> env) {
 		return accept(env, new Unresolver());
@@ -29,6 +31,50 @@ public abstract class SigExp {
 		} catch (FQLException fe) {
 			fe.printStackTrace();
 			throw new RuntimeException(fe.getLocalizedMessage());
+		}
+	}
+	
+	public static class Opposite extends SigExp {
+		SigExp e;
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((e == null) ? 0 : e.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Opposite other = (Opposite) obj;
+			if (e == null) {
+				if (other.e != null)
+					return false;
+			} else if (!e.equals(other.e))
+				return false;
+			return true;
+		}
+		
+		@Override
+		public String toString() {
+			return "opposite " + e;
+		}
+
+		public Opposite(SigExp e) {
+			super();
+			this.e = e;
+		}
+		
+		@Override
+		public <R, E> R accept(E env, SigExpVisitor<R, E> v) {
+			return v.visit(env, this);
 		}
 	}
 
@@ -330,22 +376,40 @@ public abstract class SigExp {
 
 	public static class One extends SigExp {
 		
-		public One() {
+		Set<String> attrs;
+		
+		public One(Set<String> attrs) {
+			this.attrs = attrs;
 		}
 
 		@Override
 		public int hashCode() {
-			return 0;
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((attrs == null) ? 0 : attrs.hashCode());
+			return result;
 		}
 
 		@Override
 		public boolean equals(Object obj) {
-			return (obj instanceof One);
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			One other = (One) obj;
+			if (attrs == null) {
+				if (other.attrs != null)
+					return false;
+			} else if (!attrs.equals(other.attrs))
+				return false;
+			return true;
 		}
 
 		@Override
 		public String toString() {
-			return "unit";
+			return "unit {" + PrettyPrinter.sep0(",", new LinkedList<>(attrs)) + "}";
 		}
 
 		@Override
@@ -519,14 +583,15 @@ public abstract class SigExp {
 	
 	
 	public interface SigExpVisitor<R, E> {
-		public R visit (E env, Zero e) ;
-		public R visit (E env, One e) ;
-		public R visit (E env, Plus e) ;
-		public R visit (E env, Times e) ;
-		public R visit (E env, Exp e) ;
-		public R visit (E env, Var e) ;
-		public R visit (E env, Const e) ;
-		public R visit (E env, Union e) ;
+		public R visit (E env, Zero e);
+		public R visit (E env, One e);
+		public R visit (E env, Plus e);
+		public R visit (E env, Times e);
+		public R visit (E env, Exp e);
+		public R visit (E env, Var e);
+		public R visit (E env, Const e);
+		public R visit (E env, Union e);
+		public R visit (E env, Opposite e);
 	}
 	
 }
