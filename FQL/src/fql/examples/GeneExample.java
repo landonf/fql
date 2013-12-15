@@ -9,15 +9,11 @@ public class GeneExample extends Example {
 
 	@Override
 	public String getText() {
-		return (p + s);
+		return p;
 	}
 	
-	String p = "//This example is courtesy of Peter C Marks - peter.c.marks@gmail.com\n" +
-			"//to compile it, you must disable the elements and observables GUI panes.\n\n";
-	
-	String s = 
-			"/* "
-					+ "\n   This FQL file was programmatically generated from a Gene Ontology Yeast Slim OBO file "
+	String p = "//This example is courtesy of Peter C Marks - peter.c.marks@gmail.com\n" 
+					+ "\n/*   This FQL file was programmatically generated from a Gene Ontology Yeast Slim OBO file "
 					+ "\n   located at http://www.geneontology.org/GO.slims.shtml The oboformat java library"
 					+ "\n   (https://code.google.com/p/oboformat/) was used to read the OBO file."
 					+ "\n*/"

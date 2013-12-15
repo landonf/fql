@@ -155,6 +155,21 @@ public class Flower extends SQL {
 		return ret;
 	}
 
+	int timesInWhere(String x) {
+		int count = 0;
+		
+		for (Pair<Pair<String, String>, Pair<String, String>> eq : where) {
+			if (eq.first.first.equals(x)) {
+				count++;
+			}
+			if (eq.second.first.equals(x)) {
+				count++;
+			}
+		}
+
+		return count;
+	}
+	
 	private Set<Map<Pair<Object, Object>, Object>> evalFrom(
 			final Map<String, Set<Map<Object, Object>>> state) {
 		Set<Map<Pair<Object, Object>, Object>> ret = null; // ok
@@ -171,13 +186,22 @@ public class Flower extends SQL {
 		
 		List<String> ordered = new LinkedList<>(from.keySet());
 		Comparator<String> c = new Comparator<String>() {
-
 			@Override
 			public int compare(String o1, String o2) {
+				int xxx1 = timesInWhere(o1);
+				int xxx2 = timesInWhere(o2);
+				if (xxx1 == xxx2) {
 				return Integer.compare(state.get(from.get(o1)).size(), state.get(from.get(o2)).size()); 
+				} else if (xxx1 > xxx2) {
+					return -1;
+				} else {
+					return 1;
+				}
 			}
 		};
 		Collections.sort(ordered, c);
+		
+		
 	//	System.out.println("***");
 		for (String k : ordered) {
 		//	System.out.println(state.get(from.get(k)).size());
@@ -193,10 +217,12 @@ public class Flower extends SQL {
 					throw new RuntimeException("cannot find " + from.get(k)
 							+ " in " + state);
 				}
+				
+				//TODO have cartProd only add those tuples which are joined on
 				ret = cartProd(k, new HashSet<>(ret), state.get(from.get(k)),
 						from.get(k));
-
-				ret = evalWhere2(ret);
+				//System.gc();
+			//	ret = evalWhere2(ret);
 			}
 
 		}
@@ -213,13 +239,22 @@ public class Flower extends SQL {
 		// System.out.println("doing cartprod for " + x + " and " + y0 + " and "
 		// + v + " k " + k);
 		for (Map<Pair<Object, Object>, Object> row1 : x) {
-			for (Map<Pair<Object, Object>, Object> row2 : y) {
+			a: for (Map<Pair<Object, Object>, Object> row2 : y) {
 				Map<Pair<Object, Object>, Object> row = new HashMap<>();
 				for (Pair<Object, Object> s : row1.keySet()) {
 					row.put(s, row1.get(s));
 				}
 				for (Pair<Object, Object> s : row2.keySet()) {
 					row.put(s, row2.get(s));
+				}
+				//TODO here
+				for (Pair<Pair<String, String>, Pair<String, String>> eq : where) {
+				if (row.get(eq.first) != null & row.get(eq.second) != null) {
+					if (!row.get(eq.first).equals(row.get(eq.second))) {
+						// System.out.println("failed");
+						continue a;
+					}
+				}
 				}
 				ret.add(row);
 			}

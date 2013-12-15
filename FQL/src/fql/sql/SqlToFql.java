@@ -39,6 +39,12 @@ import fql.decl.SigExp;
 import fql.examples.Example;
 import fql.gui.FQLTextPanel;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Translates SQL (in categorical normal form) to FQL.
+ */
 public class SqlToFql {
 
 	protected Example[] examples = { new PeopleExample() };

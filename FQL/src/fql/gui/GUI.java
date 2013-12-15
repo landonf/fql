@@ -36,7 +36,6 @@ import javax.swing.KeyStroke;
 import javax.swing.filechooser.FileFilter;
 
 import fql.DEBUG;
-import fql.FQLApplet;
 import fql.Pair;
 import fql.examples.Example;
 import fql.examples.Examples;
@@ -310,9 +309,9 @@ public class GUI extends JPanel {
 				saveAction();
 			}
 		});
-		if (FQLApplet.isapplet) {
-			save_button.setEnabled(false);
-		}
+		// if (FQLApplet.isapplet) {
+		// save_button.setEnabled(false);
+		// }
 
 		JButton open_button = new JButton("Open");
 		open_button.addActionListener(new ActionListener() {
@@ -320,9 +319,9 @@ public class GUI extends JPanel {
 				openAction();
 			}
 		});
-		if (FQLApplet.isapplet) {
-			open_button.setEnabled(false);
-		}
+		// if (FQLApplet.isapplet) {
+		// open_button.setEnabled(false);
+		// }
 
 		// toolBar temp1 = new JPanel();
 		JLabel l = new JLabel("Load Example:", JLabel.RIGHT);
@@ -510,6 +509,7 @@ public class GUI extends JPanel {
 			return f.getName().toLowerCase().endsWith(".fql")
 					|| f.isDirectory();
 		}
+
 		@Override
 		public String getDescription() {
 			return "FQL files (*.fql)";
@@ -525,8 +525,8 @@ public class GUI extends JPanel {
 		if (f == null) {
 			return;
 		}
-		if(!jfc.getSelectedFile().getAbsolutePath().endsWith(".fql")){
-		    f = new File(jfc.getSelectedFile() + ".fql");
+		if (!jfc.getSelectedFile().getAbsolutePath().endsWith(".fql")) {
+			f = new File(jfc.getSelectedFile() + ".fql");
 		}
 		CodeEditor e = (CodeEditor) editors.getComponentAt(editors
 				.getSelectedIndex());
@@ -554,7 +554,7 @@ public class GUI extends JPanel {
 		File f = jfc.getSelectedFile();
 		if (f == null) {
 			return;
-		}		
+		}
 		doOpen(f);
 	}
 

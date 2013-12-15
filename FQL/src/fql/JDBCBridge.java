@@ -17,31 +17,14 @@ import fql.decl.TransExp;
 import fql.sql.FullSigma;
 import fql.sql.PSM;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Class for communicating with external sql engines over jdbc.
+ */
 public class JDBCBridge {
 
-	/*
-	public static String populate() {
-		try {
-			String ret = "";
-			Class.forName(DEBUG.debug.jdbcClass);	
-			Connection Conn = DriverManager.getConnection(DEBUG.debug.jdbcUrl);
-			DatabaseMetaData m = Conn.getMetaData();
-			ResultSet RS = m.getSchemas();
-			while (RS.next() != false) { 
-				String r = RS.getString("TABLE_SCHEM");
-				ret += r;
-			}
-			m.
-			
-			return ret;
-		} (Exception e) {
-			e.printStackTrace();
-			return e.getLocalizedMessage();
-		}
-	}
-	*/
-
-	
 	public static Map<String, Set<Map<Object, Object>>>  go(List<PSM> sqls, List<PSM> drops, FQLProgram prog) {
 		Map<String, Set<Map<Object, Object>>> ret = new HashMap<>();
 
@@ -65,9 +48,7 @@ public class JDBCBridge {
 				Stmt.execute(s);
 			}
 			
-//			Stmt.execute("set @guid := 0");
 			for (PSM sql : sqls) {
-		//		System.out.println(sql);
 				Stmt.execute(sql.toPSM());
 			}
 
@@ -146,8 +127,6 @@ public class JDBCBridge {
 				}
 			}
 
-//			Conn.commit();
-			
 			return ret;
 			
 		} catch (Exception exception) {

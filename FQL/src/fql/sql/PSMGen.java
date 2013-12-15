@@ -9,8 +9,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import cern.colt.Arrays;
-
-import fql.DEBUG;
 import fql.FQLException;
 import fql.Fn;
 import fql.Pair;
@@ -21,8 +19,6 @@ import fql.cat.FinCat;
 import fql.cat.FinFunctor;
 import fql.decl.Attribute;
 import fql.decl.Edge;
-import fql.decl.Environment;
-import fql.decl.FQLProgram;
 import fql.decl.Mapping;
 import fql.decl.Node;
 import fql.decl.Path;
@@ -31,19 +27,21 @@ import fql.decl.Signature;
 /**
  * 
  * @author ryan
- *
- * PSM generator.
+ * 
+ *         PSM generator.
  */
-public class PSMGen 
-{
+public class PSMGen {
 
-	public static List<PSM> guidify(String pre0, Signature sig) throws FQLException {	
+	public static List<PSM> guidify(String pre0, Signature sig)
+			throws FQLException {
 		return guidify(pre0, sig, false);
 	}
-	public static List<PSM> guidify(String pre0, Signature sig, boolean remember) throws FQLException {	
+
+	public static List<PSM> guidify(String pre0, Signature sig, boolean remember)
+			throws FQLException {
 		// System.out.println("GUIDifying " + pre0);
 		List<PSM> ret = new LinkedList<>();
-				
+
 		Map<String, String> guid_attrs = new HashMap<>();
 		Map<String, String> twocol_attrs = new HashMap<>();
 
@@ -67,11 +65,11 @@ public class PSMGen
 			// make a substitution table
 			ret.add(new CreateTable(pre + "_subst", twocol_attrs, false));
 			ret.add(new InsertSQL(pre + "_subst", makeSubst(pre0, n)));
-			
+
 			ret.add(new CreateTable(pre + "_subst_inv", twocol_attrs, false));
 			ret.add(new InsertSQL(pre + "_subst_inv", invertSubst(pre0, n)));
 
-					// create a new table that applies the substitution
+			// create a new table that applies the substitution
 			ret.add(new CreateTable(pre + "_applied", twocol_attrs, false));
 			ret.add(new InsertSQL(pre + "_applied", makeApplyNode(pre0, n)));
 
@@ -137,7 +135,6 @@ public class PSMGen
 				ret.add(new DropTable(pre + "_subst_inv"));
 			}
 		}
-		// System.out.println("&&&&&&&&&&&&");
 		// System.out.println(ret);
 		return ret;
 	}
@@ -166,14 +163,11 @@ public class PSMGen
 	}
 
 	private static SQL makeApplyEdge(String i, Edge e) {
-
 		String src = e.source.string;
 		String dst = e.target.string;
 
 		SQL f = compose(new String[] { i + "_" + src + "_subst_inv",
 				i + "_" + e.name, i + "_" + dst + "_subst" });
-
-		// System.out.println("apply edge for " + e + " on " + i + " is " + f);
 
 		return f;
 	}
@@ -184,8 +178,6 @@ public class PSMGen
 
 		SQL f = compose(new String[] { i + "_" + src + "_subst_inv",
 				i + "_" + a.name });
-
-		// System.out.println("apply aatr for " + a + " on " + i + " is " + f);
 
 		return f;
 	}
@@ -203,7 +195,6 @@ public class PSMGen
 		return new Flower(select, from, where);
 	}
 
-	// project guid as c0, c0 as c1 from i_n_guid
 	private static SQL makeSubst(String i, Node n) {
 		List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
 
@@ -217,39 +208,6 @@ public class PSMGen
 		return new Flower(select, from, where);
 	}
 
-	public static List<PSM> compile0(Environment env, FQLProgram init)
-			throws FQLException {
-		List<PSM> ret = new LinkedList<>();
-		/*
-		for (Decl d : prog.decls) {
-			if (d instanceof ConstantInstanceDecl) {
-				ret.addAll(addInstance(env, (ConstantInstanceDecl) d));
-			} else if (d instanceof EvalInstanceDecl) {
-				List<PSM> xxx = addInstance(env, (EvalInstanceDecl) d);
-			//	System.out.println("xxxxxxxxx" + xxx);
-				ret.addAll(xxx);
-			} else if (d instanceof EvalDSPInstanceDecl) {
-				ret.addAll(addInstance(env, (EvalDSPInstanceDecl) d));
-			} else if (d instanceof ExternalDecl) {
-				ret.addAll(addInstance(env, (ExternalDecl)d));
-			} else if (d instanceof RelationalizeDecl) {
-				RelationalizeDecl rd = (RelationalizeDecl) d;
-					Signature s = env.signatures.get(rd.type);
-					//sig, outname, inname
-					ret.addAll(Relationalizer.compile(s, d.name, rd.inst, false));
-			} else {
-				// cannot throw - must ignore mappings, schemas, etc, throw new RuntimeException();
-			}
-		}
-		*/
-		return ret;
-	}
-
-	public static String compile(Environment env, FQLProgram init)
-			throws FQLException {
-		return DEBUG.debug.prelude + "\n\n" + prettyPrint(compile0(env, init));
-	}
-
 	public static String prettyPrint(List<PSM> l) {
 		String ret = "";
 		for (PSM p : l) {
@@ -261,46 +219,11 @@ public class PSMGen
 		}
 		return ret;
 	}
-/*
-	private static List<PSM> addInstance(Environment env, EvalInstanceDecl d) throws FQLException {
-/*		List<PSM> ret = new LinkedList<>();
 
-		String inst = d.inst;
-		String name = d.name;
-		Query q = env.queries.get(d.query);
-		//Signature t = env.signatures.get(d.type);
-		
-		Mapping proj = q.project;
-		Mapping join = q.join;
-		Mapping un = q.union;
-		*/
-		//System.out.println(q);
-		
-	//	EvalDSPInstanceDecl delta = new EvalDSPInstanceDecl(name + "_tempdelta", "delta", proj.name, inst, proj.source.name0);
-//		EvalDSPInstanceDecl pi = new EvalDSPInstanceDecl(name + "_temppi", "pi", join.name, name + "_tempdelta", join.target.name0);
-	//	EvalDSPInstanceDecl sigma = new EvalDSPInstanceDecl(name, "sigma", un.name, name + "_temppi", un.target.name0);
-	/*	throw new RuntimeException();
-		
-//		System.out.println(delta);
-//		System.out.println(pi);
-//		System.out.println(sigma);
-//		//ret.addAll(makeTables(name + "_tempdelta", proj.source));
-		//ret.addAll(addInstance(env, delta));
-		//ret.addAll(makeTables(name + "_temppi", join.target));
-		//ret.addAll(addInstance(env, pi));
-		//ret.addAll(makeTables(name, un.target));
-	//	ret.addAll(addInstance(env, sigma));
-//		ret.addAll(dropTables(name + "_tempdelta", proj.source));
-	//	ret.addAll(dropTables(name + "_temppi", join.target));
-	//	ret.addAll(dropTables(name + "_tempsigma", un.target));
-		//System.out.println("zzzzzzz" + ret);
-		//return ret;
-	}
-*/
 	public static List<PSM> dropTables(String name, Signature sig) {
 		List<PSM> ret = new LinkedList<>();
 
-		for (Node n : sig.nodes) {		
+		for (Node n : sig.nodes) {
 			ret.add(new DropTable(name + "_" + n.string));
 		}
 		for (Edge e : sig.edges) {
@@ -312,52 +235,11 @@ public class PSMGen
 
 		return ret;
 	}
-/*
-	private static List<PSM> addInstance(Environment env, EvalDSPInstanceDecl d)
+
+	public static List<PSM> doConst(String dst, Signature sig,
+			List<Pair<String, List<Pair<Object, Object>>>> data)
 			throws FQLException {
 		List<PSM> ret = new LinkedList<>();
-
-		String inst = d.inst;
-		String name = d.name;
-		
-		
-		Mapping f = env.getMapping(d.mapping);
-
-		if (d.kind.equals("delta")) {
-			ret.addAll(makeTables(name, f.source, false));
-			ret.addAll(delta(f, inst, name));
-			ret.addAll(guidify(name, f.source));
-			// System.out.println("adding " + delta(f, inst, name));
-		} else if (d.kind.equals("sigma")) {
-			f.okForSigma();
-			ret.addAll(makeTables(name, f.target, false));
-			ret.addAll(sigma(f, name, inst));
-		//	not needed ret.addAll(guidify(name, f.target));
-		} else if (d.kind.equals("SIGMA")) {
-			ret.addAll(makeTables(name, f.target, false));
-			ret.addAll(SIGMA(env, f, name, inst));
-			ret.addAll(guidify(name, f.target));
-		}
-		else if (d.kind.equals("pi")) {
-			f.okForPi();
-			ret.addAll(makeTables(name, f.target, false));
-			ret.addAll(pi(f, inst, name));
-			// not needed ret.addAll(guidify(name, f.target));
-		} else {
-			throw new RuntimeException(d.kind);
-		}
-
-		return ret;
-	}
-*/
-	public static List<PSM> doConst(String dst, Signature sig, List<Pair<String, List<Pair<Object, Object>>>> data)
-			throws FQLException {
-		List<PSM> ret = new LinkedList<>();
-
-//		Signature sig = env.signatures.get(d.type);
-	//	Instance inst = new Instance(sig, d.data);
-
-	//	ret.addAll(makeTables(dst, sig, false));
 
 		for (Node n : sig.nodes) {
 			ret.add(populateTable(dst, n.string, lookup(data, n.string)));
@@ -369,11 +251,11 @@ public class PSMGen
 			ret.add(populateTable(dst, a.name, lookup(data, a.name)));
 		}
 
-
 		return ret;
 	}
-	
-	public static Set<Pair<Object, Object>> lookup(List<Pair<String, List<Pair<Object, Object>>>> data, String str) {
+
+	public static Set<Pair<Object, Object>> lookup(
+			List<Pair<String, List<Pair<Object, Object>>>> data, String str) {
 		for (Pair<String, List<Pair<Object, Object>>> k : data) {
 			if (k.first.equals(str)) {
 				return new HashSet<>(k.second);
@@ -381,32 +263,33 @@ public class PSMGen
 		}
 		throw new RuntimeException();
 	}
-	
 
 	public static List<PSM> doExternal(Signature sig, String in, String out)
 			throws FQLException {
 		List<PSM> ret = new LinkedList<>();
 
-		//Instance inst = new Instance(sig);
+		// Instance inst = new Instance(sig);
 
-		//System.out.println("externaml " + in + " out " + out);
+		// System.out.println("externaml " + in + " out " + out);
 		ret.addAll(makeTables(in, sig, true));
-		//ret.addAll(makeTables(out, sig, false));
-		
+		// ret.addAll(makeTables(out, sig, false));
+
 		for (Node n : sig.nodes) {
-			ret.add(new InsertSQL(out + "_" + n.string, new CopyFlower(in + "_" + n.string)));
+			ret.add(new InsertSQL(out + "_" + n.string, new CopyFlower(in + "_"
+					+ n.string)));
 		}
 		for (Edge e : sig.edges) {
-			ret.add(new InsertSQL(out + "_" + e.name, new CopyFlower(in + "_" + e.name)));
+			ret.add(new InsertSQL(out + "_" + e.name, new CopyFlower(in + "_"
+					+ e.name)));
 		}
 		for (Attribute<Node> a : sig.attrs) {
-			ret.add(new InsertSQL(out + "_" + a.name, new CopyFlower(in + "_" + a.name)));
+			ret.add(new InsertSQL(out + "_" + a.name, new CopyFlower(in + "_"
+					+ a.name)));
 		}
-
 
 		return ret;
 	}
-	
+
 	private static PSM populateTable(String iname, String tname,
 			Set<Pair<Object, Object>> data) {
 
@@ -425,7 +308,8 @@ public class PSMGen
 		return new InsertValues(iname + "_" + tname, attrs, values);
 	}
 
-	public static List<PSM> makeTables(String name, Signature sig, boolean suppress) {
+	public static List<PSM> makeTables(String name, Signature sig,
+			boolean suppress) {
 		List<PSM> ret = new LinkedList<>();
 
 		for (Node n : sig.nodes) {
@@ -450,12 +334,7 @@ public class PSMGen
 		return ret;
 	}
 
-	
-
-//	static String preamble = "DROP DATABASE FQL; CREATE DATABASE FQL; USE FQL; SET @guid := 0;\n\n";
-
 	public static List<PSM> delta(Mapping m, String src, String dst) {
-		//System.out.println("doing delta for " + m + " and " + src + " and " + dst + " and "+ m.name);
 		Map<String, SQL> ret = new HashMap<>();
 		for (Entry<Node, Node> n : m.nm.entrySet()) {
 			ret.put(dst + "_" + n.getKey().string,
@@ -473,7 +352,7 @@ public class PSMGen
 			SQL v = ret.get(k);
 			ret0.add(new InsertSQL(k, v));
 		}
-		//System.out.println("result " + ret0);
+
 		return ret0;
 	}
 
@@ -481,8 +360,6 @@ public class PSMGen
 		Map<String, Pair<String, String>> select = new HashMap<>();
 		Map<String, String> from = new HashMap<>();
 		List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
-
-		// from.put("t0", pre + "_" + p.source.string);
 
 		from.put("t0", p[0]);
 
@@ -522,11 +399,12 @@ public class PSMGen
 	public static List<PSM> SIGMA(Mapping F, String pre, String inst)
 			throws FQLException {
 		List<PSM> ret = new LinkedList<>();
-		
+
 		ret.add(new FullSigma(F, pre, inst));
-		
+
 		return ret;
 	}
+
 	public static List<PSM> sigma(Mapping F, String pre, String inst)
 			throws FQLException {
 		Signature C = F.source;
@@ -536,7 +414,6 @@ public class PSMGen
 		if (!FinFunctor.isDiscreteOpFib(F.toFunctor2().first)) {
 			throw new FQLException("Not a discrete op-fibration" /* + F */);
 		}
-		
 
 		for (Node d : D.nodes) {
 			List<Flower> tn = new LinkedList<>();
@@ -603,9 +480,9 @@ public class PSMGen
 		return new Union(tn);
 	}
 
-	private static Attribute<Node> findEquiv(Node c, Mapping f, Attribute<Node> a)
-			throws FQLException {
-	//	Signature C = f.source;
+	private static Attribute<Node> findEquiv(Node c, Mapping f,
+			Attribute<Node> a) throws FQLException {
+		// Signature C = f.source;
 		for (Attribute<Node> peqc : f.source.attrs) {
 			if (!peqc.source.equals(c)) {
 				continue;
@@ -637,11 +514,8 @@ public class PSMGen
 		throw new FQLException("Could not find path mapping to " + e);
 	}
 
-	// int
-
-	public static Pair<List<PSM>,Map<String, Triple<Node, Node, Arr<Node, Path>>[]>> pi(Mapping F0, String src, String dst)
-			throws FQLException {
-		//try {
+	public static Pair<List<PSM>, Map<String, Triple<Node, Node, Arr<Node, Path>>[]>> pi(
+			Mapping F0, String src, String dst) throws FQLException {
 		tempTables = 0;
 		Signature D0 = F0.target;
 		Signature C0 = F0.source;
@@ -654,50 +528,45 @@ public class PSMGen
 
 		Map<String, Triple<Node, Node, Arr<Node, Path>>[]> colmap = new HashMap<>();
 		Map<String, Attribute<Node>[]> amap = new HashMap<>();
-		// Map<Node, CommCat>
 		for (Node d0 : D.objects) {
 			CommaCat<Node, Path, Node, Path, Node, Path> B = doComma(D, C, F,
 					d0, D0);
 
-		//	System.out.println("Comma cat is " + B);
-			
+			// System.out.println("Comma cat is " + B);
+
 			Map<Triple<Node, Node, Arr<Node, Path>>, String> xxx1 = new HashMap<>();
 			Map<Pair<Arr<Node, Path>, Arr<Node, Path>>, String> xxx2 = new HashMap<>();
 			List<PSM> xxx3 = deltaX(src, xxx1, xxx2, B.projB);
 			ret.addAll(xxx3);
 
-//			System.out.println("doing limit for " + d0);
-			Triple<Flower, Triple<Node, Node, Arr<Node, Path>>[], Attribute<Node>[]> 
-			xxx = lim(src, C0, D, B, xxx1, xxx2);
-//			System.out.println(xxx.first);
-//			System.out.println(Arrays.toString(xxx.second));
-			
-			//comma cat is empty, need unit for product
+			// System.out.println("doing limit for " + d0);
+			Triple<Flower, Triple<Node, Node, Arr<Node, Path>>[], Attribute<Node>[]> xxx = lim(
+					src, C0, D, B, xxx1, xxx2);
+			// System.out.println(xxx.first);
+			// System.out.println(Arrays.toString(xxx.second));
+
+			// comma cat is empty, need unit for product
 			if (xxx == null) {
 				Map<String, String> attrs2 = new HashMap<>();
 				attrs2.put("guid", PSM.VARCHAR());
-				
-				ret.add(new CreateTable(dst + "_" + d0.string + "_limit", attrs2, false));
+
+				ret.add(new CreateTable(dst + "_" + d0.string + "_limit",
+						attrs2, false));
 				ret.add(new InsertEmptyKeygen(dst + "_" + d0.string + "_limit"));
-				ret.add(new InsertSQL(dst + "_" + d0.string, new SquishFlower(dst
-						+ "_" + d0.string + "_limit")));
-				
+				ret.add(new InsertSQL(dst + "_" + d0.string, new SquishFlower(
+						dst + "_" + d0.string + "_limit")));
+
 				@SuppressWarnings("unchecked")
 				Triple<Node, Node, Arr<Node, Path>>[] cols = new Triple[0];
 				colmap.put(d0.string, cols);
 				continue;
 			}
-			
-			Triple<Node, Node, Arr<Node, Path>>[] cols = xxx.second;
-//			String ggg = "";
-//			for (Triple<Node, Node, Arr<Node, Path>> t : cols) {
-//				ggg += " " + t;
-//			}
-			//System.out.println("Cols are " + ggg);
 
-	//		System.out.println("done with limit");
+			Triple<Node, Node, Arr<Node, Path>>[] cols = xxx.second;
+
+			// System.out.println("done with limit");
 			Flower r = xxx.first;
-		//	System.out.println("r fl is " + r);
+			// System.out.println("r fl is " + r);
 			for (Attribute<Node> a : D0.attrsFor(d0)) {
 				List<Attribute<Node>> ls = new LinkedList<>();
 				for (Attribute<Node> aa : C0.attrs) {
@@ -705,30 +574,26 @@ public class PSMGen
 						ls.add(aa);
 					}
 				}
-	//			int hjk = cnamelkp(xxx.third, ls.get(0));
+				// int hjk = cnamelkp(xxx.third, ls.get(0));
 				for (int jj = 1; jj < ls.size(); jj++) {
-		//			int hjk0 = cnamelkp(xxx.third, ls.get(jj));
-				//	int xxx01 = cnamelkp(xxx.second, new Triple<>(d0, ls.get(0).source, new Arr<Node, Path>(new Path(D0, d0), d0, d0)));
+					// int hjk0 = cnamelkp(xxx.third, ls.get(jj));
+					// int xxx01 = cnamelkp(xxx.second, new Triple<>(d0,
+					// ls.get(0).source, new Arr<Node, Path>(new Path(D0, d0),
+					// d0, d0)));
 					int xxx02 = cnamelkp(xxx.third, ls.get(0));
-				//	int xxx03 = cnamelkp(xxx.second, new Triple<>(d0, ls.get(jj).source, new Arr<Node, Path>(new Path(D0, d0), d0, d0)));
+					// int xxx03 = cnamelkp(xxx.second, new Triple<>(d0,
+					// ls.get(jj).source, new Arr<Node, Path>(new Path(D0, d0),
+					// d0, d0)));
 					int xxx04 = cnamelkp(xxx.third, ls.get(jj));
-					r.where.add(new Pair<>(
-							    new Pair<>("t" + (xxx02 + xxx.second.length), "c1"),
-						      	new Pair<>("t" + (xxx04 + xxx.second.length), "c1")));
+					r.where.add(new Pair<>(new Pair<>("t"
+							+ (xxx02 + xxx.second.length), "c1"), new Pair<>(
+							"t" + (xxx04 + xxx.second.length), "c1")));
 
-//					r.where.add(new Pair<>(new Pair<>(,)), new Pair<>(,));
+					// r.where.add(new Pair<>(new Pair<>(,)), new Pair<>(,));
 				}
 			}
-		//	System.out.println("after " + r);
-			
-			//for each node in c, find the attrs that map to it, and equate them
-
 
 			colmap.put(d0.string, cols);
-			//System.out.println("adding amap " + d0.string + " and ");
-//			for (Attribute x : xxx.third) {
-//				System.out.println("zzz" + x);
-//			}
 			amap.put(d0.string, xxx.third);
 
 			Map<String, String> attrs1 = new HashMap<>();
@@ -736,7 +601,8 @@ public class PSMGen
 				attrs1.put("c" + i, PSM.VARCHAR());
 			}
 			for (int j = 0; j < xxx.third.length; j++) {
-				attrs1.put("c" + (xxx.second.length + j), xxx.third[j].target.psm());
+				attrs1.put("c" + (xxx.second.length + j),
+						xxx.third[j].target.psm());
 			}
 			Map<String, String> attrs2 = new HashMap<>(attrs1);
 			attrs2.put("guid", PSM.VARCHAR());
@@ -747,7 +613,8 @@ public class PSMGen
 					attrs1, false));
 			ret.add(new InsertSQL(dst + "_" + d0.string + "_limnoguid", r));
 
-			ret.add(new CreateTable(dst + "_" + d0.string + "_limit", attrs2, false));
+			ret.add(new CreateTable(dst + "_" + d0.string + "_limit", attrs2,
+					false));
 			ret.add(new InsertKeygen(dst + "_" + d0.string + "_limit", "guid",
 					dst + "_" + d0.string + "_limnoguid", attcs));
 
@@ -767,17 +634,11 @@ public class PSMGen
 
 			Triple<Node, Node, Arr<Node, Path>>[] q2cols = colmap.get(q2);
 			Triple<Node, Node, Arr<Node, Path>>[] q1cols = colmap.get(q1);
-			
+
 			if (q2cols == null) {
-				throw new RuntimeException("Cannot find " + q2 + " in " + colmap);
+				throw new RuntimeException("Cannot find " + q2 + " in "
+						+ colmap);
 			}
-
-			// List<Pair<Pair<String, String>, Pair<String, String>>> where =
-			// subset(dst, q1cols, q2cols, q1, q2);
-
-			// List<Pair<Pair<String, String>, Pair<String, String>>> where =
-			// subset(D, kkk.second.of(new Path(D0, s)), dst, q1cols, q2cols,
-			 //q1, q2);
 
 			List<Pair<Pair<String, String>, Pair<String, String>>> where = subset(
 					D, kkk.second.of(new Path(D0, s)), dst, q2cols, q1cols, q2,
@@ -792,26 +653,22 @@ public class PSMGen
 
 			Flower f = new Flower(select, from, where);
 
-		//	System.out.println("flower is " + f);
+			// System.out.println("flower is " + f);
 
 			ret.add(new InsertSQL(dst + "_" + s.name, f));
 
 		}
-		
+
 		for (Attribute<Node> a : F0.target.attrs) {
 			int i = colmap.get(a.source.string).length;
 			Attribute<Node>[] y = amap.get(a.source.string);
 			if (y == null) {
-				throw new FQLException("Attribute mapping not surjective " + a.source.string);
+				throw new FQLException("Attribute mapping not surjective "
+						+ a.source.string);
 			}
-			//System.out.println("&&&& doing attr " + a);
-			//System.out.println("amap is ");
-//			for (Attribute z : y) {
-//				System.out.println(z);
-//			}
 			boolean found = false;
 			int u = 0;
-	//		int j = -1;
+			// int j = -1;
 			List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
 			Map<String, Pair<String, String>> select = new HashMap<>();
 			Map<String, String> from = new HashMap<>();
@@ -821,48 +678,50 @@ public class PSMGen
 					u++;
 					continue;
 				}
-//				if (found) {
-//					throw new FQLException("Attribute mapping not bijection " + a);
-//				}
+				// if (found) {
+				// throw new FQLException("Attribute mapping not bijection " +
+				// a);
+				// }
 				found = true;
-				//j = u;
+				// j = u;
 				xxx.add(u);
 				u++;
 			}
 			if (!found) {
 				throw new FQLException("Attribute mapping not found " + a);
 			}
-			//System.out.println("i is " + i);
-			//System.out.println("u is " + u);
-			from.put(dst + "_" + a.source + "_limit", dst + "_" + a.source + "_limit");
-			select.put("c0", new Pair<>(dst + "_" + a.source + "_limit", "guid"));
+			// System.out.println("i is " + i);
+			// System.out.println("u is " + u);
+			from.put(dst + "_" + a.source + "_limit", dst + "_" + a.source
+					+ "_limit");
+			select.put("c0",
+					new Pair<>(dst + "_" + a.source + "_limit", "guid"));
 			for (int jj = 1; jj < xxx.size(); jj++) {
-				where.add(new Pair<>(new Pair<>(dst + "_" + a.source + "_limit", "c" + (xxx.get( 0)+i)),
-						  new Pair<>(dst + "_" + a.source + "_limit", "c" + (xxx.get(jj)+i))));
+				where.add(new Pair<>(
+						new Pair<>(dst + "_" + a.source + "_limit", "c"
+								+ (xxx.get(0) + i)), new Pair<>(dst + "_"
+								+ a.source + "_limit", "c" + (xxx.get(jj) + i))));
 			}
-			select.put("c1", new Pair<>(dst + "_" + a.source + "_limit", "c" + (xxx.get(0)+i)));
+			select.put("c1", new Pair<>(dst + "_" + a.source + "_limit", "c"
+					+ (xxx.get(0) + i)));
 			Flower f = new Flower(select, from, where);
 
-			//System.out.println("attr flower is " + f);
-			//System.out.println("inserting into " + dst + "_" + a.name);
+			// System.out.println("attr flower is " + f);
+			// System.out.println("inserting into " + dst + "_" + a.name);
 
 			ret.add(new InsertSQL(dst + "_" + a.name, f));
-			//project guid and u+i
+			// project guid and u+i
 		}
-		
+
 		for (Node d0 : D.objects) {
-			ret.add(new DropTable(dst + "_" + d0.string + "_limnoguid")); 
+			ret.add(new DropTable(dst + "_" + d0.string + "_limnoguid"));
 		}
-		
+
 		for (int ii = 0; ii < tempTables; ii++) {
 			ret.add(new DropTable("temp" + ii));
-		} 
+		}
 
 		return new Pair<>(ret, colmap);
-//		} catch (NullPointerException npe) {
-	//		npe.printStackTrace();
-	//		throw new RuntimeException();
-	//	}
 	}
 
 	private static List<Pair<Pair<String, String>, Pair<String, String>>> subset(
@@ -870,40 +729,44 @@ public class PSMGen
 			Triple<Node, Node, Arr<Node, Path>>[] q2cols,
 			Triple<Node, Node, Arr<Node, Path>>[] q1cols, String q2name,
 			String q1name) throws FQLException {
-//		 System.out.println("trying subset " + print(q1cols) + " in " +
-//		 print(q2cols));
+		// System.out.println("trying subset " + print(q1cols) + " in " +
+		// print(q2cols));
 		List<Pair<Pair<String, String>, Pair<String, String>>> ret = new LinkedList<>();
-		//System.out.println("Arr " + e);
-		//System.out.println("Cat" + cat);
+		// System.out.println("Arr " + e);
+		// System.out.println("Cat" + cat);
 		// turn e into arrow e', compute e' ; q2col, look for that
-		/* a: */ for (int i = 0; i < q2cols.length; i++) {
+		/* a: */for (int i = 0; i < q2cols.length; i++) {
 			boolean b = false;
 			for (int j = 0; j < q1cols.length; j++) {
 				Triple<Node, Node, Arr<Node, Path>> q2c = q2cols[i];
 				Triple<Node, Node, Arr<Node, Path>> q1c = q1cols[j];
-//				System.out.println("^^^" + q1c);
-//				System.out.println("^^^" + q2c);
-//				System.out.println("compose " + cat.compose(e, q2c.third));
-//				System.out.println("compose " + cat.compose(q2c.third, e));
-//				System.out.println("compose " + cat.compose(e, q1c.third));
-//				System.out.println("compose " + cat.compose(q1c.third, e));
-//				// if (q1c.equals(q2c)) {
-				
-				if (q1c.third.equals(cat.compose(e, q2c.third)) && q1c.second.equals(q2c.second)) {
-				//	System.out.println("hit on " + q2c.third);
-					Pair<Pair<String, String>, Pair<String, String>> retadd = new Pair<>(new Pair<>(
-							pre + "_" + q1name + "_limit_1", "c" + j),
-							new Pair<String, String>(pre + "_" + q2name + "_limit_2", "c" + i));
+				// System.out.println("^^^" + q1c);
+				// System.out.println("^^^" + q2c);
+				// System.out.println("compose " + cat.compose(e, q2c.third));
+				// System.out.println("compose " + cat.compose(q2c.third, e));
+				// System.out.println("compose " + cat.compose(e, q1c.third));
+				// System.out.println("compose " + cat.compose(q1c.third, e));
+				// // if (q1c.equals(q2c)) {
+
+				if (q1c.third.equals(cat.compose(e, q2c.third))
+						&& q1c.second.equals(q2c.second)) {
+					// System.out.println("hit on " + q2c.third);
+					Pair<Pair<String, String>, Pair<String, String>> retadd = new Pair<>(
+							new Pair<>(pre + "_" + q1name + "_limit_1", "c" + j),
+							new Pair<String, String>(pre + "_" + q2name
+									+ "_limit_2", "c" + i));
 					ret.add(retadd);
-				//	if (b) throw new FQLException("not uniq: " + "lookup for " + q2c + " and " + q1c);
-					
+					// if (b) throw new FQLException("not uniq: " +
+					// "lookup for " + q2c + " and " + q1c);
+
 					b = true;
-					
-					//System.out.println("added to where: " +  retadd);
-					//continue a;
+
+					// System.out.println("added to where: " + retadd);
+					// continue a;
 				}
 			}
-			if (b) continue;
+			if (b)
+				continue;
 			String xxx = "";
 			for (Triple<Node, Node, Arr<Node, Path>> yyy : q1cols) {
 				xxx += ", " + yyy;
@@ -912,34 +775,14 @@ public class PSMGen
 					+ " pre " + pre);
 
 		}
-		//System.out.println("where is " + ret);
+		// System.out.println("where is " + ret);
 		return ret;
-
-		// a: for (int i = 0; i < q1cols.length; i++) {
-		// for (int j = 0; j < q2cols.length; j++) {
-		// if (q1cols[i].equals(q2cols[j])) {
-		// int col1 = i+1;
-		// int col2 = j+
-		// // int col2 = j+2+q1cols.length;
-		// ret.add(new Pair<>(new Pair<>(),new Pair<>()));
-		// q1q2 = new Select(q1q2, i+1, j+2+q1cols.length);
-		// continue a;
-		// }
-		// }
-		// throw new RuntimeException("No col " + q1cols[i] + " in " + q2cols);
-		// }
-		// return ret;
 	}
 
 	private static CommaCat<Node, Path, Node, Path, Node, Path> doComma(
 			FinCat<Node, Path> d2, FinCat<Node, Path> c,
 			FinFunctor<Node, Path, Node, Path> f, Node d0, Signature S)
 			throws FQLException {
-		// List<String> x = new LinkedList<String>();
-		// x.add(d0);
-		// List<List<String>> y = new LinkedList<List<String>>();
-		// y.add(x);
-
 		FinFunctor<Node, Path, Node, Path> d = FinFunctor.singleton(d2, d0,
 				new Arr<>(d2.identities.get(d0).arr, d0, d0));
 		CommaCat<Node, Path, Node, Path, Node, Path> B = new CommaCat<>(
@@ -953,9 +796,7 @@ public class PSMGen
 
 	@SuppressWarnings("unchecked")
 	public static <Arrow> Triple<Flower, Triple<Node, Node, Arr<Node, Path>>[], Attribute<Node>[]> lim(
-			String pre,
-			Signature sig,
-			FinCat<Node, Path> cat,
+			String pre, Signature sig, FinCat<Node, Path> cat,
 			CommaCat<Node, Path, Node, Path, Node, Path> b,
 			Map<Triple<Node, Node, Arr<Node, Path>>, String> map,
 			Map<Pair<Arr<Node, Path>, Arr<Node, Path>>, String> map2)
@@ -967,7 +808,7 @@ public class PSMGen
 
 		int m = b.objects.size();
 		// String[] cnames = new String[m];
-		
+
 		if (m == 0) {
 			return null;
 		}
@@ -977,7 +818,7 @@ public class PSMGen
 		Triple<Node, Node, Arr<Node, Path>>[] cnames = new Triple[m];
 
 		List<Attribute<Node>> anames0 = new LinkedList<>();
-		
+
 		for (Triple<Node, Node, Arr<Node, Path>> n : b.objects) {
 			from.put("t" + temp, map.get(n));
 			// cnames[temp] = n.second.string;
@@ -985,68 +826,55 @@ public class PSMGen
 
 			select.put("c" + temp, new Pair<>("t" + temp, "c0"));
 			temp++;
-			//System.out.println("&&&" + n);
+			// System.out.println("&&&" + n);
 		}
-		
+
 		for (Triple<Node, Node, Arr<Node, Path>> n : b.objects) {
-	//		System.out.println("doing triple " + n);
+			// System.out.println("doing triple " + n);
 			if (cat.isId(n.third)) {
-//				System.out.println("is id " + n);
-			//	System.out.println("attrs for " + n.second + " are " + sig.attrsFor(n.second));
+				// System.out.println("is id " + n);
+				// System.out.println("attrs for " + n.second + " are " +
+				// sig.attrsFor(n.second));
 				for (Attribute<Node> a : sig.attrsFor(n.second)) {
 					anames0.add(a);
-				//	System.out.println("adding " + a);
+					// System.out.println("adding " + a);
 					from.put("t" + temp, pre + "_" + a.name);
-				// cnames[temp] = n.second.string;
+					// cnames[temp] = n.second.string;
 
 					select.put("c" + temp, new Pair<>("t" + temp, "c1"));
-				
-					where.add(new Pair<>(new Pair<>("t" + cnamelkp(cnames, n), "c0"),
-							new Pair<>("t" + temp,                    "c0")));
+
+					where.add(new Pair<>(new Pair<>("t" + cnamelkp(cnames, n),
+							"c0"), new Pair<>("t" + temp, "c0")));
 					temp++;
 				}
 			}
 		}
-		
 
-		// Set<String> cnames_set = new HashSet<>();
-		// System.out.println("***");
-		// for (String s : cnames) {
-		// System.out.println(s);
-		// cnames_set.add(s);
-		// }
-		// System.out.println("***");
-		//
-		// if (cnames_set.size() != cnames.length) {
-		// throw new RuntimeException();
-		// }
-
-		//temp = 0; VERY VERY BAD
-//		System.out.println("Col map is " + )
+		// temp = 0; VERY VERY BAD
+		// System.out.println("Col map is " + )
 		for (Arr<Triple<Node, Node, Arr<Node, Path>>, Pair<Arr<Node, Path>, Arr<Node, Path>>> e : b.arrows) {
 			if (b.isId(e)) {
 				continue;
 			}
-	//		System.out.println("DOING ARR " + e);
+			// System.out.println("DOING ARR " + e);
 			from.put("t" + temp, map2.get(e.arr));
-	
+
 			where.add(new Pair<>(new Pair<>("t" + temp, "c0"), new Pair<>("t"
-					+ cnamelkp(cnames, e.src), "c0"))); 
+					+ cnamelkp(cnames, e.src), "c0")));
 			where.add(new Pair<>(new Pair<>("t" + temp, "c1"), new Pair<>("t"
-					+ cnamelkp(cnames, e.dst), "c0"))); 
-	
-			
-		//	System.out.println("adding filter: " + e.src + " and " + e.dst + " col 1");
+					+ cnamelkp(cnames, e.dst), "c0")));
+
+			// System.out.println("adding filter: " + e.src + " and " + e.dst +
+			// " col 1");
 			temp++;
 		}
 
-		
 		Flower f = new Flower(select, from, where);
 		// System.out.println("flower is " + f);
 
-		return new Triple<>(f, cnames, anames0.toArray((Attribute<Node>[])new Attribute[] { }));
+		return new Triple<>(f, cnames,
+				anames0.toArray((Attribute<Node>[]) new Attribute[] {}));
 
-	
 	}
 
 	private static <Obj> int cnamelkp(Obj[] cnames, Obj s) throws FQLException {
@@ -1085,7 +913,7 @@ public class PSMGen
 			ret.add(new InsertSQL("temp" + tempTables, compose(pre, x)));
 			ar.put(p.getKey().arr, "temp" + tempTables++);
 		}
-		//System.out.println("DeltaX ret " + ret);
+		// System.out.println("DeltaX ret " + ret);
 		return ret;
 	}
 
@@ -1117,9 +945,9 @@ public class PSMGen
 			ret.add(new Pair<>(e.name, gather0(v)));
 		}
 		for (Attribute<Node> a : sig.attrs) {
-		//	System.out.println("looking for " + pre + "_" + "a.name");
+			// System.out.println("looking for " + pre + "_" + "a.name");
 			Set<Map<Object, Object>> v = state.get(pre + "_" + a.name);
-		//	System.out.println("result " + v);
+			// System.out.println("result " + v);
 			ret.add(new Pair<>(a.name, gather0(v)));
 		}
 

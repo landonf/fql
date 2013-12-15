@@ -434,27 +434,29 @@ public class CodeEditor extends JPanel implements Runnable {
 	}
 
 	String toDisplay = null;
-	Thread thread;
+	Thread thread, temp;
 
+	@SuppressWarnings("deprecation")
 	public void runAction() {
-		if (thread != null) {
-			JOptionPane
-					.showMessageDialog(
-							null,
-							"Cannot compile - wait for current compile to finish, or abort it from the edit menu");
-			return;
-		}
 		toDisplay = null;
 		//DateFormat format = DateFormat.getTimeInstance();
 		//String foo = format.format(new Date(System.currentTimeMillis()));
 
 		// respArea.setText("Compilation and visualization started at " + foo);
+		if (temp != null) {
+			temp.stop();
+		}
+		temp = null;
+		if (thread != null) {
+			thread.stop();
+		}
+		thread = null;
 		thread = new Thread(this);
-		Thread temp = new Thread(new Runnable() {
+		temp = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					int counter = 0;
+					//int counter = 0;
 					respArea.setText("");
 					for (;;) {
 						Thread.sleep(250);
@@ -464,16 +466,19 @@ public class CodeEditor extends JPanel implements Runnable {
 							return;
 						} else if (thread != null) {
 							respArea.setText(respArea.getText() + ".");
-							counter++;
-							if (counter == 80) {
-								counter = 0;
-								respArea.setText(respArea.getText() + "\n");
+						//	counter++;
+					//		if (counter == 80) {
+						//		counter = 0;
+						//		respArea.setText(respArea.getText() + "\n");
 								// respArea.s
-							}
+						//	}
 						}
 					}
 				} catch (InterruptedException ie) {
 					ie.printStackTrace();
+				} catch (Throwable tt) {
+					tt.printStackTrace();
+					respArea.setText(tt.getMessage());
 				}
 			}
 		});
@@ -483,6 +488,7 @@ public class CodeEditor extends JPanel implements Runnable {
 		thread.start();
 	}
 
+	@SuppressWarnings("deprecation")
 	public void run() {
 		String program = topArea.getText();
 
@@ -510,10 +516,17 @@ public class CodeEditor extends JPanel implements Runnable {
 			e.printStackTrace();
 			thread = null;
 			return;
-		} catch (RuntimeException e) {
+		} catch (Throwable e) {
 			toDisplay = "Error: " + e.getLocalizedMessage();
 			e.printStackTrace();
+			if (thread != null) {
+				thread.stop();
+			}
 			thread = null;
+			if (temp != null) {
+				temp.stop();
+			}
+			temp = null;
 			return;
 		}
 
@@ -529,12 +542,27 @@ public class CodeEditor extends JPanel implements Runnable {
 			topArea.requestFocusInWindow();
 			Integer theLine = init.lines.get(e.decl);
 			topArea.setCaretPosition(theLine);
+			if (thread != null) {
+				thread.stop();
+			}
 			thread = null;
+			if (temp != null) {
+				temp.stop();
+			}
+			temp = null;
 			return;
 		} catch (Throwable re) {
 			toDisplay = re.getLocalizedMessage();
 			re.printStackTrace();
+			if (thread != null) {
+				thread.stop();
+			}
 			thread = null;
+			if (temp != null) {
+				temp.stop();
+			}
+			temp = null;
+			respArea.setText(re.getLocalizedMessage());
 			return;
 		}
 
@@ -554,14 +582,28 @@ public class CodeEditor extends JPanel implements Runnable {
 
 			// String psm = PSMGen.compile(env, init);
 			toDisplay = env2;
-		} catch (Exception ee) {
+		} catch (Throwable ee) {
 			toDisplay = ee.toString();
 			ee.printStackTrace();
+			if (thread != null) {
+				thread.stop();
+			}
 			thread = null;
+			if (temp != null) {
+				temp.stop();
+			}
+			temp = null;
 			return;
 		}
 
+		if (thread != null) {
+			thread.stop();
+		}
 		thread = null;
+		if (temp != null) {
+			temp.stop();
+		}
+		temp = null;
 
 	}
 

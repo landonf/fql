@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import cern.colt.Arrays;
-
 import fql.FQLException;
 import fql.Fn;
 import fql.Pair;
@@ -437,7 +435,8 @@ public class InstOps implements
 		String next = next();
 		ret.addAll(PSMGen.makeTables(next, F0.source, false));
 		ret.addAll(e.h.accept(next, this));
-		ret.add(new FullSigmaTrans(F0, t.first, e.src, t.second, e.dst, next, dst));
+		ret.add(new FullSigmaTrans(F0, t.first, e.src, t.second, e.dst, next,
+				dst));
 
 		return ret;
 	}
@@ -461,10 +460,6 @@ public class InstOps implements
 			Signature sig2 = prog.insts.get(e.src).type(prog).toSig(prog);
 
 			for (Node n : sig2.nodes) {
-				// System.out.println("node is " + n.string);
-				// System.out.println("colmap1 " +
-				// Arrays.toString(colmap1x.get(n.string)));
-
 				List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
 				Map<String, String> from = new HashMap<>();
 				from.put("limit1", e.src + "_" + n.string + "_limit");
@@ -480,7 +475,8 @@ public class InstOps implements
 							"limit2", "c" + i)));
 					i++;
 				}
-				for (Attribute<Node> a : sig2.attrsFor(n)) {
+				//here a is unused because attributes will be in this order TODO check 
+				for (@SuppressWarnings("unused") Attribute<Node> a : sig2.attrsFor(n)) { 
 					where.add(new Pair<>(new Pair<>("limit1", "c" + i),
 							new Pair<>("limit2", "c" + i)));
 					i++;
@@ -488,7 +484,7 @@ public class InstOps implements
 				select.put("c0", new Pair<>("limit1", "guid"));
 				select.put("c1", new Pair<>("limit2", "guid"));
 				Flower f = new Flower(select, from, where);
-				//System.out.println("flower " + f);
+				// System.out.println("flower " + f);
 				ret.add(new InsertSQL(dst + "_" + n.string, f));
 			}
 			// ret.addAll(PSMGen.dropTables(xxx, sig2));
@@ -612,13 +608,10 @@ public class InstOps implements
 			// (f+g) : A+B -> C f : A -> C g : B -> C
 			Fn<Quad<String, String, String, String>, List<PSM>> fn = new Fn<Quad<String, String, String, String>, List<PSM>>() {
 				@Override
-				public List<PSM> of(Quad<String, String, String, String> x) { // f
-																				// g
-																				// C
-																				// dst
+				public List<PSM> of(Quad<String, String, String, String> x) {
 					String f = x.first; // e.a -> x.third
 					String g = x.second; // e.b -> x.third
-					String C = x.third;
+//					String C = x.third;
 					String dst0 = x.fourth;
 
 					// must be a map dst -> x.third
@@ -765,7 +758,7 @@ public class InstOps implements
 				public List<PSM> of(Quad<String, String, String, String> x) {
 					String f = x.first; // x.third -> e.a
 					String g = x.second; // x.third -> e.b
-					String C = x.third;
+					//String C = x.third;
 
 					String dst0 = x.fourth;
 

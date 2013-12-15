@@ -37,8 +37,13 @@ import fql.parse.RyanParser;
 import fql.parse.StringParser;
 import fql.parse.Tokens;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Class for running the chase.
+ */
 public class Chase {
-
 
 	static JButton run = new JButton("Run");
 
@@ -94,10 +99,12 @@ public class Chase {
 
 	static JComboBox<KIND> box = new JComboBox<>(new KIND[] { KIND.PARALLEL,
 			KIND.STANDARD, KIND.CORE });
-	static FQLTextPanel eds = new FQLTextPanel("EDs", "forall x, S(x,x) -> exists y, T(y,y)");
+	static FQLTextPanel eds = new FQLTextPanel("EDs",
+			"forall x, S(x,x) -> exists y, T(y,y)");
 	static FQLTextPanel eds0 = new FQLTextPanel("Simplified EDs", "");
 	static FQLTextPanel eds1 = new FQLTextPanel("Tuple EDs", "");
-	static FQLTextPanel inst = new FQLTextPanel("Instance", "S -> {(a,a),(b,b)}, T -> {}");
+	static FQLTextPanel inst = new FQLTextPanel("Instance",
+			"S -> {(a,a),(b,b)}, T -> {}");
 	static FQLTextPanel res = new FQLTextPanel("Result", "");
 
 	private static RyanParser<EmbeddedDependency> ed_p = make_ed_p();
@@ -131,7 +138,8 @@ public class Chase {
 			return new Pair<>(printNicely3(zzz), "");
 		}
 
-		Map<String, Set<Pair<Object, Object>>> res = chase(new HashSet<String>(), zzz, inst0, kind);
+		Map<String, Set<Pair<Object, Object>>> res = chase(
+				new HashSet<String>(), zzz, inst0, kind);
 
 		return new Pair<>(printNicely3(zzz), printNicely(res));
 	}
@@ -163,8 +171,7 @@ public class Chase {
 		return new RyanParser<EmbeddedDependency>() {
 
 			@Override
-			public Partial<EmbeddedDependency> parse(Tokens s)
-					throws BadSyntax {
+			public Partial<EmbeddedDependency> parse(Tokens s) throws BadSyntax {
 				RyanParser<List<String>> strings = ParserUtils
 						.many(new StringParser());
 				RyanParser<List<Triple<String, String, String>>> where1 = ParserUtils
@@ -371,16 +378,16 @@ public class Chase {
 					ret = apply(ret,
 							chaseEgd(ret_old, egd.first, egd.second, egd.third));
 				}
-			//	System.out.println("comparing " + ret + " and " + ret_old);
+				// System.out.println("comparing " + ret + " and " + ret_old);
 				if (ret.equals(ret_old)) {
 					return ret;
 				}
 				break;
 			case STANDARD:
 				fired = false;
-			//	System.out.println("ruleNo " + ruleNo);
-			//	System.out.println("tgd size " + tgds.size());
-			//	System.out.println("egd size " + egds.size());
+				// System.out.println("ruleNo " + ruleNo);
+				// System.out.println("tgd size " + tgds.size());
+				// System.out.println("egd size " + egds.size());
 				for (int x = 0; x < tgds.size() + egds.size(); x++) {
 					int pos = (ruleNo + x) % (tgds.size() + egds.size());
 					System.out.println("x " + x + "\npos" + pos);
@@ -411,7 +418,7 @@ public class Chase {
 				if (!fired) {
 					return ret;
 				}
-			//	System.out.println("\n\n\n" + ret);
+				// System.out.println("\n\n\n" + ret);
 			}
 
 			if (i++ > DEBUG.chase_limit) {
@@ -429,15 +436,16 @@ public class Chase {
 			List<Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>>> tgds,
 			List<Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>>> egds) {
 
-		//System.out.println("minimizing " + I);
-		
+		// System.out.println("minimizing " + I);
+
 		Map<String, Set<Pair<Object, Object>>> sol = I;
-		for (Map<String, Set<Pair<Object, Object>>> I0 : smaller(keys, I, tgds, egds)) {
-		//	System.out.println("checking " + I0);
+		for (Map<String, Set<Pair<Object, Object>>> I0 : smaller(keys, I, tgds,
+				egds)) {
+			// System.out.println("checking " + I0);
 			if (hasHomo(keys, I0, I) && hasHomo(keys, I, I0)) {
-			//	System.out.println("has homo ");
+				// System.out.println("has homo ");
 				if (size(I0) < size(sol)) {
-				//	System.out.println("smaller sized");
+					// System.out.println("smaller sized");
 					sol = I0;
 				}
 			}
@@ -469,10 +477,9 @@ public class Chase {
 			Map<String, Set<Pair<Object, Object>>> i0,
 			List<Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>>> tgds,
 			List<Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>>> egds) {
-		
-		
+
 		for (Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>> egd : egds) {
-			EmbeddedDependency xxx0 = conv(egd.first ,egd.second, egd.third);
+			EmbeddedDependency xxx0 = conv(egd.first, egd.second, egd.third);
 			ED xxx = ED.from(xxx0);
 
 			Flower front = xxx.front();
@@ -484,7 +491,7 @@ public class Chase {
 			}
 		}
 		for (Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>> tgd : tgds) {
-			EmbeddedDependency xxx0 = conv2(tgd.first ,tgd.second, tgd.third);
+			EmbeddedDependency xxx0 = conv2(tgd.first, tgd.second, tgd.third);
 			ED xxx = ED.from(xxx0);
 
 			Flower front = xxx.front();
@@ -525,12 +532,12 @@ public class Chase {
 		return ret;
 	}
 
-	private static boolean hasHomo(
-			Set<String> keys,
+	private static boolean hasHomo(Set<String> keys,
 			Map<String, Set<Pair<Object, Object>>> i,
 			Map<String, Set<Pair<Object, Object>>> i0) {
 
-		List<List<Pair<Object, Object>>> homs = homomorphs(ids(keys, i), ids(keys, i0));
+		List<List<Pair<Object, Object>>> homs = homomorphs(ids(keys, i),
+				ids(keys, i0));
 		for (List<Pair<Object, Object>> hom : homs) {
 			Map<String, Set<Pair<Object, Object>>> applied = apply(i, hom);
 			if (subset(applied, i0)) {
@@ -540,8 +547,7 @@ public class Chase {
 		return false;
 	}
 
-	private static boolean subset(
-			Map<String, Set<Pair<Object, Object>>> l,
+	private static boolean subset(Map<String, Set<Pair<Object, Object>>> l,
 			Map<String, Set<Pair<Object, Object>>> r) {
 		for (String k : l.keySet()) {
 			for (Pair<Object, Object> p : l.get(k)) {
@@ -553,9 +559,10 @@ public class Chase {
 		return true;
 	}
 
-	private static Set<Object> ids(Set<String> keys, Map<String, Set<Pair<Object, Object>>> i) {
+	private static Set<Object> ids(Set<String> keys,
+			Map<String, Set<Pair<Object, Object>>> i) {
 		Set<Object> ret = new HashSet<>();
-		//ignore keys
+		// ignore keys
 		for (String k : i.keySet()) {
 			for (Pair<Object, Object> p : i.get(k)) {
 				ret.add(p.first);
@@ -569,7 +576,6 @@ public class Chase {
 	public static <X> List<List<Pair<X, X>>> homomorphs(Collection<X> A,
 			Collection<X> B) {
 		List<List<Pair<X, X>>> ret = new LinkedList<>();
-
 
 		if (A.size() == 0) {
 			return ret;
@@ -885,48 +891,38 @@ public class Chase {
 		return new EmbeddedDependency(f, exists, s, t, egd);
 
 	}
-/*
-	public static Instance pi(Mapping m, Instance i) throws FQLException {
 
-		Signature cd = m.toEDs().third;
-
-		Map<String, Set<Pair<Object, Object>>> I = new HashMap<>();
-		for (Node n : cd.nodes) {
-			I.put(n.string, new HashSet<Pair<Object, Object>>());
-		}
-		for (Edge n : cd.edges) {
-			I.put(n.name, new HashSet<Pair<Object, Object>>());
-		}
-		for (String k : i.data.keySet()) {
-			I.put("src_" + k, i.data.get(k));
-		}
-
-		List<EmbeddedDependency> eds0 = cd.toED("");
-
-		Pair<List<Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>>>, List<Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>>>> zzz = split(eds0);
-
-		Set<String> keys = new HashSet<>();
-		for (Node n : m.target.nodes) {
-			keys.add("dst_" + n.string);
-		}
-		for (Edge n : m.target.edges) {
-			keys.add("dst_" + n.name);
-		}
-		Map<String, Set<Pair<Object, Object>>> res = chase(keys, zzz, I, KIND.CORE);
-		Map<String, Set<Pair<Object, Object>>> res0 = new HashMap<>();
-		for (Node n : m.target.nodes) {
-			res0.put(n.string, res.get("dst_" + n.string));
-		}
-		for (Edge n : m.target.edges) {
-			res0.put(n.name, res.get("dst_" + n.name));
-		}
-
-		Instance ret = new Instance("chased_" + i.name, m.target, res0);
-
-		return ret;
-
-	}
-*/
+	/*
+	 * public static Instance pi(Mapping m, Instance i) throws FQLException {
+	 * 
+	 * Signature cd = m.toEDs().third;
+	 * 
+	 * Map<String, Set<Pair<Object, Object>>> I = new HashMap<>(); for (Node n :
+	 * cd.nodes) { I.put(n.string, new HashSet<Pair<Object, Object>>()); } for
+	 * (Edge n : cd.edges) { I.put(n.name, new HashSet<Pair<Object, Object>>());
+	 * } for (String k : i.data.keySet()) { I.put("src_" + k, i.data.get(k)); }
+	 * 
+	 * List<EmbeddedDependency> eds0 = cd.toED("");
+	 * 
+	 * Pair<List<Triple<List<String>, List<Triple<String, String, String>>,
+	 * List<Triple<String, String, String>>>>, List<Triple<List<String>,
+	 * List<Triple<String, String, String>>, List<Pair<String, String>>>>> zzz =
+	 * split(eds0);
+	 * 
+	 * Set<String> keys = new HashSet<>(); for (Node n : m.target.nodes) {
+	 * keys.add("dst_" + n.string); } for (Edge n : m.target.edges) {
+	 * keys.add("dst_" + n.name); } Map<String, Set<Pair<Object, Object>>> res =
+	 * chase(keys, zzz, I, KIND.CORE); Map<String, Set<Pair<Object, Object>>>
+	 * res0 = new HashMap<>(); for (Node n : m.target.nodes) {
+	 * res0.put(n.string, res.get("dst_" + n.string)); } for (Edge n :
+	 * m.target.edges) { res0.put(n.name, res.get("dst_" + n.name)); }
+	 * 
+	 * Instance ret = new Instance("chased_" + i.name, m.target, res0);
+	 * 
+	 * return ret;
+	 * 
+	 * }
+	 */
 	public static Instance sigma(Mapping m, Instance i) throws FQLException {
 
 		Signature cd = m.toEDs().second;

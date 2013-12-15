@@ -7,8 +7,8 @@ import java.util.Set;
 /**
  * 
  * @author ryan
- *
- * Insert values syntax
+ * 
+ *         Insert values syntax
  */
 public class InsertValues extends PSM {
 
@@ -52,22 +52,16 @@ public class InsertValues extends PSM {
 			if (b) {
 				ret += ",";
 			}
-			b=true;
-			ret +=  " (" + rowStr + ") ";
+			b = true;
+			ret += " (" + rowStr + ") ";
 		}
-
-		// for (i = 0; i < attrs.size(); i++) {
-		// if (i > 0) {
-		// attrsStr += ", ";
-		// }
-		// attrsStr += "'" + attrs.get(i) + "'";
-		// }
 
 		return pre + ret.trim();
 	}
 
 	@Override
-	public void exec(PSMInterp interp, Map<String, Set<Map<Object, Object>>> state) {
+	public void exec(PSMInterp interp,
+			Map<String, Set<Map<Object, Object>>> state) {
 		if (state.get(name).size() > 0) {
 			throw new RuntimeException("table not empty: " + name);
 		}

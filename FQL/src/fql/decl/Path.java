@@ -198,6 +198,18 @@ public class Path  {
 		}
 		return sb.toString();
 	}
+	
+	public String toStringShort() {
+		StringBuffer sb = new StringBuffer();
+		int i = 0;
+		for (Edge e : path) {
+			if (i++ > 0) {
+				sb.append(".");
+			}
+			sb.append(e.name);
+		}
+		return sb.toString();
+	}
 
 	@Override
 	public int hashCode() {

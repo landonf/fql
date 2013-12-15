@@ -11,6 +11,12 @@ import cern.colt.Arrays;
 import fql.Pair;
 import fql.Triple;
 
+/**
+ * 
+ * @author ryan
+ *
+ * An embedded dependency.
+ */
 public class ED {
 
 	public List<String> forall, exists;

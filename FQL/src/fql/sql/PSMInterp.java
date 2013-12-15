@@ -14,32 +14,18 @@ import java.util.Set;
 public class PSMInterp {
 
 	public int guid = 0; 
-	
+
+	//keeps track of where guid was when sigma computations start,
+	//so we can replay later for sigma on transform
 	public Map<String, Integer> sigmas = new HashMap<>();
 	public Map<String, Integer> sigmas2 = new HashMap<>();
 
-	// wraps with binary tables
-//	public static String interp0(List<PSM> prog) {
-	//	Map<String, Set<Map<Object, Object>>> s = interp(prog);
-
-//		return s.toString();
-//	}
 
 	public  Map<String, Set<Map<Object, Object>>> interpX(List<PSM> prog,
 			Map<String, Set<Map<Object, Object>>> state) {
-		// System.out.println(prog);
 		for (PSM cmd : prog) {
-			// System.out.println("Executing ");
-			// System.out.println(cmd);
-			// System.out.println(state);
-
 			cmd.exec(this, state);
-			
-			// System.out.println("RESULT " + state);
-			// System.out.println("DONE EXECUTING");
-
 		}
-		// System.out.println("RESULT " + state);
 		return state;
 	}
 

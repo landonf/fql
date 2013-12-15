@@ -83,7 +83,7 @@ public class Display {
 		}
 		
 		if (DEBUG.debug.inst_obs) {
-			JPanel rel = view.observables();
+			JPanel rel = view.observables2();
 			px.add("Observables", rel);
 		}
 

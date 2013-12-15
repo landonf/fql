@@ -42,6 +42,12 @@ import fql.decl.SigExp.Const;
 import fql.examples.Example;
 import fql.gui.FQLTextPanel;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Translates RA (in the guise of SQL) to FQL using an active domain construction.
+ */
 public class RaToFql {
 
 	protected Example[] examples = { new PeopleExample() };

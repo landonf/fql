@@ -25,9 +25,14 @@ import fql.decl.SigExp;
 import fql.decl.Signature;
 import fql.decl.Type;
 
+/**
+ * 
+ * @author ryan
+ *
+ * Implements relationalization and observation using SQL.
+ * The terminal instance construction is here also.
+ */
 public class Relationalizer {
-
-	// sig, outname, inname
 
 	public static InstExp.Const terminal(FQLProgram prog, SigExp.Const sig0) {
 		try {
@@ -37,16 +42,11 @@ public class Relationalizer {
 			FinCat<Node, Path> cat = start.first;
 			Fn<Path, Arr<Node, Path>> map = start.second;
 			Map<Node, Set<Set<Triple<Arr<Node, Path>, Attribute<Node>, Object>>>> inst = new HashMap<>();
-			// Map<Attribute<Node>, Map<Pair<Arr<Node, Path>, Object>, Object>>
-			// atts = new HashMap<>();
-			// Map<Edge, Map<Pair<Arr<Node, Path>, Object>, Pair<Arr<Node,
-			// Path>, Object>>> fns = new HashMap<>();
 			Map<Set<Triple<Arr<Node, Path>, Attribute<Node>, Object>>, Integer> ids = new HashMap<>();
 			int count = 0;
 			List<Pair<String, List<Pair<Object, Object>>>> nodes0 = new LinkedList<>();
 			List<Pair<String, List<Pair<Object, Object>>>> attrs0 = new LinkedList<>();
 			List<Pair<String, List<Pair<Object, Object>>>> arrows0 = new LinkedList<>();
-			// Map<Node, Integer>
 			for (Node n : sig.nodes) {
 				Set<Set<Triple<Arr<Node, Path>, Attribute<Node>, Object>>> set = new HashSet<>();
 				Set<Triple<Arr<Node, Path>, Attribute<Node>, Object>> set0 = new HashSet<>();
@@ -54,8 +54,6 @@ public class Relationalizer {
 				set0.add(new Triple<>(map.of(new Path(sig, n)),
 						(Attribute<Node>) null, (Object) new Unit())); // null
 																		// ok
-				// List<Pair<Object, Object>> set0 = new LinkedList<>();
-				// nodes0.add(new Pair<>(n.string, set0));
 				// create 1 element set
 				for (Arr<Node, Path> p : cat.arrows) {
 					if (!p.src.equals(n)) {
@@ -98,8 +96,6 @@ public class Relationalizer {
 				nodes0.add(new Pair<>(n.string, xxx));
 			}
 			for (Attribute<Node> n : sig.attrs) {
-				// Map<Set<Triple<Arr<Node, Path>, Attribute<Node>, Object>>,
-				// Object> f = new HashMap<>();
 				List<Pair<Object, Object>> f0 = new LinkedList<>();
 				Set<Set<Triple<Arr<Node, Path>, Attribute<Node>, Object>>> src = inst
 						.get(n.source);
@@ -121,9 +117,6 @@ public class Relationalizer {
 				attrs0.add(new Pair<>(n.name, f0));
 			}
 			for (Edge n : sig.edges) {
-				// Map<List<Triple<Arr<Node, Path>, Attribute<Node>,
-				// Object>>,List<Triple<Arr<Node, Path>, Attribute<Node>,
-				// Object>>> f = new HashMap<>();
 				List<Pair<Object, Object>> f0 = new LinkedList<>();
 				arrows0.add(new Pair<>(n.name, f0));
 				Set<Set<Triple<Arr<Node, Path>, Attribute<Node>, Object>>> dst = inst
@@ -137,11 +130,7 @@ public class Relationalizer {
 				// System.out.println("ids are " + ids);
 
 				for (Set<Triple<Arr<Node, Path>, Attribute<Node>, Object>> k : dst) {
-					// Arr<Node, Path> v = map.of(new Path(sig, n));
-					// Set<Triple<Arr<Node, Path>, Attribute<Node>, Object>>
-					// newdst = new HashSet<>(k);
-					Set<Triple<Arr<Node, Path>, Attribute<Node>, Object>> newK = new HashSet<>(); // compose(n,
-																									// k);
+					Set<Triple<Arr<Node, Path>, Attribute<Node>, Object>> newK = new HashSet<>(); 
 					for (Triple<Arr<Node, Path>, Attribute<Node>, Object> xxx : k) {
 						if (xxx.second == null) {
 							continue;
@@ -172,18 +161,6 @@ public class Relationalizer {
 			throw new RuntimeException(fe.getLocalizedMessage());
 		}
 	}
-
-	/*
-	 * private static Set<Triple<Arr<Node, Path>, Attribute<Node>, Object>>
-	 * compose( Edge n, Set<Triple<Arr<Node, Path>, Attribute<Node>, Object>>
-	 * set) { Set<Triple<Arr<Node, Path>, Attribute<Node>, Object>> ret = new
-	 * HashSet<>();
-	 * 
-	 * for (Triple<Arr<Node, Path>, Attribute<Node>, Object> k : set) {
-	 * Arr<Node, Path> h = map }
-	 * 
-	 * return ret; }
-	 */
 
 	public static Pair<Map<Node, List<String>>, List<PSM>> observations(Signature sig, String out, String in, boolean relationalize) throws FQLException {
 		List<PSM> ret = new LinkedList<>();
@@ -459,9 +436,6 @@ public class Relationalizer {
 
 			ret.add(new DropTable(out + "_" +"relationalize_temp"));
 		}
-
-		// then do n.target
-		// then do attributes
 
 		return ret;
 	}

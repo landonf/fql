@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -50,23 +51,20 @@ import fql.cat.FinCat;
 import fql.cat.Inst;
 import fql.cat.Value;
 import fql.gui.CategoryOfElements;
-import fql.sql.PSM;
-import fql.sql.PSMGen;
-import fql.sql.PSMInterp;
-import fql.sql.Relationalizer;
+import fql.parse.PrettyPrinter;
 
-public class Instance  {
+public class Instance {
 
 	// public static String data(String s) {
 	// return s + " data";
 	// }
 
-//	public String name;
-	
-	//TODO better drop handling, by kind, visitor
-	
+	// public String name;
+
+	// TODO better drop handling, by kind, visitor
+
 	public void conformsTo(Signature s) throws FQLException {
-		
+
 		for (Node n : s.nodes) {
 			Set<Pair<Object, Object>> i = data.get(n.string);
 			if (i == null) {
@@ -78,16 +76,16 @@ public class Instance  {
 					throw new FQLException("Null data in " + this);
 				}
 				if (!p.first.equals(p.second)) {
-					throw new FQLException("Not reflexive: " 
-							+ s + " and " + this);
+					throw new FQLException("Not reflexive: " + s + " and "
+							+ this);
 				}
 			}
 		}
 		for (Attribute<Node> a : s.attrs) {
 			Set<Pair<Object, Object>> i = data.get(a.name);
 			if (i == null) {
-				throw new FQLException("Missing Attribute<Node> table " + a.name
-						+ " in " + this);
+				throw new FQLException("Missing Attribute<Node> table "
+						+ a.name + " in " + this);
 			}
 
 			HashSet<Object> x = new HashSet<>();
@@ -95,27 +93,28 @@ public class Instance  {
 				x.add(p.first);
 			}
 			if (data.get(a.source.string).size() != x.size()) {
-				throw new RuntimeException(
-						"Instance " + this + " does not map all domain values in " + a.name);
+				throw new RuntimeException("Instance " + this
+						+ " does not map all domain values in " + a.name);
 			}
 
 			for (Pair<Object, Object> p1 : i) {
 				for (Pair<Object, Object> p2 : i) {
 					if (p1.first.equals(p2.first)) {
 						if (!p1.second.equals(p2.second)) {
-							throw new FQLException("In " + this + ", not functional: "
-									+ " in " + s);
+							throw new FQLException("In " + this
+									+ ", not functional: " + " in " + s);
 						}
 					}
 				}
 				// functional
 
 				if (!contained(p1.first, data.get(a.source.string))) {
-					throw new FQLException("Domain has non foreign key: "
-							+ s + " and " + this);
+					throw new FQLException("Domain has non foreign key: " + s
+							+ " and " + this);
 				}
 				if (!a.target.in(p1.second)) {
-					throw new FQLException("Not a " + a.target + ": " + p1.second);
+					throw new FQLException("Not a " + a.target + ": "
+							+ p1.second);
 				}
 			}
 		}
@@ -140,8 +139,8 @@ public class Instance  {
 				for (Pair<Object, Object> p2 : i) {
 					if (p1.first.equals(p2.first)) {
 						if (!p1.second.equals(p2.second)) {
-							throw new FQLException("Not functional: " 
-									+ " in " + s + " and " + this);
+							throw new FQLException("Not functional: " + " in "
+									+ s + " and " + this);
 						}
 					}
 				}
@@ -161,27 +160,24 @@ public class Instance  {
 			Set<Pair<Object, Object>> lhs = evaluate(eq.lhs);
 			Set<Pair<Object, Object>> rhs = evaluate(eq.rhs);
 			if (!lhs.equals(rhs)) {
-				throw new FQLException("Violates constraints: " + s + "\n\n eq is " + eq
-						+ "\nlhs is " + lhs + "\n\nrhs is " + rhs);
+				throw new FQLException("Violates constraints: " + s
+						+ "\n\n eq is " + eq + "\nlhs is " + lhs
+						+ "\n\nrhs is " + rhs);
 			}
 		}
-/*
-		if (DEBUG.VALIDATE_WITH_EDS) {
-			validateUsingEDs();
-		}
-		*/
+		/*
+		 * if (DEBUG.VALIDATE_WITH_EDS) { validateUsingEDs(); }
+		 */
 		// toFunctor();
 	}
-/*
-	private void validateUsingEDs() throws FQLException {
-		//System.out.println("Validating " + this);
-		for (EmbeddedDependency ed : thesig.toED("")) {
-			if (!ED.from(ed).holds(data)) {
-				throw new FQLException("ED constraint violation in " + this + ": " + ed + "\n" + ED.from(ed) + "\n" + ED.conv(data));
-			}
-		}		
-	}
-	*/
+
+	/*
+	 * private void validateUsingEDs() throws FQLException {
+	 * //System.out.println("Validating " + this); for (EmbeddedDependency ed :
+	 * thesig.toED("")) { if (!ED.from(ed).holds(data)) { throw new
+	 * FQLException("ED constraint violation in " + this + ": " + ed + "\n" +
+	 * ED.from(ed) + "\n" + ED.conv(data)); } } }
+	 */
 
 	public Set<Pair<Object, Object>> evaluate(Path p) {
 		Set<Pair<Object, Object>> x = data.get(p.source.string);
@@ -248,7 +244,7 @@ public class Instance  {
 	}
 
 	public Instance(Signature thesig) throws FQLException {
-		//this.name = n;
+		// this.name = n;
 		this.data = new HashMap<>();
 		this.external = true;
 		for (Node node : thesig.nodes) {
@@ -266,22 +262,22 @@ public class Instance  {
 		}
 		conformsTo(thesig);
 	}
-	
-	//TODO GUI observables using JDBC
+
+	// TODO GUI observables using JDBC
 
 	public Instance(Signature thesig,
 			List<Pair<String, List<Pair<Object, Object>>>> data)
 			throws FQLException {
-		//this.name = n;
+		// this.name = n;
 		this.thesig = thesig;
 		this.data = new HashMap<>();
-		
+
 		for (Pair<String, List<Pair<Object, Object>>> k : data) {
 			if (!thesig.contains(k.first)) {
 				throw new FQLException("Extraneous table: " + k.first);
 			}
 		}
-		
+
 		List<String> seen = new LinkedList<>();
 		for (Node node : thesig.nodes) {
 			if (seen.contains(node.string)) {
@@ -320,8 +316,8 @@ public class Instance  {
 				return secol(p.second);
 			}
 		}
-		throw new RuntimeException("conformsTo failure: cannot find " + string + " in " + data2
-				);
+		throw new RuntimeException("conformsTo failure: cannot find " + string
+				+ " in " + data2);
 	}
 
 	private Set<Pair<Object, Object>> secol(List<Pair<Object, Object>> second) {
@@ -392,45 +388,29 @@ public class Instance  {
 	// }
 
 	// this is the json one
-/*	public Instance(
-			Signature sig,
-			List<Pair<String, List<Object>>> ob,
-			List<Pair<Pair<Pair<Object, Object>, String>, List<Pair<Object, Object>>>> mo)
-			throws FQLException {
-
-		this(null, sig, jsonmap(ob, mo));
-	} */
-/*
-	private static Map<String, Set<Pair<Object, Object>>> jsonmap(
-			List<Pair<String, List<Object>>> ob,
-			List<Pair<Pair<Pair<Object, Object>, String>, List<Pair<Object, Object>>>> mo) {
-		Map<String, Set<Pair<Object, Object>>> map = new HashMap<>();
-		for (Pair<String, List<Object>> o : ob) {
-			map.put(o.first, dupl(o.second));
-		}
-		for (Pair<Pair<Pair<Object, Object>, String>, List<Pair<Object, Object>>> o : mo) {
-			String arr = o.first.second;
-			Set<Pair<Object, Object>> set = map.get(arr);
-			if (set == null) {
-				set = new HashSet<>();
-				map.put(arr, set);
-			}
-			for (Pair<Object, Object> oo : o.second) {
-				set.add(oo);
-			}
-		}
-		return map;
-	}
-*/
 	/*
-	private static <X> Set<Pair<X, X>> dupl(List<X> x) {
-		Set<Pair<X, X>> ret = new HashSet<>();
-		for (X s : x) {
-			ret.add(new Pair<>(s, s));
-		}
-		return ret;
-	}
-	*/
+	 * public Instance( Signature sig, List<Pair<String, List<Object>>> ob,
+	 * List<Pair<Pair<Pair<Object, Object>, String>, List<Pair<Object,
+	 * Object>>>> mo) throws FQLException {
+	 * 
+	 * this(null, sig, jsonmap(ob, mo)); }
+	 */
+	/*
+	 * private static Map<String, Set<Pair<Object, Object>>> jsonmap(
+	 * List<Pair<String, List<Object>>> ob, List<Pair<Pair<Pair<Object, Object>,
+	 * String>, List<Pair<Object, Object>>>> mo) { Map<String, Set<Pair<Object,
+	 * Object>>> map = new HashMap<>(); for (Pair<String, List<Object>> o : ob)
+	 * { map.put(o.first, dupl(o.second)); } for (Pair<Pair<Pair<Object,
+	 * Object>, String>, List<Pair<Object, Object>>> o : mo) { String arr =
+	 * o.first.second; Set<Pair<Object, Object>> set = map.get(arr); if (set ==
+	 * null) { set = new HashSet<>(); map.put(arr, set); } for (Pair<Object,
+	 * Object> oo : o.second) { set.add(oo); } } return map; }
+	 */
+	/*
+	 * private static <X> Set<Pair<X, X>> dupl(List<X> x) { Set<Pair<X, X>> ret
+	 * = new HashSet<>(); for (X s : x) { ret.add(new Pair<>(s, s)); } return
+	 * ret; }
+	 */
 
 	private boolean typeCheck(Signature thesig2) {
 		for (String s : data.keySet()) {
@@ -470,7 +450,7 @@ public class Instance  {
 			return false;
 		return true;
 	}
-	
+
 	public String quickPrint() {
 		return data.toString();
 	}
@@ -784,7 +764,7 @@ public class Instance  {
 			JTable t = new JTable(arr, cols3) {
 				public Dimension getPreferredScrollableViewportSize() {
 					Dimension d = getPreferredSize();
-					return new Dimension(d.width, d.height );
+					return new Dimension(d.width, d.height);
 				}
 			};
 
@@ -794,7 +774,7 @@ public class Instance  {
 			JTable foo = new JTable(t.getModel()) {
 				public Dimension getPreferredScrollableViewportSize() {
 					Dimension d = getPreferredSize();
-					return new Dimension(d.width, d.height );
+					return new Dimension(d.width, d.height);
 				}
 			};
 			JPanel p = new JPanel(new GridLayout(1, 1));
@@ -812,10 +792,11 @@ public class Instance  {
 			// foo.set
 			// foo.setAutoCreateRowSorter(true);
 			p.add(new JScrollPane(foo));
-		
+
 			// p.setMaximumSize(new Dimension(200,200));
 			p.setBorder(BorderFactory.createTitledBorder(
-					BorderFactory.createEmptyBorder(), name + " (" + ids.size() + " rows)" ));
+					BorderFactory.createEmptyBorder(), name + " (" + ids.size()
+							+ " rows)"));
 			vwr.add(p, name);
 
 			// foo.setMaximumSize(new Dimension(600,200));
@@ -1032,7 +1013,6 @@ public class Instance  {
 		return makeViewer();
 	}
 
-
 	public Graph<String, String> build() {
 		// Graph<V, E> where V is the type of the vertices
 
@@ -1061,7 +1041,8 @@ public class Instance  {
 		return doView(g);
 	}
 
-	public JPanel doView(/* final Environment env ,*/ /* final Color color */ Graph<String, String> sgv) {
+	public JPanel doView(
+	/* final Environment env , *//* final Color color */Graph<String, String> sgv) {
 		// Layout<V, E>, BasicVisualizationServer<V,E>
 		// Layout<String, String> layout = new KKLayout(sgv);
 
@@ -1071,7 +1052,7 @@ public class Instance  {
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
 				layout);
-		//vv.setPreferredSize(new Dimension(600, 400));
+		// vv.setPreferredSize(new Dimension(600, 400));
 		// vv.getRenderContext().setEdgeLabelRerderer(new MyEdgeT());
 		// Setup up a new vertex to paint transformer...
 		Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
@@ -1081,9 +1062,9 @@ public class Instance  {
 				} else {
 					return thesig.colors.get(i);
 				}
-//				return color;
+				// return color;
 			}
-		}; 
+		};
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		// gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
@@ -1142,21 +1123,20 @@ public class Instance  {
 			}
 		};
 
-	//	vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+		// vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 		vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
 		vv.getRenderContext().setVertexLabelTransformer(
 				new ToStringLabeller<String>());
 		vv.getRenderContext().setEdgeLabelTransformer(
 				new ToStringLabeller<String>());
-		
-		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
-		//JPanel ret = new JPanel(new GridLayout(1,1));
-		//ret.add(zzz);
-		//ret.setBorder(BorderFactory.createEtchedBorder());
 
+		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
+		// JPanel ret = new JPanel(new GridLayout(1,1));
+		// ret.add(zzz);
+		// ret.setBorder(BorderFactory.createEtchedBorder());
 
 		JSplitPane newthing = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-		newthing.setResizeWeight(.8d); //setDividerLocation(.9d);
+		newthing.setResizeWeight(.8d); // setDividerLocation(.9d);
 		newthing.add(zzz);
 		newthing.add(vwr);
 		JPanel xxx = new JPanel(new GridLayout(1, 1));
@@ -1352,7 +1332,7 @@ public class Instance  {
 			ret.add(new Pair<>(e.name, tuples));
 		}
 
-//		return null;
+		// return null;
 		return new Instance(s, ret);
 	}
 
@@ -1423,71 +1403,17 @@ public class Instance  {
 	CardLayout cards = new CardLayout();
 	Map<String, JTable> joined;
 
-	
 	public JPanel groth() throws FQLException {
 		return CategoryOfElements.makePanel(this);
 	}
 
-	public JPanel observables() {
-		
-		
-		JTabbedPane t = new JTabbedPane();
+	private JPanel makePanel2(Pair<Object[], Object[][]> res) {
+		Object[] colnames = res.first;
+		Object[][] rows = res.second;
 
-		String name = "obsinput"; //dont use 'input' here - it conflicts
-		Map<String, Set<Map<Object, Object>>> state = shred( name );
-		//System.out.println(state);
-		try {
-			if (thesig.attrs.size() == 0) {
-				throw new FQLException("Cannot generate observables - no attributes");
-			}
+		JPanel ret = new JPanel(new GridLayout(1, 1));
 
-			List<PSM> prog = (PSMGen.makeTables("output", thesig, false));
-
-			Pair<Map<Node, List<String>>, List<PSM>> xxx = Relationalizer.compile(thesig, "output", name);
-			prog.addAll(xxx.second);
-			Map<String, Set<Map<Object, Object>>> res = new PSMInterp().interpX(prog, state);
-						
-			for (Node n : thesig.nodes) {
-				t.addTab(n.string, makePanel(xxx.first.get(n), res, n));
-			}
-			JPanel ret = new JPanel(new GridLayout(1,1));
-			ret.add(t);
-			ret.setBorder(BorderFactory.createEtchedBorder());
-			return ret;
-
-		} catch (Exception e) {
-			JPanel ret = new JPanel(new GridLayout(1,1));
-			JTextArea a = new JTextArea(e.getMessage());
-			ret.add(new JScrollPane(a));
-			return ret;
-		}
-	}
-
-	private JPanel makePanel(List<String> attrs,
-			Map<String, Set<Map<Object, Object>>> res, Node n) {
-		try {
-//		System.out.println("********");
-//		System.out.println(res);
-//		
-		JPanel ret = new JPanel(new GridLayout(1,1));
-		Object[] colNames = new Object[attrs.size() + 1];
-		int x = 1;
-		colNames[0] = "ID";
-		for (String s : attrs) {
-			colNames[x++] = s;
-		}
-		Object[][] rows = new Object[data.get(n.string).size()][attrs.size() + 1];
-		
-		int j = 0;
-		for (Map<Object, Object> row : res.get("output_" + n.string + "_observables")) {
-			for (int i = 0; i < attrs.size(); i++) {
-				rows[j][i+1] = row.get("c" + i);
-			}
-			rows[j][0] = row.get("id");
-			j++;
-		}
-		
-		JTable table = new JTable(rows, colNames);		
+		JTable table = new JTable(rows, colnames);
 		TableRowSorter<?> sorter = new MyTableRowSorter(table.getModel());
 
 		table.setRowSorter(sorter);
@@ -1495,46 +1421,210 @@ public class Instance  {
 		sorter.toggleSortOrder(0);
 
 		ret.add(new JScrollPane(table));
-		
-		String str = data.get(n.string).size() + " IDs, " + res.get("output_" + n.string + "_observables_proj").size() + " unique attribute combinations";
-		ret.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), str));
-		
+
+		String str = rows.length + " IDs, " + proj1(rows)
+				+ " unique attribute combinations"; 
+		ret.setBorder(BorderFactory.createTitledBorder(
+				BorderFactory.createEmptyBorder(), str));
+
 		return ret;
-		
+	}
+
+	private static int proj1(Object[][] in) {
+		Set<List<Object>> ret = new HashSet<>();
+		for (Object[] k : in) {
+			List<Object> xxx = new LinkedList<>();
+			for (int i = 1; i < k.length; i++) {
+				xxx.add(k[i]);
+			}
+			ret.add(xxx);
+		}
+		return ret.size();
+	}
+
+	public JPanel observables2() {
+		try {
+			Map<Node, Pair<Object[], Object[][]>> xxx = computeObservables();
+
+			JTabbedPane t = new JTabbedPane();
+
+			for (Node n : thesig.nodes) {
+				t.addTab(n.string, makePanel2(xxx.get(n)));
+			}
+			JPanel ret = new JPanel(new GridLayout(1, 1));
+			ret.add(t);
+			ret.setBorder(BorderFactory.createEtchedBorder());
+			return ret;
+
 		} catch (Throwable e) {
 			e.printStackTrace();
-			return new JPanel();
+			JPanel ret = new JPanel(new GridLayout(1, 1));
+			JTextArea a = new JTextArea(e.getMessage());
+			ret.add(new JScrollPane(a));
+			return ret;
 		}
-	
 	}
 
-	private Map<String, Set<Map<Object, Object>>> shred(String pre) {
-		Map<String, Set<Map<Object, Object>>> ret = new HashMap<>();
-		for (String k : data.keySet()) {
-			ret.put(pre + "_" + k, shred0(data.get(k)));
+	private Comparator<Pair<Path, Attribute<Node>>> comparator = new Comparator<Pair<Path, Attribute<Node>>>() {
+
+		@Override
+		public int compare(Pair<Path, Attribute<Node>> o1,
+				Pair<Path, Attribute<Node>> o2) {
+			List<String> x1 = o1.first.asList();
+			x1.add(o1.second.name);
+			List<String> x2 = o2.first.asList();
+			x2.add(o2.second.name);
+
+			Iterator<String> i1 = x1.iterator();
+			Iterator<String> i2 = x2.iterator();
+			while (i1.hasNext() && i2.hasNext()) {
+				int c = i1.next().compareTo(i2.next());
+				if (c != 0) {
+					return c;
+				}
+			}
+			if (i1.hasNext()) {
+				return 1;
+			} else if (i2.hasNext()) {
+				return -1;
+			} else {
+				return 0;
+			}
 		}
+
+	};
+
+	private Map<Node, Pair<Object[], Object[][]>> computeObservables()
+			throws FQLException {
+
+		Map<Pair<Path, Attribute<Node>>, Set<Pair<Object, Object>>> rem = new HashMap<>();
+
+		FinCat<Node, Path> cat = thesig.toCategory2().first;
+		for (Arr<Node, Path> arr : cat.arrows) {
+			Path p = arr.arr;
+			Set<Pair<Object, Object>> v = evaluate(p);
+			for (Attribute<Node> a : thesig.attrsFor(p.target)) {
+				Set<Pair<Object, Object>> vv = compose(v, data.get(a.name));
+				rem.put(new Pair<>(p, a), vv);
+			}
+		}
+
+		Map<Node, List<Pair<Path, Attribute<Node>>>> m = new HashMap<>();
+		for (Node n : thesig.nodes) {
+			m.put(n, new LinkedList<Pair<Path, Attribute<Node>>>());
+		}
+		for (Pair<Path, Attribute<Node>> k : rem.keySet()) {
+			m.get(k.first.source).add(k);
+		}
+		Map<Node, Pair<Object[], Object[][]>> ret = new HashMap<>();
+		for (Node n : thesig.nodes) {
+			Collections.sort(m.get(n), comparator);
+			Object[] ar = new Object[m.get(n).size() + 1];
+			Map<Object, Object[]> rows = new HashMap<>();
+			for (Pair<Object, Object> o : data.get(n.string)) {
+				Object[] arr = new Object[m.get(n).size() + 1];
+				arr[0] = o.first;
+				rows.put(o.first, arr);
+			}
+			ar[0] = "ID";
+			int i = 1;
+			for (Pair<Path, Attribute<Node>> k : m.get(n)) {
+				List<String> print = k.first.asList();
+				print.remove(0);
+				print.add(k.second.name);
+				ar[i] = PrettyPrinter.sep0(".", print);
+				Set<Pair<Object, Object>> v = rem.get(k);
+				for (Pair<Object, Object> p : v) {
+					rows.get(p.first)[i] = p.second;
+				}
+				i++;
+			}
+			ret.put(n, new Pair<>(ar, rows.values().toArray(new Object[][] {})));
+		}
+
 		return ret;
 	}
 
-	private Set<Map<Object, Object>> shred0(Set<Pair<Object, Object>> set) {
-		Set<Map<Object, Object>> ret = new HashSet<>();
-		for (Pair<Object, Object> p : set) {
-			Map<Object, Object> m = new HashMap<>();
-			m.put("c0", p.first);
-			m.put("c1", p.second);
-			ret.add(m);
-		}
-		return ret;
-	}
-
-
-	/**
-	 * Quickly compares two instances by checking the counts
-	 * of tuples in all the rows.
+	/*
+	 * public JPanel observables() {
+	 * 
+	 * JTabbedPane t = new JTabbedPane();
+	 * 
+	 * String name = "obsinput"; // dont use 'input' here - it conflicts
+	 * Map<String, Set<Map<Object, Object>>> state = shred(name); //
+	 * System.out.println(state); try { if (thesig.attrs.size() == 0) { throw
+	 * new FQLException( "Cannot generate observables - no attributes"); }
+	 * 
+	 * List<PSM> prog = (PSMGen.makeTables("output", thesig, false));
+	 * 
+	 * Pair<Map<Node, List<String>>, List<PSM>> xxx = Relationalizer
+	 * .compile(thesig, "output", name); prog.addAll(xxx.second); Map<String,
+	 * Set<Map<Object, Object>>> res = new PSMInterp() .interpX(prog, state);
+	 * 
+	 * for (Node n : thesig.nodes) { t.addTab(n.string,
+	 * makePanel(xxx.first.get(n), res, n)); } JPanel ret = new JPanel(new
+	 * GridLayout(1, 1)); ret.add(t);
+	 * ret.setBorder(BorderFactory.createEtchedBorder()); return ret;
+	 * 
+	 * } catch (Throwable e) { JPanel ret = new JPanel(new GridLayout(1, 1));
+	 * JTextArea a = new JTextArea(e.getMessage()); ret.add(new JScrollPane(a));
+	 * return ret; } // } catch (Throwable tt) { //
+	 * JOptionPane.showMessageDialog(null, tt.getLocalizedMessage()); // JPanel
+	 * ret = new JPanel(new GridLayout(1,1)); // JTextArea a = new
+	 * JTextArea(tt.getMessage()); // ret.add(new JScrollPane(a)); // return
+	 * ret; // } }
+	 * 
+	 * private JPanel makePanel(List<String> attrs, Map<String, Set<Map<Object,
+	 * Object>>> res, Node n) { try { // System.out.println("********"); //
+	 * System.out.println(res); // JPanel ret = new JPanel(new GridLayout(1,
+	 * 1)); Object[] colNames = new Object[attrs.size() + 1]; int x = 1;
+	 * colNames[0] = "ID"; for (String s : attrs) { colNames[x++] = s; }
+	 * Object[][] rows = new Object[data.get(n.string).size()][attrs .size() +
+	 * 1];
+	 * 
+	 * int j = 0; for (Map<Object, Object> row : res.get("output_" + n.string +
+	 * "_observables")) { for (int i = 0; i < attrs.size(); i++) { rows[j][i +
+	 * 1] = row.get("c" + i); } rows[j][0] = row.get("id"); j++; }
+	 * 
+	 * JTable table = new JTable(rows, colNames); TableRowSorter<?> sorter = new
+	 * MyTableRowSorter(table.getModel());
+	 * 
+	 * table.setRowSorter(sorter); sorter.allRowsChanged();
+	 * sorter.toggleSortOrder(0);
+	 * 
+	 * ret.add(new JScrollPane(table));
+	 * 
+	 * String str = data.get(n.string).size() + " IDs, " + res.get("output_" +
+	 * n.string + "_observables_proj") .size() +
+	 * " unique attribute combinations";
+	 * ret.setBorder(BorderFactory.createTitledBorder(
+	 * BorderFactory.createEmptyBorder(), str));
+	 * 
+	 * return ret;
+	 * 
+	 * } catch (Throwable e) { e.printStackTrace(); return new JPanel(); }
+	 * 
+	 * }
+	 * 
+	 * private Map<String, Set<Map<Object, Object>>> shred(String pre) {
+	 * Map<String, Set<Map<Object, Object>>> ret = new HashMap<>(); for (String
+	 * k : data.keySet()) { ret.put(pre + "_" + k, shred0(data.get(k))); }
+	 * return ret; }
+	 * 
+	 * private Set<Map<Object, Object>> shred0(Set<Pair<Object, Object>> set) {
+	 * Set<Map<Object, Object>> ret = new HashSet<>(); for (Pair<Object, Object>
+	 * p : set) { Map<Object, Object> m = new HashMap<>(); m.put("c0", p.first);
+	 * m.put("c1", p.second); ret.add(m); } return ret; }
 	 */
-	public static boolean quickCompare(Instance i, Instance j) throws FQLException {
+	/**
+	 * Quickly compares two instances by checking the counts of tuples in all
+	 * the rows.
+	 */
+	public static boolean quickCompare(Instance i, Instance j)
+			throws FQLException {
 		if (!i.data.keySet().equals(j.data.keySet())) {
-			throw new RuntimeException(i.data.keySet() + "\n\n" + j.data.keySet());
+			throw new RuntimeException(i.data.keySet() + "\n\n"
+					+ j.data.keySet());
 		}
 		for (String k : i.data.keySet()) {
 			Set<Pair<Object, Object>> v = i.data.get(k);
@@ -1543,7 +1633,7 @@ public class Instance  {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
 

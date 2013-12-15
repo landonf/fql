@@ -29,7 +29,6 @@ public class FullSigma extends PSM {
 	Mapping f;
 	String pre;
 	String inst;
-	//Environment env;
 
 	public FullSigma(Mapping f, String pre, String inst) {
 		this.f = f;
@@ -50,23 +49,12 @@ public class FullSigma extends PSM {
 			interp.sigmas2.put(pre, interp.guid);
 			Instance J = xxx.first;
 			Map<Node, Map<Integer, Integer>> yyy = xxx.second;
-//			Denotation d = new Denotation(interp, f, I);
-		//	System.out.println("Exucuting fs on " + I);
-			//System.out.println("GUID is " + PSMInterp.guid);
-//			System.out.println(d);
-//			Instance J = d.sigma(interp);
-		//	System.out.println("done " + J);
-			//System.out.println("GUID is " + PSMInterp.guid);
-			
-	//		System.out.println("********");
-	//		System.out.println("input instance " + I);
-	//		System.out.println("etables " + yyy);
+
 			for (Node n : C.nodes) {
 				state.put(pre + "_" + n.string + "_e", conv2(yyy.get(n)));				
 			}
 
 			for (Node n : D.nodes) {
-		//		System.out.println("looking up " + n.string + " in " + J.data);
 				state.put(pre + "_" + n.string, conv(J.data.get(n.string)));
 			}
 			for (Edge n : D.edges) {

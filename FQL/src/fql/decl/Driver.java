@@ -10,7 +10,6 @@ import fql.DEBUG;
 import fql.JDBCBridge;
 import fql.LineException;
 import fql.Pair;
-import fql.parse.PrettyPrinter;
 import fql.sql.PSM;
 import fql.sql.PSMGen;
 import fql.sql.PSMInterp;

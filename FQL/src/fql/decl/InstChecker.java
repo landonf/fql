@@ -46,8 +46,8 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 		SigExp lt = env.insts.get(a).accept(env, this);
 		SigExp rt = env.insts.get(b).accept(env, this);
 		if (!lt.equals(rt)) {
-			throw new RuntimeException("Not of same type: " + lt
-					+ " and " + rt);
+			throw new RuntimeException("Not of same type: " + lt.unresolve(env.sigs)
+					+ " and " + rt.unresolve(env.sigs));
 		}
 		return lt;	
 	}
@@ -98,7 +98,7 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 		Pair<SigExp, SigExp> ft = e.F.type(env);
 		if (!ft.second.equals(it)) {
 			throw new RuntimeException("In " + e + " expected instance to be "
-					+ ft.second + " but is " + it);
+					+ ft.second.unresolve(env.sigs) + " but is " + it.unresolve(env.sigs));
 		}
 		return ft.first;
 	}
@@ -114,7 +114,7 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 		Pair<SigExp, SigExp> ft = e.F.type(env);
 		if (!ft.first.equals(it)) {
 			throw new RuntimeException("In " + e + " expected instance to be "
-					+ ft.first + " but is " + it);
+					+ ft.first.unresolve(env.sigs) + " but is " + it.unresolve(env.sigs));
 		}
 		return ft.second;
 	}
@@ -130,7 +130,7 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 		Pair<SigExp, SigExp> ft = e.F.type(env);
 		if (!ft.first.equals(it)) {
 			throw new RuntimeException("In " + e + " expected instance to be "
-					+ ft.first + " but is " + it);
+					+ ft.first.unresolve(env.sigs) + " but is " + it.unresolve(env.sigs));
 		}
 		return ft.second;
 	}
@@ -145,7 +145,7 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 		Pair<SigExp, SigExp> ft = e.F.type(env);
 		if (!ft.first.equals(it)) {
 			throw new RuntimeException("In " + e + " expected instance to be "
-					+ ft.first + " but is " + it);
+					+ ft.first.unresolve(env.sigs) + " but is " + it.unresolve(env.sigs));
 		}
 		return ft.second;
 	}
@@ -173,7 +173,7 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 		SigExp v = env.insts.get(e.e).accept(env, this);
 		if (!(k.first.equals(v))) {
 			throw new RuntimeException("On " + e + ", expected input to be "
-					+ k.first + " but computed " + v);
+					+ k.first.unresolve(env.sigs) + " but computed " + v.unresolve(env.sigs));
 		}
 		return k.second;
 	}
@@ -187,7 +187,7 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 		SigExp v = env.insts.get(e.e).accept(env, this);
 		if (!(k.first.equals(v))) {
 			throw new RuntimeException("On " + e + ", expected input to be "
-					+ k.first + " but computed " + v);
+					+ k.first.unresolve(env.sigs) + " but computed " + v.unresolve(env.sigs));
 		}
 		return k.second;
 	}

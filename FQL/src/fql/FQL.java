@@ -3,6 +3,7 @@ package fql;
 import java.awt.MenuBar;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -42,16 +43,13 @@ public class FQL {
 		
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-
+				try {
 				final Pair<JPanel, MenuBar> gui = GUI.makeGUI();
 				final JFrame f = new JFrame("FQL IDE");
 				f.setContentPane(gui.first);
 				f.setMenuBar(gui.second);
 				f.pack();
 				f.setSize(840, 630);
-			//	GUI.editors.getComponentAt(0).requestFocusInWindow();
-//				((CodeEditor)GUI.editors.getComponentAt(0)).set //setFocusCycleRoot(true); //getCasetsetgetCaret(). 
-//				GUI.editors.(GUI.editors.getSelectedIndex()).requestFocusInWindow();
 				((CodeEditor)GUI.editors.getComponentAt(0)).topArea.requestFocusInWindow();
 				f.setLocationRelativeTo(null);
 				f.setVisible(true);
@@ -65,6 +63,10 @@ public class FQL {
 
 					}
 				});
+				} catch (Throwable e) {
+					e.printStackTrace();
+					JOptionPane.showMessageDialog(null, "Unrecoverable error, restart FQL: " + e.getMessage() );
+				}
 			}
 		});
 	}
