@@ -45,7 +45,12 @@ public class EmployeesExample extends Example {
 					+ "\n	worksIn   -> { (101, q10), (102, x02), (103, q10) },"
 					+ "\n	name      -> { (q10, AppliedMath), (x02, PureMath) },"
 					+ "\n	secretary -> { (q10, 101), (x02, 102) };"
-					+ "\n} : S\n";
+					+ "\n} : S\n"
+					+ "\n\n//delta and SIGMA migrations on infinite schemas are possible\n" 
++ "mapping F = id S\n"
++ "instance J = delta F I\n"
++ "instance K = SIGMA F I\n"
+					;
 
 
 }

@@ -121,6 +121,6 @@ public class CategoryExample extends Example {
 			+ "\n	attributes ObName->{(a,a),(b,b),(c,c)},HomName->{(f,f),(g,g)};"
 			+ "\n	arrows Dom->{(f,a),(g,b)},Cod->{(f,b),(g,c)};"
 			+ "\n} :  NamedGraph" + "\n"
-			+ "\n//instance NamedC=SIGMA NamedFree NamedG  requires null option";
+			+ "\ninstance NamedC=SIGMA NamedFree NamedG  //requires null option";
 
 }

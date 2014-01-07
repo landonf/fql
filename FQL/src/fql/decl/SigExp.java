@@ -14,7 +14,7 @@ import fql.parse.PrettyPrinter;
 
 public abstract class SigExp {
 	
-//	public static final Comparator<? super String>  = null;
+	
 
 	public SigExp unresolve(Map<String, SigExp> env) {
 		return accept(env, new Unresolver());
@@ -32,6 +32,51 @@ public abstract class SigExp {
 			fe.printStackTrace();
 			throw new RuntimeException(fe.getLocalizedMessage());
 		}
+	}
+	
+	public static class Unknown extends SigExp {
+
+		public Unknown(String name) {
+			this.name = name;
+		}
+
+		public String name;
+		
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Unknown other = (Unknown) obj;
+			if (name == null) {
+				if (other.name != null)
+					return false;
+			} else if (!name.equals(other.name))
+				return false;
+			return true;
+		}
+
+		@Override
+		public <R, E> R accept(E env, SigExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((name == null) ? 0 : name.hashCode());
+			return result;
+		}
+		
+		@Override 
+		public String toString() {
+			return name;
+		}
+		
 	}
 	
 	public static class Opposite extends SigExp {
@@ -592,6 +637,7 @@ public abstract class SigExp {
 		public R visit (E env, Const e);
 		public R visit (E env, Union e);
 		public R visit (E env, Opposite e);
+		public R visit (E env, Unknown e);
 	}
 	
 }

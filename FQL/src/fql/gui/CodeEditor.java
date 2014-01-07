@@ -9,6 +9,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -49,7 +50,7 @@ import org.fife.ui.rtextarea.SearchEngine;
 
 import fql.DEBUG;
 import fql.LineException;
-import fql.Pair;
+import fql.Triple;
 import fql.decl.Driver;
 import fql.decl.Environment;
 import fql.decl.FQLProgram;
@@ -72,7 +73,6 @@ public class CodeEditor extends JPanel implements Runnable {
 
 	public RSyntaxTextArea topArea = new RSyntaxTextArea();
 
-	
 	FQLTextPanel respArea = new FQLTextPanel("Compiler response", "");
 
 	final JTextField searchField = new JTextField();
@@ -152,7 +152,6 @@ public class CodeEditor extends JPanel implements Runnable {
 		// context.setRegularExpression(regexCB.isSelected());
 		context.setSearchForward(b);
 		context.setWholeWord(wholeCB.isSelected());
-		
 
 		if (replaceCB.isSelected()) {
 			context.setReplaceWith(replaceField.getText());
@@ -258,7 +257,7 @@ public class CodeEditor extends JPanel implements Runnable {
 		// JPanel cp = new JPanel(new BorderLayout());
 
 		topArea = new RSyntaxTextArea();
-		//topArea.set
+		// topArea.set
 		// topArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
 
 		AbstractTokenMakerFactory atmf = (AbstractTokenMakerFactory) TokenMakerFactory
@@ -289,9 +288,10 @@ public class CodeEditor extends JPanel implements Runnable {
 		ct = new StaticCodeTemplate("query", "query ", " = delta pi sigma");
 		ctm.addTemplate(ct);
 
-		ct = new StaticCodeTemplate("QUERY", "QUERY ", " = match {} src dst \"deta sigma forward\" ");
+		ct = new StaticCodeTemplate("QUERY", "QUERY ",
+				" = match {} src dst \"deta sigma forward\" ");
 		ctm.addTemplate(ct);
-		
+
 		ct = new StaticCodeTemplate("transform", "transform ",
 				" = {\n\tnodes;\n} :  -> ");
 		ctm.addTemplate(ct);
@@ -313,6 +313,7 @@ public class CodeEditor extends JPanel implements Runnable {
 
 		Action alx = new AbstractAction() {
 			private static final long serialVersionUID = 1L;
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				topArea.redoLastAction();
@@ -439,8 +440,8 @@ public class CodeEditor extends JPanel implements Runnable {
 	@SuppressWarnings("deprecation")
 	public void runAction() {
 		toDisplay = null;
-		//DateFormat format = DateFormat.getTimeInstance();
-		//String foo = format.format(new Date(System.currentTimeMillis()));
+		// DateFormat format = DateFormat.getTimeInstance();
+		// String foo = format.format(new Date(System.currentTimeMillis()));
 
 		// respArea.setText("Compilation and visualization started at " + foo);
 		if (temp != null) {
@@ -456,7 +457,7 @@ public class CodeEditor extends JPanel implements Runnable {
 			@Override
 			public void run() {
 				try {
-					//int counter = 0;
+					// int counter = 0;
 					respArea.setText("");
 					for (;;) {
 						Thread.sleep(250);
@@ -466,12 +467,12 @@ public class CodeEditor extends JPanel implements Runnable {
 							return;
 						} else if (thread != null) {
 							respArea.setText(respArea.getText() + ".");
-						//	counter++;
-					//		if (counter == 80) {
-						//		counter = 0;
-						//		respArea.setText(respArea.getText() + "\n");
-								// respArea.s
-						//	}
+							// counter++;
+							// if (counter == 80) {
+							// counter = 0;
+							// respArea.setText(respArea.getText() + "\n");
+							// respArea.s
+							// }
 						}
 					}
 				} catch (InterruptedException ie) {
@@ -495,6 +496,7 @@ public class CodeEditor extends JPanel implements Runnable {
 		FQLProgram init;
 		Environment env; // = Driver.intemp1;
 		String env2;
+		List<Throwable> exns;
 		try {
 			init = FQLParser.program(program);
 		} catch (ParserException e) {
@@ -532,9 +534,11 @@ public class CodeEditor extends JPanel implements Runnable {
 
 		try {
 			// Driver.check(init);
-			Pair<Environment, String> envX = Driver.makeEnv(init);
+			Triple<Environment, String, List<Throwable>> envX = Driver
+					.makeEnv(init);
 			env = envX.first;
 			env2 = envX.second;
+			exns = envX.third;
 		} catch (LineException e) {
 			toDisplay = "Error in " + e.kind + " " + e.decl + ": "
 					+ e.getLocalizedMessage();
@@ -552,7 +556,9 @@ public class CodeEditor extends JPanel implements Runnable {
 			temp = null;
 			return;
 		} catch (Throwable re) {
+			// System.out.println("xxxxxxx");
 			toDisplay = re.getLocalizedMessage();
+			respArea.setText(re.getLocalizedMessage());
 			re.printStackTrace();
 			if (thread != null) {
 				thread.stop();
@@ -562,7 +568,6 @@ public class CodeEditor extends JPanel implements Runnable {
 				temp.stop();
 			}
 			temp = null;
-			respArea.setText(re.getLocalizedMessage());
 			return;
 		}
 
@@ -581,7 +586,21 @@ public class CodeEditor extends JPanel implements Runnable {
 			display.display(foo, init.order);
 
 			// String psm = PSMGen.compile(env, init);
-			toDisplay = env2;
+	//		if (DEBUG.debug.continue_on_error) {
+				if (exns.size() > 0) {
+//					System.out.println("iiiiiiiiiii");
+					toDisplay = "";
+					for (Throwable ex : exns) {
+						if (ex instanceof LineException) {
+							toDisplay += "error on " + ((LineException)ex).kind + " " + ((LineException)ex).decl + ": ";
+						}
+						toDisplay += ex.getLocalizedMessage();
+						toDisplay += "\n\n---------------\n\n";
+					}
+	//			}
+			} else {
+				toDisplay = env2;
+			}
 		} catch (Throwable ee) {
 			toDisplay = ee.toString();
 			ee.printStackTrace();

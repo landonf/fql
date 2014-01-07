@@ -1020,6 +1020,7 @@ public class Mapping {
 		return ret;
 	}
 
+	//does not add equations for attrs
 	public Triple<Signature, Signature, Signature> toEDs() throws FQLException {
 		// List<EmbeddedDependency> l = new //toED();
 
@@ -1091,10 +1092,7 @@ public class Mapping {
 			delta.eqs.add(new Eq(lhs0, rhs0));
 
 		}
-		// sigma.name0 = source.name0 + "_plus_sigma_" + target.name0;
-		// pi.name0 = source.name0 + "_plus_pi_" + target.name0;
-		// delta.name0 = source.name0 + "_plus_delta_" + target.name0;
-
+		
 		return new Triple<>(delta, sigma, pi);
 
 	}

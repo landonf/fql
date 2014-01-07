@@ -35,6 +35,7 @@ import fql.decl.SigExp.Plus;
 import fql.decl.SigExp.SigExpVisitor;
 import fql.decl.SigExp.Times;
 import fql.decl.SigExp.Union;
+import fql.decl.SigExp.Unknown;
 import fql.decl.SigExp.Var;
 import fql.decl.SigExp.Zero;
 
@@ -827,6 +828,11 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 
 		return new Const(new LinkedList<>(k.objs), new LinkedList<>(k.attrs),
 				arrows, p.first.toConst(env), yyy);
+	}
+
+	@Override
+	public fql.decl.SigExp.Const visit(FQLProgram env, Unknown e) {
+		throw new RuntimeException("Encountered unknown type.");
 	}
 
 }

@@ -92,7 +92,10 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 	public SigExp visit(FQLProgram env, Delta e) {
 		InstExp xxx = env.insts.get(e.I);
 		if (xxx == null) {
-			throw new RuntimeException("Missing " + e.I);
+			throw new RuntimeException("Instance not found: " + e.I);
+		}
+		if (e.equals(xxx)) {
+			throw new RuntimeException("Circular: " + e);
 		}
 		SigExp it = xxx.accept(env, this);
 		Pair<SigExp, SigExp> ft = e.F.type(env);
@@ -108,7 +111,10 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 	public SigExp visit(FQLProgram env, Sigma e) {
 		InstExp xxx = env.insts.get(e.I);
 		if (xxx == null) {
-			throw new RuntimeException("Missing " + e.I);
+			throw new RuntimeException("Instance not found: " + e.I);
+		}
+		if (e.equals(xxx)) {
+			throw new RuntimeException("Circular: " + e);
 		}
 		SigExp it = xxx.accept(env, this);
 		Pair<SigExp, SigExp> ft = e.F.type(env);
@@ -124,7 +130,10 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 	public SigExp visit(FQLProgram env, Pi e) {
 		InstExp xxx = env.insts.get(e.I);
 		if (xxx == null) {
-			throw new RuntimeException("Missing " + e.I);
+			throw new RuntimeException("Instance not found: " + e.I);
+		}
+		if (e.equals(xxx)) {
+			throw new RuntimeException("Circular: " + e);
 		}
 		SigExp it = xxx.accept(env, this);
 		Pair<SigExp, SigExp> ft = e.F.type(env);
@@ -139,7 +148,10 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 	public SigExp visit(FQLProgram env, FullSigma e) {
 		InstExp xxx = env.insts.get(e.I);
 		if (xxx == null) {
-			throw new RuntimeException("Missing " + e.I);
+			throw new RuntimeException("Instance not found: " + e.I);
+		}
+		if (e.equals(xxx)) {
+			throw new RuntimeException("Circular: " + e);
 		}
 		SigExp it = xxx.accept(env, this);
 		Pair<SigExp, SigExp> ft = e.F.type(env);
@@ -154,7 +166,10 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 	public SigExp visit(FQLProgram env, Relationalize e) {
 		InstExp xxx = env.insts.get(e.I);
 		if (xxx == null) {
-			throw new RuntimeException("Missing " + e.I);
+			throw new RuntimeException("Instance not found: " + e.I);
+		}
+		if (e.equals(xxx)) {
+			throw new RuntimeException("Circular: " + e);
 		}
 		return xxx.accept(env, this);
 	}
@@ -167,10 +182,14 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 	@Override
 	public SigExp visit(FQLProgram env, Eval e) {
 		Pair<SigExp, SigExp> k = e.q.type(env);
+		InstExp xxx = env.insts.get(e.e);
 		if (null == env.insts.get(e.e)) {
 			throw new RuntimeException("Unknown: " + e.e);
 		}
-		SigExp v = env.insts.get(e.e).accept(env, this);
+		if (e.equals(xxx)) {
+			throw new RuntimeException("Circular: " + e);
+		}
+		SigExp v = xxx.accept(env, this);
 		if (!(k.first.equals(v))) {
 			throw new RuntimeException("On " + e + ", expected input to be "
 					+ k.first.unresolve(env.sigs) + " but computed " + v.unresolve(env.sigs));
@@ -181,10 +200,14 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 	@Override
 	public SigExp visit(FQLProgram env, FullEval e) {
 		Pair<SigExp, SigExp> k = e.q.type(env);
+		InstExp xxx = env.insts.get(e.e);
 		if (null == env.insts.get(e.e)) {
 			throw new RuntimeException("Unknown: " + e.e);
 		}
-		SigExp v = env.insts.get(e.e).accept(env, this);
+		if (e.equals(xxx)) {
+			throw new RuntimeException("Circular: " + e);
+		}
+		SigExp v = xxx.accept(env, this);
 		if (!(k.first.equals(v))) {
 			throw new RuntimeException("On " + e + ", expected input to be "
 					+ k.first.unresolve(env.sigs) + " but computed " + v.unresolve(env.sigs));

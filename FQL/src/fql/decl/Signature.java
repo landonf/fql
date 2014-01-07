@@ -1152,6 +1152,8 @@ public class Signature  {
 			
 		}
 		
+		//TODO extend fql to eds in paper to attributes
+		
 		for (Attribute<Node> e : attrs) {
 			List<String> forall = new LinkedList<>();
 			List<String> exists = new LinkedList<>();
@@ -1214,7 +1216,6 @@ public class Signature  {
 	}
 
 	public static Signature sum(String c, String d, Signature C, Signature D) throws FQLException {
-		//String n = c + "_plus_" + d; 
 		List<String> o = new LinkedList<>();
 		for (Node node : C.nodes) {
 			o.add(c + "_" + node.string);
@@ -1223,16 +1224,23 @@ public class Signature  {
 			o.add(d + "_" + node.string);
 		}
 		
-		List<Triple<String, String, String>> a = new LinkedList<>();
-		if (C.attrs.size() > 0 || D.attrs.size() > 0) {
-			throw new FQLException("Cannot have attributes in signature sum");
-		}
 		List<Triple<String, String, String>> e = new LinkedList<>();
 		for (Edge edge : C.edges) {
 			e.add(new Triple<>(c + "_" + edge.name, c + "_" + edge.source.string, c + "_" + edge.target.string));
 		}
 		for (Edge edge : D.edges) {
 			e.add(new Triple<>(d + "_" + edge.name, d + "_" + edge.source.string, d + "_" + edge.target.string));
+		}
+		
+		Map<String, Type> types = new HashMap<>();
+		List<Triple<String, String, String>> a = new LinkedList<>();
+		for (Attribute<Node> edge : C.attrs) {
+			types.put(edge.target.toString(), edge.target);
+			a.add(new Triple<>(c + "_" + edge.name, c + "_" + edge.source.string, edge.target.toString()));
+		}
+		for (Attribute<Node> edge : D.attrs) {
+			types.put(edge.target.toString(), edge.target);
+			a.add(new Triple<>(d + "_" + edge.name, d + "_" + edge.source.string, edge.target.toString()));
 		}
 		
 		List<Pair<List<String>, List<String>>> cc = new LinkedList<>();
@@ -1263,7 +1271,7 @@ public class Signature  {
 			cc.add(new Pair<>(lhs, rhs));
 		}
 		
-		return new Signature(new HashMap<String, Type>(), /*n, */o, a, e, cc);
+		return new Signature(types, o, a, e, cc);
 	}
 
 	

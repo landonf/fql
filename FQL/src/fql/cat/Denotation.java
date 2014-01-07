@@ -43,6 +43,7 @@ import fql.decl.Node;
 import fql.decl.Path;
 import fql.decl.Signature;
 import fql.decl.Transform;
+import fql.decl.Type;
 import fql.gui.FQLTextPanel;
 import fql.sql.PSMInterp;
 
@@ -307,7 +308,7 @@ public class Denotation {
 				// System.out.println("looking for " + k.name);
 				//System.out.println("Map is " + map);
 				//System.out.println("want " + k);
-				Object v1 = getFrom(D,  map /*().get(k)*/, v0);
+				Object v1 = getFrom(k, D,  map /*().get(k)*/, v0);
 				// System.out.println("v1 is " + v1);
 				t.add(new Pair<Object, Object>(v.first, v1));
 			}
@@ -316,7 +317,7 @@ public class Denotation {
 		return new Instance(thesig, d);
 	}
 
-	private static Object getFrom(Denotation D, Map<Object, Object> saved,
+	private static Object getFrom(Attribute<Node> attr, Denotation D, Map<Object, Object> saved,
 			Integer newkey) {
 		List<Pair<Integer, Object>> pre = new LinkedList<>();
 
@@ -348,7 +349,10 @@ public class Denotation {
 			return ret;
 		}
 		if (DEBUG.debug.ALLOW_NULLS) {
-			return "NULL"; // TODO null hack
+			if (!(attr.target instanceof Type.Varchar)) {
+				throw new RuntimeException("Cannot create nulls for any type but string");
+			}
+			return "NULL" + newkey; // TODO null hack
 		}
 		throw new RuntimeException();
 	}

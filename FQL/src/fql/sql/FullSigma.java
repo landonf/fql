@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import fql.FQLException;
 import fql.Pair;
 import fql.Triple;
 import fql.cat.Denotation;
@@ -64,9 +63,9 @@ public class FullSigma extends PSM {
 				state.put(pre + "_" + n.name, conv(J.data.get(n.name)));
 			}
 			
-		} catch (FQLException e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
-			throw new RuntimeException(e);
+			throw new RuntimeException("Error in instance " + pre + ": " + e.getLocalizedMessage());
 		}
 		
 	}

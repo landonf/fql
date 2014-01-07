@@ -9,6 +9,7 @@ package fql.examples;
  */
 public class Examples {
 
+	public static Example graph = new GraphExample();
 	public static Example plusSig = new CoProdExample();
 	public static Example plusSig2 = new CoProducts2Example();
 	public static Example full = new FullSigmaExample();
@@ -40,7 +41,7 @@ public class Examples {
 	public static Example products = new ProductExample();
 	public static Example products2 = new Product2Example();
 	public static Example enums = new EnumsExample();
-	//public static Example functor = new FunctorExample();
+	// public static Example functor = new FunctorExample();
 	public static Example terminal = new TerminalExample();
 	public static Example transform = new TransformExample();
 	public static Example transform2 = new Transforms2Example();
@@ -52,14 +53,15 @@ public class Examples {
 	public static Example match2 = new MatchExample2();
 	public static Example surj = new SurjectiveExample();
 	public static Example cat = new CategoryExample();
-	
-	public static Example[] examples = new Example[] { cat, surj, full2, match2,
-			match, sub, terminal, /* functor, */ enums, people, external, plusSig2,
-			products2, typeddelta, delta, pi, typedPi, typedsigma, sigma, full,
-			employess, typedemployees, composition, tcomp, iso, triangle,
-			cyclicgroup, transform2, dihedral, empty, foil, typedFoil, sql2fql,
-			weird, written, monad, typedWeird, relative, sotgd, plusSig,
-			products, transform, gene };
+	public static Example eds2fql = new EDsToFqlExample();
+
+	public static Example[] examples = new Example[] { graph, eds2fql, cat, surj,
+			full2, match2, match, sub, terminal, /* functor, */enums, people,
+			external, plusSig2, products2, typeddelta, delta, pi, typedPi,
+			typedsigma, sigma, full, employess, typedemployees, composition,
+			tcomp, iso, triangle, cyclicgroup, transform2, dihedral, empty,
+			foil, typedFoil, sql2fql, weird, written, monad, typedWeird,
+			relative, sotgd, plusSig, products, transform, gene };
 
 	public static final String helpString = "See the People example for a tutorial, and the All Syntax example for all possible FQL syntax."
 			+ "\n"

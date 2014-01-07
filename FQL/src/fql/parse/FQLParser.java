@@ -44,7 +44,7 @@ public class FQLParser {
 			});
 
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
-			")", "=", "->", "+", "*", "^", "|" };
+			")", "=", "->", "+", "*", "^", "|", "?" };
 
 	static String[] res = new String[] { "opposite", "EVAL", "QUERY", "union",
 			"subschema", "match", "drop", "nodes", "attributes", "enum",
@@ -111,7 +111,7 @@ public class FQLParser {
 
 		Parser<?> a = Parsers.or(new Parser<?>[] { term("void"),
 				Parsers.tuple(term("unit"), xxx), plusTy, prodTy, expTy,
-				unionTy, ident(), schemaConst(), op });
+				unionTy, ident(), schemaConst(), op, term("?") });
 
 		ref.set(a);
 
@@ -196,6 +196,8 @@ public class FQLParser {
 		return Parsers.between(term("{"), foo, term("}"));
 	}
 
+	private static int unknown_idx = 0;
+	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final SigExp toSchema(Object o) {
 		try {
@@ -227,7 +229,10 @@ public class FQLParser {
 		try {
 			if (o.toString().equals("void")) {
 				return new SigExp.Zero();
+			} else if (o.toString().equals("?")) {
+				return new SigExp.Unknown("?" + unknown_idx++);
 			}
+			
 			throw new RuntimeException();
 		} catch (RuntimeException cce) {
 		}

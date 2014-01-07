@@ -35,8 +35,8 @@ public class MatchExample extends Example {
 			+ "\n		Animal;"
 			+ "\n	attributes"
 			+ "\n		attA : Amphibian -> string, "
-			+ "\n		attL:Animal-> string, "
-			+ "\n		attW:Animal->string;"
+			+ "\n		attL:LandAnimal-> string, "
+			+ "\n		attW:WaterAnimal->string;"
 			+ "\n	arrows"
 			+ "\n		IsAL:Amphibian->LandAnimal,"
 			+ "\n		IsAW:Amphibian->WaterAnimal,"
@@ -44,7 +44,7 @@ public class MatchExample extends Example {
 			+ "\n		IsAWW:WaterAnimal->Animal;"
 			+ "\n	equations"
 			+ "\n		Amphibian.IsAL.IsALL=Amphibian.IsAW.IsAWW;"
-			+ "\n}"
+			+ "\n	}"
 			+ "\n"
 			+ "\ninstance I = {"
 			+ "\n	nodes "
@@ -52,13 +52,14 @@ public class MatchExample extends Example {
 			+ "\n		LandAnimal->{1,2,3,4,5},"
 			+ "\n		WaterAnimal->{1,2,3,4};"
 			+ "\n	attributes "
-			+ "\n		attA -> {(1,gecko),(2, salamander)}, "
-			+ "\n		attL ->{(1,gecko),(2,salamander),(3,human),(4,cow),(5,horse)},"
-			+ "\n		attW -> {(1,fish),(2,gecko),(3,salamander),(4,dolphin)};"
+			+ "\n		attA -> {(1,gecko),(2, frog)}, "
+			+ "\n		attL ->{(1,gecko),(2,frog),(3,human),(4,cow),(5,horse)},"
+			+ "\n		attW -> {(1,fish),(2,gecko),(3,frog),(4,dolphin)};"
 			+ "\n	arrows"
 			+ "\n		IsAL->{(1,1),(2,2)},"
 			+ "\n		IsAW->{(1,2),(2,3)};"
 			+ "\n	} : C"
+			+ "\n"
 			+ "\n"
 			+ "\n"
 			+ "\nQUERY q1 = match {(attA, attA),(attL, attL), (attW, attW)} C D \"delta sigma forward\""
@@ -68,8 +69,11 @@ public class MatchExample extends Example {
 			+ "\n"
 			+ "\n//instance out1 = EVAL q1 I // - I has wrong type"
 			+ "\n//instance out2 = EVAL q2 I // - I has wrong type"
-			+ "\n//instance out3 = EVAL q3 I // SIGMA fails if it can't create nulls"
-			+ "\n//instance out4 = EVAL q4 I // has 800 rows! (takes minutes to run)";
+			+ "\ninstance out3 = EVAL q3 I // SIGMA fails if it can't create nulls"
+			+ "\ninstance out4 = EVAL q4 I // has 40 rows";
+
+
+
 
 
 

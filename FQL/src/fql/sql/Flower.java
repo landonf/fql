@@ -191,6 +191,12 @@ public class Flower extends SQL {
 				int xxx1 = timesInWhere(o1);
 				int xxx2 = timesInWhere(o2);
 				if (xxx1 == xxx2) {
+					if (from.get(o1) == null || state.get(from.get(o1)) == null) {
+						throw new RuntimeException("Missing: " + o1);
+					}
+					if (from.get(o2) == null || state.get(from.get(o2)) == null) {
+						throw new RuntimeException("Missing: " + o2);
+					}
 				return Integer.compare(state.get(from.get(o1)).size(), state.get(from.get(o2)).size()); 
 				} else if (xxx1 > xxx2) {
 					return -1;
@@ -199,7 +205,7 @@ public class Flower extends SQL {
 				}
 			}
 		};
-		Collections.sort(ordered, c);
+		Collections.sort(ordered, c); 
 		
 		
 	//	System.out.println("***");
@@ -218,7 +224,6 @@ public class Flower extends SQL {
 							+ " in " + state);
 				}
 				
-				//TODO have cartProd only add those tuples which are joined on
 				ret = cartProd(k, new HashSet<>(ret), state.get(from.get(k)),
 						from.get(k));
 				//System.gc();
@@ -247,7 +252,6 @@ public class Flower extends SQL {
 				for (Pair<Object, Object> s : row2.keySet()) {
 					row.put(s, row2.get(s));
 				}
-				//TODO here
 				for (Pair<Pair<String, String>, Pair<String, String>> eq : where) {
 				if (row.get(eq.first) != null & row.get(eq.second) != null) {
 					if (!row.get(eq.first).equals(row.get(eq.second))) {

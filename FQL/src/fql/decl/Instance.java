@@ -170,6 +170,16 @@ public class Instance {
 		 */
 		// toFunctor();
 	}
+	
+	public Map<String, Set<Pair<Object, Object>>> shred(String pre) {
+		Map<String, Set<Pair<Object, Object>>> ret = new HashMap<>();
+		
+		for (String k : data.keySet()) {
+			ret.put(pre + "_" + k, data.get(k));
+		}
+		
+		return ret;
+	}
 
 	/*
 	 * private void validateUsingEDs() throws FQLException {
@@ -263,8 +273,6 @@ public class Instance {
 		conformsTo(thesig);
 	}
 
-	// TODO GUI observables using JDBC
-
 	public Instance(Signature thesig,
 			List<Pair<String, List<Pair<Object, Object>>>> data)
 			throws FQLException {
@@ -336,7 +344,7 @@ public class Instance {
 				return new HashSet<>(p.second);
 			}
 		}
-		throw new FQLException("cannot find " + n + " in " + this);
+		throw new FQLException("cannot find " + n);
 	}
 
 	// public Instance(String name, Query thequery, Instance theinstance)

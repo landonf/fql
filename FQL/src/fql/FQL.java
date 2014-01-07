@@ -1,6 +1,7 @@
 package fql;
 
 import java.awt.MenuBar;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -27,7 +28,10 @@ public class FQL {
 		if (args.length == 1) {
 			try {
 				FQLProgram init = FQLParser.program(args[0]);
-				Pair<Environment, String> envX = Driver.makeEnv(init);
+				Triple<Environment, String, List<Throwable>> envX = Driver.makeEnv(init);
+				if (envX.third.size() > 0) {
+					throw new RuntimeException("Errors: " + envX.third);
+				}
 				System.out.println("OK");
 				System.out.println(envX.second);
 				return;

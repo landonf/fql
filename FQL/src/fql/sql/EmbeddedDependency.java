@@ -213,6 +213,7 @@ public class EmbeddedDependency {
 		throw new RuntimeException();
 	}
 
+	
 	public static EmbeddedDependency eq(String pre, Path lhs, Path rhs) {
 
 		List<String> forall = matrix("u", lhs);
@@ -278,7 +279,7 @@ public class EmbeddedDependency {
 		ret.add(new Triple<>(pre + p.target.string, x, y));
 
 		return ret;
-	}
+	} 
 
 	@SuppressWarnings("unused")
 	private static List<String> matrix(String pre, Path p) {

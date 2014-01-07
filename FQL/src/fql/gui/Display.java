@@ -267,7 +267,9 @@ public class Display {
 				frames.add(new Pair<String, JComponent>("QUERY " + c + " : " + a + " -> " + b, showFullQuery(p, environment, c)));				
 			}
 			else {
-				throw new RuntimeException("Not found: " + c);
+				if (!DEBUG.debug.continue_on_error) {
+					throw new RuntimeException("Not found: " + c);					
+				}
 			}
 		}
 	}

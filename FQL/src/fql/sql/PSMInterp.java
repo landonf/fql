@@ -1,9 +1,13 @@
 package fql.sql;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import fql.DEBUG;
+import fql.Pair;
 
 /**
  * 
@@ -21,15 +25,22 @@ public class PSMInterp {
 	public Map<String, Integer> sigmas2 = new HashMap<>();
 
 
-	public  Map<String, Set<Map<Object, Object>>> interpX(List<PSM> prog,
+	public  Pair<Map<String, Set<Map<Object, Object>>>, List<Throwable>> interpX(List<PSM> prog,
 			Map<String, Set<Map<Object, Object>>> state) {
+		List<Throwable> ret = new LinkedList<>();
 		for (PSM cmd : prog) {
-			cmd.exec(this, state);
+			try {
+				cmd.exec(this, state);
+			} catch (Throwable t) {
+				if (DEBUG.debug.continue_on_error) {
+					ret.add(t);
+				}
+			}
 		}
-		return state;
+		return new Pair<>(state, ret);
 	}
 
-	public Map<String, Set<Map<Object, Object>>> interp(List<PSM> prog) {
+	public Pair<Map<String, Set<Map<Object, Object>>>, List<Throwable>> interp(List<PSM> prog) {
 		guid = 0;
 		return interpX(prog, new HashMap<String, Set<Map<Object, Object>>>());
 	}

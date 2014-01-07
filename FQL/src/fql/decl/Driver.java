@@ -7,9 +7,12 @@ import java.util.Map;
 import java.util.Set;
 
 import fql.DEBUG;
+import fql.FQLException;
 import fql.JDBCBridge;
 import fql.LineException;
 import fql.Pair;
+import fql.Triple;
+import fql.sql.Chase;
 import fql.sql.PSM;
 import fql.sql.PSMGen;
 import fql.sql.PSMInterp;
@@ -54,13 +57,12 @@ public class Driver {
 			try {
 				InstExp i = p.insts.get(k);
 				SigExp y = i.type(p);
-				 ret += "instance " + k + ": " + y.unresolve(p.sigs) + "\n\n";
+				ret += "instance " + k + ": " + y.unresolve(p.sigs) + "\n\n";
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
 				throw new LineException(ex.getLocalizedMessage(), k, "instance");
 			}
 		}
-
 
 		for (String k : p.queries.keySet()) {
 			try {
@@ -73,7 +75,7 @@ public class Driver {
 				throw new LineException(re.getLocalizedMessage(), k, "query");
 			}
 		}
-		
+
 		for (String k : p.full_queries.keySet()) {
 			try {
 				FullQueryExp v = p.full_queries.get(k);
@@ -89,8 +91,10 @@ public class Driver {
 		return ret.trim() + "\n\n";
 	}
 
-	public static Pair<Environment, String> makeEnv(FQLProgram prog) {
+	public static Triple<Environment, String, List<Throwable>> makeEnv(FQLProgram prog) {
 
+		List<Throwable> exns = new LinkedList<>();
+		
 		Map<String, Signature> sigs = new HashMap<>();
 		Map<String, Mapping> maps = new HashMap<>();
 		Map<String, Instance> insts = new HashMap<>();
@@ -103,7 +107,12 @@ public class Driver {
 				sigs.put(k, v.toSig(prog));
 			} catch (RuntimeException re) {
 				re.printStackTrace();
-				throw new LineException(re.getLocalizedMessage(), k, "schema");
+				LineException exn = new LineException(re.getLocalizedMessage(), k, "schema");
+				if (DEBUG.debug.continue_on_error) {
+					exns.add(exn);
+				} else {
+					throw exn;
+				}
 			}
 
 		}
@@ -114,7 +123,12 @@ public class Driver {
 				maps.put(k, v.toMap(prog));
 			} catch (RuntimeException re) {
 				re.printStackTrace();
-				throw new LineException(re.getLocalizedMessage(), k, "mapping");
+				LineException exn = new LineException(re.getLocalizedMessage(), k, "mapping");
+				if (DEBUG.debug.continue_on_error) {
+					exns.add(exn);
+				} else {
+					throw exn;
+				}
 			}
 		}
 		for (String k : prog.queries.keySet()) {
@@ -124,7 +138,12 @@ public class Driver {
 				queries.put(k, Query.toQuery(prog, v));
 			} catch (RuntimeException re) {
 				re.printStackTrace();
-				throw new LineException(re.getLocalizedMessage(), k, "query");
+				LineException exn = new LineException(re.getLocalizedMessage(), k, "query");
+				if (DEBUG.debug.continue_on_error) {
+					exns.add(exn);
+				} else {
+					throw exn;
+				}
 			}
 		}
 		for (String k : prog.full_queries.keySet()) {
@@ -134,7 +153,12 @@ public class Driver {
 				full_queries.put(k, FullQuery.toQuery(prog, v));
 			} catch (RuntimeException re) {
 				re.printStackTrace();
-				throw new LineException(re.getLocalizedMessage(), k, "query");
+				LineException exn = new LineException(re.getLocalizedMessage(), k, "QUERY");
+				if (DEBUG.debug.continue_on_error) {
+					exns.add(exn);
+				} else {
+					throw exn;
+				}
 			}
 		}
 		for (String k : prog.insts.keySet()) {
@@ -143,7 +167,12 @@ public class Driver {
 				v.type(prog);
 			} catch (RuntimeException re) {
 				re.printStackTrace();
-				throw new LineException(re.getLocalizedMessage(), k, "instance");
+				LineException exn = new LineException(re.getLocalizedMessage(), k, "instance");
+				if (DEBUG.debug.continue_on_error) {
+					exns.add(exn);
+				} else {
+					throw exn;
+				}
 			}
 		}
 		for (String k : prog.transforms.keySet()) {
@@ -153,8 +182,12 @@ public class Driver {
 				v.type(prog);
 			} catch (RuntimeException re) {
 				re.printStackTrace();
-				throw new LineException(re.getLocalizedMessage(), k,
-						"transform");
+				LineException exn = new LineException(re.getLocalizedMessage(), k, "transform");
+				if (DEBUG.debug.continue_on_error) {
+					exns.add(exn);
+				} else {
+					throw exn;
+				}
 			}
 		}
 
@@ -168,7 +201,12 @@ public class Driver {
 				psm.addAll(v.accept(k, ops).first);
 			} catch (RuntimeException re) {
 				re.printStackTrace();
-				throw new LineException(re.getLocalizedMessage(), k, "instance");
+				LineException exn = new LineException(re.getLocalizedMessage(), k, "instance");
+				if (DEBUG.debug.continue_on_error) {
+					exns.add(exn);
+				} else {
+					throw exn;
+				}
 			}
 		}
 
@@ -182,18 +220,28 @@ public class Driver {
 				psm.addAll(v.accept(k, ops));
 			} catch (RuntimeException re) {
 				re.printStackTrace();
-				throw new LineException(re.getLocalizedMessage(), k, "instance");
+				LineException exn = new LineException(re.getLocalizedMessage(), k, "transform");
+				if (DEBUG.debug.continue_on_error) {
+					exns.add(exn);
+				} else {
+					throw exn;
+				}
 			}
 		}
 		List<PSM> drops = computeDrops(prog);
 
 		Map<String, Set<Map<Object, Object>>> res;
 		if (DEBUG.debug.useJDBC) {
+			if (exns.size() > 0) {
+				throw new RuntimeException("Cannot use continue on errors with jdbc");
+			}
 			res = JDBCBridge.go(psm, drops, prog);
 		} else {
-			res = new PSMInterp().interp(psm);
+			Pair<Map<String, Set<Map<Object, Object>>>, List<Throwable>> resX = new PSMInterp().interp(psm);
+			res = resX.first;
+			exns.addAll(resX.second);
 		}
-		//PrettyPrinter.printDB(res);
+		// PrettyPrinter.printDB(res);
 
 		for (String k : prog.insts.keySet()) {
 			try {
@@ -203,7 +251,12 @@ public class Driver {
 				insts.put(k, new Instance(s, b));
 			} catch (Exception re) {
 				re.printStackTrace();
-				throw new LineException(re.getLocalizedMessage(), k, "instance");
+				LineException exn = new LineException(re.getLocalizedMessage(), k, "instance");
+				if (DEBUG.debug.continue_on_error) {
+					exns.add(exn);
+				} else {
+					throw exn;
+				}
 			}
 		}
 		Map<String, Transform> transforms = new HashMap<>();
@@ -221,21 +274,86 @@ public class Driver {
 								.get(val.second), b));
 			} catch (Exception re) {
 				re.printStackTrace();
-				throw new LineException(re.getLocalizedMessage(), k, "instance");
+				LineException exn = new LineException(re.getLocalizedMessage(), k, "transform");
+				if (DEBUG.debug.continue_on_error) {
+					exns.add(exn);
+				} else {
+					throw exn;
+				}
 			}
 		}
 		String str = "";
 		try {
-			str = DEBUG.debug.prelude + "\n\n" + PSMGen.prettyPrint(psm) + "\n\n"
-					+ PSMGen.prettyPrint(drops) + "\n\n" + DEBUG.debug.afterlude + "\n\n";			
+			str = DEBUG.debug.prelude + "\n\n" + PSMGen.prettyPrint(psm)
+					+ "\n\n" + 
+					(drops.size() == 0 ? "" : PSMGen.prettyPrint(drops) + "\n\n")
+					+ DEBUG.debug.afterlude + "\n\n";
 		} catch (RuntimeException re) {
 			str = re.getLocalizedMessage();
 		}
-		return new Pair<>(new Environment(sigs, maps, insts, queries, 
-				transforms, full_queries), str.trim());
+
+		// check full sigmas with EDs
+		if (DEBUG.debug.VALIDATE_WITH_EDS) {
+			try {
+				validateWithEds(prog, insts);
+			} catch (FQLException fe) {
+				fe.printStackTrace();
+				throw new RuntimeException(fe.getLocalizedMessage());
+			}
+		}
+
+		
+		
+		return new Triple<>(new Environment(sigs, maps, insts, queries,
+				transforms, full_queries), str.trim(), dedup(exns));
+	}
+
+	private static <X> List<X> dedup(List<X> l) {
+		List<X> ret = new LinkedList<X>();
+		for (X x : l) {
+			if (!ret.contains(x)) {
+				ret.add(x);
+			}
+		}
+		return ret;
 	}
 	
-	
+	private static void validateWithEds(FQLProgram prog,
+			Map<String, Instance> insts) throws FQLException {
+		for (String k : prog.insts.keySet()) {
+			InstExp v = prog.insts.get(k);
+			if (v instanceof InstExp.FullSigma) {
+				InstExp.FullSigma v0 = (InstExp.FullSigma) v;
+				Instance x = Chase.sigma(v0.F.toMap(prog), insts.get(v0.I));
+				if (!Instance.quickCompare(x, insts.get(k))) {
+					throw new RuntimeException(
+							"Bad sigma ED compare: ED gives\n\n" + x
+									+ "\n\nbut SIGMA gives\n\n" + insts.get(k));
+				}
+			}
+			if (v instanceof InstExp.Sigma) {
+				InstExp.Sigma v0 = (InstExp.Sigma) v;
+				Instance x = Chase.sigma(v0.F.toMap(prog), insts.get(v0.I));
+				if (!Instance.quickCompare(x, insts.get(k))) {
+					throw new RuntimeException(
+							"Bad sigma ED compare: ED gives\n\n" + x
+									+ "\n\nbut SIGMA gives\n\n" + insts.get(k));
+				}
+			}
+			if (v instanceof InstExp.Delta) {
+				InstExp.Delta v0 = (InstExp.Delta) v;
+				Instance x = Chase.delta(v0.F.toMap(prog), insts.get(v0.I));
+				// Instance x = Chase.sigmaDirect(KIND.STANDARD,
+				// v0.F.toMap(prog), insts.get(v0.I));
+				if (!Instance.quickCompare(x, insts.get(k))) {
+					throw new RuntimeException(
+							"Bad sigma ED compare: ED gives\n\n" + x
+									+ "\n\nbut SIGMA gives\n\n" + insts.get(k));
+				}
+			}
+		}
+	}
+
 	public static List<PSM> computeDrops(FQLProgram prog) {
 		List<PSM> drops = new LinkedList<>();
 		for (String k : prog.drop) {
@@ -264,5 +382,4 @@ public class Driver {
 		return drops;
 	}
 
-	
 }
