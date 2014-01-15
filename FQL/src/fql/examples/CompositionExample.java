@@ -4,7 +4,7 @@ public class CompositionExample extends Example {
 
 	@Override
 	public String getName() {
-		return "Composition";
+		return "Query Composition";
 	}
 
 	@Override

@@ -54,6 +54,8 @@ public class GUI extends JPanel {
 
 	public static JTabbedPane editors = new JTabbedPane();
 
+	public static JComboBox<Example> box = null;
+
 	public static Pair<JPanel, MenuBar> makeGUI() {
 
 		JPanel pan = new JPanel();
@@ -326,8 +328,15 @@ public class GUI extends JPanel {
 		// toolBar temp1 = new JPanel();
 		JLabel l = new JLabel("Load Example:", JLabel.RIGHT);
 		Arrays.sort(Examples.examples);
-		final JComboBox<Example> box = new JComboBox<>(Examples.examples);
+		Arrays.sort(Examples.key_examples);
+		
+		if (DEBUG.debug.limit_examples) {
+			box = new JComboBox<>(Examples.key_examples);			
+		} else {
+			box = new JComboBox<>(Examples.examples);
+		}
 		box.setSelectedIndex(-1);
+		
 		box.addActionListener(new ActionListener() {
 
 			@Override

@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,7 @@ public class Flower extends SQL {
 	Map<String, String> from;
 	List<Pair<Pair<String, String>, Pair<String, String>>> where;
 
-	public Flower(Map<String, Pair<String, String>> select,
+	public Flower(LinkedHashMap<String, Pair<String, String>> select,
 			Map<String, String> from,
 			List<Pair<Pair<String, String>, Pair<String, String>>> where) {
 		this.select = select;

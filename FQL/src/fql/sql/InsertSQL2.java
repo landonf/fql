@@ -1,7 +1,10 @@
 package fql.sql;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import fql.parse.PrettyPrinter;
 
 /**
  * 
@@ -9,21 +12,21 @@ import java.util.Set;
  * 
  *         Insert the result of a SQL query into a table.
  */
-public class InsertSQL extends PSM {
+public class InsertSQL2 extends PSM {
 
-	String name, c0, c1;
+	String name;
 	SQL sql;
+	List<String> cols;
 
-	public InsertSQL(String name, SQL sql, String c0, String c1) {
+	public InsertSQL2(String name, SQL sql, List<String> cols) {
 		this.name = name;
 		this.sql = sql;
-		this.c0 = c0;
-		this.c1 = c1;
+		this.cols = cols;
 	}
 
 	@Override
 	public String toPSM() {
-		return "INSERT INTO " + name + "(" + c0 + "," + c1 + ") " + sql.toPSM();
+		return "INSERT INTO " + name + "(" + PrettyPrinter.sep0(",", cols) + ") " + sql.toPSM();
 	}
 
 	@Override

@@ -5,7 +5,7 @@ public class TypedSigmaExample extends Example {
 
 	@Override
 	public String getName() {
-		return "Typed Sigma";
+		return "Sigma";
 	}
 
 	@Override

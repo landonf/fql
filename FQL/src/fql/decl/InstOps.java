@@ -2,6 +2,7 @@ package fql.decl;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,7 @@ import fql.sql.Flower;
 import fql.sql.FullSigmaTrans;
 import fql.sql.InsertKeygen;
 import fql.sql.InsertSQL;
+import fql.sql.InsertSQL2;
 import fql.sql.InsertValues;
 import fql.sql.PSM;
 import fql.sql.PSMGen;
@@ -74,7 +76,7 @@ public class InstOps implements
 
 		for (Node k : prog.insts.get(e.t).type(prog).toSig(prog).nodes) {
 			ret.add(new InsertSQL(dst + "_" + k.string, new CopyFlower(e.t
-					+ "_" + k.string)));
+					+ "_" + k.string, "c0", "c1"), "c0", "c1"));
 		}
 
 		return ret;
@@ -104,13 +106,13 @@ public class InstOps implements
 			where.add(new Pair<>(new Pair<>("left", "c1"), new Pair<>("right",
 					"c0")));
 
-			Map<String, Pair<String, String>> select = new HashMap<>();
+			LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 			select.put("c0", new Pair<>("left", "c0"));
 			select.put("c1", new Pair<>("right", "c1"));
 
 			Flower f = new Flower(select, from, where);
 
-			ret.add(new InsertSQL(dst + "_" + k, f));
+			ret.add(new InsertSQL(dst + "_" + k, f, "c0", "c1"));
 		}
 
 		ret.addAll(PSMGen.dropTables(el, inst_type));
@@ -138,14 +140,16 @@ public class InstOps implements
 		ret.addAll(PSMGen.makeTables("pre_" + dst, s, false));
 		for (Node k : s.nodes) {
 			Set<Map<Object, Object>> values = convert(lookup(k.string, e.objs));
+			if (values.size() > 0) {
 			ret.add(new InsertValues("pre_" + dst + "_" + k.string, attrs,
 					values));
+			}
 
 			SQL f = PSMGen.compose(new String[] {
 					e.src + "_" + k.string + "_subst_inv",
 					"pre_" + dst + "_" + k.string,
 					e.dst + "_" + k.string + "_subst" });
-			ret.add(new InsertSQL(dst + "_" + k.string, f));
+			ret.add(new InsertSQL(dst + "_" + k.string, f, "c0", "c1"));
 		}
 
 		ret.addAll(PSMGen.dropTables("pre_" + dst, s));
@@ -212,11 +216,11 @@ public class InstOps implements
 					where.add(new Pair<>(new Pair<>("t1_obs", "c" + i),
 							new Pair<>("t2_obs", "c" + i)));
 				}
-				Map<String, Pair<String, String>> select = new HashMap<>();
+				LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 				select.put("c0", new Pair<>("t1", "c0"));
 				select.put("c1", new Pair<>("t2", "c0"));
 				Flower f = new Flower(select, from, where);
-				ret.add(new InsertSQL(dst + "_" + n, f));
+				ret.add(new InsertSQL(dst + "_" + n, f, "c0", "c1"));
 
 			}
 
@@ -245,7 +249,7 @@ public class InstOps implements
 
 		for (Node n : t.nodes) {
 			ret.add(new InsertSQL(dst + "_" + n.string, new CopyFlower(e.obj
-					+ "_fst_" + n.string)));
+					+ "_fst_" + n.string, "c0", "c1"), "c0", "c1"));
 		}
 
 		return ret;
@@ -260,7 +264,7 @@ public class InstOps implements
 
 		for (Node n : t.nodes) {
 			ret.add(new InsertSQL(dst + "_" + n.string, new CopyFlower(e.obj
-					+ "_snd_" + n.string)));
+					+ "_snd_" + n.string, "c0", "c1"), "c0", "c1"));
 		}
 
 		return ret;
@@ -275,7 +279,7 @@ public class InstOps implements
 
 		for (Node n : t.nodes) {
 			ret.add(new InsertSQL(dst + "_" + n.string, new CopyFlower(e.obj
-					+ "_inl_" + n.string)));
+					+ "_inl_" + n.string, "c0", "c1"), "c0", "c1"));
 		}
 
 		return ret;
@@ -290,7 +294,7 @@ public class InstOps implements
 
 		for (Node n : t.nodes) {
 			ret.add(new InsertSQL(dst + "_" + n.string, new CopyFlower(e.obj
-					+ "_inr_" + n.string)));
+					+ "_inr_" + n.string, "c0", "c1"), "c0", "c1"));
 		}
 
 		return ret;
@@ -373,7 +377,7 @@ public class InstOps implements
 					dst + "_" + n.string,
 					PSMGen.compose(new String[] {
 							e.src + "_" + n.string + "_subst_inv",
-							next + "_" + fc, e.dst + "_" + n.string + "_subst" })));
+							next + "_" + fc, e.dst + "_" + n.string + "_subst" }), "c0", "c1"));
 		}
 
 		ret.addAll(PSMGen.dropTables(next, sig));
@@ -402,21 +406,21 @@ public class InstOps implements
 			List<Flower> l = new LinkedList<>();
 			for (Node m : F.source.nodes) {
 				if (F.nm.get(m).equals(n)) {
-					l.add(new CopyFlower(next + "_" + m.string));
+					l.add(new CopyFlower(next + "_" + m.string, "c0", "c1"));
 				}
 			}
 			String yyy = xxx + "_" + n.string;
 			if (l.size() == 0) {
 
 			} else if (l.size() == 0) {
-				ret.add(new InsertSQL(yyy, l.get(0)));
+				ret.add(new InsertSQL(yyy, l.get(0), "c0", "c1"));
 			} else {
-				ret.add(new InsertSQL(yyy, new Union(l)));
+				ret.add(new InsertSQL(yyy, new Union(l), "c0", "c1"));
 			}
 			ret.add(new InsertSQL(dst + "_" + n.string, PSMGen
 					.compose(new String[] {
 							e.src + "_" + n.string + "_subst_inv", yyy,
-							e.dst + "_" + n.string + "_subst" })));
+							e.dst + "_" + n.string + "_subst" }), "c0", "c1"));
 		}
 		ret.addAll(PSMGen.dropTables(xxx, sig2));
 		ret.addAll(PSMGen.dropTables(next, sig));
@@ -464,7 +468,7 @@ public class InstOps implements
 				Map<String, String> from = new HashMap<>();
 				from.put("limit1", e.src + "_" + n.string + "_limit");
 				from.put("limit2", e.dst + "_" + n.string + "_limit");
-				Map<String, Pair<String, String>> select = new HashMap<>();
+				LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 				int i = 0;
 				for (Triple<Node, Node, Arr<Node, Path>> col : colmap1x
 						.get(n.string)) {
@@ -485,7 +489,7 @@ public class InstOps implements
 				select.put("c1", new Pair<>("limit2", "guid"));
 				Flower f = new Flower(select, from, where);
 				// System.out.println("flower " + f);
-				ret.add(new InsertSQL(dst + "_" + n.string, f));
+				ret.add(new InsertSQL(dst + "_" + n.string, f, "c0", "c1"));
 			}
 			// ret.addAll(PSMGen.dropTables(xxx, sig2));
 			// ret.addAll(PSMGen.dropTables(next, sig));
@@ -521,7 +525,7 @@ public class InstOps implements
 			ret.add(new CreateTable(n.string + "xxx_temp", attrs, false));
 			ret.add(new CreateTable(n.string + "yyy_temp", attrs, false));
 
-			Map<String, Pair<String, String>> select = new HashMap<>();
+			LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 			select.put("c0", new Pair<>("l", "c0"));
 			select.put("c1", new Pair<>("r", "c0"));
 			Map<String, String> from = new HashMap<>();
@@ -530,14 +534,14 @@ public class InstOps implements
 			List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
 			where.add(new Pair<>(new Pair<>("l", "c1"), new Pair<>("r", "c1")));
 			Flower jk = new Flower(select, from, where);
-			ret.add(new InsertSQL(n.string + "yyy_temp", jk));
+			ret.add(new InsertSQL(n.string + "yyy_temp", jk, "c0", "c1"));
 			ret.add(new InsertSQL(n.string + "xxx_temp", PSMGen
 					.compose(new String[] { next + "_" + n.string,
 							e.dst + "_" + n.string + "_squash",
-							e.dst + "_" + n.string + "_subst" })));
+							e.dst + "_" + n.string + "_subst" }), "c0", "c1"));
 			ret.add(new InsertSQL(dst + "_" + n.string, PSMGen
 					.compose(new String[] { n.string + "yyy_temp",
-							n.string + "xxx_temp" })));
+							n.string + "xxx_temp" }), "c0", "c1"));
 			ret.add(new DropTable(n.string + "xxx_temp"));
 			ret.add(new DropTable(n.string + "yyy_temp"));
 		}
@@ -573,21 +577,21 @@ public class InstOps implements
 
 			for (Node n : s.nodes) {
 				List<Flower> l = new LinkedList<>();
-				l.add(new CopyFlower(e.a + "_" + n.string));
-				l.add(new CopyFlower(e.b + "_" + n.string));
-				ret.add(new InsertSQL(dst + "_" + n.string, new Union(l)));
+				l.add(new CopyFlower(e.a + "_" + n.string, "c0", "c1"));
+				l.add(new CopyFlower(e.b + "_" + n.string, "c0", "c1"));
+				ret.add(new InsertSQL(dst + "_" + n.string, new Union(l), "c0", "c1"));
 			}
 			for (Attribute<Node> n : s.attrs) {
 				List<Flower> l = new LinkedList<>();
-				l.add(new CopyFlower(e.a + "_" + n.name));
-				l.add(new CopyFlower(e.b + "_" + n.name));
-				ret.add(new InsertSQL(dst + "_" + n.name, new Union(l)));
+				l.add(new CopyFlower(e.a + "_" + n.name, "c0", "c1"));
+				l.add(new CopyFlower(e.b + "_" + n.name, "c0", "c1"));
+				ret.add(new InsertSQL(dst + "_" + n.name, new Union(l), "c0", "c1"));
 			}
 			for (Edge n : s.edges) {
 				List<Flower> l = new LinkedList<>();
-				l.add(new CopyFlower(e.a + "_" + n.name));
-				l.add(new CopyFlower(e.b + "_" + n.name));
-				ret.add(new InsertSQL(dst + "_" + n.name, new Union(l)));
+				l.add(new CopyFlower(e.a + "_" + n.name, "c0", "c1"));
+				l.add(new CopyFlower(e.b + "_" + n.name, "c0", "c1"));
+				ret.add(new InsertSQL(dst + "_" + n.name, new Union(l), "c0", "c1"));
 			}
 
 			ret.addAll(PSMGen.guidify(dst, s, true));
@@ -599,11 +603,11 @@ public class InstOps implements
 				SQL f = PSMGen.compose(new String[] {
 				/* dst + "_" + n.string + "_subst_inv", */
 				e.a + "_" + n.string, dst + "_" + n.string + "_subst" });
-				ret.add(new InsertSQL(dst + "_inl_" + n.string, f));
+				ret.add(new InsertSQL(dst + "_inl_" + n.string, f, "c0", "c1"));
 				SQL f0 = PSMGen.compose(new String[] {
 				/* dst + "_" + n.string + "_subst_inv", */
 				e.b + "_" + n.string, dst + "_" + n.string + "_subst" });
-				ret.add(new InsertSQL(dst + "_inr_" + n.string, f0));
+				ret.add(new InsertSQL(dst + "_inr_" + n.string, f0, "c0", "c1"));
 			}
 			// (f+g) : A+B -> C f : A -> C g : B -> C
 			Fn<Quad<String, String, String, String>, List<PSM>> fn = new Fn<Quad<String, String, String, String>, List<PSM>>() {
@@ -634,7 +638,7 @@ public class InstOps implements
 						flowers.add(sql1);
 						flowers.add(sql2);
 						ret.add(new InsertSQL(dst0 + "_" + n.string, new Union(
-								flowers)));
+								flowers), "c0", "c1"));
 					}
 
 					return ret;
@@ -656,7 +660,7 @@ public class InstOps implements
 			ret.addAll(PSMGen.makeTables(dst + "_fst", s, false));
 			ret.addAll(PSMGen.makeTables(dst + "_snd", s, false));
 			for (Node n : s.nodes) {
-				Map<String, Pair<String, String>> select = new HashMap<>();
+				LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 				Map<String, String> from = new HashMap<>();
 				List<String> attrs = new LinkedList<>();
 				Map<String, String> attrsM = new HashMap<>();
@@ -666,7 +670,7 @@ public class InstOps implements
 				attrs.add("left");
 				attrs.add("right");
 				attrsM.put("left", PSM.VARCHAR());
-				attrsM.put("left", PSM.VARCHAR());
+				attrsM.put("right", PSM.VARCHAR());
 				select.put("left", new Pair<>("left", "c0"));
 				select.put("right", new Pair<>("right", "c0"));
 				for (Attribute<Node> a : s.attrsFor(n)) {
@@ -685,7 +689,7 @@ public class InstOps implements
 				Flower f = new Flower(select, from, where);
 				ret.add(new CreateTable(dst + "_prod_temp_" + n.string, attrsM,
 						false));
-				ret.add(new InsertSQL(dst + "_prod_temp_" + n.string, f));
+				ret.add(new InsertSQL2(dst + "_prod_temp_" + n.string, f, attrs));
 				Map<String, String> attrsM0 = new HashMap<>(attrsM);
 				attrsM0.put("guid", PSM.VARCHAR());
 				ret.add(new CreateTable(dst + "_prod_guid_" + n.string,
@@ -697,35 +701,35 @@ public class InstOps implements
 
 				from = new HashMap<>();
 				from.put("t", dst + "_prod_guid_" + n.string);
-				select = new HashMap<>();
+				select = new LinkedHashMap<>();
 				select.put("c0", new Pair<>("t", "guid"));
 				select.put("c1", new Pair<>("t", "left"));
 				f = new Flower(select, from, where0);
-				ret.add(new InsertSQL(dst + "_fst_" + n, f));
+				ret.add(new InsertSQL(dst + "_fst_" + n, f, "c0", "c1"));
 
 				from = new HashMap<>();
 				from.put("t", dst + "_prod_guid_" + n.string);
-				select = new HashMap<>();
+				select = new LinkedHashMap<>();
 				select.put("c0", new Pair<>("t", "guid"));
 				select.put("c1", new Pair<>("t", "right"));
 				f = new Flower(select, from, where0);
-				ret.add(new InsertSQL(dst + "_snd_" + n, f));
+				ret.add(new InsertSQL(dst + "_snd_" + n, f, "c0", "c1"));
 
-				Map<String, Pair<String, String>> select0 = new HashMap<>();
+				LinkedHashMap<String, Pair<String, String>> select0 = new LinkedHashMap<>();
 				select0.put("c0", new Pair<>("t", "guid"));
 				select0.put("c1", new Pair<>("t", "guid"));
 				Map<String, String> from0 = new HashMap<>();
 				from0.put("t", dst + "_prod_guid_" + n.string);
 				Flower sql = new Flower(select0, from0, where0);
-				ret.add(new InsertSQL(dst + "_" + n.string, sql));
+				ret.add(new InsertSQL(dst + "_" + n.string, sql, "c0", "c1"));
 				for (Attribute<Node> a : s.attrsFor(n)) {
-					select0 = new HashMap<>();
+					select0 = new LinkedHashMap<>();
 					select0.put("c0", new Pair<>("t", "guid"));
 					select0.put("c1", new Pair<>("t", a.name));
 					from0 = new HashMap<>();
 					from0.put("t", dst + "_prod_guid_" + n.string);
 					sql = new Flower(select0, from0, where0);
-					ret.add(new InsertSQL(dst + "_" + a.name, sql));
+					ret.add(new InsertSQL(dst + "_" + a.name, sql, "c0", "c1"));
 				}
 				ret.add(new DropTable(dst + "_prod_temp_" + n));
 
@@ -746,11 +750,11 @@ public class InstOps implements
 						"dstGuid", "left")));
 				where.add(new Pair<>(new Pair<>("rightEdge", "c1"), new Pair<>(
 						"dstGuid", "right")));
-				Map<String, Pair<String, String>> select = new HashMap<>();
+				LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 				select.put("c0", new Pair<>("srcGuid", "guid"));
 				select.put("c1", new Pair<>("dstGuid", "guid"));
 				Flower f = new Flower(select, from, where);
-				ret.add(new InsertSQL(dst + "_" + edge.name, f));
+				ret.add(new InsertSQL(dst + "_" + edge.name, f, "c0", "c1"));
 			}
 
 			Fn<Quad<String, String, String, String>, List<PSM>> fn = new Fn<Quad<String, String, String, String>, List<PSM>>() {
@@ -776,11 +780,11 @@ public class InstOps implements
 								new Pair<>("f", "c1")));
 						where.add(new Pair<>(new Pair<>("lim", "right"),
 								new Pair<>("g", "c1")));
-						Map<String, Pair<String, String>> select = new HashMap<>();
+						LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 						select.put("c0", new Pair<>("f", "c0"));
 						select.put("c1", new Pair<>("lim", "guid"));
 						Flower flower = new Flower(select, from, where);
-						ret.add(new InsertSQL(dst0 + "_" + n.string, flower));
+						ret.add(new InsertSQL(dst0 + "_" + n.string, flower, "c0", "c1"));
 					}
 
 					return ret;
@@ -981,15 +985,15 @@ public class InstOps implements
 		Const sig = e.q.type(prog).second.toConst(prog);
 		for (String n : sig.nodes) {
 			ret.add(new InsertSQL(env + "_" + n, new CopyFlower(l.second + "_"
-					+ n)));
+					+ n, "c0", "c1"), "c0", "c1"));
 		}
 		for (Triple<String, String, String> n : sig.attrs) {
 			ret.add(new InsertSQL(env + "_" + n.first, new CopyFlower(l.second
-					+ "_" + n.first)));
+					+ "_" + n.first, "c0", "c1"), "c0", "c1"));
 		}
 		for (Triple<String, String, String> n : sig.arrows) {
 			ret.add(new InsertSQL(env + "_" + n.first, new CopyFlower(l.second
-					+ "_" + n.first)));
+					+ "_" + n.first, "c0", "c1"), "c0", "c1"));
 		}
 
 		return new Pair<>(ret, new Object());
@@ -1079,7 +1083,7 @@ public class InstOps implements
 		for (Node n : ty.nodes) {
 			ret.add(new InsertSQL(dst + "_" + n.string, PSMGen
 					.compose(new String[] { e.src + "_" + n.string + "_squash",
-							e.src + "_" + n.string + "_subst" })));
+							e.src + "_" + n.string + "_subst" }), "c0", "c1"));
 		}
 
 		return ret;

@@ -4,7 +4,7 @@ public class DeltaExample extends Example {
 
 	@Override
 	public String getName() {
-		return "Typed Delta";
+		return "Delta";
 	}
 
 	@Override

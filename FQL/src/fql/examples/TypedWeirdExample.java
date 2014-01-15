@@ -7,7 +7,7 @@ public class TypedWeirdExample extends Example {
 
 	@Override
 	public String getName() {
-		return "Typed Weird";
+		return "Weird";
 	}
 
 	@Override

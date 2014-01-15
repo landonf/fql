@@ -21,6 +21,9 @@ public class InsertValues extends PSM {
 		this.name = name;
 		this.attrs = attrs;
 		this.values = values;
+		if (values.size() == 0) {
+			throw new RuntimeException();
+		}
 	}
 
 	/*
@@ -29,6 +32,7 @@ public class InsertValues extends PSM {
 	 */
 	@Override
 	public String toPSM() {
+		
 		String attrsStr = "";
 		for (int i = 0; i < attrs.size(); i++) {
 			if (i > 0) {

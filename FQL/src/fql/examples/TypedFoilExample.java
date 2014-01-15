@@ -4,7 +4,7 @@ public class TypedFoilExample extends Example {
 
 	@Override
 	public String getName() {
-		return "Typed FOIL";
+		return "FOIL";
 	}
 
 	@Override

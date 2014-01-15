@@ -1,6 +1,5 @@
 package fql;
 
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.io.FileInputStream;
@@ -9,12 +8,19 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+
+import fql.examples.Example;
+import fql.examples.Examples;
+import fql.gui.GUI;
 
 /**
  * 
@@ -25,6 +31,9 @@ import javax.swing.JTextField;
 @SuppressWarnings("serial")
 public class DEBUG implements Serializable {
 
+	public static enum SQLKIND { H2, NATIVE, JDBC };
+	public SQLKIND sqlKind = SQLKIND.NATIVE;
+	
 	public String FILE_PATH = "";
 
 	public boolean ALLOW_NULLS = true;
@@ -76,7 +85,7 @@ public class DEBUG implements Serializable {
 	public String afterlude = "DROP DATABASE FQL; ";
 
 	public String jdbcUrl = "jdbc:mysql://localhost:3306/?user=root";
-	public boolean useJDBC = false;
+//	public boolean useJDBC = false;
 	public String jdbcClass = "com.mysql.jdbc.Driver";
 
 	public boolean MultiView = true;
@@ -118,7 +127,8 @@ public class DEBUG implements Serializable {
 	public boolean inst_joined = true;
 	public boolean inst_gr = true;
 	public boolean inst_obs = true;
-
+	public boolean limit_examples = true;
+	
 	public boolean transform_graphical = true;
 	public boolean transform_tabular = true;
 	public boolean transform_textual = true;
@@ -138,7 +148,7 @@ public class DEBUG implements Serializable {
 		JTabbedPane jtb = new JTabbedPane();
 		
 		JPanel general = new JPanel(new GridLayout(7,2));
-		JPanel viewer = new JPanel(new GridLayout(6,2));
+		JPanel viewer = new JPanel(new GridLayout(7,2));
 		JPanel sql = new JPanel(new GridLayout(7,2));
 		
 		jtb.add("General", general);
@@ -147,9 +157,14 @@ public class DEBUG implements Serializable {
 		
 //		JPanel p = new JPanel(new GridLayout(20, 2));
 
+		  JCheckBox limex = new JCheckBox("", limit_examples);
+		  JLabel limexL
+		  = new JLabel("Show only some examples:"); viewer.add(limexL); viewer.add(limex);
+		  limexL.setToolTipText("The examples combo box will only display some examples."); 
+		
 		  JCheckBox coeB = new JCheckBox("", continue_on_error);
 		  JLabel coeL
-		  = new JLabel("Continue on errors:"); general.add(coeL); general.add(coeB);
+		  = new JLabel("Continue on errors (dangerous):"); general.add(coeL); general.add(coeB);
 		  coeL.setToolTipText("FQL will attempt to continue on errors, and report these after opening the viewer."); 
 			
 			 
@@ -196,10 +211,35 @@ public class DEBUG implements Serializable {
 		general.add(label5);
 		general.add(jcb);
 
-		JCheckBox jdbcBox = new JCheckBox("", useJDBC);
-		JLabel jdbcLabel = new JLabel("Use JDBC:");
+		ButtonGroup group = new ButtonGroup();
+		JRadioButton nativeButton = new JRadioButton("Naive");
+		JRadioButton h2Button = new JRadioButton("H2");
+		JRadioButton jdbcButton = new JRadioButton("JDBC");
+		group.add(nativeButton);
+		group.add(h2Button);
+		group.add(jdbcButton);
+		JPanel jdbcBox = new JPanel(); //new GridLayout(1,3));
+		jdbcBox.add(nativeButton);
+		jdbcBox.add(h2Button);
+		jdbcBox.add(jdbcButton);
+		switch (sqlKind) {
+		case H2:
+			group.setSelected(h2Button.getModel(), true);
+			break;
+		case JDBC:
+			group.setSelected(jdbcButton.getModel(), true);
+			break;
+		case NATIVE:
+			group.setSelected(nativeButton.getModel(), true);
+			break;
+		default:
+			throw new RuntimeException();
+		}
+		
+//		JCheckBox jdbcBox = new JCheckBox("", useJDBC);
+		JLabel jdbcLabel = new JLabel("SQL Engine:");
 		jdbcLabel
-				.setToolTipText("Causes FQL to execute the generated SQL against a JDBC connection.");
+				.setToolTipText("Choose between a naive SQL engine, the H2 engine, or an external JDBC engine.");
 		sql.add(jdbcLabel);
 		sql.add(jdbcBox);
 
@@ -353,6 +393,7 @@ public class DEBUG implements Serializable {
 			// DO_NOT_GUIDIFY = jcbX.isSelected();
 			// SHOW_QUERY_PATHS = jcb1.isSelected();
 			MultiView = jcbM.isSelected();
+			limit_examples = limex.isSelected();
 
 			// CHECK_MAPPINGS = jcb1.isSelected();
 			MAX_PATH_LENGTH = a;
@@ -383,7 +424,14 @@ public class DEBUG implements Serializable {
 			transform_tabular = transform_tabular_box.isSelected();
 			transform_textual = transform_textual_box.isSelected();
 
-			useJDBC = jdbcBox.isSelected();
+			if (h2Button.isSelected()) {
+				sqlKind = SQLKIND.H2;
+			} else if (jdbcButton.isSelected()) {
+				sqlKind = SQLKIND.JDBC;
+			} else if (nativeButton.isSelected()) {
+				sqlKind = SQLKIND.NATIVE;
+			}
+						
 			jdbcUrl = jdbcField.getText();
 			jdbcClass = jdbcField2.getText();
 			FILE_PATH = fileArea.getText();
@@ -399,6 +447,22 @@ public class DEBUG implements Serializable {
 			load(false);
 			// debug.showOptions();
 		}
+		
+		//TODO update gui combo box thingy here
+		int nbox = GUI.box.getModel().getSize();
+		if (limit_examples) {
+			if (nbox != Examples.key_examples.length) {
+				DefaultComboBoxModel<Example> m = new DefaultComboBoxModel<>(Examples.key_examples);
+				GUI.box.setModel(m);
+				GUI.box.setSelectedIndex(-1);
+			}
+		} else {
+			if (nbox != Examples.examples.length) {
+				DefaultComboBoxModel<Example> m = new DefaultComboBoxModel<>(Examples.examples);
+				GUI.box.setModel(m);
+				GUI.box.setSelectedIndex(-1);
+			}
+		}
 	}
 
 	public static void showAbout() {
@@ -408,7 +472,7 @@ public class DEBUG implements Serializable {
 
 	static String about = "FQL IDE Copyright (C) 2012-2014 David Spivak and Ryan Wisnesky"
 			+ "\n\nLicense: Creative-Commons Attribution-NonCommercial-NoDerivs 3.0 Unported"
-			+ "\n\nLibraries used:\n\nJParsec (parsing)\nJUNG (graph visualization)\nRSyntaxTextArea (code editor)";
+			+ "\n\nLibraries used:\n\nJParsec (parsing)\nJUNG (graph visualization)\nRSyntaxTextArea (code editor)\nH2 (SQL)";
 
 	public static int chase_limit = 64;
 

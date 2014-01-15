@@ -2,6 +2,7 @@ package fql.sql;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -175,7 +176,7 @@ public class ED {
 
 		//System.out.println("Make called on " + max + " " + frm + " " + whr);
 		
-		Map<String, String> f = new HashMap<>();
+		LinkedHashMap<String, String> f = new LinkedHashMap<>();
 		int i = 0;
 		for (String r : frm) {
 			f.put("t" + (i++), r);
@@ -189,7 +190,7 @@ public class ED {
 				  new Pair<>("t" + (p.second/ 2), "c" + (p.second% 2))));
 		}
 
-		Map<String, Pair<String, String>> s = new HashMap<>();
+		LinkedHashMap<String, Pair<String, String>> s = new LinkedHashMap<>();
 		for (i = 0; i < max; i++) {
 			s.put("c" + i, new Pair<>("t" + (i / 2), "c" + (i % 2)));
 		}

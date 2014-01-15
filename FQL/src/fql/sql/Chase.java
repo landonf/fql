@@ -27,7 +27,6 @@ import fql.decl.Edge;
 import fql.decl.Instance;
 import fql.decl.Mapping;
 import fql.decl.Node;
-import fql.decl.Path;
 import fql.decl.Signature;
 import fql.gui.FQLTextPanel;
 import fql.parse.BadSyntax;

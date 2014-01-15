@@ -11,7 +11,6 @@ public class Examples {
 
 	public static Example graph = new GraphExample();
 	public static Example plusSig = new CoProdExample();
-	public static Example plusSig2 = new CoProducts2Example();
 	public static Example full = new FullSigmaExample();
 	public static Example full2 = new FullSigmaExample2();
 	public static Example external = new ExternalExample();
@@ -19,34 +18,31 @@ public class Examples {
 	public static Example typedFoil = new TypedFoilExample();
 	public static Example typedPi = new TypedPiExample();
 	public static Example typedWeird = new TypedWeirdExample();
-	public static Example weird = new WeirdExample();
+	//public static Example weird = new WeirdExample();
 	public static Example sql2fql = new SqlToFqlExample();
-	public static Example foil = new FoilExample();
+	//public static Example foil = new FoilExample();
 	public static Example empty = new EmptyExample();
-	public static Example typeddelta = new TypedDeltaExample();
-	public static Example delta = new DeltaExample();
-	public static Example pi = new PiExample();
-	public static Example sigma = new SigmaExample();
-	public static Example composition = new CompositionExample();
+	public static Example typeddelta = new DeltaExample();
+//	public static Example delta = new DeltaExample();
+//	public static Example pi = new PiExample();
+//	public static Example sigma = new SigmaExample();
+	//public static Example composition = new CompositionExample();
 	public static Example tcomp = new TypedCompositionExample();
 	public static Example iso = new IsoExample();
 	public static Example triangle = new TriangleExample();
 	public static Example cyclicgroup = new CyclicExample();
-	public static Example employess = new EmployeesExample();
+	public static Example employess = new EmployeesExample(); 
 	public static Example dihedral = new DihedralExample();
 	public static Example typedemployees = new TypedEmployeesExample();
 	public static Example typedsigma = new TypedSigmaExample();
 	public static Example relative = new RelationalizerExample();
-	public static Example sotgd = new EDExample();
 	public static Example products = new ProductExample();
-	public static Example products2 = new Product2Example();
 	public static Example enums = new EnumsExample();
 	// public static Example functor = new FunctorExample();
-	public static Example terminal = new TerminalExample();
 	public static Example transform = new TransformExample();
 	public static Example transform2 = new Transforms2Example();
 	public static Example written = new WrittenExample();
-	public static Example monad = new MonadExample();
+//	public static Example monad = new MonadExample();
 	public static Example gene = new GeneExample();
 	public static Example sub = new SubSchemaExample();
 	public static Example match = new MatchExample();
@@ -54,25 +50,34 @@ public class Examples {
 	public static Example surj = new SurjectiveExample();
 	public static Example cat = new CategoryExample();
 	public static Example eds2fql = new EDsToFqlExample();
-
-	public static Example[] examples = new Example[] { graph, eds2fql, cat, surj,
-			full2, match2, match, sub, terminal, /* functor, */enums, people,
-			external, plusSig2, products2, typeddelta, delta, pi, typedPi,
-			typedsigma, sigma, full, employess, typedemployees, composition,
+	public static Example fncomp = new FnCompExample();
+	
+	public static Example[] examples = new Example[] { fncomp, graph, eds2fql, cat, surj,
+			full2, match2, match, sub, /* functor, */enums, people,
+			external, typeddelta, /* delta, pi, */ typedPi,
+			typedsigma, /* sigma, */ full, employess, typedemployees, /* composition, */
 			tcomp, iso, triangle, cyclicgroup, transform2, dihedral, empty,
-			foil, typedFoil, sql2fql, weird, written, monad, typedWeird,
-			relative, sotgd, plusSig, products, transform, gene };
+			/* foil, */ typedFoil, sql2fql, /* weird, */ written, /* monad, */ typedWeird,
+			relative, plusSig, products, transform, gene };
+	
+	public static Example[] key_examples = new Example[] {   surj,
+		 enums, people,
+		external, typeddelta, typedPi,
+		typedsigma, full, typedemployees, 
+		tcomp, empty,
+		 typedFoil, sql2fql, 
+		relative, plusSig, products, transform, gene };
 
-	public static final String helpString = "See the People example for a tutorial, and the All Syntax example for all possible FQL syntax."
+	public static final String helpString = "See the People example for a tutorial, and the All Syntax example for all possible FQL syntax.  Additional examples can be enabled by unchecking the 'show only limited examples' box in the viewer panel of the options menu."
 			+ "\n"
-			+ "\nFor many purposes, signatures must be finite (see options)."
+			+ "\nFor many purposes, signatures must be finite.  Support for some infinite signatures and migrations can be enalbed in the options menu."
 			+ "\n"
-			+ "\nFQL is not case-sensitive, but many SQL systems are."
+			+ "\nFQL can use the H2 SQL engine instead of its naive engine -- see the options menu."
 			+ "\n"
 			+ "\nCREATE TABLE statements generated by instances can be suppressed using the keyword \"external\","
 			+ "\nand results dropped using the \"drop\" command. (see External example)."
 			+ "\n"
-			+ "\nInstance values must be single words, unless they are quoted."
+			+ "\nInstance values must be single words, unless they are quoted.  Negative numbers must be quoted."
 			+ "\n"
 			+ "\nTry Control-shift-space after schema, instance, mapping, query, transform for code completion. "
 			+ "\n"

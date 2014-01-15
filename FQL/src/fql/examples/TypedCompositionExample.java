@@ -4,7 +4,7 @@ public class TypedCompositionExample extends Example {
 
 	@Override
 	public String getName() {
-		return "Typed Composition";
+		return "Query Composition";
 	}
 
 	@Override

@@ -3,10 +3,13 @@ package fql.sql;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.collections15.map.LinkedMap;
 
 import fql.FQLException;
 import fql.Fn;
@@ -191,10 +194,10 @@ public class Relationalizer {
 				ret.add(new CreateTable(out + "_" + n.string + "tempNoAttrs" + count,
 						edge_types, false));
 				InsertSQL f0 = new InsertSQL(out + "_" +n.string + "tempNoAttrs" + count,
-						f);
+						f, "c0", "c1");
 				ret.add(f0);
 
-				Map<String, Pair<String, String>> select = new HashMap<>();
+				LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 				Map<String, String> from = new HashMap<>();
 				List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
 				List<Attribute<Node>> l = sig.attrsFor(p.arr.target);
@@ -202,7 +205,7 @@ public class Relationalizer {
 				select.put("c0", new Pair<>(n.string, "c0"));
 				// select.put("c1", new Pair<>(n.string + "tempNoAttrs", "c1"));
 				int i = 1;
-				Map<String, String> types = new HashMap<>();
+				LinkedHashMap<String, String> types = new LinkedHashMap<>();
 				types.put("c0", PSM.VARCHAR());
 				// types.put("c1", PSM.VARCHAR());
 				for (Attribute<Node> a : l) {
@@ -220,12 +223,12 @@ public class Relationalizer {
 				// System.out.println("&&&Flower is " + g);
 
 				ret.add(new CreateTable(out + "_" +n.string + "temp" + count, types, false));
-				ret.add(new InsertSQL(out + "_" +n.string + "temp" + count, g));
+				ret.add(new InsertSQL2(out + "_" +n.string + "temp" + count, g, new LinkedList<>(types.keySet())));
 				count++;
 				
 			}
 
-			Map<String, Pair<String, String>> select = new HashMap<>();
+			LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 			List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
 			Map<String, String> from = new HashMap<>();
 			from.put(in + "_" + n.string, in + "_" + n.string);
@@ -253,7 +256,7 @@ public class Relationalizer {
 			// }
 			Flower j = new Flower(select, from, where);
 			ret.add(new CreateTable(out + "_" +n.string + "_observables", ty, false));
-			ret.add(new InsertSQL(out + "_" +n.string + "_observables", j));
+			ret.add(new InsertSQL2(out + "_" +n.string + "_observables", j, new LinkedList<>(j.select.keySet())));
 			
 			if (relationalize) {
 				ret.addAll(relationalize(select, from, where, sig, out, ty, n, u, edge_types));
@@ -277,16 +280,16 @@ public class Relationalizer {
 		return observations(sig, out, in, true);
 	}
 
-	public static List<PSM> relationalize(Map<String, Pair<String, String>> select, Map<String, String> from, List<Pair<Pair<String, String>, Pair<String, String>>> where, Signature sig, String out, Map<String, String> ty, Node n, int u, Map<String, String> edge_types) throws FQLException {
+	public static List<PSM> relationalize(LinkedHashMap<String, Pair<String, String>> select, Map<String, String> from, List<Pair<Pair<String, String>, Pair<String, String>>> where, Signature sig, String out, Map<String, String> ty, Node n, int u, Map<String, String> edge_types) throws FQLException {
 		List<PSM> ret = new LinkedList<>();
 
-		Map<String, Pair<String, String>> select0 = new HashMap<>(select);
+		LinkedHashMap<String, Pair<String, String>> select0 = new LinkedHashMap<>(select);
 		Map<String, String> ty0 = new HashMap<>(ty);
 		ty0.remove("id");
 		select0.remove("id");
 		Flower j0 = new Flower(select0, from, where);
 		ret.add(new CreateTable(out + "_" +n.string + "_observables_proj", ty0, false));
-		ret.add(new InsertSQL(out + "_" +n.string + "_observables_proj", j0));
+		ret.add(new InsertSQL2(out + "_" +n.string + "_observables_proj", j0, new LinkedList<>(j0.select.keySet())));
 
 		ret.add(new CreateTable(out + "_" +n.string + "_observables_guid", ty, false));
 		ret.add(new InsertKeygen(out + "_" +n.string + "_observables_guid", "id", out + "_" + n.string
@@ -296,7 +299,7 @@ public class Relationalizer {
 	//		throw new RuntimeException("Cannot compute observables for " + n + ": no attributes");
 //		}
 		
-		select = new HashMap<>();
+		select = new LinkedHashMap<>();
 		where = new LinkedList<>();
 		from = new HashMap<>();
 		from.put(n.string + "_observables", out + "_" +n.string + "_observables");
@@ -311,7 +314,7 @@ public class Relationalizer {
 
 		Flower k = new Flower(select, from, where);
 		ret.add(new CreateTable(out + "_" +n.string + "_squash", edge_types, false));
-		ret.add(new InsertSQL(out + "_" +n.string + "_squash", k));
+		ret.add(new InsertSQL2(out + "_" +n.string + "_squash", k, new LinkedList<>(k.select.keySet())));
 		
 		//TODO drops for observables
 	//	ret.add(new DropTable(n.string + "_observables"));
@@ -334,21 +337,21 @@ public class Relationalizer {
 
 		List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
 		Map<String, String> from = new HashMap<>();
-		Map<String, Pair<String, String>> select = new HashMap<>();
+		LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 
 		from.put(N + "_squash", out + "_" +N + "_squash");
-		select.put("c1", new Pair<>(N + "_squash", "c1"));
 		select.put("c0", new Pair<>(N + "_squash", "c1"));
+		select.put("c1", new Pair<>(N + "_squash", "c1"));
 
 		Flower f = new Flower(select, from, where);
 
 		ret.add(new CreateTable(out + "_" + N + "_relationalize_temp", attrs, false));
-		ret.add(new InsertSQL(out + "_" + N +"_relationalize_temp", f));
+		ret.add(new InsertSQL(out + "_" + N +"_relationalize_temp", f, "c0", "c1"));
 
 		ret.add(new DropTable(out + "_" + N.string));
 		ret.add(new CreateTable(out + "_" + N.string, attrs, false));
 		ret.add(new InsertSQL(out + "_" + N.string, new CopyFlower(
-				out + "_" + N + "_relationalize_temp")));
+				out + "_" + N + "_relationalize_temp", "c0", "c1"), "c0", "c1"));
 
 		ret.add(new DropTable(out + "_" + N + "_relationalize_temp"));
 
@@ -359,7 +362,7 @@ public class Relationalizer {
 
 			where = new LinkedList<>();
 			from = new HashMap<>();
-			select = new HashMap<>();
+			select = new LinkedHashMap<>();
 
 			from.put(N + "_squash", out + "_" +N + "_squash");
 			from.put(out + "_" + n.name, out + "_" + n.name);
@@ -371,12 +374,12 @@ public class Relationalizer {
 			f = new Flower(select, from, where);
 
 			ret.add(new CreateTable(out + "_" + n.name + "_relationalize_temp", attrs, false));
-			ret.add(new InsertSQL(out + "_" + n.name + "_relationalize_temp", f));
+			ret.add(new InsertSQL(out + "_" + n.name + "_relationalize_temp", f, "c0", "c1"));
 
 			ret.add(new DropTable(out + "_" + n.name));
 			ret.add(new CreateTable(out + "_" + n.name, attrs, false));
 			ret.add(new InsertSQL(out + "_" + n.name, new CopyFlower(
-					out + "_" + n.name + "_relationalize_temp")));
+					out + "_" + n.name + "_relationalize_temp", "c0", "c1"), "c0", "c1"));
 
 			ret.add(new DropTable(out + "_" + n.name + "_relationalize_temp"));
 		}
@@ -387,7 +390,7 @@ public class Relationalizer {
 
 			where = new LinkedList<>();
 			from = new HashMap<>();
-			select = new HashMap<>();
+			select = new LinkedHashMap<>();
 
 			from.put(N + "_squash", out + "_" +N + "_squash");
 			from.put(out + "_" + n.name, out + "_" + n.name);
@@ -399,12 +402,12 @@ public class Relationalizer {
 			f = new Flower(select, from, where);
 
 			ret.add(new CreateTable(out + "_" +"relationalize_temp", attrs, false));
-			ret.add(new InsertSQL(out + "_" +"relationalize_temp", f));
+			ret.add(new InsertSQL(out + "_" +"relationalize_temp", f, "c0", "c1"));
 
 			ret.add(new DropTable(out + "_" + n.name));
 			ret.add(new CreateTable(out + "_" + n.name, attrs, false));
 			ret.add(new InsertSQL(out + "_" + n.name, new CopyFlower(
-					out + "_" +"relationalize_temp")));
+					out + "_" +"relationalize_temp", "c0", "c1"), "c0", "c1"));
 
 			ret.add(new DropTable(out + "_" +"relationalize_temp"));
 		}
@@ -415,24 +418,25 @@ public class Relationalizer {
 
 			where = new LinkedList<>();
 			from = new HashMap<>();
-			select = new HashMap<>();
+			select = new LinkedHashMap<>();
 
 			from.put(N + "_squash", out + "_" +N + "_squash");
 			from.put(out + "_" + n.name, out + "_" + n.name);
 			where.add(new Pair<>(new Pair<>(N + "_squash", "c0"), new Pair<>(out
 					+ "_" + n.name, "c1")));
-			select.put("c1", new Pair<>(N + "_squash", "c1"));
 			select.put("c0", new Pair<>(out + "_" + n.name, "c0"));
+			select.put("c1", new Pair<>(N + "_squash", "c1"));
 
+			
 			f = new Flower(select, from, where);
 
 			ret.add(new CreateTable(out + "_" +"relationalize_temp", attrs, false));
-			ret.add(new InsertSQL(out + "_" +"relationalize_temp", f));
+			ret.add(new InsertSQL(out + "_" +"relationalize_temp", f, "c0", "c1"));
 
 			ret.add(new DropTable(out + "_" + n.name));
 			ret.add(new CreateTable(out + "_" + n.name, attrs, false));
 			ret.add(new InsertSQL(out + "_" + n.name, new CopyFlower(
-					out + "_" +"relationalize_temp")));
+					out + "_" +"relationalize_temp", "c0", "c1"), "c0", "c1"));
 
 			ret.add(new DropTable(out + "_" +"relationalize_temp"));
 		}
@@ -449,7 +453,7 @@ public class Relationalizer {
 			attrs.put("c1", PSM.VARCHAR());
 			// ret.add(new CreateTable(out + "_" + n.string, attrs, false));
 			ret.add(new InsertSQL(out + "_" + n.string, new CopyFlower(in + "_"
-					+ n.string)));
+					+ n.string, "c0", "c1"), "c0", "c1"));
 		}
 		for (Attribute<Node> n : sig.attrs) {
 			Map<String, String> attrs = new HashMap<>();
@@ -457,7 +461,7 @@ public class Relationalizer {
 			attrs.put("c1", n.target.psm());
 			// ret.add(new CreateTable(out + "_" + n.name, attrs, false));
 			ret.add(new InsertSQL(out + "_" + n.name, new CopyFlower(in + "_"
-					+ n.name)));
+					+ n.name, "c0", "c1"), "c0", "c1"));
 		}
 		for (Edge n : sig.edges) {
 			Map<String, String> attrs = new HashMap<>();
@@ -465,7 +469,7 @@ public class Relationalizer {
 			attrs.put("c1", PSM.VARCHAR());
 			// ret.add(new CreateTable(out + "_" + n.name, attrs, false));
 			ret.add(new InsertSQL(out + "_" + n.name, new CopyFlower(in + "_"
-					+ n.name)));
+					+ n.name, "c0", "c1"), "c0", "c1"));
 		}
 
 		return ret;

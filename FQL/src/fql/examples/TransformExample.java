@@ -88,11 +88,11 @@ public class TransformExample extends Example {
 
 	+ "\n"
 
-	+ "\ninstance I = void s"
+	+ "\ninstance II = void s"
 
 	+ "\n"
 
-	+ "\ntransform t1 = I.void j"
+	+ "\ntransform t1 = II.void j"
 
 	+ "\n"
 
@@ -108,7 +108,7 @@ public class TransformExample extends Example {
 
 	+ "\n"
 
-	+ "\ntransform J = tx.unit tj"
+	+ "\ntransform JJ = tx.unit tj"
 
 	;
 

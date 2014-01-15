@@ -36,6 +36,8 @@ public class PSMInterp {
 					ret.add(t);
 				}
 			}
+			System.out.println("After " + cmd);
+			System.out.println(state);
 		}
 		return new Pair<>(state, ret);
 	}

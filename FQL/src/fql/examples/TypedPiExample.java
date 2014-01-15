@@ -7,7 +7,7 @@ public class TypedPiExample extends Example {
 
 	@Override
 	public String getName() {
-		return "Typed Pi";
+		return "Pi";
 	}
 
 	@Override

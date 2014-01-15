@@ -28,7 +28,7 @@ public class SurjectiveExample extends Example {
 			+ "\n"
 			+ "\ninstance I = {"
 			+ "\n	nodes a -> {1,2,3}, b -> {1,2};"
-			+ "\n	attributes att1 -> {(1,alpha), (2,beta), (3,gamma)}, att2 -> {(1,alpha),(2,delta)};"
+			+ "\n	attributes att1 -> {(1,alpha), (2,beta), (3,gamma)}, att2 -> {(1,alpha),(2,dlta)};"
 			+ "\n	arrows;"
 			+ "\n} : C"
 			+ "\n"

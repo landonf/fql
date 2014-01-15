@@ -1,5 +1,6 @@
 package fql.sql;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,16 +12,18 @@ import java.util.Set;
  */
 public class CopyFlower extends Flower {
 
-	String name;
+	String name, c0, c1;
 	
-	public CopyFlower(String name) {
+	public CopyFlower(String name, String c0, String c1) {
 		super();
 		this.name = name;
+		this.c0 = c0;
+		this.c1 = c1;
 	}
 	
 	@Override
 	public String toPSM() {
-	return "SELECT * FROM " + name;
+	return "SELECT " + c0 + "," + c1 + " FROM " + name;
 	}
 	
 	@Override

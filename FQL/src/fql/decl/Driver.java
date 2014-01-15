@@ -190,7 +190,7 @@ public class Driver {
 				}
 			}
 		}
-
+/*
 		List<PSM> psm = new LinkedList<PSM>();
 		InstOps ops = new InstOps(prog);
 		for (String k : prog.insts.keySet()) {
@@ -228,26 +228,34 @@ public class Driver {
 				}
 			}
 		}
-		List<PSM> drops = computeDrops(prog);
-
-		Map<String, Set<Map<Object, Object>>> res;
-		if (DEBUG.debug.useJDBC) {
+//		List<PSM> drops = computeDrops(prog);
+*/
+		Triple<Map<String, Set<Map<Object, Object>>>, String, List<Throwable>> res = JDBCBridge.run(prog);
+/*		if (DEBUG.debug.sqlKind == DEBUG.SQLKIND.JDBC) {
 			if (exns.size() > 0) {
 				throw new RuntimeException("Cannot use continue on errors with jdbc");
 			}
 			res = JDBCBridge.go(psm, drops, prog);
-		} else {
+		} else if (DEBUG.debug.sqlKind == DEBUG.SQLKIND.NATIVE){
 			Pair<Map<String, Set<Map<Object, Object>>>, List<Throwable>> resX = new PSMInterp().interp(psm);
 			res = resX.first;
 			exns.addAll(resX.second);
+		} else if (DEBUG.debug.sqlKind == DEBUG.SQLKIND.H2) {
+	//		res = JDBCBridge.h2(psm, prog);			
+			res = JDBCBridge.h2x(prog);
+		}
+		else {
+			throw new RuntimeException();
 		}
 		// PrettyPrinter.printDB(res);
+*/
 
+		exns.addAll(res.third);
 		for (String k : prog.insts.keySet()) {
 			try {
 				Signature s = prog.insts.get(k).type(prog).toSig(prog);
 				List<Pair<String, List<Pair<Object, Object>>>> b = PSMGen
-						.gather(k, s, res);
+						.gather(k, s, res.first);
 				insts.put(k, new Instance(s, b));
 			} catch (Exception re) {
 				re.printStackTrace();
@@ -267,7 +275,7 @@ public class Driver {
 				InstExp i = prog.insts.get(val.first);
 				Signature s = i.type(prog).toSig(prog);
 				List<Pair<String, List<Pair<Object, Object>>>> b = PSMGen
-						.gather(k, s, res);
+						.gather(k, s, res.first);
 				transforms.put(
 						k,
 						new Transform(insts.get(val.first), insts
@@ -282,16 +290,6 @@ public class Driver {
 				}
 			}
 		}
-		String str = "";
-		try {
-			str = DEBUG.debug.prelude + "\n\n" + PSMGen.prettyPrint(psm)
-					+ "\n\n" + 
-					(drops.size() == 0 ? "" : PSMGen.prettyPrint(drops) + "\n\n")
-					+ DEBUG.debug.afterlude + "\n\n";
-		} catch (RuntimeException re) {
-			str = re.getLocalizedMessage();
-		}
-
 		// check full sigmas with EDs
 		if (DEBUG.debug.VALIDATE_WITH_EDS) {
 			try {
@@ -305,7 +303,7 @@ public class Driver {
 		
 		
 		return new Triple<>(new Environment(sigs, maps, insts, queries,
-				transforms, full_queries), str.trim(), dedup(exns));
+				transforms, full_queries), res.second.trim(), dedup(exns));
 	}
 
 	private static <X> List<X> dedup(List<X> l) {

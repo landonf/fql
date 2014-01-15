@@ -2,6 +2,7 @@ package fql.sql;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -64,14 +65,14 @@ public class PSMGen {
 
 			// make a substitution table
 			ret.add(new CreateTable(pre + "_subst", twocol_attrs, false));
-			ret.add(new InsertSQL(pre + "_subst", makeSubst(pre0, n)));
+			ret.add(new InsertSQL(pre + "_subst", makeSubst(pre0, n), "c0", "c1"));
 
 			ret.add(new CreateTable(pre + "_subst_inv", twocol_attrs, false));
-			ret.add(new InsertSQL(pre + "_subst_inv", invertSubst(pre0, n)));
+			ret.add(new InsertSQL(pre + "_subst_inv", invertSubst(pre0, n), "c0", "c1"));
 
 			// create a new table that applies the substitution
 			ret.add(new CreateTable(pre + "_applied", twocol_attrs, false));
-			ret.add(new InsertSQL(pre + "_applied", makeApplyNode(pre0, n)));
+			ret.add(new InsertSQL(pre + "_applied", makeApplyNode(pre0, n), "c0", "c1"));
 
 			// drop guid table
 			ret.add(new DropTable(pre + "_guid"));
@@ -80,8 +81,9 @@ public class PSMGen {
 			ret.add(new DropTable(pre));
 
 			// copy the new table
-			ret.add(new CreateTable(pre, twocol_attrs, false));
-			ret.add(new InsertSQL(pre, new CopyFlower(pre + "_applied")));
+			ret.add(new SimpleCreateTable(pre, PSM.VARCHAR(), false));
+//			ret.add(new CreateTable(pre, twocol_attrs, false));
+			ret.add(new InsertSQL(pre, new CopyFlower(pre + "_applied", "c0", "c1"), "c0", "c1"));
 
 			// drop the new table
 			ret.add(new DropTable(pre + "_applied"));
@@ -92,14 +94,15 @@ public class PSMGen {
 
 			// create a new table that applies the substitution
 			ret.add(new CreateTable(pre + "_applied", twocol_attrs, false));
-			ret.add(new InsertSQL(pre + "_applied", makeApplyEdge(pre0, e)));
+			ret.add(new InsertSQL(pre + "_applied", makeApplyEdge(pre0, e), "c0", "c1"));
 
 			// drop original table
 			ret.add(new DropTable(pre));
 
 			// copy the new table
-			ret.add(new CreateTable(pre, twocol_attrs, false));
-			ret.add(new InsertSQL(pre, new CopyFlower(pre + "_applied")));
+			ret.add(new SimpleCreateTable(pre, PSM.VARCHAR(), false));
+//			ret.add(new CreateTable(pre, twocol_attrs, false));
+			ret.add(new InsertSQL(pre, new CopyFlower(pre + "_applied", "c0", "c1"), "c0", "c1"));
 
 			// drop the new table
 			ret.add(new DropTable(pre + "_applied"));
@@ -112,14 +115,15 @@ public class PSMGen {
 			// create a new table that applies the substitution
 
 			ret.add(new CreateTable(pre + "_applied", colattrs(a), false));
-			ret.add(new InsertSQL(pre + "_applied", makeAttr(pre0, a)));
+			ret.add(new InsertSQL(pre + "_applied", makeAttr(pre0, a), "c0", "c1"));
 
 			// drop original table
 			ret.add(new DropTable(pre));
 
 			// copy the new table
-			ret.add(new CreateTable(pre, twocol_attrs, false));
-			ret.add(new InsertSQL(pre, new CopyFlower(pre + "_applied")));
+			ret.add(new SimpleCreateTable(pre, a.target.psm(), false));
+//			ret.add(new CreateTable(pre, twocol_attrs, false));
+			ret.add(new InsertSQL(pre, new CopyFlower(pre + "_applied", "c0", "c1"), "c0", "c1"));
 
 			// drop the new table
 			ret.add(new DropTable(pre + "_applied"));
@@ -148,7 +152,7 @@ public class PSMGen {
 
 	private static SQL invertSubst(String pre0, Node n) {
 		String pre = pre0 + "_" + n;
-		Map<String, Pair<String, String>> select = new HashMap<>();
+		LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 		select.put("c0", new Pair<>(pre + "_subst", "c1"));
 		select.put("c1", new Pair<>(pre + "_subst", "c0"));
 
@@ -188,7 +192,7 @@ public class PSMGen {
 		Map<String, String> from = new HashMap<>();
 		from.put(i + "_" + n.string + "_guid", i + "_" + n.string + "_guid");
 
-		Map<String, Pair<String, String>> select = new HashMap<>();
+		LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 		select.put("c0", new Pair<>(i + "_" + n.string + "_guid", "guid"));
 		select.put("c1", new Pair<>(i + "_" + n.string + "_guid", "guid"));
 
@@ -201,9 +205,10 @@ public class PSMGen {
 		Map<String, String> from = new HashMap<>();
 		from.put(i + "_" + n.string + "_guid", i + "_" + n.string + "_guid");
 
-		Map<String, Pair<String, String>> select = new HashMap<>();
-		select.put("c1", new Pair<>(i + "_" + n.string + "_guid", "guid"));
+		LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 		select.put("c0", new Pair<>(i + "_" + n.string + "_guid", "c0"));
+		select.put("c1", new Pair<>(i + "_" + n.string + "_guid", "guid"));
+
 
 		return new Flower(select, from, where);
 	}
@@ -242,13 +247,22 @@ public class PSMGen {
 		List<PSM> ret = new LinkedList<>();
 
 		for (Node n : sig.nodes) {
-			ret.add(populateTable(dst, n.string, lookup(data, n.string)));
+			PSM x = populateTable(dst, n.string, lookup(data, n.string));
+			if (x != null) {
+				ret.add(x);
+			}
 		}
 		for (Edge e : sig.edges) {
-			ret.add(populateTable(dst, e.name, lookup(data, e.name)));
+			PSM x = populateTable(dst, e.name, lookup(data, e.name));
+			if (x != null) {
+				ret.add(x);
+			}
 		}
 		for (Attribute<Node> a : sig.attrs) {
-			ret.add(populateTable(dst, a.name, lookup(data, a.name)));
+			PSM x = populateTable(dst, a.name, lookup(data, a.name));
+			if (x != null) {
+				ret.add(x);
+			}
 		}
 
 		return ret;
@@ -276,15 +290,15 @@ public class PSMGen {
 
 		for (Node n : sig.nodes) {
 			ret.add(new InsertSQL(out + "_" + n.string, new CopyFlower(in + "_"
-					+ n.string)));
+					+ n.string, "c0", "c1"), "c0", "c1"));
 		}
 		for (Edge e : sig.edges) {
 			ret.add(new InsertSQL(out + "_" + e.name, new CopyFlower(in + "_"
-					+ e.name)));
+					+ e.name, "c0", "c1"), "c0", "c1"));
 		}
 		for (Attribute<Node> a : sig.attrs) {
 			ret.add(new InsertSQL(out + "_" + a.name, new CopyFlower(in + "_"
-					+ a.name)));
+					+ a.name, "c0", "c1"), "c0", "c1"));
 		}
 
 		return ret;
@@ -304,10 +318,12 @@ public class PSMGen {
 			m.put("c1", row.second);
 			values.add(m);
 		}
-
-		return new InsertValues(iname + "_" + tname, attrs, values);
+		if (values.size() > 0) {
+			return new InsertValues(iname + "_" + tname, attrs, values);
+		}
+		return null;
 	}
-
+/*
 	public static List<PSM> makeTables(String name, Signature sig,
 			boolean suppress) {
 		List<PSM> ret = new LinkedList<>();
@@ -332,32 +348,51 @@ public class PSMGen {
 		}
 
 		return ret;
-	}
+	} */
+	
+	public static List<PSM> makeTables(String name, Signature sig,
+			boolean suppress) {
+		List<PSM> ret = new LinkedList<>();
+
+		for (Node n : sig.nodes) {
+			ret.add(new SimpleCreateTable(name + "_" + n.string, PSM.VARCHAR(), suppress));
+		}
+		for (Edge e : sig.edges) {
+			ret.add(new SimpleCreateTable(name + "_" + e.name, PSM.VARCHAR(), suppress));
+		}
+		for (Attribute<Node> a : sig.attrs) {
+			ret.add(new SimpleCreateTable(name + "_" + a.name, a.target.psm(), suppress));
+		}
+
+		return ret;
+	} 
+	
+	//TODO add to create table an option to make c0 a primary key
 
 	public static List<PSM> delta(Mapping m, String src, String dst) {
 		Map<String, SQL> ret = new HashMap<>();
 		for (Entry<Node, Node> n : m.nm.entrySet()) {
 			ret.put(dst + "_" + n.getKey().string,
-					new CopyFlower(src + "_" + n.getValue().string));
+					new CopyFlower(src + "_" + n.getValue().string, "c0", "c1"));
 		}
 		for (Entry<Edge, Path> e : m.em.entrySet()) {
 			ret.put(dst + "_" + e.getKey().name, compose(src, e.getValue()));
 		}
 		for (Entry<Attribute<Node>, Attribute<Node>> a : m.am.entrySet()) {
 			ret.put(dst + "_" + a.getKey().name,
-					new CopyFlower(src + "_" + a.getValue().name));
+					new CopyFlower(src + "_" + a.getValue().name, "c0", "c1"));
 		}
 		List<PSM> ret0 = new LinkedList<>();
 		for (String k : ret.keySet()) {
 			SQL v = ret.get(k);
-			ret0.add(new InsertSQL(k, v));
+			ret0.add(new InsertSQL(k, v, "c0", "c1"));
 		}
 
 		return ret0;
 	}
 
 	public static Flower compose(String[] p) {
-		Map<String, Pair<String, String>> select = new HashMap<>();
+		LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 		Map<String, String> from = new HashMap<>();
 		List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
 
@@ -376,7 +411,7 @@ public class PSMGen {
 	}
 
 	public static Flower compose(String pre, Path p) {
-		Map<String, Pair<String, String>> select = new HashMap<>();
+		LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 		Map<String, String> from = new HashMap<>();
 		List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
 
@@ -419,7 +454,7 @@ public class PSMGen {
 			List<Flower> tn = new LinkedList<>();
 			for (Node c : C.nodes) {
 				if (F.nm.get(c).equals(d)) {
-					tn.add(new CopyFlower(inst + "_" + c.string));
+					tn.add(new CopyFlower(inst + "_" + c.string, "c0", "c1"));
 				}
 			}
 
@@ -427,7 +462,7 @@ public class PSMGen {
 				continue;
 			}
 			SQL y = foldUnion(tn);
-			ret.add(new InsertSQL(pre + "_" + d.string, y));
+			ret.add(new InsertSQL(pre + "_" + d.string, y, "c0", "c1"));
 		}
 
 		for (Edge e : D.edges) {
@@ -445,7 +480,7 @@ public class PSMGen {
 				continue;
 			}
 			SQL y = foldUnion(tn);
-			ret.add(new InsertSQL(pre + "_" + e.name, y));
+			ret.add(new InsertSQL(pre + "_" + e.name, y, "c0", "c1"));
 		}
 
 		for (Attribute<Node> a : D.attrs) {
@@ -455,7 +490,7 @@ public class PSMGen {
 			for (Node c : C.nodes) {
 				if (F.nm.get(c).equals(d)) {
 					Attribute<Node> pc = findEquiv(c, F, a);
-					Flower q = new CopyFlower(inst + "_" + pc.name);
+					Flower q = new CopyFlower(inst + "_" + pc.name, "c0", "c1");
 					tn.add(q);
 				}
 			}
@@ -464,7 +499,7 @@ public class PSMGen {
 				continue;
 			}
 			SQL y = foldUnion(tn);
-			ret.add(new InsertSQL(pre + "_" + a.name, y));
+			ret.add(new InsertSQL(pre + "_" + a.name, y, "c0", "c1"));
 		}
 
 		return ret;
@@ -554,7 +589,7 @@ public class PSMGen {
 						attrs2, false));
 				ret.add(new InsertEmptyKeygen(dst + "_" + d0.string + "_limit"));
 				ret.add(new InsertSQL(dst + "_" + d0.string, new SquishFlower(
-						dst + "_" + d0.string + "_limit")));
+						dst + "_" + d0.string + "_limit"), "c0", "c1"));
 
 				@SuppressWarnings("unchecked")
 				Triple<Node, Node, Arr<Node, Path>>[] cols = new Triple[0];
@@ -611,7 +646,7 @@ public class PSMGen {
 
 			ret.add(new CreateTable(dst + "_" + d0.string + "_limnoguid",
 					attrs1, false));
-			ret.add(new InsertSQL(dst + "_" + d0.string + "_limnoguid", r));
+			ret.add(new InsertSQL2(dst + "_" + d0.string + "_limnoguid", r, new LinkedList<String>(r.select.keySet())));
 
 			ret.add(new CreateTable(dst + "_" + d0.string + "_limit", attrs2,
 					false));
@@ -621,7 +656,7 @@ public class PSMGen {
 			// craeted by createTables
 			// ret.add(new CreateTable(dst + "_" + d0.string, twocol_attrs));
 			ret.add(new InsertSQL(dst + "_" + d0.string, new SquishFlower(dst
-					+ "_" + d0.string + "_limit")));
+					+ "_" + d0.string + "_limit"), "c0", "c1"));
 		}
 
 		for (Edge s : F0.target.edges) {
@@ -647,7 +682,7 @@ public class PSMGen {
 			from.put(dst + "_" + q1 + "_limit_1", dst + "_" + q1 + "_limit");
 			from.put(dst + "_" + q2 + "_limit_2", dst + "_" + q2 + "_limit");
 
-			Map<String, Pair<String, String>> select = new HashMap<>();
+			LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 			select.put("c0", new Pair<>(dst + "_" + q1 + "_limit_1", "guid"));
 			select.put("c1", new Pair<>(dst + "_" + q2 + "_limit_2", "guid"));
 
@@ -655,7 +690,7 @@ public class PSMGen {
 
 			// System.out.println("flower is " + f);
 
-			ret.add(new InsertSQL(dst + "_" + s.name, f));
+			ret.add(new InsertSQL(dst + "_" + s.name, f, "c0", "c1"));
 
 		}
 
@@ -670,7 +705,7 @@ public class PSMGen {
 			int u = 0;
 			// int j = -1;
 			List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
-			Map<String, Pair<String, String>> select = new HashMap<>();
+			LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 			Map<String, String> from = new HashMap<>();
 			List<Integer> xxx = new LinkedList<>();
 			for (Attribute<Node> b : y) {
@@ -709,7 +744,7 @@ public class PSMGen {
 			// System.out.println("attr flower is " + f);
 			// System.out.println("inserting into " + dst + "_" + a.name);
 
-			ret.add(new InsertSQL(dst + "_" + a.name, f));
+			ret.add(new InsertSQL(dst + "_" + a.name, f, "c0", "c1"));
 			// project guid and u+i
 		}
 
@@ -804,7 +839,7 @@ public class PSMGen {
 
 		List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
 		Map<String, String> from = new HashMap<>();
-		Map<String, Pair<String, String>> select = new HashMap<>();
+		LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 
 		int m = b.objects.size();
 		// String[] cnames = new String[m];
@@ -910,7 +945,7 @@ public class PSMGen {
 				.entrySet()) {
 			Path x = p.getKey().arr.second.arr;
 			ret.add(new CreateTable("temp" + tempTables, twocol_attrs, false));
-			ret.add(new InsertSQL("temp" + tempTables, compose(pre, x)));
+			ret.add(new InsertSQL("temp" + tempTables, compose(pre, x), "c0", "c1"));
 			ar.put(p.getKey().arr, "temp" + tempTables++);
 		}
 		// System.out.println("DeltaX ret " + ret);

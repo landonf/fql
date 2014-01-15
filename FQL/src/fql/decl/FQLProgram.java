@@ -4,6 +4,9 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+
+import fql.LineException;
 
 public class FQLProgram {
 
@@ -121,44 +124,48 @@ public class FQLProgram {
 		public List<String> order = new LinkedList<>();
 		
 		public FQLProgram(List<NewDecl> decls) {
+			Set<String> seen = new HashSet<>();
 			for (NewDecl decl : decls) {
 				if (decl.name != null) {
 					order.add(decl.name); //drops are unnamed
 				} 
 				if (decl.enums != null) {
-					checkDup(decl.name, "enum");
+					checkDup(seen, decl.name, "enum");
 					enums.put(decl.name, new Type.Enum(decl.name, new HashSet<Object>(decl.enums)));
 					lines.put(decl.name, decl.line);
 				} else if (decl.sig != null) {
-					checkDup(decl.name, "signature");
+					checkDup(seen, decl.name, "signature");
 					sigs.put(decl.name, decl.sig);
 					lines.put(decl.name, decl.line);
 				} else if (decl.inst != null) {
-					checkDup(decl.name, "instance");
+					checkDup(seen, decl.name, "instance");
 					insts.put(decl.name, decl.inst);
 					lines.put(decl.name, decl.line);
 				} else if (decl.map != null) {
-					checkDup(decl.name, "mapping");
+					checkDup(seen, decl.name, "mapping");
 					maps.put(decl.name, decl.map);
 					lines.put(decl.name, decl.line);
 				} else if (decl.query != null) {
-					checkDup(decl.name, "query");
+					checkDup(seen, decl.name, "query");
 					queries.put(decl.name, decl.query);
 					lines.put(decl.name, decl.line);
 				} else if (decl.drop != null) {
 					drop.addAll(decl.drop);
 				} else if (decl.trans != null) {
-					checkDup(decl.name, "transform");
+					checkDup(seen, decl.name, "transform");
 					transforms.put(decl.name, decl.trans);
 					lines.put(decl.name, decl.line);
 				} else if (decl.full_query != null) {
-					checkDup(decl.name, "full_query");
+					checkDup(seen, decl.name, "full_query");
 					full_queries.put(decl.name, decl.full_query);
 					lines.put(decl.name, decl.line);
 				}
-				else {
-					throw new RuntimeException();
-				}
+				if (decl.name != null) {
+					seen.add(decl.name.toUpperCase()); 
+				} 
+//				else {
+	//				throw new RuntimeException();
+		//		}
 			}
 			enums.put("int", new Type.Int());
 			enums.put("string", new Type.Varchar());
@@ -166,9 +173,10 @@ public class FQLProgram {
 
 		
 
-		private <X, Y> void checkDup(X name, String s) {
-			if (full_queries.containsKey(name) || sigs.containsKey(name) || maps.containsKey(name) || insts.containsKey(name) || queries.containsKey(name) || transforms.containsKey(name) || enums.containsKey(name)) {
-				throw new RuntimeException("Duplicate " + s + " " + name);
+		private void checkDup(Set<String> seen, String name, String s) throws LineException {
+			if (seen.contains(name.toUpperCase())) {
+//				throw new LineException("Duplicate " + s + " " +, name, s);
+				throw new RuntimeException("Duplicate name: " + s + " " + name);
 			}
 
 		}

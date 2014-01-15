@@ -4,7 +4,7 @@ public class TypedEmployeesExample extends Example {
 
 	@Override
 	public String getName() {
-		return "Typed Employees";
+		return "Employees";
 	}
 
 	@Override
