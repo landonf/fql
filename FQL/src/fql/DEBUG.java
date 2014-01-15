@@ -448,7 +448,6 @@ public class DEBUG implements Serializable {
 			// debug.showOptions();
 		}
 		
-		//TODO update gui combo box thingy here
 		int nbox = GUI.box.getModel().getSize();
 		if (limit_examples) {
 			if (nbox != Examples.key_examples.length) {

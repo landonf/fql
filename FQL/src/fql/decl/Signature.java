@@ -1152,7 +1152,7 @@ public class Signature  {
 			
 		}
 		
-		//TODO extend fql to eds in paper to attributes
+		//TODO EDs for transforms
 		
 		for (Attribute<Node> e : attrs) {
 			List<String> forall = new LinkedList<>();

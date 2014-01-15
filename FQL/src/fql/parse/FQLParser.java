@@ -313,6 +313,7 @@ public class FQLParser {
 				Parsers.tuple(ref.lazy(), term("then"), ref.lazy()), term(")"));
 
 		Parser a = Parsers.or(new Parser[] {
+				Parsers.tuple(term("external"), ident(), ident(), ident()),
 				Parsers.tuple(ident(), term("."), term("unit"), ident()),
 				Parsers.tuple(ident(), term("."), term("void"), ident()),
 				Parsers.tuple(ident(), term("."), term("fst")),
@@ -322,7 +323,7 @@ public class FQLParser {
 				Parsers.tuple(ident(), term("."), term("relationalize")),
 				Parsers.tuple(term("delta"), ident(), ident(), ref.lazy()),
 				Parsers.tuple(term("sigma"), ident(), ident(), ref.lazy()),
-				Parsers.tuple(term("SIGMA"), ident(), ident(), ref.lazy()),
+				Parsers.tuple(term("SIGMA"), ident(), ident(), ident()),
 				Parsers.tuple(term("pi"), ident(), ident(), ref.lazy()),
 				Parsers.tuple(term("relationalize"), ident(), ident(),
 						ref.lazy()),
@@ -394,10 +395,25 @@ public class FQLParser {
 				return new TransExp.Pi(h, src, dst);
 			} else if (kind.equals("sigma")) {
 				return new TransExp.Sigma(h, src, dst);
-			} else if (kind.equals("SIGMA")) {
-				return new TransExp.FullSigma(h, src, dst);
 			} else if (kind.equals("relationalize")) {
 				return new TransExp.Relationalize(h, src, dst);
+			} else {
+				throw new RuntimeException(o.toString());
+			}
+		} catch (RuntimeException ex) {
+
+		}
+		
+		try {
+			Tuple4 p = (Tuple4) o;
+			String src = p.b.toString();
+			String dst = p.c.toString();
+			String name = p.d.toString();
+			String kind = p.a.toString();
+			if (kind.equals("external")) {
+				return new TransExp.External(src, dst, name);
+			} else if (kind.equals("SIGMA")) {
+				return new TransExp.FullSigma(name, src, dst);
 			} else {
 				throw new RuntimeException(o.toString());
 			}

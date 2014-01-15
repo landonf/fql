@@ -185,6 +185,8 @@ public class Flower extends SQL {
 		// " tuples exceeds limit on " + this);
 		// }
 		
+	//	System.out.println("jjjjjjjj");
+		
 		List<String> ordered = new LinkedList<>(from.keySet());
 		Comparator<String> c = new Comparator<String>() {
 			@Override
@@ -209,9 +211,9 @@ public class Flower extends SQL {
 		Collections.sort(ordered, c); 
 		
 		
-	//	System.out.println("***");
+//		System.out.println("***");
 		for (String k : ordered) {
-		//	System.out.println(state.get(from.get(k)).size());
+	//		System.out.println(from.get(k) + " " + state.get(from.get(k)).size() + " " + state.get(from.get(k)).size());
 			if (ret == null) {
 				if (state.get(from.get(k)) == null) {
 					throw new RuntimeException("cannot find " + from.get(k)

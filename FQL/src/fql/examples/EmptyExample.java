@@ -86,6 +86,7 @@ public class EmptyExample extends Example {
 					+ "\ntransform t17 = pi I2 I2 id I"
 					+ "\ntransform t18 = relationalize I4 I4 id I"
 					+ "\ntransform t19 = I4.relationalize"
+					+ "\ntransform t21 = external I6 I6 name"
 					+ "\n\ndrop I t1\n\n";
 					
 

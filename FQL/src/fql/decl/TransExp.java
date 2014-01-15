@@ -11,7 +11,57 @@ public abstract class TransExp {
 		return accept(p, new TransChecker());
 	}
 	
-	//TODO performance check
+	public static class External extends TransExp {
+		public String src, dst, name;
+		
+		@Override
+		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			External other = (External) obj;
+			if (dst == null) {
+				if (other.dst != null)
+					return false;
+			} else if (!dst.equals(other.dst))
+				return false;
+			if (name == null) {
+				if (other.name != null)
+					return false;
+			} else if (!name.equals(other.name))
+				return false;
+			if (src == null) {
+				if (other.src != null)
+					return false;
+			} else if (!src.equals(other.src))
+				return false;
+			return true;
+		}
+		public External(String src, String dst, String name) {
+			super();
+			this.src = src;
+			this.dst = dst;
+			this.name = name;
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
+			result = prime * result + ((name == null) ? 0 : name.hashCode());
+			result = prime * result + ((src == null) ? 0 : src.hashCode());
+			return result;
+		}
+
+	}
 	
 	public static class Squash extends TransExp {
 
@@ -177,7 +227,7 @@ public abstract class TransExp {
 	}
 	
 	public static class FullSigma extends TransExp {
-		public TransExp h;
+		public String h;
 		public String src, dst;
 		
 		@Override
@@ -185,7 +235,7 @@ public abstract class TransExp {
 			return "SIGMA " + src + " " + " " + dst + " " + h;
 		}
 		
-		public FullSigma(TransExp h, String src, String dst) {
+		public FullSigma(String h, String src, String dst) {
 			super();
 			this.h = h;
 			this.src = src;
@@ -1250,6 +1300,7 @@ public abstract class TransExp {
 	//	public R visit(E env, Curry e);
 		public R visit(E env, Case e);
 		public R visit(E env, Prod e);
+		public R visit(E env, External e);
 	}
 
 

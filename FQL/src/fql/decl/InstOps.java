@@ -141,8 +141,8 @@ public class InstOps implements
 		for (Node k : s.nodes) {
 			Set<Map<Object, Object>> values = convert(lookup(k.string, e.objs));
 			if (values.size() > 0) {
-			ret.add(new InsertValues("pre_" + dst + "_" + k.string, attrs,
-					values));
+				ret.add(new InsertValues("pre_" + dst + "_" + k.string, attrs,
+						values));
 			}
 
 			SQL f = PSMGen.compose(new String[] {
@@ -377,7 +377,8 @@ public class InstOps implements
 					dst + "_" + n.string,
 					PSMGen.compose(new String[] {
 							e.src + "_" + n.string + "_subst_inv",
-							next + "_" + fc, e.dst + "_" + n.string + "_subst" }), "c0", "c1"));
+							next + "_" + fc, e.dst + "_" + n.string + "_subst" }),
+					"c0", "c1"));
 		}
 
 		ret.addAll(PSMGen.dropTables(next, sig));
@@ -434,12 +435,12 @@ public class InstOps implements
 
 		Mapping F0 = ((FullSigma) prog.insts.get(e.src)).F.toMap(prog);
 
-		Pair<String, String> t = e.h.type(prog);
+		Pair<String, String> t = prog.transforms.get(e.h).type(prog);
 
-		String next = next();
-		ret.addAll(PSMGen.makeTables(next, F0.source, false));
-		ret.addAll(e.h.accept(next, this));
-		ret.add(new FullSigmaTrans(F0, t.first, e.src, t.second, e.dst, next,
+//		String next = next();
+	//	ret.addAll(PSMGen.makeTables(next, F0.source, false));
+	//	ret.addAll(e.h.accept(next, this));
+		ret.add(new FullSigmaTrans(F0, t.first, e.src, t.second, e.dst, e.h,
 				dst));
 
 		return ret;
@@ -479,8 +480,10 @@ public class InstOps implements
 							"limit2", "c" + i)));
 					i++;
 				}
-				//here a is unused because attributes will be in this order TODO check 
-				for (@SuppressWarnings("unused") Attribute<Node> a : sig2.attrsFor(n)) { 
+				// here a is unused because attributes will be in this order
+				// TODO check
+				for (@SuppressWarnings("unused")
+				Attribute<Node> a : sig2.attrsFor(n)) {
 					where.add(new Pair<>(new Pair<>("limit1", "c" + i),
 							new Pair<>("limit2", "c" + i)));
 					i++;
@@ -579,19 +582,22 @@ public class InstOps implements
 				List<Flower> l = new LinkedList<>();
 				l.add(new CopyFlower(e.a + "_" + n.string, "c0", "c1"));
 				l.add(new CopyFlower(e.b + "_" + n.string, "c0", "c1"));
-				ret.add(new InsertSQL(dst + "_" + n.string, new Union(l), "c0", "c1"));
+				ret.add(new InsertSQL(dst + "_" + n.string, new Union(l), "c0",
+						"c1"));
 			}
 			for (Attribute<Node> n : s.attrs) {
 				List<Flower> l = new LinkedList<>();
 				l.add(new CopyFlower(e.a + "_" + n.name, "c0", "c1"));
 				l.add(new CopyFlower(e.b + "_" + n.name, "c0", "c1"));
-				ret.add(new InsertSQL(dst + "_" + n.name, new Union(l), "c0", "c1"));
+				ret.add(new InsertSQL(dst + "_" + n.name, new Union(l), "c0",
+						"c1"));
 			}
 			for (Edge n : s.edges) {
 				List<Flower> l = new LinkedList<>();
 				l.add(new CopyFlower(e.a + "_" + n.name, "c0", "c1"));
 				l.add(new CopyFlower(e.b + "_" + n.name, "c0", "c1"));
-				ret.add(new InsertSQL(dst + "_" + n.name, new Union(l), "c0", "c1"));
+				ret.add(new InsertSQL(dst + "_" + n.name, new Union(l), "c0",
+						"c1"));
 			}
 
 			ret.addAll(PSMGen.guidify(dst, s, true));
@@ -615,7 +621,7 @@ public class InstOps implements
 				public List<PSM> of(Quad<String, String, String, String> x) {
 					String f = x.first; // e.a -> x.third
 					String g = x.second; // e.b -> x.third
-//					String C = x.third;
+					// String C = x.third;
 					String dst0 = x.fourth;
 
 					// must be a map dst -> x.third
@@ -762,7 +768,7 @@ public class InstOps implements
 				public List<PSM> of(Quad<String, String, String, String> x) {
 					String f = x.first; // x.third -> e.a
 					String g = x.second; // x.third -> e.b
-					//String C = x.third;
+					// String C = x.third;
 
 					String dst0 = x.fourth;
 
@@ -784,7 +790,8 @@ public class InstOps implements
 						select.put("c0", new Pair<>("f", "c0"));
 						select.put("c1", new Pair<>("lim", "guid"));
 						Flower flower = new Flower(select, from, where);
-						ret.add(new InsertSQL(dst0 + "_" + n.string, flower, "c0", "c1"));
+						ret.add(new InsertSQL(dst0 + "_" + n.string, flower,
+								"c0", "c1"));
 					}
 
 					return ret;
@@ -978,6 +985,7 @@ public class InstOps implements
 
 	@Override
 	public Pair<List<PSM>, Object> visit(String env, FullEval e) {
+		/*
 		List<PSM> ret = new LinkedList<>();
 		Pair<List<PSM>, String> l = e.q.toFullQuery(prog).accept(e.e, this);
 		ret.addAll(l.first);
@@ -996,7 +1004,8 @@ public class InstOps implements
 					+ "_" + n.first, "c0", "c1"), "c0", "c1"));
 		}
 
-		return new Pair<>(ret, new Object());
+		return new Pair<>(ret, new Object()); */
+		throw new RuntimeException();
 	}
 
 	// //////////////////////////////////////
@@ -1038,7 +1047,7 @@ public class InstOps implements
 			try {
 				ret.addAll(PSMGen.sigma(F0, dst, src));
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				//ex.printStackTrace();
 				ret.addAll(PSMGen.SIGMA(F0, dst, src));
 			}
 			// ret.addAll(PSMGen.dropTables(next, F0.target));
@@ -1086,6 +1095,23 @@ public class InstOps implements
 							e.src + "_" + n.string + "_subst" }), "c0", "c1"));
 		}
 
+		return ret;
+	}
+
+	// src and dst will be guidified, hence, must apply that subst here
+	@Override
+	public List<PSM> visit(String env, fql.decl.TransExp.External e) {
+		List<PSM> ret = new LinkedList<>();
+		Signature sig = prog.insts.get(e.src).type(prog).toSig(prog);
+		ret.addAll(PSMGen.makeTables(e.name, sig, false));
+
+		for (Node n : sig.nodes) {
+			ret.add(new InsertSQL(e.name + "_" + n.string, PSMGen
+					.compose(new String[] {
+							e.src + "_" + n.string + "_subst_inv",
+							e.name + "_" + n.string,
+							e.dst + "_" + n.string + "_subst" }), "c0", "c1"));
+		}
 		return ret;
 	}
 

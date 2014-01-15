@@ -12,13 +12,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import fql.decl.Attribute;
 import fql.decl.Driver;
+import fql.decl.Edge;
 import fql.decl.FQLProgram;
 import fql.decl.InstExp;
 import fql.decl.InstOps;
+import fql.decl.Node;
 import fql.decl.SigExp;
 import fql.decl.Signature;
 import fql.decl.TransExp;
+import fql.sql.FullSigma;
+import fql.sql.FullSigmaTrans;
+import fql.sql.InsertValues;
 import fql.sql.PSM;
 import fql.sql.PSMGen;
 import fql.sql.PSMInterp;
@@ -31,16 +37,9 @@ import fql.sql.PSMInterp;
  */
 public class JDBCBridge {
 
-	//TODO add externals for transforms
-	
-	/*
-	 * public JDBCBridge(FQLProgram prog) throws SQLException { h2conn =
-	 * DriverManager.getConnection("jdbc:h2:mem:"); stmt =
-	 * h2conn.createStatement(); this.prog = prog; }
-	 */
-
 	// TODO if full sigmas are required, should *push* results to DB
-
+	// TODO test on jdbc again
+	
 	public static Triple<Map<String, Set<Map<Object, Object>>>, String, List<Throwable>> run(
 			FQLProgram prog) {
 		Map<String, Set<Map<Object, Object>>> ret = new HashMap<>();
@@ -86,9 +85,18 @@ public class JDBCBridge {
 						break;
 					default:
 						if (v instanceof InstExp.FullSigma) {
-							throw new RuntimeException("Cannot use full sigma with jdbc/h2");
-						}
-						if (v instanceof InstExp.External && DEBUG.debug.sqlKind == DEBUG.SQLKIND.H2) {
+							//throw new RuntimeException("Cannot use full sigma with jdbc/h2");
+							List<PSM> xxx = v.accept(k, ops).first;
+							if (xxx.size() != 1) {
+								throw new RuntimeException();
+							}
+							FullSigma yyy = (FullSigma) xxx.get(0);
+							int theguid = getGuid(Stmt);
+							interp.guid = theguid;
+							yyy.exec(interp, ret);
+							Stmt.execute("SET @guid = " + interp.guid);
+							psm.addAll(makeInserts(k, ret, v.type(prog).toSig(prog)));
+						} else if (v instanceof InstExp.External && DEBUG.debug.sqlKind == DEBUG.SQLKIND.H2) {
 							
 						} else {
 							psm.addAll(v.accept(k, ops).first);
@@ -96,7 +104,9 @@ public class JDBCBridge {
 						for (PSM sql : psm) {
 							Stmt.execute(sql.toPSM());
 						}
-						gatherInstance(prog, ret, Stmt, k, v);
+						if (!(v instanceof InstExp.FullSigma)) {
+							gatherInstance(prog, ret, Stmt, k, v);
+						}
 						break;
 					}
 					sqls.addAll(psm);
@@ -121,21 +131,33 @@ public class JDBCBridge {
 					InstExp i = prog.insts.get(val.first);
 					Signature s = i.type(prog).toSig(prog);
 					psm.addAll(PSMGen.makeTables(k, s, false));
-					psm.addAll(v.accept(k, ops));
 					sqls.addAll(psm);
 					switch (DEBUG.debug.sqlKind) {
 					case NATIVE:
+						psm.addAll(v.accept(k, ops));
 						interp.interpX(psm, ret);
 						break;
 					default:
 						if (v instanceof TransExp.FullSigma) {
-							throw new RuntimeException("Cannot use full sigma with jdbc/h2");
+							List<PSM> xxx = v.accept(k, ops);
+							if (xxx.size() != 1) {
+								throw new RuntimeException();
+							}
+							FullSigmaTrans yyy = (FullSigmaTrans) xxx.get(0);
+							yyy.exec(interp, ret);
+							psm.addAll(makeInserts(k, ret, s));
+						} else if (v instanceof TransExp.External && DEBUG.debug.sqlKind == DEBUG.SQLKIND.H2) {
+							
+						} else {
+							psm.addAll(v.accept(k, ops));
 						}
-
 						for (PSM sql : psm) {
 							Stmt.execute(sql.toPSM());
 						}
-						gatherTransform(prog, ret, Stmt, k, v);
+						if (!(v instanceof TransExp.FullSigma)) {
+							gatherTransform(prog, ret, Stmt, k, v);
+						}
+						break;
 					}
 
 				} catch (RuntimeException re) {
@@ -181,9 +203,58 @@ public class JDBCBridge {
 		} catch (Exception exception) {
 			exception.printStackTrace();
 			// System.out.println(ret);
-			throw new RuntimeException("JDBC error: "
-					+ exception.getLocalizedMessage());
+			throw new RuntimeException(exception.getLocalizedMessage());
 		}
+	}
+
+	private static int getGuid(Statement stmt) throws SQLException {
+		stmt.execute("CREATE TABLE GUID_TEMP_TABLE_XXX_YYY(C0 INTEGER)");
+		stmt.execute("INSERT INTO GUID_TEMP_TABLE_XXX_YYY VALUES (@GUID)");
+		ResultSet RS = stmt
+				.executeQuery("SELECT * FROM GUID_TEMP_TABLE_XXX_YYY");
+		Integer i = null;
+		while (RS.next() != false) {
+			i = (Integer) RS.getObject("C0");
+			break;
+		}
+		RS.close();
+		stmt.execute("DROP TABLE GUID_TEMP_TABLE_XXX_YYY");
+		if (i == null) {
+			throw new RuntimeException("Cannot get GUID from database");
+		}
+		return i.intValue();
+	}
+
+	private static List<PSM> makeInserts(String k,
+			Map<String, Set<Map<Object, Object>>> state, Signature sig) {
+		List<PSM> ret = new LinkedList<>();
+		
+		List<String> attrs = new LinkedList<>();
+		attrs.add("c0");
+		attrs.add("c1");
+		for (Node n : sig.nodes) {
+			Set<Map<Object, Object>> v = state.get(k + "_" + n.string);
+			if (v.size() == 0) {
+				continue;
+			}
+			ret.add(new InsertValues(k + "_" + n.string, attrs, v));
+		}
+		for (Edge e : sig.edges) {
+			Set<Map<Object, Object>> v = state.get(k + "_" + e.name);
+			if (v.size() == 0) {
+				continue;
+			}
+			ret.add(new InsertValues(k + "_" + e.name, attrs, v));
+		}
+		for (Attribute<Node> a : sig.attrs) {
+			Set<Map<Object, Object>> v = state.get(k + "_" + a.name);
+			if (v.size() == 0) {
+				continue;
+			}
+			ret.add(new InsertValues(k + "_" + a.name, attrs, v));			
+		}
+		
+		return ret;
 	}
 
 	private static void gatherTransform(FQLProgram prog,
@@ -197,8 +268,8 @@ public class JDBCBridge {
 			Set<Map<Object, Object>> ms = new HashSet<>();
 			while (RS.next() != false) {
 				Map<Object, Object> m = new HashMap<>();
-				m.put("c0", RS.getObject("c0"));
-				m.put("c1", RS.getObject("c1"));
+				m.put("c0", Integer.parseInt(RS.getObject("c0").toString()));
+				m.put("c1", Integer.parseInt(RS.getObject("c1").toString()));
 				ms.add(m);
 			}
 			RS.close();
@@ -223,8 +294,8 @@ public class JDBCBridge {
 			Set<Map<Object, Object>> ms = new HashSet<>();
 			while (RS.next() != false) {
 				Map<Object, Object> m = new HashMap<>();
-				m.put("c0", RS.getObject("c0"));
-				m.put("c1", RS.getObject("c1"));
+				m.put("c0", Integer.parseInt(RS.getObject("c0").toString()));
+				m.put("c1", Integer.parseInt(RS.getObject("c1").toString()));
 				ms.add(m);
 			}
 			RS.close();
@@ -236,7 +307,7 @@ public class JDBCBridge {
 			Set<Map<Object, Object>> ms = new HashSet<>();
 			while (RS.next() != false) {
 				Map<Object, Object> m = new HashMap<>();
-				m.put("c0", RS.getObject("c0"));
+				m.put("c0", Integer.parseInt(RS.getObject("c0").toString()));
 				m.put("c1", RS.getObject("c1"));
 				ms.add(m);
 			}
@@ -249,8 +320,8 @@ public class JDBCBridge {
 			Set<Map<Object, Object>> ms = new HashSet<>();
 			while (RS.next() != false) {
 				Map<Object, Object> m = new HashMap<>();
-				m.put("c0", RS.getObject("c0"));
-				m.put("c1", RS.getObject("c1"));
+				m.put("c0", Integer.parseInt(RS.getObject("c0").toString()));
+				m.put("c1", Integer.parseInt(RS.getObject("c1").toString()));
 				ms.add(m);
 			}
 			RS.close();

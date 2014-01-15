@@ -1149,15 +1149,19 @@ public class Denotation {
 			List<Integer[]> l = new LinkedList<>();
 			for (Pair<Object, Object> x : X.data.get(f.name)) {
 				Integer[] r = new Integer[4 + 1 + g.path.size()];
-				if (x.first instanceof String) {
-					r[0] = Integer.parseInt((String) x.first);
-					r[1] = Integer.parseInt((String) x.second);
-					r[3] = Integer.parseInt((String) x.first);
-				} else {
-					r[0] = (Integer) x.first;
-					r[1] = (Integer) x.second;
-					r[3] = (Integer) x.first;
-				}
+				r[0] = Integer.parseInt(x.first.toString());
+				r[1] = Integer.parseInt(x.second.toString());
+				r[3] = Integer.parseInt(x.first.toString());
+
+			//	if (x.first instanceof String) {
+//					r[0] = Integer.parseInt((String) x.first);
+//					r[1] = Integer.parseInt((String) x.second);
+//					r[3] = Integer.parseInt((String) x.first);
+			//	} else {
+			//		r[0] = (Integer) x.first;
+			//		r[1] = (Integer) x.second;
+			//		r[3] = (Integer) x.first;
+				//}
 				l.add(r);
 			}
 

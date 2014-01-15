@@ -289,8 +289,9 @@ public class Relationalizer {
 		select0.remove("id");
 		Flower j0 = new Flower(select0, from, where);
 		ret.add(new CreateTable(out + "_" +n.string + "_observables_proj", ty0, false));
+		if (ty0.size() > 0) {
 		ret.add(new InsertSQL2(out + "_" +n.string + "_observables_proj", j0, new LinkedList<>(j0.select.keySet())));
-
+		}
 		ret.add(new CreateTable(out + "_" +n.string + "_observables_guid", ty, false));
 		ret.add(new InsertKeygen(out + "_" +n.string + "_observables_guid", "id", out + "_" + n.string
 				+ "_observables_proj", new LinkedList<>(ty0.keySet())));

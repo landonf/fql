@@ -624,7 +624,6 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 		throw new RuntimeException();
 	}
 
-	// TODO add foreign key and primary key to generated SQL
 
 	@Override
 	public Const visit(FQLProgram env, fql.decl.MapExp.Var e) {

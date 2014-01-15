@@ -34,10 +34,12 @@ public class PSMInterp {
 			} catch (Throwable t) {
 				if (DEBUG.debug.continue_on_error) {
 					ret.add(t);
+				} else {
+					throw t;
 				}
 			}
-			System.out.println("After " + cmd);
-			System.out.println(state);
+		//	System.out.println("After " + cmd);
+		//	System.out.println(state);
 		}
 		return new Pair<>(state, ret);
 	}

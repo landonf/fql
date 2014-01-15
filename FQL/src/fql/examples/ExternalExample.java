@@ -27,6 +27,10 @@ public class ExternalExample extends Example {
 					+ "\n"
 					+ "\n// copies given extblname into J"
 					+ "\ninstance J = external C extblname\n"
+					
+					+ "\n// external (and only external) instances can have external transforms"
+					+ "\ntransform K = external J J exttransname"
+
 					+ "\n\ndrop I //drops tables for I";
 /*					+ "\n"
 					+ "\nmapping F : C -> C = id C"

@@ -173,6 +173,15 @@ public class FQLProgram {
 
 		
 
+		@Override
+		public String toString() {
+			return "FQLProgram [enums=" + enums + ", sigs=" + sigs + ", maps="
+					+ maps + ", insts=" + insts + ", full_queries="
+					+ full_queries + ", queries=" + queries + ", transforms="
+					+ transforms + ", lines=" + lines + ", drop=" + drop
+					+ ", order=" + order + "]";
+		}
+
 		private void checkDup(Set<String> seen, String name, String s) throws LineException {
 			if (seen.contains(name.toUpperCase())) {
 //				throw new LineException("Duplicate " + s + " " +, name, s);

@@ -30,6 +30,14 @@ import fql.decl.Transform;
  */
 public class FullSigmaTrans extends PSM {
 
+	
+	@Override
+	public String toString() {
+		return "FullSigmaTrans [f=" + f + ", srcH=" + srcH + ", src=" + src
+				+ ", dstH=" + dstH + ", dst=" + dst + ", h=" + h + ", pre="
+				+ pre + "]";
+	}
+
 	Mapping f;
 	String srcH, src;
 	String dstH, dst;
@@ -65,6 +73,10 @@ public class FullSigmaTrans extends PSM {
 		List<Pair<String, List<Pair<Object, Object>>>> H0 = PSMGen.gather(h, C,
 				state);
 
+	//	System.out.println("trans is " + this);
+	//	System.out.println("H0 is " + H0);
+	//	System.out.println("state is " + state);
+		
 		// List<Pair<String, List<Pair<Object, Object>>>> I0X =
 		// PSMGen.gather(src, D, state);
 		List<Pair<String, List<Pair<Object, Object>>>> J0X = PSMGen.gather(dst,

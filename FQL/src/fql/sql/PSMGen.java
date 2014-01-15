@@ -563,6 +563,7 @@ public class PSMGen {
 
 		Map<String, Triple<Node, Node, Arr<Node, Path>>[]> colmap = new HashMap<>();
 		Map<String, Attribute<Node>[]> amap = new HashMap<>();
+		List<Node> doNotDrop = new LinkedList<>();
 		for (Node d0 : D.objects) {
 			CommaCat<Node, Path, Node, Path, Node, Path> B = doComma(D, C, F,
 					d0, D0);
@@ -582,6 +583,7 @@ public class PSMGen {
 
 			// comma cat is empty, need unit for product
 			if (xxx == null) {
+				doNotDrop.add(d0);
 				Map<String, String> attrs2 = new HashMap<>();
 				attrs2.put("guid", PSM.VARCHAR());
 
@@ -749,6 +751,9 @@ public class PSMGen {
 		}
 
 		for (Node d0 : D.objects) {
+			if (doNotDrop.contains(d0)) {
+				continue;
+			}
 			ret.add(new DropTable(dst + "_" + d0.string + "_limnoguid"));
 		}
 

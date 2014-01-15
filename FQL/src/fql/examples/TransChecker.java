@@ -14,6 +14,7 @@ import fql.decl.TransExp.Case;
 import fql.decl.TransExp.Comp;
 import fql.decl.TransExp.Const;
 import fql.decl.TransExp.Delta;
+import fql.decl.TransExp.External;
 import fql.decl.TransExp.FF;
 import fql.decl.TransExp.Fst;
 import fql.decl.TransExp.FullSigma;
@@ -299,7 +300,14 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 
 	@Override
 	public Pair<String, String> visit(FQLProgram env, FullSigma e) {
-		Pair<String, String> ht = e.h.type(env);
+		if (seen.contains(e.h)) {
+			throw new RuntimeException("Circular transform " + e);
+		}
+		seen.add(e.h);
+		if (env.transforms.get(e.h) == null) {
+			throw new RuntimeException("Transform not found " + e);
+		}
+		Pair<String, String> ht = env.transforms.get(e.h).type(env);
 		InstExp i1 = env.insts.get(e.src);		
 		if (!(i1 instanceof InstExp.FullSigma)) {
 			throw new RuntimeException(i1 + " is not a full sigma in " + e);
@@ -376,6 +384,35 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		}
 		fql.decl.InstExp.Relationalize xxx = (fql.decl.InstExp.Relationalize) s;
 		return new Pair<>(xxx.I, e.src);
+	}
+
+	@Override
+	public Pair<String, String> visit(FQLProgram env, External e) {
+		InstExp src = env.insts.get(e.src);
+		if (src == null) {
+			throw new RuntimeException("Missing instance " + e.src);
+		}
+		InstExp dst = env.insts.get(e.dst);
+		if (dst == null) {
+			throw new RuntimeException("Missing instance " + e.src);
+		}
+		if (!(src instanceof InstExp.External)) {
+			throw new RuntimeException(e.src + " is not external.");
+		}
+		if (!(dst instanceof InstExp.External)) {
+			throw new RuntimeException(e.dst + " is not external.");
+		}
+		InstExp.External src0 = (InstExp.External) src;
+		InstExp.External dst0 = (InstExp.External) dst;
+
+		SigExp srct = src0.type(env);
+		SigExp dstt = dst0.type(env);
+		if (!srct.equals(dstt)) {
+			throw new RuntimeException("Instances not of same type on " + e + " are " + srct + " and " + dstt);
+		}
+		
+		return new Pair<>(e.src, e.dst);
+
 	}
 
 }
