@@ -1037,7 +1037,9 @@ public class Chase {
 	 */
 	public static Instance sigma(Mapping m, Instance i) throws FQLException {
 
-		Signature cd = m.toEDs().second;
+		Triple<Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>, Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>, Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>> kkk = m.toEDs();
+		
+		Signature cd = kkk.second.first;
 
 		Map<String, Set<Pair<Object, Object>>> I = new HashMap<>();
 		for (Node n : cd.nodes) {
@@ -1053,9 +1055,9 @@ public class Chase {
 			I.put("src_" + k, i.data.get(k));
 		}
 
-		List<EmbeddedDependency> eds0 = cd.toED("");
-		List<Pair<String, String>> egd = new LinkedList<>();
-		for (Attribute<Node> a : m.source.attrs) {
+		List<EmbeddedDependency> eds0 = Signature.toED("", kkk.second);
+	//	List<Pair<String, String>> egd = new LinkedList<>();
+	/*	for (Attribute<Node> a : m.source.attrs) {
 			List<String> forall = new LinkedList<>();
 			forall.add("x");
 			forall.add("y");
@@ -1086,7 +1088,7 @@ public class Chase {
 			ed = new EmbeddedDependency(forall, exists, where, tgd, egd);
 			eds0.add(ed);
 			// System.out.println("adding " + ed);
-		}
+		} */
 
 		Pair<List<Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>>>, List<Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>>>> zzz = split(eds0);
 
@@ -1102,6 +1104,9 @@ public class Chase {
 		}
 		Map<String, Set<Pair<Object, Object>>> res = chase(keys, zzz, I,
 				KIND.PARALLEL);
+//		Map<String, Set<Pair<Object, Object>>> res = chase(keys, zzz, I,
+//				KIND.CORE);
+	//	System.out.println(res);
 		Map<String, Set<Pair<Object, Object>>> res0 = new HashMap<>();
 		for (Node n : m.target.nodes) {
 			res0.put(n.string, res.get("dst_" + n.string));
@@ -1121,7 +1126,9 @@ public class Chase {
 
 	public static Instance delta(Mapping m, Instance i) throws FQLException {
 
-		Signature cd = m.toEDs().first;
+		Triple<Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>, Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>, Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>> kkk = m.toEDs();
+		
+		Signature cd = m.toEDs().first.first;
 
 		Map<String, Set<Pair<Object, Object>>> I = new HashMap<>();
 		for (Node n : cd.nodes) {
@@ -1137,9 +1144,10 @@ public class Chase {
 			I.put("dst_" + k, i.data.get(k));
 		}
 
-		List<EmbeddedDependency> eds0 = cd.toED("");
-		List<Pair<String, String>> egd = new LinkedList<>();
-		for (Attribute<Node> a : m.source.attrs) {
+		List<EmbeddedDependency> eds0 = Signature.toED("", kkk.first);
+
+	//	List<Pair<String, String>> egd = new LinkedList<>();
+	/*	for (Attribute<Node> a : m.source.attrs) {
 			List<String> forall = new LinkedList<>();
 			forall.add("x");
 			forall.add("y");
@@ -1210,7 +1218,7 @@ public class Chase {
 			ed = new EmbeddedDependency(forall, exists, where, tgd, egd);
 			eds0.add(ed);
 			// System.out.println("adding " + ed);
-		}
+		} */
 //		for (EmbeddedDependency ed : eds0) {
 	//		System.out.println(ed);
 	//	}
@@ -1227,6 +1235,8 @@ public class Chase {
 		for (Attribute<Node> n : m.target.attrs) {
 			keys.add("src_" + n.name);
 		}
+//		Map<String, Set<Pair<Object, Object>>> res = chase(keys, zzz, I,
+	//			KIND.CORE); // changed
 
 		Map<String, Set<Pair<Object, Object>>> res = chase(keys, zzz, I,
 				KIND.HYBRID); // changed

@@ -7,7 +7,9 @@ import java.util.Set;
 
 import fql.Pair;
 import fql.Triple;
+import fql.decl.Attribute;
 import fql.decl.Edge;
+import fql.decl.Node;
 import fql.decl.Path;
 
 /**
@@ -212,8 +214,76 @@ public class EmbeddedDependency {
 		}
 		throw new RuntimeException();
 	}
-
 	
+	public static EmbeddedDependency eq3(String pre,
+			Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>> eq) {
+
+		List<Triple<String, String, String>> where = new LinkedList<>();
+	//	where.add(new Triple<>(lhs.source.string, "x", "x"));
+	//	where.add(new Triple<>(rhs.source.string, "x", "x"));
+
+		List<String> forall = new LinkedList<>();
+
+		forall.add("a");
+		forall.add("b");
+		forall.add("c");
+		forall.add("d");
+		where.add(new Triple<>(pre + eq.first.name, "a", "b"));
+		where.add(new Triple<>(pre + eq.second.first.name, "a", "c"));
+		where.add(new Triple<>(pre + eq.second.second.name, "c", "d"));
+
+		List<Pair<String, String>> egd = new LinkedList<>();
+		egd.add(new Pair<>("b", "d"));
+		
+		List<String> exists = new LinkedList<>();
+		List<Triple<String, String, String>> tgd = new LinkedList<>();
+		
+		EmbeddedDependency ed = new EmbeddedDependency(forall, exists, where,
+				tgd, egd);
+		
+		return ed;
+	}
+
+	public static EmbeddedDependency eq2(String pre, Path lhs, Path rhs) {
+
+		List<Triple<String, String, String>> where = new LinkedList<>();
+	//	where.add(new Triple<>(lhs.source.string, "x", "x"));
+	//	where.add(new Triple<>(rhs.source.string, "x", "x"));
+
+		List<String> forall = new LinkedList<>();
+
+		int i = 0;
+		String last = "x";
+		forall.add("x");
+		for (String e : lhs.asList()) {
+			where.add(new Triple<>(pre + e, last, "y"+i));
+			last = "y"+i;
+			forall.add(last);
+			i++;
+		}
+
+		String lhsLast = last;
+		
+		last = "x";
+		for (String e : rhs.asList()) {
+			where.add(new Triple<>(pre + e, last, "z"+i));
+			last = "z"+i;
+			forall.add(last);
+			i++;
+		}
+
+		List<Pair<String, String>> egd = new LinkedList<>();
+		egd.add(new Pair<>(lhsLast, last));
+		
+		List<String> exists = new LinkedList<>();
+		List<Triple<String, String, String>> tgd = new LinkedList<>();
+		
+		EmbeddedDependency ed = new EmbeddedDependency(forall, exists, where,
+				tgd, egd);
+		
+		return ed;
+	}
+	/*
 	public static EmbeddedDependency eq(String pre, Path lhs, Path rhs) {
 
 		List<String> forall = matrix("u", lhs);
@@ -239,30 +309,8 @@ public class EmbeddedDependency {
 
 		return ed;
 
-		/*
-		 * int v = 0;
-		 * 
-		 * for (Edge e : source.path) {
-		 * 
-		 * String u = "v" + Integer.toString(v); v++; String w = "v" +
-		 * Integer.toString(v); forall.add(u); forall.add(w); where.add(new
-		 * Triple<>(s + "." + e.name, u, w));
-		 * 
-		 * //tgd.add(new Triple<>(t + "." + nm.get(e.source).string, u, u));
-		 * Path p = em.get(e); for (Edge E : p.path) { exists.add("v" + v);
-		 * tgd.add(new Triple<>(target.name0 + "." + E.name, "v" + (v - 1), "v"
-		 * + v)); v++; } // v++;
-		 * 
-		 * // tgd.add(new Triple<>(target.name0 + "." + //
-		 * nm.get(e.target).string, w, w));
-		 * 
-		 * EmbeddedDependency ed = new EmbeddedDependency(forall, exists, where,
-		 * tgd, not, egd);
-		 * 
-		 * ret.add(ed); }
-		 */
-	}
-
+	} */
+/*
 	private static List<Triple<String, String, String>> telescope(String pre,
 			String x, String y, Path p, List<String> vars) {
 
@@ -279,7 +327,7 @@ public class EmbeddedDependency {
 		ret.add(new Triple<>(pre + p.target.string, x, y));
 
 		return ret;
-	} 
+	} */
 
 	@SuppressWarnings("unused")
 	private static List<String> matrix(String pre, Path p) {
@@ -349,5 +397,7 @@ public class EmbeddedDependency {
 
 		return ret;
 	}
+
+	
 
 }

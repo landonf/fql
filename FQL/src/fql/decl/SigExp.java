@@ -348,7 +348,7 @@ public abstract class SigExp {
 	}
 
 	public static class Var extends SigExp {
-		String v;
+		public String v;
 
 		public Var(String v) {
 			if (v.contains(" ") || v.equals("void") || v.equals("unit")) {

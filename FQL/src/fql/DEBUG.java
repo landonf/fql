@@ -11,10 +11,12 @@ import java.io.Serializable;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
@@ -31,9 +33,20 @@ import fql.gui.GUI;
 @SuppressWarnings("serial")
 public class DEBUG implements Serializable {
 
-	public static enum SQLKIND { H2, NATIVE, JDBC };
-	public SQLKIND sqlKind = SQLKIND.NATIVE;
-	
+	public static enum SQLKIND {
+		H2, NATIVE, JDBC
+	};
+
+	public String instFlow_graph = "ISOMLayout";
+	public String schFlow_graph = "ISOMLayout";
+	public String schema_graph = "ISOMLayout";
+	public String mapping_graph = "FRLayout";
+	public String inst_graph = "ISOMLayout";
+	public String trans_graph = "FRLayout";
+	public String query_graph = "ISOMLayout";
+
+	public SQLKIND sqlKind = SQLKIND.H2;
+
 	public String FILE_PATH = "";
 
 	public boolean ALLOW_NULLS = true;
@@ -85,7 +98,7 @@ public class DEBUG implements Serializable {
 	public String afterlude = "DROP DATABASE FQL; ";
 
 	public String jdbcUrl = "jdbc:mysql://localhost:3306/?user=root";
-//	public boolean useJDBC = false;
+	// public boolean useJDBC = false;
 	public String jdbcClass = "com.mysql.jdbc.Driver";
 
 	public boolean MultiView = true;
@@ -103,7 +116,7 @@ public class DEBUG implements Serializable {
 	public boolean VALIDATE_WITH_EDS = false;
 
 	public boolean continue_on_error = false;
-	
+
 	// public static int MAX_JOIN_SIZE = 1024;
 
 	public boolean ALLOW_INFINITES = false;
@@ -121,6 +134,9 @@ public class DEBUG implements Serializable {
 	public boolean mapping_textual = true;
 	public boolean mapping_ed = true;
 
+	public boolean query_graphical = true;
+	public boolean query_textual = true;
+
 	public boolean inst_graphical = true;
 	public boolean inst_tabular = true;
 	public boolean inst_textual = true;
@@ -129,6 +145,8 @@ public class DEBUG implements Serializable {
 	public boolean inst_obs = true;
 	public boolean limit_examples = true;
 	
+	public boolean allow_surjective = true;
+
 	public boolean transform_graphical = true;
 	public boolean transform_tabular = true;
 	public boolean transform_textual = true;
@@ -143,54 +161,84 @@ public class DEBUG implements Serializable {
 	static String label8text = "Sets the size of Strings in the SQL output (used for ID columns and string columns).";
 	static String labelMtext = "Allows multiple viewers for the same editor.";
 
+	static int selected_tab = 0;
+
 	public void showOptions() {
-		
+
 		JTabbedPane jtb = new JTabbedPane();
-		
-		JPanel general = new JPanel(new GridLayout(7,2));
-		JPanel viewer = new JPanel(new GridLayout(7,2));
-		JPanel sql = new JPanel(new GridLayout(7,2));
-		
-		jtb.add("General", general);
-		jtb.add("Viewer", viewer);
-		jtb.add("SQL", sql);
-		
-//		JPanel p = new JPanel(new GridLayout(20, 2));
 
-		  JCheckBox limex = new JCheckBox("", limit_examples);
-		  JLabel limexL
-		  = new JLabel("Show only some examples:"); viewer.add(limexL); viewer.add(limex);
-		  limexL.setToolTipText("The examples combo box will only display some examples."); 
-		
-		  JCheckBox coeB = new JCheckBox("", continue_on_error);
-		  JLabel coeL
-		  = new JLabel("Continue on errors (dangerous):"); general.add(coeL); general.add(coeB);
-		  coeL.setToolTipText("FQL will attempt to continue on errors, and report these after opening the viewer."); 
-			
-			 
+		JPanel general1 = new JPanel(new GridLayout(10, 1));
+		JPanel general2 = new JPanel(new GridLayout(10, 1));
 
-		  JCheckBox ed = new JCheckBox("", VALIDATE_WITH_EDS);
-		  ed.setToolTipText
-		  ("Validates Sigma/Delta migrations (on objects) using embedded dependencies"); JLabel edL
-		  = new JLabel("Validate sigmas and deltas using EDs:"); general.add(edL); general.add(ed);
-		 
+		JPanel sql1 = new JPanel(new GridLayout(10, 1));
+		JPanel sql2 = new JPanel(new GridLayout(10, 1));
+
+		JPanel viewer1 = new JPanel(new GridLayout(9, 1));
+		JPanel viewer2 = new JPanel(new GridLayout(9, 1));
+
+		// JPanel general = new JPanel(new GridLayout(8, 2));
+		// JPanel viewer = new JPanel(new GridLayout(12, 2));
+		// JPanel sql = new JPanel(new GridLayout(7, 2));
+
+		JSplitPane generalsplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		JSplitPane sqlsplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		JSplitPane viewersplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+
+		generalsplit.add(general1);
+		generalsplit.add(general2);
+		sqlsplit.add(sql1);
+		sqlsplit.add(sql2);
+		viewersplit.add(viewer1);
+		viewersplit.add(viewer2);
+
+		jtb.add("General", generalsplit);
+		jtb.add("Viewer", viewersplit);
+		jtb.add("SQL", sqlsplit);
+
+		jtb.setSelectedIndex(selected_tab);
+
+		JCheckBox surjB = new JCheckBox("", allow_surjective);
+		JLabel surjL = new JLabel("Allow surjective pi (dangerous):");
+		general1.add(surjL);
+		general2.add(surjB);
+		surjL.setToolTipText("Allows the attribute mapping of pi migrations to be surjections.");
+
+		
+		JCheckBox limex = new JCheckBox("", limit_examples);
+		JLabel limexL = new JLabel("Show only some examples:");
+		general1.add(limexL);
+		general2.add(limex);
+		limexL.setToolTipText("The examples combo box will only display some examples.");
+
+		JCheckBox coeB = new JCheckBox("", continue_on_error);
+		JLabel coeL = new JLabel("Continue on errors (dangerous):");
+		general1.add(coeL);
+		general2.add(coeB);
+		coeL.setToolTipText("FQL will attempt to continue on errors, and report these after opening the viewer.");
+
+		JCheckBox ed = new JCheckBox("", VALIDATE_WITH_EDS);
+		ed.setToolTipText("Validates Sigma/Delta migrations (on objects) using embedded dependencies");
+		JLabel edL = new JLabel("Validate sigmas and deltas using EDs:");
+		general1.add(edL);
+		general2.add(ed);
+
 		JCheckBox nullbox = new JCheckBox("", ALLOW_NULLS);
 		nullbox.setToolTipText("Allow full sigma to create null attribute values");
 		JLabel nullL = new JLabel("Allow SIGMA to create nulls (dangerous):");
-		general.add(nullL);
-		general.add(nullbox);
+		general1.add(nullL);
+		general2.add(nullbox);
 
 		JCheckBox gr = new JCheckBox("", ALL_GR_PATHS);
 		gr.setToolTipText("Show all paths in category of elements");
 		JLabel grL = new JLabel("Show all paths in elements view:");
-		viewer.add(grL);
-		viewer.add(gr);
+		viewer1.add(grL);
+		viewer2.add(gr);
 
 		JCheckBox jcbM = new JCheckBox("", MultiView);
 		jcbM.setToolTipText(labelMtext);
 		JLabel labelM = new JLabel("Allow multiple viewers per editor:");
-		viewer.add(labelM);
-		viewer.add(jcbM);
+		viewer1.add(labelM);
+		viewer2.add(jcbM);
 
 		/*
 		 * JCheckBox jcbX = new JCheckBox("", DO_NOT_GUIDIFY); JPanel p0 = new
@@ -202,14 +250,14 @@ public class DEBUG implements Serializable {
 		JLabel label4 = new JLabel(
 				"Allow some infinite schemas and migrations (dangerous):");
 		label4.setToolTipText(label4text);
-		general.add(label4);
-		general.add(jcb0);
+		general1.add(label4);
+		general2.add(jcb0);
 
 		JCheckBox jcb = new JCheckBox("", VALIDATE);
 		JLabel label5 = new JLabel("Validate all categories:");
 		label5.setToolTipText(label5text);
-		general.add(label5);
-		general.add(jcb);
+		general1.add(label5);
+		general2.add(jcb);
 
 		ButtonGroup group = new ButtonGroup();
 		JRadioButton nativeButton = new JRadioButton("Naive");
@@ -218,7 +266,7 @@ public class DEBUG implements Serializable {
 		group.add(nativeButton);
 		group.add(h2Button);
 		group.add(jdbcButton);
-		JPanel jdbcBox = new JPanel(); //new GridLayout(1,3));
+		JPanel jdbcBox = new JPanel(); // new GridLayout(1,3));
 		jdbcBox.add(nativeButton);
 		jdbcBox.add(h2Button);
 		jdbcBox.add(jdbcButton);
@@ -235,70 +283,70 @@ public class DEBUG implements Serializable {
 		default:
 			throw new RuntimeException();
 		}
-		
-//		JCheckBox jdbcBox = new JCheckBox("", useJDBC);
+
+		// JCheckBox jdbcBox = new JCheckBox("", useJDBC);
 		JLabel jdbcLabel = new JLabel("SQL Engine:");
 		jdbcLabel
 				.setToolTipText("Choose between a naive SQL engine, the H2 engine, or an external JDBC engine.");
-		sql.add(jdbcLabel);
-		sql.add(jdbcBox);
+		sql1.add(jdbcLabel);
+		sql2.add(jdbcBox);
 
 		JTextField jdbcField = new JTextField(jdbcUrl);
 		JLabel jdbcLabel2 = new JLabel("JDBC URL:");
 		jdbcLabel2.setToolTipText("The JDBC connection to use.");
-		sql.add(jdbcLabel2);
-		sql.add(jdbcField);
+		sql1.add(jdbcLabel2);
+		sql2.add(jdbcField);
 
 		JTextField jdbcField2 = new JTextField(jdbcClass);
 		JLabel jdbcLabel22 = new JLabel("JDBC Driver Class:");
 		jdbcLabel22.setToolTipText("The JDBC class to use.");
-		sql.add(jdbcLabel22);
-		sql.add(jdbcField2);
+		sql1.add(jdbcLabel22);
+		sql2.add(jdbcField2);
 
 		JTextField plen = new JTextField(Integer.toString(MAX_PATH_LENGTH));
 		JLabel label6 = new JLabel("Maximum path length:");
 		label6.setToolTipText(label6text);
-		sql.add(label6);
-		sql.add(plen);
+		sql1.add(label6);
+		sql2.add(plen);
 
 		JTextField iter = new JTextField(
 				Integer.toString(MAX_DENOTE_ITERATIONS));
 		JLabel label7 = new JLabel(
 				"Maximum iterations for category computation:");
 		label7.setToolTipText(label7text);
-		general.add(label7);
-		general.add(iter);
+		general1.add(label7);
+		general2.add(iter);
 
 		JTextField vlen = new JTextField(Integer.toString(varlen));
 		JLabel label8 = new JLabel("VARCHAR size:");
 		label8.setToolTipText(label8text);
-		sql.add(label8);
-		sql.add(vlen);
+		sql1.add(label8);
+		sql2.add(vlen);
 
 		JTextField area = new JTextField(12);
 		area.setText(prelude);
 		JLabel areaLabel = new JLabel("Generated SQL prelude:");
 		areaLabel.setToolTipText("Set the prelude for the generated SQL.");
-		sql.add(areaLabel);
-		sql.add(area);
-		//area.setMaximumSize(new Dimension(200, 300));
+		sql1.add(areaLabel);
+		sql2.add(area);
+		// area.setMaximumSize(new Dimension(200, 300));
 
 		JTextField area2 = new JTextField(12);
 		area2.setText(afterlude);
 		JLabel areaLabel2 = new JLabel("Generated SQL postlude:");
 		areaLabel2.setToolTipText("Set the postlude for the generated SQL.");
-		sql.add(areaLabel2);
-		sql.add(area2);
-		//area2.setMaximumSize(new Dimension(200, 300));
+		sql1.add(areaLabel2);
+		sql2.add(area2);
+		// area2.setMaximumSize(new Dimension(200, 300));
 
 		JTextField fileArea = new JTextField(12);
 		fileArea.setText(FILE_PATH);
 		JLabel fileLabel = new JLabel("Default File Chooser Path:");
 		areaLabel2
 				.setToolTipText("Sets the directory for the file chooser to open on.");
-		general.add(fileLabel);
-		general.add(fileArea);
-		//fileArea.setMaximumSize(new Dimension(200, 300));
+		general1.add(fileLabel);
+		general2.add(fileArea);
+		// fileArea.setMaximumSize(new Dimension(200, 300));
 
 		JPanel schemaArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JCheckBox schema_graphical_box = new JCheckBox("Graph",
@@ -308,15 +356,32 @@ public class DEBUG implements Serializable {
 		JCheckBox schema_ed_box = new JCheckBox("ED", schema_ed);
 		JCheckBox schema_denotation_box = new JCheckBox("Denotation",
 				schema_denotation);
+
+		// JPanel schemaTemp = new JPanel();
+		// schemaTemp.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		JComboBox<String> schemaBox = new JComboBox<>(layouts);
+		schemaBox.setSelectedItem(schema_graph);
+		schemaBox.setToolTipText(layout_string);
+		schemaArea.add(schemaBox);
 		schemaArea.add(schema_graphical_box);
+
+		// schemaArea.add(schemaTemp);
+
 		schemaArea.add(schema_textual_box);
 		schemaArea.add(schema_tabular_box);
 		schemaArea.add(schema_ed_box);
 		schemaArea.add(schema_denotation_box);
+		// schemaArea.add(schemaBox);
 		JLabel schema_label = new JLabel("Schema viewer panels:");
 		schema_label.setToolTipText("Sets which viewers to use for schemas.");
-		viewer.add(schema_label);
-		viewer.add(schemaArea);
+		viewer1.add(schema_label);
+		viewer2.add(schemaArea);
+
+		
+
+		// JComboBox schemaLayout = new JComboBox(layouts);
+		// viewer.add(schemaLayoutLabel);
+		// viewer.add(schemaGraphPanel);
 
 		JPanel mappingArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JCheckBox mapping_graphical_box = new JCheckBox("Graph",
@@ -324,14 +389,30 @@ public class DEBUG implements Serializable {
 		JCheckBox mapping_textual_box = new JCheckBox("Text", mapping_textual);
 		JCheckBox mapping_tabular_box = new JCheckBox("Table", mapping_tabular);
 		JCheckBox mapping_ed_box = new JCheckBox("ED", mapping_ed);
+		// JPanel mappingTemp = new JPanel();
+		// schemaTemp.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		JComboBox<String> mappingBox = new JComboBox<>(layouts);
+		mappingBox.setToolTipText(layout_string);
+		mappingBox.setSelectedItem(mapping_graph);
+
+		mappingArea.add(mappingBox);
 		mappingArea.add(mapping_graphical_box);
+
+		// mappingArea.add(mappingTemp);
 		mappingArea.add(mapping_textual_box);
 		mappingArea.add(mapping_tabular_box);
 		mappingArea.add(mapping_ed_box);
 		JLabel mapping_label = new JLabel("Mapping viewer panels:");
 		mapping_label.setToolTipText("Sets which viewers to use for mappings.");
-		viewer.add(mapping_label);
-		viewer.add(mappingArea);
+		viewer1.add(mapping_label);
+		viewer2.add(mappingArea);
+
+
+		// JLabel mappingLayoutLabel = new
+		// JLabel("Layout engine to use for mapping graph (requires re-compile)");
+		// JComboBox mappingLayout = new JComboBox(layouts);
+		// viewer.add(mappingLayoutLabel);
+		// viewer.add(mappingLayout);
 
 		JPanel instArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JCheckBox inst_graphical_box = new JCheckBox("Graph", inst_graphical);
@@ -340,7 +421,12 @@ public class DEBUG implements Serializable {
 		JCheckBox inst_joined_box = new JCheckBox("Joined", inst_joined);
 		JCheckBox inst_gr_box = new JCheckBox("Elements", inst_gr);
 		JCheckBox inst_obs_box = new JCheckBox("Observables", inst_obs);
+		JComboBox<String> instBox = new JComboBox<>(layouts);
+		instBox.setToolTipText(layout_string);
+		instBox.setSelectedItem(inst_graph);
+		instArea.add(instBox);
 		instArea.add(inst_graphical_box);
+
 		instArea.add(inst_textual_box);
 		instArea.add(inst_tabular_box);
 		instArea.add(inst_joined_box);
@@ -348,8 +434,15 @@ public class DEBUG implements Serializable {
 		instArea.add(inst_obs_box);
 		JLabel inst_label = new JLabel("Instance viewer panels:");
 		inst_label.setToolTipText("Sets which viewers to use for instances.");
-		viewer.add(inst_label);
-		viewer.add(instArea);
+		viewer1.add(inst_label);
+		viewer2.add(instArea);
+
+	//	JLabel instLayoutLabel = new JLabel(
+		//		"Layout engine to use for instance graph (requires re-compile)");
+		//JComboBox instLayout = new JComboBox(layouts);
+		instBox.setToolTipText(layout_string);
+		// viewer.add(instLayoutLabel);
+		// viewer.add(instLayout);
 
 		JPanel transformArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JCheckBox transform_graphical_box = new JCheckBox("Graph",
@@ -358,20 +451,90 @@ public class DEBUG implements Serializable {
 				transform_textual);
 		JCheckBox transform_tabular_box = new JCheckBox("Table",
 				transform_tabular);
+		JComboBox<String> transBox = new JComboBox<>(layouts);
+		transBox.setToolTipText(layout_string);
+		transBox.setSelectedItem(trans_graph);
+
+		transformArea.add(transBox);
 		transformArea.add(transform_graphical_box);
+
 		transformArea.add(transform_textual_box);
 		transformArea.add(transform_tabular_box);
 		JLabel transform_label = new JLabel("Transform viewer panels:");
 		mapping_label
 				.setToolTipText("Sets which viewers to use for transforms.");
-		viewer.add(transform_label);
-		viewer.add(transformArea);
+		viewer1.add(transform_label);
+		viewer2.add(transformArea);
 
+//		JLabel transLayoutLabel = new JLabel(
+	//			"Layout engine to use for transform graph (requires re-compile)");
+		//JComboBox transLayout = new JComboBox(layouts);
+		// viewer.add(transLayoutLabel);
+		// viewer.add(transLayout);
+
+		JPanel fullQueryArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JCheckBox query_graphical_box = new JCheckBox("Graph", query_graphical);
+		JCheckBox query_textual_box = new JCheckBox("Text", query_textual);
+		JComboBox<String> queryBox = new JComboBox<>(layouts);
+		queryBox.setToolTipText(layout_string);
+		queryBox.setSelectedItem(query_graph);
+
+		fullQueryArea.add(queryBox);
+		fullQueryArea.add(query_graphical_box);
+
+		fullQueryArea.add(query_textual_box);
+		JLabel query_label = new JLabel("Full Query viewer panels:");
+		query_label
+				.setToolTipText("Sets which viewers to use for full queries.");
+		viewer1.add(query_label);
+		viewer2.add(fullQueryArea);
+		
+		JComboBox<String> instFlowBox = new JComboBox<>(layouts);
+		instFlowBox.setToolTipText(layout_string);
+		instFlowBox.setSelectedItem(instFlow_graph);
+
+		JPanel instFlowArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		instFlowArea.add(instFlowBox);
+		JLabel instFlow_label = new JLabel("Instance Flow graph layouts:");
+		instFlow_label.setToolTipText("Sets which graph layout to use for instance flow.");
+		viewer1.add(instFlow_label);
+		viewer2.add(instFlowArea);
+		
+		JComboBox<String> schFlowBox = new JComboBox<>(layouts);
+		schFlowBox.setToolTipText(layout_string);
+		schFlowBox.setSelectedItem(schFlow_graph);
+
+		JPanel schFlowArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		schFlowArea.add(schFlowBox);
+		JLabel schFlow_label = new JLabel("Schema Flow graph layouts:");
+		schFlow_label.setToolTipText("Sets which graph layout to use for schema flow.");
+		viewer1.add(schFlow_label);
+		viewer2.add(schFlowArea);
+
+
+		// JLabel queryLayoutLabel = new
+		// JLabel("Layout engine to use for full query graph (requires re-compile)");
+		// JComboBox queryLayout = new JComboBox(layouts);
+		// viewer.add(queryLayoutLabel);
+		// viewer.add(queryLayout);
+
+		sql1.add(new JLabel());
+		sql2.add(new JLabel());
+		sql1.add(new JLabel());
+		sql2.add(new JLabel());
+		sql1.add(new JLabel());
+		sql2.add(new JLabel());
+
+		general1.add(new JLabel());
+		general2.add(new JLabel());
+		
 		int ret = JOptionPane.showOptionDialog(null, jtb, "Options",
 				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null,
 				new String[] { "OK", "Cancel", "Reset", "Save", "Load" }, "OK");
 		// showConfirmDialog(null, p, "Options",
 		// JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+
+		selected_tab = jtb.getSelectedIndex();
 
 		if (ret == 0 || ret == 3) {
 			int a = MAX_PATH_LENGTH;
@@ -385,7 +548,7 @@ public class DEBUG implements Serializable {
 				return;
 			}
 			continue_on_error = coeB.isSelected();
-			 VALIDATE_WITH_EDS = ed.isSelected();
+			VALIDATE_WITH_EDS = ed.isSelected();
 			ALLOW_NULLS = nullbox.isSelected();
 			ALL_GR_PATHS = gr.isSelected();
 			ALLOW_INFINITES = jcb0.isSelected();
@@ -413,6 +576,9 @@ public class DEBUG implements Serializable {
 			mapping_tabular = mapping_tabular_box.isSelected();
 			mapping_textual = mapping_textual_box.isSelected();
 
+			query_graphical = query_graphical_box.isSelected();
+			query_textual = query_textual_box.isSelected();
+
 			inst_graphical = inst_graphical_box.isSelected();
 			inst_tabular = inst_tabular_box.isSelected();
 			inst_textual = inst_textual_box.isSelected();
@@ -420,6 +586,16 @@ public class DEBUG implements Serializable {
 			inst_gr = inst_gr_box.isSelected();
 			inst_obs = inst_obs_box.isSelected();
 
+			schema_graph = (String) schemaBox.getSelectedItem();
+			mapping_graph = (String) mappingBox.getSelectedItem();
+			inst_graph = (String) instBox.getSelectedItem();
+			trans_graph = (String) transBox.getSelectedItem();
+			query_graph = (String) queryBox.getSelectedItem();
+			instFlow_graph = (String) instFlowBox.getSelectedItem();
+			schFlow_graph = (String) schFlowBox.getSelectedItem();
+			
+			allow_surjective = surjB.isSelected();
+			
 			transform_graphical = transform_graphical_box.isSelected();
 			transform_tabular = transform_tabular_box.isSelected();
 			transform_textual = transform_textual_box.isSelected();
@@ -431,7 +607,7 @@ public class DEBUG implements Serializable {
 			} else if (nativeButton.isSelected()) {
 				sqlKind = SQLKIND.NATIVE;
 			}
-						
+
 			jdbcUrl = jdbcField.getText();
 			jdbcClass = jdbcField2.getText();
 			FILE_PATH = fileArea.getText();
@@ -447,17 +623,19 @@ public class DEBUG implements Serializable {
 			load(false);
 			// debug.showOptions();
 		}
-		
+
 		int nbox = GUI.box.getModel().getSize();
 		if (limit_examples) {
 			if (nbox != Examples.key_examples.length) {
-				DefaultComboBoxModel<Example> m = new DefaultComboBoxModel<>(Examples.key_examples);
+				DefaultComboBoxModel<Example> m = new DefaultComboBoxModel<>(
+						Examples.key_examples);
 				GUI.box.setModel(m);
 				GUI.box.setSelectedIndex(-1);
 			}
 		} else {
 			if (nbox != Examples.examples.length) {
-				DefaultComboBoxModel<Example> m = new DefaultComboBoxModel<>(Examples.examples);
+				DefaultComboBoxModel<Example> m = new DefaultComboBoxModel<>(
+						Examples.examples);
 				GUI.box.setModel(m);
 				GUI.box.setSelectedIndex(-1);
 			}
@@ -474,5 +652,28 @@ public class DEBUG implements Serializable {
 			+ "\n\nLibraries used:\n\nJParsec (parsing)\nJUNG (graph visualization)\nRSyntaxTextArea (code editor)\nH2 (SQL)";
 
 	public static int chase_limit = 64;
+
+	public static final String layout_prefix = "edu.uci.ics.jung.algorithms.layout.";
+
+	static String[] layouts = { "CircleLayout", "FRLayout", "ISOMLayout",
+			"KKLayout", "SpringLayout" };
+
+	String layout_string = "<html>" +
+			"" +
+			"<li>CircleLayout: places vertices on a circle</li>" +
+			"<li>FRLayout: Fruchterman-Reingold algorithm (force-directed)</li>" +
+			"<li>SOMLayout: self-organizing map layout</li>" +
+			"<li>KKLayout: Kamada-Kawai algorithm (tries to maintain distances)</li>" +
+			"<li>SpringLayout: simple force-directed layout</li>" +
+			"" +
+			"</html>";
+			
+	
+	/*
+	 * CircleLayout: places vertices on a circle FRLayout: Fruchterman-Reingold
+	 * algorithm (force-directed) ISOMLayout: self-organizing map layout
+	 * KKLayout: Kamada-Kawai algorithm (tries to maintain specified distances)
+	 * SpringLayout: simple force-directed layout
+	 */
 
 }

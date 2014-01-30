@@ -15,7 +15,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -327,8 +326,6 @@ public class GUI extends JPanel {
 
 		// toolBar temp1 = new JPanel();
 		JLabel l = new JLabel("Load Example:", JLabel.RIGHT);
-		Arrays.sort(Examples.examples);
-		Arrays.sort(Examples.key_examples);
 		
 		if (DEBUG.debug.limit_examples) {
 			box = new JComboBox<>(Examples.key_examples);			
@@ -369,9 +366,6 @@ public class GUI extends JPanel {
 			}
 		});
 
-		{
-			DEBUG.load(true);
-		}
 
 		// JPanel temp2 = new JPanel();
 		// temp2.add(l);
@@ -390,6 +384,8 @@ public class GUI extends JPanel {
 		// editors.requestFocusInWindow();
 		return new Pair<>(pan, menuBar);
 	}
+	
+
 
 	protected static void doExample(Example e) {
 		// int i = untitled_count;

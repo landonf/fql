@@ -1,6 +1,7 @@
 package fql;
 
 import java.awt.MenuBar;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -12,6 +13,7 @@ import javax.swing.UIManager;
 import fql.decl.Driver;
 import fql.decl.Environment;
 import fql.decl.FQLProgram;
+import fql.examples.Examples;
 import fql.gui.CodeEditor;
 import fql.gui.GUI;
 import fql.parse.FQLParser;
@@ -28,7 +30,8 @@ public class FQL {
 		if (args.length == 1) {
 			try {
 				FQLProgram init = FQLParser.program(args[0]);
-				Triple<Environment, String, List<Throwable>> envX = Driver.makeEnv(init);
+				Triple<Environment, String, List<Throwable>> envX = Driver
+						.makeEnv(init);
 				if (envX.third.size() > 0) {
 					throw new RuntimeException("Errors: " + envX.third);
 				}
@@ -41,35 +44,47 @@ public class FQL {
 				return;
 			}
 		} else if (args.length != 0) {
-			System.out.println("The FQL IDE expects zero arguments for the gui and one argument, a string, for the compiler.");
+			System.out
+					.println("The FQL IDE expects zero arguments for the gui and one argument, a string, for the compiler.");
 			return;
 		}
+
+		//TODO check surjective pis still compose
 		
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				try {
-				final Pair<JPanel, MenuBar> gui = GUI.makeGUI();
-				final JFrame f = new JFrame("FQL IDE");
-				f.setContentPane(gui.first);
-				f.setMenuBar(gui.second);
-				f.pack();
-				f.setSize(840, 630);
-				((CodeEditor)GUI.editors.getComponentAt(0)).topArea.requestFocusInWindow();
-				f.setLocationRelativeTo(null);
-				f.setVisible(true);
+					Arrays.sort(Examples.examples);
+					Arrays.sort(Examples.key_examples);
 
-				f.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-				f.addWindowListener(new java.awt.event.WindowAdapter() {
-					@Override
-					public void windowClosing(
-							java.awt.event.WindowEvent windowEvent) {
-						GUI.exitAction();
+					DEBUG.load(true);
 
-					}
-				});
+					final Pair<JPanel, MenuBar> gui = GUI.makeGUI();
+					final JFrame f = new JFrame("FQL IDE");
+					f.setContentPane(gui.first);
+					f.setMenuBar(gui.second);
+					f.pack();
+					f.setSize(840, 630);
+					((CodeEditor) GUI.editors.getComponentAt(0)).topArea
+							.requestFocusInWindow();
+					f.setLocationRelativeTo(null);
+					f.setVisible(true);
+
+					f.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+					f.addWindowListener(new java.awt.event.WindowAdapter() {
+						@Override
+						public void windowClosing(
+								java.awt.event.WindowEvent windowEvent) {
+							GUI.exitAction();
+
+						}
+					});
 				} catch (Throwable e) {
 					e.printStackTrace();
-					JOptionPane.showMessageDialog(null, "Unrecoverable error, restart FQL: " + e.getMessage() );
+					JOptionPane.showMessageDialog(
+							null,
+							"Unrecoverable error, restart FQL: "
+									+ e.getMessage());
 				}
 			}
 		});

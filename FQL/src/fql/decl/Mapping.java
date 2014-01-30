@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Stroke;
+import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -26,7 +27,6 @@ import javax.swing.UIManager;
 
 import org.apache.commons.collections15.Transformer;
 
-import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -813,9 +813,15 @@ public class Mapping {
 	// }
 	// };
 
+	@SuppressWarnings("unchecked")
 	public JPanel doView(final Environment env, Graph<String, String> sgv) {
 		// Layout<V, E>, BasicVisualizationServer<V,E>
-		Layout<String, String> layout = new FRLayout<>(sgv);
+		try {
+			Class<?> c = Class.forName(DEBUG.layout_prefix + DEBUG.debug.mapping_graph);
+			Constructor<?> x = c.getConstructor(Graph.class);
+			Layout<String, String> layout = (Layout<String, String>) x.newInstance(sgv);
+
+//		Layout<String, String> layout = new FRLayout<>(sgv);
 		// Layout<String, String> layout = new KKLayout(sgv);
 
 		// Layout<String, String> layout = new ISOMLayout<String,String>(sgv);
@@ -901,6 +907,10 @@ public class Mapping {
 		p.setBorder(BorderFactory.createEtchedBorder());
 		p.add(new GraphZoomScrollPane(vv));
 		return p;
+		} catch (Throwable e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
 	}
 
 	public static Mapping compose(/* String string, */Mapping l, Mapping r)
@@ -937,10 +947,12 @@ public class Mapping {
 			for (Attribute<Node> a : source.attrs) {
 				Attribute<Node> c = am.get(a);
 				if (c.equals(n)) {
-//					if (found) {
-	//					throw new FQLException("Not attribute bijection "
-		//						+ this);
-		//			}
+					if (!DEBUG.debug.allow_surjective) {
+					if (found) {
+						throw new FQLException("Not attribute bijection "
+								+ this);
+					}
+					}
 					found = true;
 				}
 			}
@@ -1004,7 +1016,7 @@ public class Mapping {
 	public JPanel constraint() {
 		JPanel ret = new JPanel(new GridLayout(1, 1));
 		try {
-			Triple<Signature, Signature, Signature> x = toEDs();
+			Triple<Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>, Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>, Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>> x = toEDs();
 
 			JTabbedPane t = new JTabbedPane();
 			t.addTab("Sigma", quickView(x.second));
@@ -1020,14 +1032,18 @@ public class Mapping {
 		return ret;
 	}
 
+	//Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>
+	
 	//does not add equations for attrs
-	public Triple<Signature, Signature, Signature> toEDs() throws FQLException {
+	public Triple<Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>, 
+				  Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>, 
+				  Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>> toEDs() throws FQLException {
 		// List<EmbeddedDependency> l = new //toED();
 
 		Signature sigma = Signature.sum("src", "dst", source, target);
 		Signature pi = Signature.sum("src", "dst", source, target);
 		Signature delta = Signature.sum("src", "dst", source, target);
-
+		
 		Map<Node, Edge> m_map = new HashMap<>();
 		Map<Node, Edge> l_map = new HashMap<>();
 		for (Node c : source.nodes) {
@@ -1093,53 +1109,34 @@ public class Mapping {
 
 		}
 		
-		return new Triple<>(delta, sigma, pi);
+		List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>> deltaXX = new LinkedList<>();
+		List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>> sigmaYY = new LinkedList<>();
+		List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>> piZZ = new LinkedList<>();
 
+		for (Attribute<Node> a : source.attrs) {
+			Attribute<Node> a0 = new Attribute<Node>("src_" + a.name, new Node("src_" + a.source.string), a.target);
+			Attribute<Node> b0 = new Attribute<Node>("dst_" + am.get(a).name, new Node("dst_" + am.get(a).source.string), a.target);
+			
+			sigmaYY.add(new Pair<>(a0, new Pair<>(l_map.get(a.source), b0)));
+			deltaXX.add(new Pair<>(a0, new Pair<>(l_map.get(a.source), b0)));
+
+			piZZ.add(new Pair<>(b0, new Pair<>(m_map.get(a.source), a0)));
+			deltaXX.add(new Pair<>(b0, new Pair<>(m_map.get(a.source), a0)));
+		}
+		 
+		Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>> deltaX = new Pair<>(delta, deltaXX);
+		Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>> sigmaY = new Pair<>(delta, sigmaYY);
+		Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>> piZ = new Pair<>(delta, piZZ);
+		return new Triple<>(deltaX, sigmaY, piZ);
 	}
 
-	/*
-	 * public List<EmbeddedDependency> toED() { List<EmbeddedDependency> ret =
-	 * new LinkedList<>();
-	 * 
-	 * int v = 0; for (Node n : source.nodes) { List<String> forall = new
-	 * LinkedList<>(); List<String> exists = new LinkedList<>();
-	 * List<Triple<String, String, String>> where = new LinkedList<>();
-	 * List<Triple<String, String, String>> tgd = new LinkedList<>();
-	 * List<Triple<String, String, String>> not = new LinkedList<>();
-	 * List<Pair<String, String>> egd = new LinkedList<>();
-	 * 
-	 * String u = "v" + Integer.toString(v); forall.add(u); where.add(new
-	 * Triple<>(source.name0 + "." + n.string, u, u)); tgd.add(new
-	 * Triple<>(target.name0 + "." + nm.get(n).string, u, u));
-	 * 
-	 * EmbeddedDependency ed = new EmbeddedDependency(forall, exists, where,
-	 * tgd, not, egd); ret.add(ed); v++; }
-	 * 
-	 * for (Attribute<Node> a : source.attrs) { List<String> forall = new
-	 * LinkedList<>(); List<String> exists = new LinkedList<>();
-	 * List<Triple<String, String, String>> where = new LinkedList<>();
-	 * List<Triple<String, String, String>> tgd = new LinkedList<>();
-	 * List<Pair<String, String>> egd = new LinkedList<>(); List<Triple<String,
-	 * String, String>> not = new LinkedList<>();
-	 * 
-	 * String u = "v" + Integer.toString(v); forall.add(u); where.add(new
-	 * Triple<>(source.name0 + "." + a.name, u, u)); tgd.add(new
-	 * Triple<>(target.name0 + "." + am.get(a).name, u, u));
-	 * 
-	 * EmbeddedDependency ed = new EmbeddedDependency(forall, exists, where,
-	 * tgd, not, egd); ret.add(ed); v++; }
-	 * 
-	 * 
-	 * 
-	 * return ret; }
-	 */
 
-	private JComponent quickView(Signature X) {
+	private JComponent quickView(Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>> second) {
 		JTabbedPane ret = new JTabbedPane();
 
-		ret.addTab("Signature", new JScrollPane(new JTextArea(X.toString())));
+		ret.addTab("Signature", new JScrollPane(new JTextArea(Signature.toString(second))));
 		ret.addTab("Embedded Dependencies", new JScrollPane(new JTextArea(
-				quickConv(X.toED("")))));
+				quickConv(Signature.toED("", second)))));
 
 		return ret;
 	}

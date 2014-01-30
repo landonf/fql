@@ -12,7 +12,7 @@ public class MatchExample2 extends Example {
 		return s;
 	}
 	
-	String s =  "\n/* Situation 1: "
+	String s =  "/* Situation 1: "
 			+ "\n *  We want to create a query between schema DogOwner and schema Dog"
 			+ "\n *  with attribute matching:"
 			+ "\n *  match {(dogatt,dname),(personatt,ownerName)}."
@@ -158,8 +158,8 @@ public class MatchExample2 extends Example {
 			+ "\n	arrows"
 			+ "\n		ship:PO->POShipTo,"
 			+ "\n		bill:PO->POBillTo,"
-			+ "\n		line:PO->POLines,"
-			+ "\n		item:POLines->Item"
+			+ "\n		lne:PO->POLines,"
+			+ "\n		itm:POLines->Item"
 			+ "\n		;"
 			+ "\n	equations;"
 			+ "\n}"
@@ -183,13 +183,16 @@ public class MatchExample2 extends Example {
 			+ "\n	arrows"
 			+ "\n		deliver:PurchaseOrder->DeliverTo,"
 			+ "\n		invoice:PurchaseOrder->InvoiceTo,"
-			+ "\n		items:PurchaseOrder->Items,"
-			+ "\n		item:Items->Item,"
+			+ "\n		itms:PurchaseOrder->Items,"
+			+ "\n		itm:Items->Item,"
 			+ "\n		deliverAdd:DeliverTo->DeliverAddress,"
 			+ "\n		invoiceAdd:InvoiceTo->InvoiceAddress"
 			+ "\n		;"
 			+ "\n	equations;"
 			+ "\n}";
+
+
+
 
 
 

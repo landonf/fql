@@ -13,7 +13,7 @@ public class EmployeesExample extends Example {
 	}
 	
 	public static final String s = 
-					"/* this is an example of an infinite schema.  \nto compile it, check 'do not validate mappings' in the options menu */\n"
+					"/* this is an example of an infinite schema.  \nto compile it, check 'allow infinte schemas' in the options menu */\n"
 			        + "\nschema S = { "
 					+ "\n nodes"
 					+ "\n 	Employee, Department, FirstName, LastName, DepartmentName;"

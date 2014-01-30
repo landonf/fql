@@ -9,6 +9,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Stroke;
+import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -31,7 +32,6 @@ import javax.swing.table.TableRowSorter;
 
 import org.apache.commons.collections15.Transformer;
 
-import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -449,6 +449,7 @@ public class Transform {
 	} 
 	
 
+	@SuppressWarnings("unchecked")
 	public JPanel doView(
 			final String src_n,
 			final String dst_n,
@@ -458,9 +459,14 @@ public class Transform {
 		// HashMap<Pair<Node, Object>,String> map = new HashMap<>();
 		JPanel cards = new JPanel(new CardLayout());
 
+		try {
+			Class<?> c = Class.forName(DEBUG.layout_prefix + DEBUG.debug.trans_graph);
+			Constructor<?> x = c.getConstructor(Graph.class);
+			Layout<Triple<Node, Object, String>, Pair<Path, Integer>> layout = (Layout<Triple<Node, Object, String>, Pair<Path, Integer>>) x.newInstance(first);
+
 		// Layout<V, E>, BasicVisualizationServer<V,E>
-		Layout<Triple<Node, Object, String>, Pair<Path, Integer>> layout = new FRLayout<>(
-				first);
+//		Layout<Triple<Node, Object, String>, Pair<Path, Integer>> layout = new FRLayout<>(
+	//			first);
 		// Layout<Pair<Node, Object>, Pair<Path, Integer>> layout = new
 		// ISOMLayout<>(sgv);
 		// Layout<String, String> layout = new CircleLayout(sgv);
@@ -576,6 +582,10 @@ public class Transform {
 		ret.add(lowerComp(), BorderLayout.NORTH);
 		ret.setBorder(BorderFactory.createEtchedBorder());
 		return ret;
+		} catch (Throwable t) {
+			t.printStackTrace();
+			throw new RuntimeException();
+		}
 	}
 
 	public JPanel makePanel(String src_n, String dst_n) {

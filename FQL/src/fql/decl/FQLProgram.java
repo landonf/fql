@@ -126,8 +126,8 @@ public class FQLProgram {
 		public FQLProgram(List<NewDecl> decls) {
 			Set<String> seen = new HashSet<>();
 			for (NewDecl decl : decls) {
-				if (decl.name != null) {
-					order.add(decl.name); //drops are unnamed
+				if (decl.name != null && decl.enums == null) {
+					order.add(decl.name); //drops are unnamed, ignore enums
 				} 
 				if (decl.enums != null) {
 					checkDup(seen, decl.name, "enum");

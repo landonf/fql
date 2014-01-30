@@ -173,7 +173,7 @@ public abstract class FullQueryExp {
 
 	public static class Var extends FullQueryExp {
 
-		String v;
+		public String v;
 
 		public Var(String v) {
 			if (v.contains(" ")) {

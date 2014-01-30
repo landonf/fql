@@ -25,7 +25,6 @@ import fql.decl.InstExp.Pi;
 import fql.decl.InstExp.Relationalize;
 import fql.decl.InstExp.Sigma;
 import fql.decl.InstExp.Two;
-import fql.decl.SigExp.Const;
 import fql.decl.TransExp.Case;
 import fql.decl.TransExp.Comp;
 import fql.decl.TransExp.FF;
@@ -99,16 +98,16 @@ public class InstOps implements
 
 		for (Node k : inst_type.nodes) {
 			Map<String, String> from = new HashMap<>();
-			from.put("left", el + "_" + k);
-			from.put("right", er + "_" + k);
+			from.put("lft", el + "_" + k);
+			from.put("rght", er + "_" + k);
 
 			List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
-			where.add(new Pair<>(new Pair<>("left", "c1"), new Pair<>("right",
+			where.add(new Pair<>(new Pair<>("lft", "c1"), new Pair<>("rght",
 					"c0")));
 
 			LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
-			select.put("c0", new Pair<>("left", "c0"));
-			select.put("c1", new Pair<>("right", "c1"));
+			select.put("c0", new Pair<>("lft", "c0"));
+			select.put("c1", new Pair<>("rght", "c1"));
 
 			Flower f = new Flower(select, from, where);
 
@@ -671,24 +670,24 @@ public class InstOps implements
 				List<String> attrs = new LinkedList<>();
 				Map<String, String> attrsM = new HashMap<>();
 				List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
-				from.put("left", e.a + "_" + n.string);
-				from.put("right", e.b + "_" + n.string);
-				attrs.add("left");
-				attrs.add("right");
-				attrsM.put("left", PSM.VARCHAR());
-				attrsM.put("right", PSM.VARCHAR());
-				select.put("left", new Pair<>("left", "c0"));
-				select.put("right", new Pair<>("right", "c0"));
+				from.put("lft", e.a + "_" + n.string);
+				from.put("rght", e.b + "_" + n.string);
+				attrs.add("lft");
+				attrs.add("rght");
+				attrsM.put("lft", PSM.VARCHAR());
+				attrsM.put("rght", PSM.VARCHAR());
+				select.put("lft", new Pair<>("lft", "c0"));
+				select.put("rght", new Pair<>("rght", "c0"));
 				for (Attribute<Node> a : s.attrsFor(n)) {
-					from.put("left_" + a.name, e.a + "_" + a.name);
+					from.put("lft_" + a.name, e.a + "_" + a.name);
 					from.put("right_" + a.name, e.b + "_" + a.name);
-					where.add(new Pair<>(new Pair<>("left_" + a.name, "c0"),
-							new Pair<>("left", "c0")));
+					where.add(new Pair<>(new Pair<>("lft_" + a.name, "c0"),
+							new Pair<>("lft", "c0")));
 					where.add(new Pair<>(new Pair<>("right_" + a.name, "c0"),
-							new Pair<>("right", "c0")));
-					where.add(new Pair<>(new Pair<>("left_" + a.name, "c1"),
+							new Pair<>("rght", "c0")));
+					where.add(new Pair<>(new Pair<>("lft_" + a.name, "c1"),
 							new Pair<>("right_" + a.name, "c1")));
-					select.put(a.name, new Pair<>("left_" + a.name, "c1"));
+					select.put(a.name, new Pair<>("lft_" + a.name, "c1"));
 					attrs.add(a.name);
 					attrsM.put(a.name, a.target.psm());
 				}
@@ -709,7 +708,7 @@ public class InstOps implements
 				from.put("t", dst + "_prod_guid_" + n.string);
 				select = new LinkedHashMap<>();
 				select.put("c0", new Pair<>("t", "guid"));
-				select.put("c1", new Pair<>("t", "left"));
+				select.put("c1", new Pair<>("t", "lft"));
 				f = new Flower(select, from, where0);
 				ret.add(new InsertSQL(dst + "_fst_" + n, f, "c0", "c1"));
 
@@ -717,7 +716,7 @@ public class InstOps implements
 				from.put("t", dst + "_prod_guid_" + n.string);
 				select = new LinkedHashMap<>();
 				select.put("c0", new Pair<>("t", "guid"));
-				select.put("c1", new Pair<>("t", "right"));
+				select.put("c1", new Pair<>("t", "rght"));
 				f = new Flower(select, from, where0);
 				ret.add(new InsertSQL(dst + "_snd_" + n, f, "c0", "c1"));
 
@@ -749,13 +748,13 @@ public class InstOps implements
 				from.put("dstGuid", dst + "_prod_guid_" + edge.target);
 				List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
 				where.add(new Pair<>(new Pair<>("leftEdge", "c0"), new Pair<>(
-						"srcGuid", "left")));
+						"srcGuid", "lft")));
 				where.add(new Pair<>(new Pair<>("rightEdge", "c0"), new Pair<>(
-						"srcGuid", "right")));
+						"srcGuid", "rght")));
 				where.add(new Pair<>(new Pair<>("leftEdge", "c1"), new Pair<>(
-						"dstGuid", "left")));
+						"dstGuid", "lft")));
 				where.add(new Pair<>(new Pair<>("rightEdge", "c1"), new Pair<>(
-						"dstGuid", "right")));
+						"dstGuid", "rght")));
 				LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 				select.put("c0", new Pair<>("srcGuid", "guid"));
 				select.put("c1", new Pair<>("dstGuid", "guid"));
@@ -782,9 +781,9 @@ public class InstOps implements
 						from.put("lim", dst + "_prod_guid_" + n.string);
 						where.add(new Pair<>(new Pair<>("f", "c0"), new Pair<>(
 								"g", "c0")));
-						where.add(new Pair<>(new Pair<>("lim", "left"),
+						where.add(new Pair<>(new Pair<>("lim", "lft"),
 								new Pair<>("f", "c1")));
-						where.add(new Pair<>(new Pair<>("lim", "right"),
+						where.add(new Pair<>(new Pair<>("lim", "rght"),
 								new Pair<>("g", "c1")));
 						LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 						select.put("c0", new Pair<>("f", "c0"));

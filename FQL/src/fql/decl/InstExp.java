@@ -879,34 +879,20 @@ public abstract class InstExp {
 
 	public interface InstExpVisitor<R, E> {
 		public R visit(E env, Zero e);
-
 		public R visit(E env, One e);
-
 		public R visit(E env, Two e);
-
 		public R visit(E env, Plus e);
-
 		public R visit(E env, Times e);
-
 		public R visit(E env, Exp e);
-
 		// public R visit (E env, Var e);
 		public R visit(E env, Const e);
-
 		public R visit(E env, Delta e);
-
 		public R visit(E env, Sigma e);
-
 		public R visit(E env, Pi e);
-
 		public R visit(E env, FullSigma e);
-
 		public R visit(E env, Relationalize e);
-
 		public R visit(E env, External e);
-
 		public R visit(E env, Eval e);
-		
 		public R visit(E env, FullEval e);
 	}
 

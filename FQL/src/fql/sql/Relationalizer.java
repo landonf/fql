@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.collections15.map.LinkedMap;
-
 import fql.FQLException;
 import fql.Fn;
 import fql.Pair;

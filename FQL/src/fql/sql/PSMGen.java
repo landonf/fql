@@ -367,7 +367,6 @@ public class PSMGen {
 		return ret;
 	} 
 	
-	//TODO add to create table an option to make c0 a primary key
 
 	public static List<PSM> delta(Mapping m, String src, String dst) {
 		Map<String, SQL> ret = new HashMap<>();

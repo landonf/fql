@@ -29,6 +29,8 @@ import fql.sql.PSM;
 import fql.sql.PSMGen;
 import fql.sql.PSMInterp;
 
+//TODO always execute postlude
+
 /**
  * 
  * @author ryan
@@ -37,7 +39,6 @@ import fql.sql.PSMInterp;
  */
 public class JDBCBridge {
 
-	// TODO if full sigmas are required, should *push* results to DB
 	// TODO test on jdbc again
 	
 	public static Triple<Map<String, Set<Map<Object, Object>>>, String, List<Throwable>> run(
@@ -102,6 +103,7 @@ public class JDBCBridge {
 							psm.addAll(v.accept(k, ops).first);
 						}
 						for (PSM sql : psm) {
+//							System.out.println("exec " + sql.toPSM());
 							Stmt.execute(sql.toPSM());
 						}
 						if (!(v instanceof InstExp.FullSigma)) {
@@ -110,13 +112,21 @@ public class JDBCBridge {
 						break;
 					}
 					sqls.addAll(psm);
-				} catch (RuntimeException re) {
+				} catch (Throwable re) {
 					re.printStackTrace();
 					LineException exn = new LineException(
 							re.getLocalizedMessage(), k, "instance");
 					if (DEBUG.debug.continue_on_error) {
 						exns.add(exn);
 					} else {
+						if (DEBUG.debug.sqlKind == DEBUG.SQLKIND.JDBC) {
+							String[] prel0 = DEBUG.debug.afterlude.split(";");
+							for (String s : prel0) {
+								if (s.trim().length() > 0) {
+									Stmt.execute(s);
+								}
+							}
+						}
 						throw exn;
 					}
 				}
@@ -160,13 +170,21 @@ public class JDBCBridge {
 						break;
 					}
 
-				} catch (RuntimeException re) {
+				} catch (Throwable re) {
 					re.printStackTrace();
 					LineException exn = new LineException(
 							re.getLocalizedMessage(), k, "transform");
 					if (DEBUG.debug.continue_on_error) {
 						exns.add(exn);
 					} else {
+						if (DEBUG.debug.sqlKind == DEBUG.SQLKIND.JDBC) {
+							String[] prel0 = DEBUG.debug.afterlude.split(";");
+							for (String s : prel0) {
+								if (s.trim().length() > 0) {
+									Stmt.execute(s);
+								}
+							}
+						}
 						throw exn;
 					}
 				}
@@ -201,6 +219,9 @@ public class JDBCBridge {
 
 			return new Triple<>(ret, str, exns);
 		} catch (Exception exception) {
+			if (exception instanceof LineException) {
+				throw ((LineException)exception);
+			}
 			exception.printStackTrace();
 			// System.out.println(ret);
 			throw new RuntimeException(exception.getLocalizedMessage());

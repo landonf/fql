@@ -1,14 +1,19 @@
 package fql.decl;
 
 import fql.Pair;
+import fql.decl.Query.ToQueryVisitor;
 
 
 
 public abstract class QueryExp {
 	
+	public Query toQuery(FQLProgram env) {
+		return accept(env, new ToQueryVisitor());
+	}
+	
 	public static class Var extends QueryExp {
 
-		String v;
+		public String v;
 		
 		public Var(String v) {
 			if (v.contains(" ")) {

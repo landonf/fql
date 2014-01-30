@@ -88,7 +88,7 @@ public abstract class MapExp {
 	}
 	
 	public static class Id extends MapExp {
-		SigExp t;
+		public SigExp t;
 
 		public Id(SigExp t) {
 			this.t = t;
@@ -370,7 +370,7 @@ public abstract class MapExp {
 	}
 
 	public static class Var extends MapExp {
-		String v;
+		public String v;
 
 		public Var(String v) {
 			this.v = v;

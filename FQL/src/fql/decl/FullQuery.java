@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Paint;
+import java.lang.reflect.Constructor;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -17,7 +18,6 @@ import javax.swing.JTextArea;
 
 import org.apache.commons.collections15.Transformer;
 
-import edu.uci.ics.jung.algorithms.layout.ISOMLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -28,6 +28,7 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.VertexLabelRenderer;
+import fql.DEBUG;
 import fql.Pair;
 
 public abstract class FullQuery {
@@ -94,13 +95,19 @@ public abstract class FullQuery {
 		return doView(g);
 	}
 
+	@SuppressWarnings("unchecked")
 	public JComponent doView(
 			/* final Environment env, */Graph<Pair<FullQuery, Integer>, Integer> sgv) {
 
+		try {
+		Class<?> c = Class.forName(DEBUG.layout_prefix + DEBUG.debug.inst_graph);
+		Constructor<?> x = c.getConstructor(Graph.class);
+		Layout<Pair<FullQuery, Integer>, Integer> layout = (Layout<Pair<FullQuery, Integer>, Integer>) x.newInstance(sgv);
+
 		// Layout<V, E>, BasicVisualizationServer<V,E>
 		// Layout<String, String> layout = new FRLayout(sgv);
-		Layout<Pair<FullQuery, Integer>, Integer> layout = new ISOMLayout<Pair<FullQuery, Integer>, Integer>(
-				sgv);
+//		Layout<Pair<FullQuery, Integer>, Integer> layout = new ISOMLayout<Pair<FullQuery, Integer>, Integer>(
+	//			sgv);
 		// Layout<String, String> layout = new CircleLayout(sgv);
 		layout.setSize(new Dimension(600, 400));
 		// BasicVisualizationServer<String, String> vv = new
@@ -172,6 +179,10 @@ public abstract class FullQuery {
 
 		// xxx.setMaximumSize(new Dimension(400,400));
 		return xxx;
+		} catch (Throwable e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
 	}
 
 	JTextArea cards = new JTextArea();

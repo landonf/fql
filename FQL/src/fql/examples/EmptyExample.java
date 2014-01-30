@@ -82,7 +82,7 @@ public class EmptyExample extends Example {
 					+ "\n//transform eval"
 					+ "\ntransform t15 = delta I1 I1 id I"
 					+ "\ntransform t16 = sigma I3 I3 id I"
-					+ "\ntransform t20 = SIGMA I5 I5 id I"
+					+ "\ntransform t20 = SIGMA I5 I5 t1"
 					+ "\ntransform t17 = pi I2 I2 id I"
 					+ "\ntransform t18 = relationalize I4 I4 id I"
 					+ "\ntransform t19 = I4.relationalize"

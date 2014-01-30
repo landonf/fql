@@ -8,6 +8,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Stroke;
+import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -33,7 +34,6 @@ import javax.swing.table.TableRowSorter;
 
 import org.apache.commons.collections15.Transformer;
 
-import edu.uci.ics.jung.algorithms.layout.ISOMLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -43,6 +43,7 @@ import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.VertexLabelRenderer;
+import fql.DEBUG;
 import fql.FQLException;
 import fql.Pair;
 import fql.cat.Arr;
@@ -1049,13 +1050,19 @@ public class Instance {
 		return doView(g);
 	}
 
+	@SuppressWarnings("unchecked")
 	public JPanel doView(
 	/* final Environment env , *//* final Color color */Graph<String, String> sgv) {
 		// Layout<V, E>, BasicVisualizationServer<V,E>
 		// Layout<String, String> layout = new KKLayout(sgv);
 
 		// Layout<String, String> layout = new FRLayout(sgv);
-		Layout<String, String> layout = new ISOMLayout<String, String>(sgv);
+		try {
+			Class<?> c = Class.forName(DEBUG.layout_prefix + DEBUG.debug.inst_graph);
+			Constructor<?> x = c.getConstructor(Graph.class);
+			Layout<String, String> layout = (Layout<String, String>) x.newInstance(sgv);
+
+//		Layout<String, String> layout = new ISOMLayout<String, String>(sgv);
 		// Layout<String, String> layout = new CircleLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
@@ -1151,6 +1158,10 @@ public class Instance {
 		xxx.add(newthing);
 		// xxx.setMaximumSize(new Dimension(400,400));
 		return xxx;
+		} catch (Throwable t) {
+			t.printStackTrace();
+			throw new RuntimeException();
+		}
 	}
 
 	private class MyVertexT implements VertexLabelRenderer {
@@ -1630,6 +1641,7 @@ public class Instance {
 	 */
 	public static boolean quickCompare(Instance i, Instance j)
 			throws FQLException {
+		List<String> l = new LinkedList<>();
 		if (!i.data.keySet().equals(j.data.keySet())) {
 			throw new RuntimeException(i.data.keySet() + "\n\n"
 					+ j.data.keySet());
@@ -1638,11 +1650,12 @@ public class Instance {
 			Set<Pair<Object, Object>> v = i.data.get(k);
 			Set<Pair<Object, Object>> v0 = j.data.get(k);
 			if (v.size() != v0.size()) {
+				l.add(k);
 				return false;
 			}
 		}
-
 		return true;
+		//return l;
 	}
 
 }
