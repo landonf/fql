@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<TokenMakerDefinition>
+  <general>
+    <package>fql.parse</package>
+    <className>FqlTokenMaker</className>
+    <extendedClass>AbstractJFlexCTokenMaker</extendedClass>
+    <classComment/>
+    <ignoreCase>false</ignoreCase>
+    <booleanLiterals>false</booleanLiterals>
+  </general>
+  <comments>
+    <lineComments enabled="true" start="//"/>
+    <multiLineComments enabled="true" end="*/" start="/*"/>
+    <docComments enabled="false" end="" start=""/>
+  </comments>
+  <keywords>
+    <keyword>QUERY</keyword>
+    <keyword>enum</keyword>
+    <keyword>instance</keyword>
+    <keyword>mapping</keyword>
+    <keyword>query</keyword>
+    <keyword>schema</keyword>
+    <keyword>transform</keyword>
+  </keywords>
+  <keywords2>
+    <keyword>ASWRITTEN</keyword>
+    <keyword>EVAL</keyword>
+    <keyword>SIGMA</keyword>
+    <keyword>apply</keyword>
+    <keyword>arrows</keyword>
+    <keyword>attributes</keyword>
+    <keyword>curry</keyword>
+    <keyword>delta</keyword>
+    <keyword>drop</keyword>
+    <keyword>equations</keyword>
+    <keyword>eval</keyword>
+    <keyword>external</keyword>
+    <keyword>fst</keyword>
+    <keyword>id</keyword>
+    <keyword>inl</keyword>
+    <keyword>inr</keyword>
+    <keyword>match</keyword>
+    <keyword>nodes</keyword>
+    <keyword>opposite</keyword>
+    <keyword>pi</keyword>
+    <keyword>prop</keyword>
+    <keyword>relationalize</keyword>
+    <keyword>sigma</keyword>
+    <keyword>snd</keyword>
+    <keyword>subschema</keyword>
+    <keyword>then</keyword>
+    <keyword>union</keyword>
+    <keyword>unit</keyword>
+    <keyword>void</keyword>
+  </keywords2>
+  <dataTypes>
+    <dataType>int</dataType>
+    <dataType>string</dataType>
+  </dataTypes>
+  <functions/>
+  <numbers>
+    <hexLiteral/>
+    <intLiteral>{Digit}+</intLiteral>
+    <floatLiteral/>
+  </numbers>
+  <stringLiterals enabled="true" multiLine="false"/>
+  <charLiterals enabled="false" multiLine="false"/>
+  <backtickLiterals enabled="false"/>
+  <operators>
+    <operator>(</operator>
+    <operator>)</operator>
+    <operator>*</operator>
+    <operator>+</operator>
+    <operator>,</operator>
+    <operator>-&gt;</operator>
+    <operator>:</operator>
+    <operator>;</operator>
+    <operator>=</operator>
+    <operator>^</operator>
+    <operator>{</operator>
+    <operator>|</operator>
+    <operator>}</operator>
+  </operators>
+</TokenMakerDefinition>

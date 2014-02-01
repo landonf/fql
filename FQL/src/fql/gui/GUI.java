@@ -40,6 +40,7 @@ import fql.examples.Example;
 import fql.examples.Examples;
 import fql.sql.Chase;
 import fql.sql.RaToFql;
+import fql.sql.RingToFql;
 import fql.sql.SqlToFql;
 
 @SuppressWarnings("serial")
@@ -190,6 +191,14 @@ public class GUI extends JPanel {
 		sqlToFqlItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				sqlToFqlAction();
+			}
+		});
+		
+		MenuItem ringToFqlItem = new MenuItem("Polynomials to FQL");
+		toolsMenu.add(ringToFqlItem);
+		ringToFqlItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				ringToFqlAction();
 			}
 		});
 
@@ -406,6 +415,10 @@ public class GUI extends JPanel {
 
 	private static void sqlToFqlAction() {
 		new SqlToFql();
+	}
+	
+	private static void ringToFqlAction() {
+		new RingToFql();
 	}
 
 	private static void raToFqlAction() {

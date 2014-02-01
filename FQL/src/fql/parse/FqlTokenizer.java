@@ -20,7 +20,7 @@ public class FqlTokenizer implements Tokens {
 	//private List<String> lines;
 	
 	private String[] symbols = new String[] { ",", ":", ";", "->", ".", "{",
-			"}", "(", ")", "=", "[", "]" };
+			"}", "(", ")", "=", "[", "]", "+", "*" };
 
 	private String comment_start = "/*";
 	private String comment_end = "*/";

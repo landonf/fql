@@ -2,12 +2,12 @@ package fql.decl;
 
 import java.awt.BasicStroke;
 import java.awt.CardLayout;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Stroke;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.Comparator;
@@ -21,8 +21,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -42,7 +40,6 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
-import edu.uci.ics.jung.visualization.renderers.VertexLabelRenderer;
 import fql.DEBUG;
 import fql.FQLException;
 import fql.Pair;
@@ -669,6 +666,7 @@ public class Instance {
 		return ret;
 	}
 
+	@SuppressWarnings("serial")
 	private void prejoin() {
 		if (joined != null) {
 			return;
@@ -689,11 +687,12 @@ public class Instance {
 
 		for (Edge e : thesig.edges) {
 			jnd.get(e.source.string).put(e.name, data.get(e.name));
-			// names.add(e.name);
+	//		names.add(e.name);
 		}
 
 		for (Attribute<Node> a : thesig.attrs) {
 			jnd.get(a.source.string).put(a.name, data.get(a.name));
+		//	names.add(a.name);
 		}
 
 		Comparator<String> strcmp = new Comparator<String>() {
@@ -702,8 +701,100 @@ public class Instance {
 			}
 		};
 		Collections.sort(names, strcmp);
-
 		joined = makejoined(jnd, nd, names);
+		
+		for (Edge e : thesig.edges) {
+			String name = e.name;
+			Object[][] rowData = new Object[data.get(name).size()][2];
+			int i = 0;
+			for (Pair<Object, Object> k : data.get(name)) {
+				rowData[i][0] = k.first;
+				rowData[i][1] = k.second;
+				i++;
+			}
+			Object[] colNames = new Object[] { e.source.string, e.target.string };
+			JTable t = new JTable(rowData, colNames) {
+				public Dimension getPreferredScrollableViewportSize() {
+					Dimension d = getPreferredSize();
+					return new Dimension(d.width, d.height);
+				}
+			};
+			JPanel p = new JPanel(new GridLayout(1, 1));
+			TableRowSorter<?> sorter = new MyTableRowSorter(t.getModel());
+			sorter.toggleSortOrder(0);
+			t.setRowSorter(sorter);
+			sorter.allRowsChanged();
+			p.add(new JScrollPane(t));
+
+			// p.setMaximumSize(new Dimension(200,200));
+			p.setBorder(BorderFactory.createTitledBorder(
+					BorderFactory.createEmptyBorder(), name + " (" + data.get(name).size()
+							+ " rows)"));
+		//	System.out.println("adding " + name );
+			vwr.add(p, name);
+		}
+		
+		for (Attribute<Node> e : thesig.attrs) {
+			String name = e.name;
+			Object[][] rowData = new Object[data.get(name).size()][2];
+			int i = 0;
+			for (Pair<Object, Object> k : data.get(name)) {
+				rowData[i][0] = k.first;
+				rowData[i][1] = k.second;
+				i++;
+			}
+			Object[] colNames = new Object[] { e.source.string, e.target.toString() };
+			JTable t = new JTable(rowData, colNames) {
+				public Dimension getPreferredScrollableViewportSize() {
+					Dimension d = getPreferredSize();
+					return new Dimension(d.width, d.height);
+				}
+			};
+			JPanel p = new JPanel(new GridLayout(1, 1));
+			TableRowSorter<?> sorter = new MyTableRowSorter(t.getModel());
+			sorter.toggleSortOrder(0);
+			t.setRowSorter(sorter);
+			sorter.allRowsChanged();
+			p.add(new JScrollPane(t));
+
+			// p.setMaximumSize(new Dimension(200,200));
+			p.setBorder(BorderFactory.createTitledBorder(
+					BorderFactory.createEmptyBorder(), name + " (" + data.get(name).size()
+							+ " rows)"));
+		//	System.out.println("adding " + name );
+			vwr.add(p, name);
+		}
+		
+		for (Attribute<Node> e : thesig.attrs) {
+			String name = e.name;
+			Object[][] rowData = new Object[data.get(name).size()][1];
+			int i = 0;
+			for (Pair<Object, Object> k : data.get(name)) {
+				rowData[i][0] = k.second;
+				i++;
+			}
+			Object[] colNames = new Object[] { e.target.toString() };
+			JTable t = new JTable(rowData, colNames) {
+				public Dimension getPreferredScrollableViewportSize() {
+					Dimension d = getPreferredSize();
+					return new Dimension(d.width, d.height);
+				}
+			};
+			JPanel p = new JPanel(new GridLayout(1, 1));
+			TableRowSorter<?> sorter = new MyTableRowSorter(t.getModel());
+			sorter.toggleSortOrder(0);
+			t.setRowSorter(sorter);
+			sorter.allRowsChanged();
+			p.add(new JScrollPane(t));
+
+			
+			// p.setMaximumSize(new Dimension(200,200));
+			p.setBorder(BorderFactory.createTitledBorder(
+					BorderFactory.createEmptyBorder(), "domain of " + name + " (" + data.get(name).size()
+							+ " rows)"));
+		//	System.out.println("adding " + name );
+			vwr.add(p, "domain of " + name);
+		}
 
 	}
 
@@ -1050,7 +1141,7 @@ public class Instance {
 		return doView(g);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public JPanel doView(
 	/* final Environment env , *//* final Color color */Graph<String, String> sgv) {
 		// Layout<V, E>, BasicVisualizationServer<V,E>
@@ -1065,7 +1156,7 @@ public class Instance {
 //		Layout<String, String> layout = new ISOMLayout<String, String>(sgv);
 		// Layout<String, String> layout = new CircleLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
-		VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
+		final VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
 				layout);
 		// vv.setPreferredSize(new Dimension(600, 400));
 		// vv.getRenderContext().setEdgeLabelRerderer(new MyEdgeT());
@@ -1102,10 +1193,58 @@ public class Instance {
 		// };
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 		// vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
-		vv.getRenderContext().setVertexLabelRenderer(new MyVertexT());
-		// vv.getRenderContext().setVertexLabelTransformer(new
-		// ToStringLabeller());
+		//vv.getRenderContext().setVertexLabelRenderer(new MyVertexT());
+		 vv.getRenderContext().setVertexLabelTransformer(new
+		 Transformer() {
 
+			@Override
+			public Object transform(Object arg0) {
+				String str = (String) arg0;
+				if (thesig.isAttribute(str)) {
+					str = thesig.getTypeLabel(str);
+				}
+				return str;
+			}
+			 
+		 });
+
+		 vv.getPickedVertexState().addItemListener(new ItemListener() {
+
+				@Override
+				public void itemStateChanged(ItemEvent e) {
+					if (e.getStateChange() != ItemEvent.SELECTED) {
+						return;
+					}
+					vv.getPickedEdgeState().clear();
+					String str = ((String) e.getItem());
+					prejoin();
+
+					if (!thesig.isAttribute(str)) {
+						cards.show(vwr, str);
+					} else {
+						cards.show(vwr, "domain of " + str);
+							
+					}
+//					yyy.setSelectedValue(indices.get(str), true);
+				}
+				
+			});
+		 vv.getPickedEdgeState().addItemListener(new ItemListener() {
+
+				@Override
+				public void itemStateChanged(ItemEvent e) {
+					if (e.getStateChange() != ItemEvent.SELECTED) {
+						return;
+					}
+					vv.getPickedVertexState().clear();
+					String str = ((String) e.getItem());
+					prejoin();
+//					System.out.println("trying to show " + str);
+					cards.show(vwr, str);
+					//yyy.setSelectedValue(indices.get(str), true);
+				}
+				
+			});
 		// new MyEdgeT()); // {
 
 		// vv.getRenderContext().setEdgeLabelTransformer(new
@@ -1115,7 +1254,18 @@ public class Instance {
 		// vv.getRenderer().getVertexRenderer().
 		vv.getRenderContext().setLabelOffset(20);
 		vv.getRenderContext().setEdgeLabelTransformer(
-				new ToStringLabeller<String>());
+				new Transformer() {
+
+					@Override
+					public Object transform(Object arg0) {
+						String s = arg0.toString();
+						if (thesig.isAttribute(s)) {
+							return "";
+						}
+						return s;
+					}
+					
+				});
 		// vv.getRenderContext().getEdgeLabelRenderer().
 		// vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
 
@@ -1142,8 +1292,6 @@ public class Instance {
 		vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
 		vv.getRenderContext().setVertexLabelTransformer(
 				new ToStringLabeller<String>());
-		vv.getRenderContext().setEdgeLabelTransformer(
-				new ToStringLabeller<String>());
 
 		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
 		// JPanel ret = new JPanel(new GridLayout(1,1));
@@ -1163,7 +1311,7 @@ public class Instance {
 			throw new RuntimeException();
 		}
 	}
-
+/*
 	private class MyVertexT implements VertexLabelRenderer {
 
 		public MyVertexT() {
@@ -1174,8 +1322,6 @@ public class Instance {
 				Object arg1, Font arg2, boolean arg3, T arg4) {
 			if (arg3) {
 				prejoin();
-				// Map<String, JPanel> panels = makejoined();
-				// if (pi.isPicked((String) arg4)) {
 
 				cards.show(vwr, (String) arg4);
 
@@ -1210,6 +1356,7 @@ public class Instance {
 			}
 		}
 	}
+	*/
 
 	// private class MyEdgeT extends DefaultEdgeLabelRenderer {
 	// // private final PickedInfo<String> pi;
