@@ -243,6 +243,11 @@ public class Display {
 			px.add("Denotation", den);
 		}
 
+		if (DEBUG.debug.schema_rdf) {
+			JPanel rel = view.rdf();
+			px.add("RDF", rel);
+		}
+
 		JPanel top = new JPanel(new GridLayout(1, 1));
 		top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 		top.add(px);

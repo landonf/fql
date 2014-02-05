@@ -923,7 +923,67 @@ public class Instance {
 
 		return tap;
 	}
-	
+	/*
+	<rdfs:Class rdf:ID="staffMember">
+	<rdfs:comment>The class of staff members </rdfs:comment>
+</rdfs:Class>
+<rdf:Property rdf:ID="isTaughtBy">
+		<rdfs:domain rdf:resource="#course"/>
+	<rdfs:range rdf:resource="#lecturer"/>
+</rdf:Property>
+*/
+	public String rdfX(String name) {
+		String xxx = "";
+		String prefix = "fql://entity/"; // + name + "/";
+				
+		for (Node n : thesig.nodes) {
+			Set<Pair<Object, Object>> ids = data.get(n.string);
+			for (Pair<Object, Object> idX : ids) {
+				Object id = idX.first;
+				xxx += "<rdf:Description rdf:about=\"" + prefix + id + "\">\n";
+				xxx += "    <rdf:type rdf:resource=\"fql://node/" + n.string + "\"/>\n"; //+
+						//"/fql://node/Department"/>
+					//xxx += "    <node:" + n.string + "/>\n";
+
+			//	xxx += "    <node:node>" + n.string + "</node:node>\n";
+				for (Attribute<Node> a : thesig.attrsFor(n)) {
+					xxx += "    <attribute:" + a.name +">" + lookupX(data.get(a.name), id) + "</attribute:" + a.name + ">\n";
+				}
+				for (Edge a : thesig.edges) {
+					if (!a.source.equals(n)) {
+						continue;
+					}
+				//	xxx += "    <arrow:value rdf:resource=\""+ prefix + a.name +"\">" + lookupX(data.get(a.name), id) + "</arrow:value>\n";					
+
+					xxx += "    <arrow:" + a.name + " rdf:resource=\"" + prefix + lookupX(data.get(a.name), id) + "\"/>\n";					
+				}
+				xxx += "</rdf:Description>\n\n";
+			}
+//			xxx += "\n";
+		}
+		
+		String ret =
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+		"\n<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"" +
+		"\n    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"" +		
+		"\n    xmlns:node=\"fql://node/\"" +		
+		"\n    xmlns:arrow=\"fql://arrow/\"" +
+		"\n    xmlns:attribute=\"fql://attribute/\">\n\n" + 
+		xxx
+		+ "</rdf:RDF>";
+/*			<rdf:Description rdf:about="http://en.wikipedia.org/wiki/Oxford">
+				<dc:title>Oxford</dc:title>
+				<dc:coverage>Oxfordshire</dc:coverage>
+				<dc:publisher>Wikipedia</dc:publisher>
+				<region:population>10000</region:population>
+				<region:principaltown rdf:resource="http://www.country-regions.fake/oxford"/>
+			</rdf:Description>
+
+		</rdf:RDF> */
+		return ret;
+	}
+
+	/*
 	public String rdfX(String name) {
 		String xxx = "";
 		String prefix = "fql://entity/"; // + name + "/";
@@ -968,10 +1028,10 @@ public class Instance {
 				<region:principaltown rdf:resource="http://www.country-regions.fake/oxford"/>
 			</rdf:Description>
 
-		</rdf:RDF> */
+		</rdf:RDF> 
 		return ret;
-	}
-	
+	} */
+
 /*	public String rdfY(String name) {
 		String xxx = "";
 		String prefix = "http://categoricaldata.net/fql/ref/" + name + "/";

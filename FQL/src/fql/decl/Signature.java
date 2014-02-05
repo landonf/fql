@@ -1249,5 +1249,64 @@ public class Signature {
 
 		return new Signature(types, o, a, e, cc);
 	}
+	
+	public JPanel rdf() {
+		JTextArea ta = new JTextArea(rdfX());
+		JPanel tap = new JPanel(new GridLayout(1, 1));
+		ta.setBorder(BorderFactory.createEmptyBorder());
+		//
+		tap.setBorder(BorderFactory.createEmptyBorder());
+	//	ta.setWrapStyleWord(true);
+	//	ta.setLineWrap(true);
+		JScrollPane xxx = new JScrollPane(ta);
+		// xxx.setBorder(BorderFactory.createEmptyBorder());
+		//
+		tap.add(xxx);
+		// tap.setSize(600, 600);
+
+		return tap;
+	}
+
+	
+	public String rdfX() {
+		String xxx = "";
+	//  	String prefix = "fql://entity/"; // + name + "/";
+		
+		for (Node n : nodes) {
+			xxx += "<rdfs:Class rdf:about=\"fql://node/" + n.string + "\"/>\n";
+			xxx += "\n";
+		}
+	//	xxx += "\n";
+		for (Attribute<Node> a : attrs) {
+			xxx += "<rdf:Property rdf:about=\"fql://attribute/" + a.name + "\">\n";
+			xxx += "    <rdfs:domain rdf:resource=\"fql://node/" + a.source.string + "\"/>\n";
+			if (a.target instanceof Type.Int) {
+				xxx += "    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#int\"/>\n";
+			} else {
+				xxx += "    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n";
+			}
+			xxx += "</rdf:Property>\n";
+			xxx += "\n";
+		}
+	//	xxx += "\n";
+		for (Edge a : edges) {
+			xxx += "<rdf:Property rdf:about=\"fql://arrow/" + a.name + "\">\n";
+			xxx += "    <rdfs:domain rdf:resource=\"fql://node/" + a.source.string + "\"/>\n";
+			xxx += "    <rdfs:range rdf:resource=\"fql://node/" + a.target.string + "\"/>\n";
+			xxx += "</rdf:Property>\n";
+			xxx += "\n";
+		}
+	//	xxx += "\n";
+		String ret =
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+				"\n<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"" +
+				"\n    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"" +		
+				"\n    xmlns:node=\"fql://node/\"" +		
+				"\n    xmlns:arrow=\"fql://arrow/\"" +
+				"\n    xmlns:attribute=\"fql://attribute/\">\n\n" + 
+				xxx
+				+ "</rdf:RDF>";
+		return ret;
+	}
 
 }

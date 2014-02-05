@@ -123,6 +123,7 @@ public class DEBUG implements Serializable {
 
 	// public static boolean DO_NOT_GUIDIFY = false;
 
+	public boolean schema_rdf = true;
 	public boolean schema_graphical = true;
 	public boolean schema_tabular = true;
 	public boolean schema_textual = true;
@@ -357,6 +358,7 @@ public class DEBUG implements Serializable {
 		JCheckBox schema_ed_box = new JCheckBox("ED", schema_ed);
 		JCheckBox schema_denotation_box = new JCheckBox("Denotation",
 				schema_denotation);
+		JCheckBox schema_rdf_box = new JCheckBox("RDF", schema_rdf);
 
 		// JPanel schemaTemp = new JPanel();
 		// schemaTemp.setBorder(BorderFactory.createLineBorder(Color.BLACK));
@@ -372,6 +374,7 @@ public class DEBUG implements Serializable {
 		schemaArea.add(schema_tabular_box);
 		schemaArea.add(schema_ed_box);
 		schemaArea.add(schema_denotation_box);
+		schemaArea.add(schema_rdf_box);
 		// schemaArea.add(schemaBox);
 		JLabel schema_label = new JLabel("Schema viewer panels:");
 		schema_label.setToolTipText("Sets which viewers to use for schemas.");
@@ -422,7 +425,7 @@ public class DEBUG implements Serializable {
 		JCheckBox inst_joined_box = new JCheckBox("Joined", inst_joined);
 		JCheckBox inst_gr_box = new JCheckBox("Elements", inst_gr);
 		JCheckBox inst_obs_box = new JCheckBox("Observables", inst_obs);
-		JCheckBox inst_rdf_box = new JCheckBox("RDF", inst_obs);
+		JCheckBox inst_rdf_box = new JCheckBox("RDF", inst_rdf);
 		JComboBox<String> instBox = new JComboBox<>(layouts);
 		instBox.setToolTipText(layout_string);
 		instBox.setSelectedItem(inst_graph);
@@ -573,6 +576,8 @@ public class DEBUG implements Serializable {
 			schema_graphical = schema_graphical_box.isSelected();
 			schema_tabular = schema_tabular_box.isSelected();
 			schema_textual = schema_textual_box.isSelected();
+			schema_rdf = schema_rdf_box.isSelected();
+
 
 			mapping_ed = mapping_ed_box.isSelected();
 			mapping_graphical = mapping_graphical_box.isSelected();
