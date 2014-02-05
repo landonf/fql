@@ -1,5 +1,6 @@
 package fql.sql;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -9,7 +10,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import cern.colt.Arrays;
 import fql.FQLException;
 import fql.Fn;
 import fql.Pair;

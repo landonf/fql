@@ -137,6 +137,7 @@ public class DEBUG implements Serializable {
 	public boolean query_graphical = true;
 	public boolean query_textual = true;
 
+	public boolean inst_rdf = true;
 	public boolean inst_graphical = true;
 	public boolean inst_tabular = true;
 	public boolean inst_textual = true;
@@ -421,6 +422,7 @@ public class DEBUG implements Serializable {
 		JCheckBox inst_joined_box = new JCheckBox("Joined", inst_joined);
 		JCheckBox inst_gr_box = new JCheckBox("Elements", inst_gr);
 		JCheckBox inst_obs_box = new JCheckBox("Observables", inst_obs);
+		JCheckBox inst_rdf_box = new JCheckBox("RDF", inst_obs);
 		JComboBox<String> instBox = new JComboBox<>(layouts);
 		instBox.setToolTipText(layout_string);
 		instBox.setSelectedItem(inst_graph);
@@ -432,6 +434,7 @@ public class DEBUG implements Serializable {
 		instArea.add(inst_joined_box);
 		instArea.add(inst_gr_box);
 		instArea.add(inst_obs_box);
+		instArea.add(inst_rdf_box);
 		JLabel inst_label = new JLabel("Instance viewer panels:");
 		inst_label.setToolTipText("Sets which viewers to use for instances.");
 		viewer1.add(inst_label);
@@ -585,6 +588,7 @@ public class DEBUG implements Serializable {
 			inst_joined = inst_joined_box.isSelected();
 			inst_gr = inst_gr_box.isSelected();
 			inst_obs = inst_obs_box.isSelected();
+			inst_rdf = inst_rdf_box.isSelected();
 
 			schema_graph = (String) schemaBox.getSelectedItem();
 			mapping_graph = (String) mappingBox.getSelectedItem();

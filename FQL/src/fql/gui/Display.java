@@ -80,6 +80,7 @@ import fql.decl.SigExp;
 import fql.decl.Signature;
 import fql.decl.Transform;
 import fql.decl.Unresolver;
+//import org.apache.commons.collections15.Transformer;
 
 /**
  * 
@@ -91,7 +92,7 @@ public class Display {
 
 	List<Pair<String, JComponent>> frames = new LinkedList<>();
 
-	public JPanel showInst(
+	public JPanel showInst(String c,
 	/* Color color Environment environment, String c, */Instance view)
 			throws FQLException {
 		JTabbedPane px = new JTabbedPane();
@@ -128,6 +129,11 @@ public class Display {
 		if (DEBUG.debug.inst_obs) {
 			JPanel rel = view.observables2();
 			px.add("Observables", rel);
+		}
+		
+		if (DEBUG.debug.inst_rdf) {
+			JPanel rel = view.rdf(c);
+			px.add("RDF", rel);
 		}
 
 		JPanel top = new JPanel(new GridLayout(1, 1));
@@ -314,7 +320,7 @@ public class Display {
 				String xxx = p.insts.get(c).type(p)
 						.accept(p.sigs, new Unresolver()).toString();
 				frames.add(new Pair<String, JComponent>("instance " + c + " : "
-						+ xxx, showInst(environment.instances.get(c))));
+						+ xxx, showInst(c, environment.instances.get(c))));
 			} else if (environment.queries.get(c) != null) {
 				Pair<SigExp, SigExp> xxx = p.queries.get(c).type(p);
 				String a = xxx.first.accept(p.sigs, new Unresolver())

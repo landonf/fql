@@ -1,5 +1,6 @@
 package fql.sql;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -8,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import cern.colt.Arrays;
 import fql.Pair;
 import fql.Triple;
 

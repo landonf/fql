@@ -923,6 +923,150 @@ public class Instance {
 
 		return tap;
 	}
+	
+	public String rdfX(String name) {
+		String xxx = "";
+		String prefix = "fql://entity/"; // + name + "/";
+		
+		for (Node n : thesig.nodes) {
+			Set<Pair<Object, Object>> ids = data.get(n.string);
+			for (Pair<Object, Object> idX : ids) {
+				Object id = idX.first;
+				xxx += "<rdf:Description rdf:about=\"" + prefix + id + "\">\n";
+					xxx += "    <node:" + n.string + "/>\n";
+
+			//	xxx += "    <node:node>" + n.string + "</node:node>\n";
+				for (Attribute<Node> a : thesig.attrsFor(n)) {
+					xxx += "    <attribute:" + a.name +">" + lookupX(data.get(a.name), id) + "</attribute:" + a.name + ">\n";
+				}
+				for (Edge a : thesig.edges) {
+					if (!a.source.equals(n)) {
+						continue;
+					}
+				//	xxx += "    <arrow:value rdf:resource=\""+ prefix + a.name +"\">" + lookupX(data.get(a.name), id) + "</arrow:value>\n";					
+
+					xxx += "    <arrow:" + a.name + " rdf:resource=\"" + prefix + lookupX(data.get(a.name), id) + "\"/>\n";					
+				}
+				xxx += "</rdf:Description>\n\n";
+			}
+			xxx += "\n";
+		}
+		
+		String ret =
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+		"\n<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"" +
+		"\n    xmlns:node=\"fql://node/\"" +		
+		"\n    xmlns:arrow=\"fql://arrow/\"" +
+		"\n    xmlns:attribute=\"fql://attribute/\">\n\n" + 
+		xxx
+		+ "</rdf:RDF>";
+/*			<rdf:Description rdf:about="http://en.wikipedia.org/wiki/Oxford">
+				<dc:title>Oxford</dc:title>
+				<dc:coverage>Oxfordshire</dc:coverage>
+				<dc:publisher>Wikipedia</dc:publisher>
+				<region:population>10000</region:population>
+				<region:principaltown rdf:resource="http://www.country-regions.fake/oxford"/>
+			</rdf:Description>
+
+		</rdf:RDF> */
+		return ret;
+	}
+	
+/*	public String rdfY(String name) {
+		String xxx = "";
+		String prefix = "http://categoricaldata.net/fql/ref/" + name + "/";
+		
+		for (Node n : thesig.nodes) {
+			xxx += "<rdf:Description rdf:about=\"" + prefix + n.string + "\">\n";
+			xxx += "    <node:name>" + n.string + "</node:name>\n";
+			xxx += "</rdf:Description>\n";
+			xxx += "\n";
+		}
+		xxx += "\n";
+		for (Attribute<Node> a : thesig.attrs) {
+			xxx += "<rdf:Description rdf:about=\"" + prefix + a.name + "\">\n";
+			xxx += "    <attribute:name>" + a.name + "</attribute:name>\n";
+			xxx += "    <attribute:source rdf:resource=\"" + prefix + a.source.string + "\"/>\n";
+			xxx += "    <attribute:type>" + a.target.toString() + "</attribute:type>\n";
+			xxx += "</rdf:Description>\n";
+			xxx += "\n";
+		}
+		xxx += "\n";
+		for (Edge a : thesig.edges) {
+			xxx += "<rdf:Description rdf:about=\"" + prefix + a.name + "\">\n";
+			xxx += "    <arrow:name>" + a.name + "</arrow:name>\n";
+			xxx += "    <arrow:source rdf:resource=\"" + prefix + a.source.string + "\"/>\n";
+			xxx += "    <arrow:target rdf:resource=\"" + prefix + a.target.string + "\"/>\n";
+			xxx += "</rdf:Description>\n";
+			xxx += "\n";
+		}
+		xxx += "\n";
+		for (Node n : thesig.nodes) {
+			Set<Pair<Object, Object>> ids = data.get(n.string);
+			for (Pair<Object, Object> idX : ids) {
+				Object id = idX.first;
+				xxx += "<rdf:Description rdf:about=\"" + prefix + id + "\">\n";
+				xxx += "    <node:value rdf:resource=\"" + prefix + n.string + "\"/>\n";
+				for (Attribute<Node> a : thesig.attrsFor(n)) {
+					xxx += "    <attribute:value rdf:resource=\""+ prefix + a.name +"\">" + lookupX(data.get(a.name), id) + "</attribute:value>\n";
+				}
+				for (Edge a : thesig.edges) {
+					if (!a.source.equals(n)) {
+						continue;
+					}
+					xxx += "    <arrow:value rdf:resource=\""+ prefix + a.name +"\">" + lookupX(data.get(a.name), id) + "</arrow:value>\n";					
+				}
+				xxx += "</rdf:Description>\n\n";
+			}
+			xxx += "\n";
+		}
+		
+		String ret =
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+		"\n<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"" +
+		"\n    xmlns:node=\"http://categoricaldata.net/fql/node\"" +		
+		"\n    xmlns:arrow=\"http://categoricaldata.net/fql/arrow\"" +
+		"\n    xmlns:attribute=\"http://categoricaldata.net/fql/attribute\">\n\n" + 
+		xxx
+		+ "</rdf:RDF>";
+/*			<rdf:Description rdf:about="http://en.wikipedia.org/wiki/Oxford">
+				<dc:title>Oxford</dc:title>
+				<dc:coverage>Oxfordshire</dc:coverage>
+				<dc:publisher>Wikipedia</dc:publisher>
+				<region:population>10000</region:population>
+				<region:principaltown rdf:resource="http://www.country-regions.fake/oxford"/>
+			</rdf:Description>
+
+		</rdf:RDF> 
+		return ret;
+	} */
+	
+	private Object lookupX(Set<Pair<Object, Object>> set, Object id) {
+		for (Pair<Object, Object> k : set) {
+			if (k.first.equals(id)) {
+				return k.second;
+			}
+		}
+		throw new RuntimeException("Not found: " + id + " in " + set);
+	}
+
+	//TODO add option for RDF id debug
+	public JPanel rdf(String name) {
+		JTextArea ta = new JTextArea(rdfX(name));
+		JPanel tap = new JPanel(new GridLayout(1, 1));
+		ta.setBorder(BorderFactory.createEmptyBorder());
+		//
+		tap.setBorder(BorderFactory.createEmptyBorder());
+	//	ta.setWrapStyleWord(true);
+	//	ta.setLineWrap(true);
+		JScrollPane xxx = new JScrollPane(ta);
+		// xxx.setBorder(BorderFactory.createEmptyBorder());
+		//
+		tap.add(xxx);
+		// tap.setSize(600, 600);
+
+		return tap;
+	}
 
 	public static boolean iso(Instance i1, Instance i2) {
 		sameNodes(i1, i2);
