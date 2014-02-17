@@ -21,8 +21,10 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu.Separator;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
@@ -49,13 +51,21 @@ import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 
 import fql.DEBUG;
+import fql.FQLException;
 import fql.LineException;
+import fql.Pair;
 import fql.Triple;
 import fql.decl.Driver;
 import fql.decl.Environment;
 import fql.decl.FQLProgram;
+import fql.decl.InstExp;
+import fql.decl.InstanceEditor;
+import fql.decl.MapExp;
+import fql.decl.TransExp;
+import fql.decl.Type;
 import fql.examples.Example;
 import fql.parse.FQLParser;
+import fql.parse.PrettyPrinter;
 
 /**
  * 
@@ -71,7 +81,7 @@ public class CodeEditor extends JPanel implements Runnable {
 
 	private static final long serialVersionUID = 1L;
 
-	public RSyntaxTextArea topArea = new RSyntaxTextArea();
+	public RSyntaxTextArea topArea;
 
 	FQLTextPanel respArea = new FQLTextPanel("Compiler response", "");
 
@@ -241,6 +251,71 @@ public class CodeEditor extends JPanel implements Runnable {
 		});
 
 	}
+	
+	public void vedit() {
+		FQLProgram init = tryParse(topArea.getText());
+		if (init == null) {
+			respArea.setText(toDisplay);
+			return;
+		}
+		if (init.lines.size() == 0) {
+			return;
+		}
+		String which = null;
+		int start = -1;
+		int offs = topArea.getCaretPosition();
+		int end = -1;
+		int i = 0;
+		int pos = 0;
+		for (String k : init.lines.keySet()) {
+			Integer v = init.lines.get(k);
+			if (v < offs && v > start) {
+				start = v;
+				which = k;
+				pos = i;
+			}
+			i++;
+		}
+		if (which == null) {
+			throw new RuntimeException();
+		}
+		// System.out.println("which: " + which);
+
+		int j = 0;
+		for (String k : init.lines.keySet()) {
+			if (j == pos + 1) {
+				end = init.lines.get(k);
+				break;
+			}
+			j++;
+		}
+		if (end == -1) {
+			end = topArea.getText().length();
+		}
+		// System.out.println("end: " + end);
+
+		InstExp ie = init.insts.get(which);
+		if (ie == null || !(ie instanceof InstExp.Const)) {
+			respArea.setText("Cannot visually edit "
+					+ which
+					+ ": only constant instances are visually editable.");
+			return;
+		}
+		InstExp.Const iec = (InstExp.Const) ie;
+		try {
+			InstExp.Const n = new InstanceEditor(which, iec.sig
+					.toSig(init), iec).show();
+			if (n == null) {
+				return;
+			}
+			String newText = "instance " + which + " = " + n.toString()
+					+ " : " + n.sig + "\n\n";
+			topArea.replaceRange(newText, start, end);
+		} catch (FQLException fe) {
+			fe.printStackTrace();
+			respArea.setText(fe.getLocalizedMessage());
+		}
+	}
 
 	public CodeEditor(Integer id, String content) {
 		super(new GridLayout(1, 1));
@@ -248,27 +323,12 @@ public class CodeEditor extends JPanel implements Runnable {
 		this.id = id;
 		respArea.setWordWrap(true);
 
-		// Border b =
-		// BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK),
-		// "FQL Program");
-
-		// setBorder(b);
-
-		// JPanel cp = new JPanel(new BorderLayout());
-
-		topArea = new RSyntaxTextArea();
-		// topArea.set
-		// topArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
-
 		AbstractTokenMakerFactory atmf = (AbstractTokenMakerFactory) TokenMakerFactory
 				.getDefaultInstance();
 		atmf.putMapping("text/fql", "fql.parse.FqlTokenMaker");
 		FoldParserManager.get().addFoldParserMapping("text/fql",
 				new CurlyFoldParser());
-		topArea.setSyntaxEditingStyle("text/fql");
-		topArea.setText(content);
-		topArea.setCaretPosition(0);
-		topArea.setAutoscrolls(true);
+
 		// topArea.setAntiAliasingEnabled(true);
 		RSyntaxTextArea.setTemplatesEnabled(true);
 
@@ -295,6 +355,23 @@ public class CodeEditor extends JPanel implements Runnable {
 		ct = new StaticCodeTemplate("transform", "transform ",
 				" = {\n\tnodes;\n} :  -> ");
 		ctm.addTemplate(ct);
+
+		topArea = new RSyntaxTextArea();
+		topArea.setSyntaxEditingStyle("text/fql");
+		topArea.setText(content);
+		topArea.setCaretPosition(0);
+		topArea.setAutoscrolls(true);
+
+		Separator s = new Separator();
+		JMenuItem visualEdit = new JMenuItem("Visual Edit");
+		visualEdit.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				vedit();
+			}
+
+		});
 
 		InputMap inputMap = topArea.getInputMap();
 
@@ -394,6 +471,11 @@ public class CodeEditor extends JPanel implements Runnable {
 
 		});
 
+		topArea.getPopupMenu().add(visualEdit, 0);
+		topArea.getPopupMenu().add(s, 1);
+		// topArea.getPopupMenu().setLightWeightPopupEnabled(true);
+
+		// topArea.getP
 	}
 
 	protected void findAction() {
@@ -497,38 +579,8 @@ public class CodeEditor extends JPanel implements Runnable {
 		Environment env; // = Driver.intemp1;
 		String env2;
 		List<Throwable> exns;
-		try {
-			init = FQLParser.program(program);
-		} catch (ParserException e) {
-			int col = e.getLocation().column;
-			int line = e.getLocation().line;
-			topArea.requestFocusInWindow();
-			// int startOffset = topArea.viewToModel(new Point(col, line));
-			topArea.setCaretPosition(topArea.getDocument()
-					.getDefaultRootElement().getElement(line - 1)
-					.getStartOffset()
-					+ (col - 1));
-			// topArea.setCaretPosition(startOffset);
-			// topArea.repaint();
-			String s = e.getMessage();
-			String t = s.substring(s.indexOf(" "));
-			t.split("\\s+");
-
-			toDisplay = "Syntax error: " + e.getLocalizedMessage();
-			e.printStackTrace();
-			thread = null;
-			return;
-		} catch (Throwable e) {
-			toDisplay = "Error: " + e.getLocalizedMessage();
-			e.printStackTrace();
-			if (thread != null) {
-				thread.stop();
-			}
-			thread = null;
-			if (temp != null) {
-				temp.stop();
-			}
-			temp = null;
+		init = tryParse(program);
+		if (init == null) {
 			return;
 		}
 
@@ -586,18 +638,19 @@ public class CodeEditor extends JPanel implements Runnable {
 			display.display(foo, init.order);
 
 			// String psm = PSMGen.compile(env, init);
-	//		if (DEBUG.debug.continue_on_error) {
-				if (exns.size() > 0) {
-//					System.out.println("iiiiiiiiiii");
-					toDisplay = "";
-					for (Throwable ex : exns) {
-						if (ex instanceof LineException) {
-							toDisplay += "error on " + ((LineException)ex).kind + " " + ((LineException)ex).decl + ": ";
-						}
-						toDisplay += ex.getLocalizedMessage();
-						toDisplay += "\n\n---------------\n\n";
+			// if (DEBUG.debug.continue_on_error) {
+			if (exns.size() > 0) {
+				// System.out.println("iiiiiiiiiii");
+				toDisplay = "";
+				for (Throwable ex : exns) {
+					if (ex instanceof LineException) {
+						toDisplay += "error on " + ((LineException) ex).kind
+								+ " " + ((LineException) ex).decl + ": ";
 					}
-	//			}
+					toDisplay += ex.getLocalizedMessage();
+					toDisplay += "\n\n---------------\n\n";
+				}
+				// }
 			} else {
 				toDisplay = env2;
 			}
@@ -624,6 +677,129 @@ public class CodeEditor extends JPanel implements Runnable {
 		}
 		temp = null;
 
+	}
+	
+	
+	public void format() {
+		String input = topArea.getText();
+		FQLProgram p = tryParse(input);
+		if (p == null) {
+			respArea.setText(toDisplay);
+			return;
+		}
+		if (input.contains("//") || input.contains("/*")) {
+			int x = JOptionPane.showConfirmDialog(null, "Formatting will erase all comments - continue?", "Continue?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+			if (x != JOptionPane.YES_OPTION) {
+				return;
+			}
+		}
+		//order does not contain enums or drops
+		StringBuffer sb = new StringBuffer();
+		for (String k : p.enums.keySet()) {
+			Type t = p.enums.get(k);
+			if (!(t instanceof Type.Enum)) {
+				continue;
+			}
+			Type.Enum e = (Type.Enum) t;
+			sb.append("enum " + k + " = " + e.printFull());
+			sb.append("\n\n");
+		}
+		for (String k : p.order) {
+			Pair<String, Object> o = get(p, k);
+			sb.append(o.first + " " + k + " = " + o.second.toString());
+			if (o.second instanceof InstExp.Const) {
+				InstExp.Const c = (InstExp.Const) o.second;
+				sb.append(" : " + c.sig);
+			} else if (o.second instanceof MapExp.Const) {
+				MapExp.Const c = (MapExp.Const) o.second;
+				sb.append(" : " + c.src + " -> " + c.dst);
+			} else if (o.second instanceof TransExp.Const) {
+				TransExp.Const c = (TransExp.Const) o.second;
+				sb.append(" : " + c.src + " -> " + c.dst);
+			}
+			sb.append("\n\n");
+		}
+		if (p.drop.size() > 0) {
+			sb.append("drop " + PrettyPrinter.sep0(" ", p.drop) + "\n\n");
+		}
+		topArea.setText(sb.toString().trim());
+		topArea.setCaretPosition(0);
+	}
+	
+
+	
+	private Pair<String, Object> get(FQLProgram p, String k) {
+		Object o = null;
+		
+		o = p.full_queries.get(k);
+		if (o != null) {
+			return new Pair<>("QUERY", o);
+		}
+		
+		o = p.queries.get(k);
+		if (o != null) {
+			return new Pair<>("query", o);
+		}
+		
+		o = p.insts.get(k);
+		if (o != null) {
+			return new Pair<>("instance", o);
+		}
+		
+		o = p.maps.get(k);
+		if (o != null) {
+			return new Pair<>("mapping", o);
+		}
+		
+		o = p.sigs.get(k);
+		if (o != null) {
+			return new Pair<>("schema", o);
+		}
+		
+		o = p.transforms.get(k);
+		if (o != null) {
+			return new Pair<>("transform", o);
+		}
+		
+		throw new RuntimeException("Cannot find " + k);
+	}
+	
+	@SuppressWarnings("deprecation")
+	private FQLProgram tryParse(String program) {
+		try {
+			return FQLParser.program(program);
+		} catch (ParserException e) {
+			int col = e.getLocation().column;
+			int line = e.getLocation().line;
+			topArea.requestFocusInWindow();
+			// int startOffset = topArea.viewToModel(new Point(col, line));
+			topArea.setCaretPosition(topArea.getDocument()
+					.getDefaultRootElement().getElement(line - 1)
+					.getStartOffset()
+					+ (col - 1));
+			// topArea.setCaretPosition(startOffset);
+			// topArea.repaint();
+			String s = e.getMessage();
+			String t = s.substring(s.indexOf(" "));
+			t.split("\\s+");
+
+			toDisplay = "Syntax error: " + e.getLocalizedMessage();
+			e.printStackTrace();
+			thread = null;
+			return null;
+		} catch (Throwable e) {
+			toDisplay = "Error: " + e.getLocalizedMessage();
+			e.printStackTrace();
+			if (thread != null) {
+				thread.stop();
+			}
+			thread = null;
+			if (temp != null) {
+				temp.stop();
+			}
+			temp = null;
+			return null;
+		}
 	}
 
 	public boolean abortBecauseDirty() {

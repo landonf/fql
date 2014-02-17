@@ -42,7 +42,13 @@ public class GraphExample extends Example {
 + "\n} : Graph -> Terminal"
 + "\n"
 + "\n//has 4 rows"
-+ "\ninstance Components=SIGMA F G";
++ "\ninstance Components=SIGMA F G"
++ "\n"
++ "\n//puts 4 rows into vertex, 4 rows into arrow, corresponding to the connected components"
++ "\ninstance I = delta F Components"
++ "\n"
++ "\n//gives the transform from the original graph to the connected components"
++ "\ntransform t = I.return";
 
 
 }

@@ -24,7 +24,7 @@ public abstract class Type {
 	
 	public static class Enum extends Type {
 		public String name;
-		public Set<Object> values;
+		public Set<String> values;
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -49,11 +49,32 @@ public abstract class Type {
 			return true;
 		}
 		
+		public Object q(Object o) {
+			String s = o.toString();
+			if ((s.contains(" ") || s.contains("-") || s.length() == 0) && !s.contains("\"")) {
+				return "\"" + s + "\"";
+			}
+			return s;
+		}
+		
+		public String printFull() {
+			String ret = "{";
+			boolean b = false;
+			for (String s : values) {
+				if (b) {
+					ret += ", ";
+				}
+				b = true;
+				ret += q(s);
+			}
+			return ret + "}";
+		}
+		
 		@Override
 		public String toString() {
 			return name;
 		}
-		public Enum(String name, Set<Object> values) {
+		public Enum(String name, Set<String> values) {
 			super();
 			this.name = name;
 			this.values = values;

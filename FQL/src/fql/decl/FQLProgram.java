@@ -131,7 +131,7 @@ public class FQLProgram {
 				} 
 				if (decl.enums != null) {
 					checkDup(seen, decl.name, "enum");
-					enums.put(decl.name, new Type.Enum(decl.name, new HashSet<Object>(decl.enums)));
+					enums.put(decl.name, new Type.Enum(decl.name, new HashSet<String>(decl.enums)));
 					lines.put(decl.name, decl.line);
 				} else if (decl.sig != null) {
 					checkDup(seen, decl.name, "signature");

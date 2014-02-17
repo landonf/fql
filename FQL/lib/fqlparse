@@ -29,6 +29,7 @@
     <keyword>apply</keyword>
     <keyword>arrows</keyword>
     <keyword>attributes</keyword>
+    <keyword>coreturn</keyword>
     <keyword>curry</keyword>
     <keyword>delta</keyword>
     <keyword>drop</keyword>
@@ -45,6 +46,7 @@
     <keyword>pi</keyword>
     <keyword>prop</keyword>
     <keyword>relationalize</keyword>
+    <keyword>return</keyword>
     <keyword>sigma</keyword>
     <keyword>snd</keyword>
     <keyword>subschema</keyword>

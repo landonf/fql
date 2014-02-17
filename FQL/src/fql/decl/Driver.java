@@ -212,6 +212,8 @@ public class Driver {
 		Triple<Map<String, Set<Map<Object, Object>>>, String, List<Throwable>> res = JDBCBridge
 				.run(prog);
 
+		//System.out.println(res.first);
+		
 		exns.addAll(res.third);
 		for (String k : prog.insts.keySet()) {
 			try {

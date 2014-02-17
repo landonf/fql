@@ -28,6 +28,7 @@ import fql.sql.InsertValues;
 import fql.sql.PSM;
 import fql.sql.PSMGen;
 import fql.sql.PSMInterp;
+import fql.sql.SimpleCreateTable;
 
 //TODO always execute postlude
 
@@ -39,8 +40,6 @@ import fql.sql.PSMInterp;
  */
 public class JDBCBridge {
 
-	// TODO test on jdbc again
-	
 	public static Triple<Map<String, Set<Map<Object, Object>>>, String, List<Throwable>> run(
 			FQLProgram prog) {
 		Map<String, Set<Map<Object, Object>>> ret = new HashMap<>();
@@ -86,7 +85,8 @@ public class JDBCBridge {
 						break;
 					default:
 						if (v instanceof InstExp.FullSigma) {
-							//throw new RuntimeException("Cannot use full sigma with jdbc/h2");
+							// throw new
+							// RuntimeException("Cannot use full sigma with jdbc/h2");
 							List<PSM> xxx = v.accept(k, ops).first;
 							if (xxx.size() != 1) {
 								throw new RuntimeException();
@@ -96,14 +96,19 @@ public class JDBCBridge {
 							interp.guid = theguid;
 							yyy.exec(interp, ret);
 							Stmt.execute("SET @guid = " + interp.guid);
-							psm.addAll(makeInserts(k, ret, v.type(prog).toSig(prog)));
-						} else if (v instanceof InstExp.External && DEBUG.debug.sqlKind == DEBUG.SQLKIND.H2) {
-							
+							psm.addAll(makeInserts(
+									k,
+									ret,
+									v.type(prog).toSig(prog),
+									((InstExp.FullSigma) v).F.toMap(prog).source));
+						} else if (v instanceof InstExp.External
+								&& DEBUG.debug.sqlKind == DEBUG.SQLKIND.H2) {
+
 						} else {
 							psm.addAll(v.accept(k, ops).first);
 						}
 						for (PSM sql : psm) {
-//							System.out.println("exec " + sql.toPSM());
+							// System.out.println("exec " + sql.toPSM());
 							Stmt.execute(sql.toPSM());
 						}
 						if (!(v instanceof InstExp.FullSigma)) {
@@ -155,9 +160,10 @@ public class JDBCBridge {
 							}
 							FullSigmaTrans yyy = (FullSigmaTrans) xxx.get(0);
 							yyy.exec(interp, ret);
-							psm.addAll(makeInserts(k, ret, s));
-						} else if (v instanceof TransExp.External && DEBUG.debug.sqlKind == DEBUG.SQLKIND.H2) {
-							
+							psm.addAll(makeInserts(k, ret, s, null));
+						} else if (v instanceof TransExp.External
+								&& DEBUG.debug.sqlKind == DEBUG.SQLKIND.H2) {
+
 						} else {
 							psm.addAll(v.accept(k, ops));
 						}
@@ -220,7 +226,7 @@ public class JDBCBridge {
 			return new Triple<>(ret, str, exns);
 		} catch (Exception exception) {
 			if (exception instanceof LineException) {
-				throw ((LineException)exception);
+				throw ((LineException) exception);
 			}
 			exception.printStackTrace();
 			// System.out.println(ret);
@@ -247,12 +253,26 @@ public class JDBCBridge {
 	}
 
 	private static List<PSM> makeInserts(String k,
-			Map<String, Set<Map<Object, Object>>> state, Signature sig) {
+			Map<String, Set<Map<Object, Object>>> state, Signature sig,
+			Signature src_sig) {
 		List<PSM> ret = new LinkedList<>();
-		
+
 		List<String> attrs = new LinkedList<>();
 		attrs.add("c0");
 		attrs.add("c1");
+
+		if (src_sig != null) {
+			for (Node n : src_sig.nodes) {
+				Set<Map<Object, Object>> v = state.get(k + "_" + n.string
+						+ "_e");
+				ret.add(new SimpleCreateTable(k + "_" + n.string + "_e", PSM.VARCHAR(), false));
+				if (v.size() == 0) {
+					continue;
+				}
+				ret.add(new InsertValues(k + "_" + n.string + "_e", attrs, v));
+			}
+		}
+
 		for (Node n : sig.nodes) {
 			Set<Map<Object, Object>> v = state.get(k + "_" + n.string);
 			if (v.size() == 0) {
@@ -272,9 +292,9 @@ public class JDBCBridge {
 			if (v.size() == 0) {
 				continue;
 			}
-			ret.add(new InsertValues(k + "_" + a.name, attrs, v));			
+			ret.add(new InsertValues(k + "_" + a.name, attrs, v));
 		}
-		
+
 		return ret;
 	}
 

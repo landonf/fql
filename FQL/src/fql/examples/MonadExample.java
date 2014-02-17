@@ -13,7 +13,7 @@ public class MonadExample extends Example {
 	}
 
 
-String s = "schema One = {"
+String s = ""; /*"schema One = {"
 + "\n	nodes a;"
 + "\n	attributes attx:a->string,atty:a->string,attz:a->string;"
 + "\n	arrows;"
@@ -42,6 +42,6 @@ String s = "schema One = {"
 + "\ninstance J = pi ex I"
 + "\n"
 + "\ninstance K = delta ex J";
-
+*/
 }
 

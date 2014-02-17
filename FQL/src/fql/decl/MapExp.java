@@ -77,7 +77,7 @@ public abstract class MapExp {
 		
 		@Override
 		public String toString() {
-			return "subschema : " + s + " -> " + t;
+			return "subschema " + s + " " + t;
 		}
 		
 		@Override
@@ -251,7 +251,8 @@ public abstract class MapExp {
 		public List<Pair<String, List<String>>> arrows;
 		public List<Pair<String, String>> attrs;
 		public List<Pair<String, String>> objs;
-		SigExp src, dst;
+		public SigExp src;
+		public SigExp dst;
 
 		public Const(List<Pair<String, String>> objs,
 				List<Pair<String, String>> attrs,
@@ -268,47 +269,44 @@ public abstract class MapExp {
 
 
 		@Override
-		public String toString() {
-			String ret = "";
-			
-			String nm = "\nnodes\n";
+		public String toString() {	
+			String nm = "\n nodes\n";
 			boolean b = false;
 			for (Pair<String, String> k : objs) {
 				if (b) {
 					nm += ",\n";
 				}
 				b = true;
-				nm += " " + k.first + " -> " + k.second;
+				nm += "  " + k.first + " -> " + k.second;
 			}
+			nm = nm.trim();
 			nm += ";\n";
-			ret += nm;
 
-			nm = "attributes\n";
+			nm += " attributes\n";
 			b = false;
 			for (Pair<String, String> k : attrs) {
 				if (b) {
 					nm += ",\n";
 				}
 				b = true;
-				nm += " " + k.first + " -> " + k.second;
+				nm += "  " + k.first + " -> " + k.second;
 			}
+			nm = nm.trim();
 			nm += ";\n";
-			ret += nm;
 			
-			nm = "arrows\n";
+			nm += " arrows\n";
 			b = false;
 			for (Pair<String, List<String>> k : arrows) {
 				if (b) {
 					nm += ",\n";
 				}
 				b = true;
-				nm += " " + k.first + " -> " + PrettyPrinter.sep0(".", k.second);
+				nm += "  " + k.first + " -> " + PrettyPrinter.sep0(".", k.second);
 			}
+			nm = nm.trim();
 			nm += ";\n";
-			ret += nm;
 
-
-			return "{" + ret + "}";
+			return "{\n " + nm + "}";
 		}
 		
 

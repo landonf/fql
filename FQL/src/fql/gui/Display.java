@@ -245,7 +245,7 @@ public class Display {
 
 		if (DEBUG.debug.schema_rdf) {
 			JPanel rel = view.rdf();
-			px.add("RDF", rel);
+			px.add("OWL", rel);
 		}
 
 		JPanel top = new JPanel(new GridLayout(1, 1));
@@ -409,8 +409,8 @@ public class Display {
 		});
 
 		JPanel north = new JPanel(new GridLayout(2, 1));
-		JButton instanceFlowButton = new JButton("Show Instance Flow");
-		JButton schemaFlowButton = new JButton("Show Schema Flow");
+		JButton instanceFlowButton = new JButton("Instance Dependence Graph");
+		JButton schemaFlowButton = new JButton("Schema Mapping Graph");
 		north.add(instanceFlowButton);
 		instanceFlowButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -501,7 +501,7 @@ public class Display {
 			// return doView(g); }
 		}
 		f.setSize(600, 540);
-		f.setTitle("Instance flow for " + name);
+		f.setTitle("Instance Dependence Graph for " + name);
 		f.setLocationRelativeTo(null);
 		f.setVisible(true);
 	}
@@ -536,7 +536,7 @@ public class Display {
 			// return doView(g); }
 		}
 		f.setSize(600, 540);
-		f.setTitle("Schema flow for " + name);
+		f.setTitle("Schema Mapping Graph for " + name);
 		f.setLocationRelativeTo(null);
 		f.setVisible(true);
 	}

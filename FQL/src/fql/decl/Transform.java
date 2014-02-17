@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
@@ -48,6 +49,7 @@ import fql.Pair;
 import fql.Triple;
 import fql.cat.Arr;
 import fql.cat.FinCat;
+import fql.parse.PrettyPrinter;
 
 public class Transform {
 
@@ -92,15 +94,15 @@ public class Transform {
 				try {
 					lookup(data.get(n.string), k.first);
 				} catch (RuntimeException re) {
-					throw new RuntimeException("Not total: " + n.string + "\n\n" + this + "\n\nsrc " + src + "\n\ndst " + dst);
+					throw new RuntimeException("Not total: " + n.string  + "\n\n" + this  + "\n\nsrc " + src + "\n\ndst " + dst );
 				}
 			}
 			for (Pair<Object, Object> k : v) {
 				if (!src.data.get(n.string).contains(new Pair<>(k.first, k.first))) {
-					throw new RuntimeException("Non-domain value in " + n + "\n\n" + this);
+					throw new RuntimeException("Non-domain value in " + n + "\n\n" + this  );
 				}
 				if (!dst.data.get(n.string).contains(new Pair<>(k.second, k.second))) {
-					throw new RuntimeException("Non-range value in " + n + "\n\n" + this);					
+					throw new RuntimeException("Non-range value in " + n + "\n\n" + this /* + "\n\nsrc " + src + "\n\ndst " + dst */);					
 				}
 			}
 		}
@@ -255,7 +257,7 @@ public class Transform {
 			JPanel p = new JPanel(new GridLayout(1, 1));
 			p.add(new JScrollPane(t));
 			p.setBorder(BorderFactory.createTitledBorder(
-					BorderFactory.createEmptyBorder(2, 2, 2, 2), k));
+					BorderFactory.createEmptyBorder(2, 2, 2, 2), k + "  (" + xxx.size() + " rows)"));
 			panels.add(p);
 			p.setSize(60, 60);
 		}
@@ -268,7 +270,7 @@ public class Transform {
 		for (JPanel p : panels) {
 			panel.add(p);
 		}
-		panel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+		panel.setBorder(BorderFactory.createEtchedBorder());
 		return panel;
 	}
 /*
@@ -294,7 +296,7 @@ public class Transform {
 
 	@Override
 	public String toString() {
-		String ret = "";
+		/*String ret = "";
 
 		boolean b = false;
 		for (String k0 : data.keySet()) {
@@ -316,7 +318,32 @@ public class Transform {
 
 			ret += k.first + " -> {" + ret0 + "}";
 		}
-		return "{nodes\n" + ret + ";}";
+		return "{nodes\n" + ret + ";}"; */
+
+		String nm = "\n nodes\n";
+		boolean b = false;
+		for (Entry<String, Set<Pair<Object, Object>>> k : data.entrySet()) {
+			if (b) {
+				nm += ", \n";
+			}
+			b = true;
+			
+			boolean c = false;
+			nm += "  " + k.getKey() + " -> " + "{";
+
+			for (Pair<Object, Object> k0 : k.getValue()) {
+				if (c) {
+					nm += ", ";
+				}
+				c = true;
+				nm += "(" + PrettyPrinter.q(k0.first) + ", " + PrettyPrinter.q(k0.second) + ")";
+			}
+			nm += "}";
+		}
+		nm = nm.trim();
+		nm += ";\n";
+
+		return "{\n " + nm + "}";
 	}
 
 	private Pair<Graph<Triple<Node, Object, String>, Pair<Path, Integer>>, HashMap<Triple<Node, Object, String>, Map<Attribute<Node>, Object>>> build(

@@ -87,6 +87,12 @@ public class EmptyExample extends Example {
 					+ "\ntransform t18 = relationalize I4 I4 id I"
 					+ "\ntransform t19 = I4.relationalize"
 					+ "\ntransform t21 = external I6 I6 name"
+					+ "\n"
+					+ "\n////(co)monads also work for SIGMA and pi"
+					+ "\ninstance I3X = delta F I3"
+					+ "\ntransform I3Xa = I3X.return"
+					+ "\ninstance I1X = sigma F I1"
+					+ "\ntransform I1Xa = I1X.coreturn"
 					+ "\n\ndrop I t1\n\n";
 					
 

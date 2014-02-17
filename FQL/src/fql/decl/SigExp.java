@@ -283,49 +283,55 @@ public abstract class SigExp {
 
 		@Override
 		public String toString() {
-			String printNodes = "";
+			String x = "\n nodes\n";
 			boolean b = false;
 			for (String n : nodes) {
 				if (b) {
-					printNodes += ",\n";
+					x += ",\n";
 				}
-				printNodes += " " + n;
+				x += "  " + n;
 				b = true;
 			}
-
-			String printAttrs = "";
+			x = x.trim();
+			x += ";\n";
+			x += " attributes\n";
 			b = false;
 			for (Triple<String, String, String> a : attrs) {
 				if (b) {
-					printAttrs += ",\n";
+					x += ",\n";
 				}
-				printAttrs += " " + a.first + ": " + a.second + " -> " + a.third;
+				x += "  " + a.first + ": " + a.second + " -> " + a.third;
 				b = true;
 			}
 
-			String printArrows = "";
+			x = x.trim();
+			x += ";\n";
+			x += " arrows\n";
+
 			b = false;
 			for (Triple<String, String, String> a : arrows) {
 				if (b) {
-					printArrows += ",\n";
+					x += ",\n";
 				}
-				printArrows += " " + a.first + ": " + a.second + " -> " + a.third;
+				x += "  " + a.first + ": " + a.second + " -> " + a.third;
 				b = true;
 			}
 
-			String printEqs = "";
+			x = x.trim();
+			x += ";\n";
+			x += " equations\n";
+
 			b = false;
 			for (Pair<List<String>, List<String>> a : eqs) {
 				if (b) {
-					printEqs += ",\n";
+					x += ",\n";
 				}
-				printEqs += " " + printOneEq(a.first) + " = " + printOneEq(a.second);
+				x += "  " + printOneEq(a.first) + " = " + printOneEq(a.second);
 				b = true;
 			}
+			x = x.trim();
+			return "{\n " + x + ";\n}";
 
-			return "{\nnodes\n" + printNodes + ";\nattributes\n" + printAttrs
-					+ ";\narrows\n" + printArrows + ";\nequations\n" + printEqs
-					+ ";\n}";
 		}
 		
 		private String printOneEq(List<String> l) {
@@ -454,7 +460,7 @@ public abstract class SigExp {
 
 		@Override
 		public String toString() {
-			return "unit {" + PrettyPrinter.sep0(",", new LinkedList<>(attrs)) + "}";
+			return "unit {" + PrettyPrinter.sep0(", ", new LinkedList<>(attrs)) + "}";
 		}
 
 		@Override

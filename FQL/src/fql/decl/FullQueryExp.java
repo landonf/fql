@@ -14,7 +14,7 @@ public abstract class FullQueryExp {
 
 		@Override
 		public String toString() {
-			return "delta" + f;
+			return "delta " + f;
 		}
 
 		public MapExp f;
@@ -289,7 +289,7 @@ public abstract class FullQueryExp {
 
 		@Override
 		public String toString() {
-			return "match " + print(rel) + " " + src + " " + dst + " " + "\""
+			return "match {" + print(rel) + "} " + src + " " + dst + " " + "\""
 					+ kind + "\"";
 		}
 

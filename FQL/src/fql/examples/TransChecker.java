@@ -13,6 +13,7 @@ import fql.decl.Signature;
 import fql.decl.TransExp.Case;
 import fql.decl.TransExp.Comp;
 import fql.decl.TransExp.Const;
+import fql.decl.TransExp.Coreturn;
 import fql.decl.TransExp.Delta;
 import fql.decl.TransExp.External;
 import fql.decl.TransExp.FF;
@@ -24,6 +25,7 @@ import fql.decl.TransExp.Inr;
 import fql.decl.TransExp.Pi;
 import fql.decl.TransExp.Prod;
 import fql.decl.TransExp.Relationalize;
+import fql.decl.TransExp.Return;
 import fql.decl.TransExp.Sigma;
 import fql.decl.TransExp.Snd;
 import fql.decl.TransExp.Squash;
@@ -413,6 +415,73 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		
 		return new Pair<>(e.src, e.dst);
 
+	}
+
+	@Override
+	public Pair<String, String> visit(FQLProgram env, Return e) {
+		InstExp i1 = env.insts.get(e.inst);
+		if (i1 == null) {
+			throw new RuntimeException("Missing instance " + e.inst);
+		}
+		if (i1 instanceof InstExp.Delta) {
+			InstExp i2 = env.insts.get(((InstExp.Delta) i1).I); //can't be null
+			if (i2 instanceof InstExp.Sigma) {
+				if (!((InstExp.Sigma) i2).F.equals(((InstExp.Delta) i1).F)) {
+					throw new RuntimeException();
+				}
+				return new Pair<>(((InstExp.Sigma) i2).I, e.inst);
+			} else if (i2 instanceof InstExp.FullSigma) {
+				if (!((InstExp.FullSigma) i2).F.equals(((InstExp.Delta) i1).F)) {
+					throw new RuntimeException("Mappings not equal.");
+				}
+				return new Pair<>(((InstExp.FullSigma) i2).I, e.inst);
+			} else {
+				throw new RuntimeException("Not a delta of a sigma (or SIGMA).");
+			} 
+		} else if (i1 instanceof InstExp.Pi) {	 
+			InstExp i2 = env.insts.get(((InstExp.Pi) i1).I); //can't be null
+			if (i2 instanceof InstExp.Delta) {
+				if (!((InstExp.Delta) i2).F.equals(((InstExp.Pi) i1).F)) {
+					throw new RuntimeException();
+				}
+				return new Pair<>(((InstExp.Delta) i2).I, e.inst);
+			} else {
+				throw new RuntimeException("Not a pi of a delta.");
+			} 
+		} else {
+			throw new RuntimeException("Can only return a delta of a sigma or a pi of a delta."); 
+		}
+	}
+
+	@Override
+	public Pair<String, String> visit(FQLProgram env, Coreturn e) {
+		InstExp i1 = env.insts.get(e.inst);
+		if (i1 == null) {
+			throw new RuntimeException("Missing instance " + e.inst);
+		}
+		if (i1 instanceof InstExp.Sigma) {
+			InstExp i2 = env.insts.get(((InstExp.Sigma) i1).I); //can't be null
+			if (i2 instanceof InstExp.Delta) {
+				if (!((InstExp.Delta) i2).F.equals(((InstExp.Sigma) i1).F)) {
+					throw new RuntimeException("Mappings not equal.");
+				}
+				return new Pair<>(e.inst, ((InstExp.Delta) i2).I);
+			} else {
+				throw new RuntimeException("Not a sigma of a delta.");
+			} 
+		} else if (i1 instanceof InstExp.Delta) {
+			InstExp i2 = env.insts.get(((InstExp.Delta) i1).I); //can't be null
+			if (i2 instanceof InstExp.Pi) {
+				if (!((InstExp.Pi) i2).F.equals(((InstExp.Delta) i1).F)) {
+					throw new RuntimeException("Mappings not equal.");
+				}
+				return new Pair<>(e.inst, ((InstExp.Pi) i2).I);
+			} else {
+				throw new RuntimeException("Not a delta of a pi.");
+			} 			
+		} else {
+			throw new RuntimeException("Can only coreturn a sigma of a delta or a delta of a pi."); 
+		}
 	}
 
 }

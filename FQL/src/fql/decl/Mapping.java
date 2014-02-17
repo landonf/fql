@@ -44,6 +44,7 @@ import fql.Triple;
 import fql.cat.Arr;
 import fql.cat.FinCat;
 import fql.cat.FinFunctor;
+import fql.parse.PrettyPrinter;
 import fql.sql.EmbeddedDependency;
 import fql.sql.PSM;
 import fql.sql.PSMGen;
@@ -262,12 +263,12 @@ public class Mapping {
 			Attribute<Node> a1 = source.getAttr(a.first);
 			Attribute<Node> a2 = target.getAttr(a.second);
 			if (a1 == null) {
-				throw new FQLException("In mapping " + this
-						+ ", cannot find source attribute " + a.first);
+				throw new FQLException(/* "In mapping " + this
+						+ ", */ "Cannot find source attribute " + a.first);
 			}
 			if (a2 == null) {
-				throw new FQLException("In mapping " + this
-						+ ", cannot find target attribute " + a.second);
+				throw new FQLException(/* "In mapping " + this
+						+ ", */ "Cannot find target attribute " + a.second);
 			}
 			if (a1.target.equals(a2.target)) {
 				am.put(a1, a2);
@@ -521,7 +522,7 @@ public class Mapping {
 	}
 
 	public String toString2(boolean xxx) {
-		StringBuffer sb = new StringBuffer(); // "mapping " + name + " : "
+/*		StringBuffer sb = new StringBuffer(); // "mapping " + name + " : "
 		// + source + " -> " + target + " = ");
 		// if (isId) {
 		// sb.append("id " + source.name0);
@@ -574,12 +575,51 @@ public class Mapping {
 			// sb.append(")");
 		}
 		sb.append("\n ;\n}");
-		if (xxx) {
-			sb.append(" : " + source.toString());
-			sb.append(" \n\n -> \n\n ");
-			sb.append(target.toString());
+		*/
+		String nm = "\n nodes\n";
+		boolean b = false;
+		for (Entry<Node, Node> k : this.nm.entrySet()) {
+			if (b) {
+				nm += ",\n";
+			}
+			b = true;
+			nm += "  " + k.getKey() + " -> " + k.getValue();
 		}
-		return sb.toString();
+		nm = nm.trim();
+		nm += ";\n";
+
+		nm += " attributes\n";
+		b = false;
+		for (Entry<Attribute<Node>, Attribute<Node>> k : this.am.entrySet()) {
+			if (b) {
+				nm += ",\n";
+			}
+			b = true;
+			nm += "  " + k.getKey().name + " -> " + k.getValue().name;
+		}
+		nm = nm.trim();
+		nm += ";\n";
+		
+		nm += " arrows\n";
+		b = false;
+		for (Entry<Edge, Path> k : this.em.entrySet()) {
+			if (b) {
+				nm += ",\n";
+			}
+			b = true;
+			nm += "  " + k.getKey().name + " -> " + PrettyPrinter.sep0(".", k.getValue().asList());
+		}
+		nm = nm.trim();
+		nm += ";\n";
+
+		String ret = "{\n " + nm + "}";
+
+		if (xxx) {
+			ret += (" : " + source.toString());
+			ret += (" \n\n -> \n\n ");
+			ret += (target.toString());
+		}
+		return ret;
 	}
 
 	/**

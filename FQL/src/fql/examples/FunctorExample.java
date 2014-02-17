@@ -12,7 +12,7 @@ public class FunctorExample extends Example {
 		return s;
 	}
 
-	String s = "schema One = {"
+	String s = ""; /*"schema One = {"
 			+ "\n	nodes a;"
 			+ "\n	attributes attx:a->string,atty:a->string,attz:a->string;"
 			+ "\n	arrows;"
@@ -97,7 +97,7 @@ public class FunctorExample extends Example {
 			+ "\n "
 			+ "\ninstance sigmaFI = sigma H K"
 			+ "\ninstance sigmaFJ = sigma H L"
-;
+; */
 
 
 }

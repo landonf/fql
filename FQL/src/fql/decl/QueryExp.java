@@ -100,7 +100,7 @@ public abstract class QueryExp {
 		}
 		
 		public String toString() {
-			return (l + " then " + r);
+			return "(" + l + " then " + r + ")";
 		}
 
 		@Override

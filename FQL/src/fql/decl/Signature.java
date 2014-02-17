@@ -523,7 +523,7 @@ public class Signature {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer("{\n");
+/*		StringBuffer sb = new StringBuffer("{\n");
 
 		boolean first = true;
 		sb.append("nodes\n");
@@ -570,7 +570,55 @@ public class Signature {
 			sb.append(eq);
 		}
 		sb.append("\n ;\n}");
-		return sb.toString();
+		return sb.toString(); */
+		String x = "\n nodes\n";
+		boolean b = false;
+		for (Node n : nodes) {
+			if (b) {
+				x += ",\n";
+			}
+			x += "  " + n;
+			b = true;
+		}
+		x = x.trim();
+		x += ";\n";
+		x += " attributes\n";
+		b = false;
+		for (Attribute<Node> a : attrs) {
+			if (b) {
+				x += ",\n";
+			}
+			x += "  " + a.name + ": " + a.source.string + " -> " + a.target.toString();
+			b = true;
+		}
+
+		x = x.trim();
+		x += ";\n";
+		x += " arrows\n";
+
+		b = false;
+		for (Edge a : edges) {
+			if (b) {
+				x += ",\n";
+			}
+			x += "  " + a.name + ": " + a.source.string + " -> " + a.target.string;
+			b = true;
+		}
+
+		x = x.trim();
+		x += ";\n";
+		x += " equations\n";
+
+		b = false;
+		for (Eq a : eqs) {
+			if (b) {
+				x += ",\n";
+			}
+			x += "  " + a;
+			b = true;
+		}
+		x = x.trim();
+		return "{\n " + x + ";\n}";
 	}
 
 	// private boolean disconnected(Node n) {
@@ -1176,7 +1224,6 @@ public class Signature {
 		for (Eq eq : sig.eqs) {
 			ret.add(EmbeddedDependency.eq2(pre, eq.lhs, eq.rhs));
 		}
-		// TODO: find equations for attributes
 
 		for (Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>> eq : xxx.second) {
 			ret.add(EmbeddedDependency.eq3(pre, eq));
@@ -1266,7 +1313,49 @@ public class Signature {
 
 		return tap;
 	}
-
+	/*
+	public String rdfX() {
+		String xxx = "";
+	//  	String prefix = "fql://entity/"; // + name + "/";
+		
+		for (Node n : nodes) {
+			xxx += "<owl:Class rdf:about=\"fql://node/" + n.string + "\"/>\n";
+			xxx += "\n";
+		}
+	//	xxx += "\n";
+		for (Attribute<Node> a : attrs) {
+			xxx += "<owl:FunctionalProperty rdf:about=\"fql://attribute/" + a.name + "\">\n";
+			xxx += "    <rdfs:domain rdf:resource=\"fql://node/" + a.source.string + "\"/>\n";
+			if (a.target instanceof Type.Int) {
+				xxx += "    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#int\"/>\n";
+			} else {
+				xxx += "    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n";
+			}
+			xxx += "</owl:FunctionalProperty>\n";
+			xxx += "\n";
+		}
+	//	xxx += "\n";
+		for (Edge a : edges) {
+			xxx += "<owl:FunctionalProperty rdf:about=\"fql://arrow/" + a.name + "\">\n";
+			xxx += "    <rdfs:domain rdf:resource=\"fql://node/" + a.source.string + "\"/>\n";
+			xxx += "    <rdfs:range rdf:resource=\"fql://node/" + a.target.string + "\"/>\n";
+			xxx += "</owl:FunctionalProperty>\n";
+			xxx += "\n";
+		}
+	//	xxx += "\n";
+		String ret =
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+				"\n<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"" +
+				"\n    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"" +		
+				"\n    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"" +
+				"\n    xmlns:node=\"fql://node/\"" +		
+				"\n    xmlns:arrow=\"fql://arrow/\"" +
+				"\n    xmlns:attribute=\"fql://attribute/\">\n\n" + 
+				xxx
+				+ "</rdf:RDF>";
+		return ret;
+	}
+*/
 	
 	public String rdfX() {
 		String xxx = "";
@@ -1307,6 +1396,6 @@ public class Signature {
 				xxx
 				+ "</rdf:RDF>";
 		return ret;
-	}
+	} 
 
 }

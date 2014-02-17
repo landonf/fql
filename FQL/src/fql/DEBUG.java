@@ -42,7 +42,7 @@ public class DEBUG implements Serializable {
 	public String schema_graph = "ISOMLayout";
 	public String mapping_graph = "FRLayout";
 	public String inst_graph = "ISOMLayout";
-	public String trans_graph = "FRLayout";
+	public String trans_graph = "ISOMLayout";
 	public String query_graph = "ISOMLayout";
 
 	public SQLKIND sqlKind = SQLKIND.H2;
@@ -358,7 +358,7 @@ public class DEBUG implements Serializable {
 		JCheckBox schema_ed_box = new JCheckBox("ED", schema_ed);
 		JCheckBox schema_denotation_box = new JCheckBox("Denotation",
 				schema_denotation);
-		JCheckBox schema_rdf_box = new JCheckBox("RDF", schema_rdf);
+		JCheckBox schema_rdf_box = new JCheckBox("OWL", schema_rdf);
 
 		// JPanel schemaTemp = new JPanel();
 		// schemaTemp.setBorder(BorderFactory.createLineBorder(Color.BLACK));

@@ -138,6 +138,7 @@ public class GUI extends JPanel {
 		openItem.setShortcut(o);
 
 		Menu toolsMenu = new Menu("Tools");
+		Menu transMenu = new Menu("Translate");
 
 		final Menu editMenu = new Menu("Edit");
 		MenuItem findItem = new MenuItem("Find");
@@ -154,14 +155,22 @@ public class GUI extends JPanel {
 		exitItem.setShortcut(q);
 
 		// Menu optionsMenu = new Menu("Options");
-		MenuItem optionsItem = new MenuItem("Show Options");
+/*		MenuItem optionsItem = new MenuItem("Show Options");
 		editMenu.add(optionsItem);
 		optionsItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				DEBUG.debug.showOptions();
 			}
-		});
+		}); */
 
+		MenuItem formatItem = new MenuItem("Format Code");
+		editMenu.add(formatItem);
+		formatItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				formatAction();
+			}
+		});
+		
 		MenuItem chaseItem = new MenuItem("Run Chase");
 		toolsMenu.add(chaseItem);
 		chaseItem.addActionListener(new ActionListener() {
@@ -178,16 +187,16 @@ public class GUI extends JPanel {
 			}
 		});
 
-		MenuItem raToFqlItem = new MenuItem("RA to FQL");
-		toolsMenu.add(raToFqlItem);
+		MenuItem raToFqlItem = new MenuItem("SPCU to FQL");
+		transMenu.add(raToFqlItem);
 		raToFqlItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				raToFqlAction();
 			}
 		});
 
-		MenuItem sqlToFqlItem = new MenuItem("SQL to FQL");
-		toolsMenu.add(sqlToFqlItem);
+		MenuItem sqlToFqlItem = new MenuItem("SQL Schema to FQL");
+		transMenu.add(sqlToFqlItem);
 		sqlToFqlItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				sqlToFqlAction();
@@ -195,7 +204,7 @@ public class GUI extends JPanel {
 		});
 		
 		MenuItem ringToFqlItem = new MenuItem("Polynomials to FQL");
-		toolsMenu.add(ringToFqlItem);
+		transMenu.add(ringToFqlItem);
 		ringToFqlItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				ringToFqlAction();
@@ -203,32 +212,25 @@ public class GUI extends JPanel {
 		});
 
 		MenuItem abortItem = new MenuItem("Abort");
-		editMenu.add(abortItem);
+		toolsMenu.add(abortItem);
 		abortItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				abortAction();
 			}
 		});
 
-		/*
-		 * MenuItem jsonItem = new MenuItem("JSON Input");
-		 * editMenu.add(jsonItem); jsonItem.addActionListener(new
-		 * ActionListener() { public void actionPerformed(ActionEvent e) {
-		 * JsonPanel.showPanel(new FQLBackEnd()); } });
-		 */
-
 		Menu helpMenu = new Menu("About");
-		MenuItem helpItem = new MenuItem("Help");
+		/*		MenuItem helpItem = new MenuItem("Help");
 		helpMenu.add(helpItem);
 		helpItem.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				helpAction();
-			}
+			} 
 
-		});
-		MenuItem aboutItem = new MenuItem("Legal");
+		}); */
+		MenuItem aboutItem = new MenuItem("About");
 		helpMenu.add(aboutItem);
 		aboutItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -270,6 +272,7 @@ public class GUI extends JPanel {
 		menuBar.add(fileMenu);
 		menuBar.add(editMenu);
 		menuBar.add(toolsMenu);
+		menuBar.add(transMenu);
 		// menuBar.add(optionsMenu);
 
 		// menuBar.add(webMenu);
@@ -342,7 +345,6 @@ public class GUI extends JPanel {
 			box = new JComboBox<>(Examples.examples);
 		}
 		box.setSelectedIndex(-1);
-		
 		box.addActionListener(new ActionListener() {
 
 			@Override
@@ -375,6 +377,17 @@ public class GUI extends JPanel {
 			}
 		});
 
+		MenuItem vItem = new MenuItem("Visually Edit");
+		editMenu.add(vItem);
+		vItem.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				vedit();
+			}
+			
+		});
+		
 
 		// JPanel temp2 = new JPanel();
 		// temp2.add(l);
@@ -402,6 +415,24 @@ public class GUI extends JPanel {
 			return;
 		}
 		newAction(e.getName(), e.getText());
+	}
+	
+	private static void formatAction() {
+		int i = editors.getSelectedIndex();
+		CodeEditor c = (CodeEditor) editors.getComponentAt(i);
+		if (c == null) {
+			return;
+		}
+		c.format();
+	}
+	
+	private static void vedit() {
+		int i = editors.getSelectedIndex();
+		CodeEditor c = (CodeEditor) editors.getComponentAt(i);
+		if (c == null) {
+			return;
+		}
+		c.vedit();
 	}
 
 	private static void checkAction() {

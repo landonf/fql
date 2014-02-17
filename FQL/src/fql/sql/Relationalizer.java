@@ -100,7 +100,7 @@ public class Relationalizer {
 				List<Pair<Object, Object>> f0 = new LinkedList<>();
 				Set<Set<Triple<Arr<Node, Path>, Attribute<Node>, Object>>> src = inst
 						.get(n.source);
-				Set<Object> dst = ((Type.Enum) n.target).values;
+				Set<String> dst = ((Type.Enum) n.target).values;
 				// System.out.println("*** doing " + n);
 				for (Object k : dst) {
 					Triple<Arr<Node, Path>, Attribute<Node>, Object> v = new Triple<>(

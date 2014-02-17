@@ -36,6 +36,7 @@ import fql.decl.TransExp;
  */
 public class FQLParser {
 
+	
 	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
 			.map(new Map<String, Integer>() {
 				public Integer map(String s) {
@@ -46,7 +47,7 @@ public class FQLParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?" };
 
-	static String[] res = new String[] { "opposite", "EVAL", "QUERY", "union",
+	static String[] res = new String[] { "return", "coreturn", "opposite", "EVAL", "QUERY", "union",
 			"subschema", "match", "drop", "nodes", "attributes", "enum",
 			"ASWRITTEN", "schema", "transform", "dist1", "dist2", "arrows",
 			"equations", "id", "delta", "sigma", "pi", "SIGMA", "apply", "eq",
@@ -317,6 +318,8 @@ public class FQLParser {
 				Parsers.tuple(ident(), term("."), term("unit"), ident()),
 				Parsers.tuple(ident(), term("."), term("void"), ident()),
 				Parsers.tuple(ident(), term("."), term("fst")),
+				Parsers.tuple(ident(), term("."), term("return")),
+				Parsers.tuple(ident(), term("."), term("coreturn")),
 				Parsers.tuple(ident(), term("."), term("snd")),
 				Parsers.tuple(ident(), term("."), term("inl")),
 				Parsers.tuple(ident(), term("."), term("inr")),
@@ -446,11 +449,14 @@ public class FQLParser {
 
 			if (p3.toString().equals("fst")) {
 				return new TransExp.Fst(p1);
-			}
-			if (p3.toString().equals("relationalize")) {
+			} else if (p3.toString().equals("relationalize")) {
 				return new TransExp.Squash(p1);
 			} else if (p3.toString().equals("snd")) {
 				return new TransExp.Snd(p1);
+			} else if (p3.toString().equals("return")) {
+				return new TransExp.Return(p1);
+			} else if (p3.toString().equals("coreturn")) {
+				return new TransExp.Coreturn(p1);
 			} else if (p3.toString().equals("inl")) {
 				return new TransExp.Inl(p1);
 			} else if (p3.toString().equals("inr")) {

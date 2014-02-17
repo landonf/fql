@@ -5,10 +5,101 @@ import java.util.List;
 
 import fql.Pair;
 import fql.examples.TransChecker;
+import fql.parse.PrettyPrinter;
 
 public abstract class TransExp {
 	public Pair<String, String> type(FQLProgram p) {
 		return accept(p, new TransChecker());
+	}
+	
+	public static class Return extends TransExp {
+		
+		public String inst;
+		
+		public Return(String inst) {
+			this.inst = inst;
+		}
+
+		@Override
+		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Return other = (Return) obj;
+			if (inst == null) {
+				if (other.inst != null)
+					return false;
+			} else if (!inst.equals(other.inst))
+				return false;
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((inst == null) ? 0 : inst.hashCode());
+			return result;
+		}
+		
+		@Override
+		public String toString() {
+			return inst + ".return";
+		}
+		
+	}
+	
+	public static class Coreturn extends TransExp {
+		
+		public String inst;
+		
+		public Coreturn(String inst) {
+			this.inst = inst;
+		}
+
+		@Override
+		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Coreturn other = (Coreturn) obj;
+			if (inst == null) {
+				if (other.inst != null)
+					return false;
+			} else if (!inst.equals(other.inst))
+				return false;
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((inst == null) ? 0 : inst.hashCode());
+			return result;
+		}
+		
+		@Override
+		public String toString() {
+			return inst + ".coreturn";
+		}
+		
 	}
 	
 	public static class External extends TransExp {
@@ -59,6 +150,10 @@ public abstract class TransExp {
 			result = prime * result + ((name == null) ? 0 : name.hashCode());
 			result = prime * result + ((src == null) ? 0 : src.hashCode());
 			return result;
+		}
+		@Override
+		public String toString() {
+			return "external " + src + " " + dst + " " + name;
 		}
 
 	}
@@ -232,7 +327,7 @@ public abstract class TransExp {
 		
 		@Override
 		public String toString() {
-			return "SIGMA " + src + " " + " " + dst + " " + h;
+			return "SIGMA " + src + " " + dst + " " + h;
 		}
 		
 		public FullSigma(String h, String src, String dst) {
@@ -614,35 +709,34 @@ public abstract class TransExp {
 			Collections.sort(this.objs);
 		}
 
-
+	
 		@Override
 		public String toString() {
-			String ret = "";
 			
-			String nm = "nodes ";
+			String nm = "\n nodes\n";
 			boolean b = false;
 			for (Pair<String, List<Pair<Object, Object>>> k : objs) {
 				if (b) {
-					nm += ",";
+					nm += ", \n";
 				}
 				b = true;
 				
-				String xxx = "";
 				boolean c = false;
+				nm += "  " + k.first + " -> " + "{";
+
 				for (Pair<Object, Object> k0 : k.second) {
 					if (c) {
-						xxx += ",";
+						nm += ", ";
 					}
 					c = true;
-					xxx += "(" + k0.first + "," + k0.second + ")";
+					nm += "(" + PrettyPrinter.q(k0.first) + ", " + PrettyPrinter.q(k0.second) + ")";
 				}
-				
-				nm += k.first + " -> " + "{" + xxx + "}";
+				nm += "}";
 			}
+			nm = nm.trim();
 			nm += ";\n";
-			ret += nm;
 
-			return "{" + ret + "}";
+			return "{\n " + nm + "}";
 		}
 		
 
@@ -1006,7 +1100,7 @@ public abstract class TransExp {
 
 		@Override
 		public String toString() {
-			return obj + "inr";
+			return obj + ".inr";
 		}
 
 		@Override
@@ -1158,7 +1252,7 @@ public abstract class TransExp {
 		}
 
 		public String toString() {
-			return "(" + l + " * " + r + ")";
+			return obj + ".(" + l + " * " + r + ")";
 		}
 
 		@Override
@@ -1301,6 +1395,9 @@ public abstract class TransExp {
 		public R visit(E env, Case e);
 		public R visit(E env, Prod e);
 		public R visit(E env, External e);
+		public R visit(E env, Return e);
+		public R visit(E env, Coreturn e);
+		
 	}
 
 

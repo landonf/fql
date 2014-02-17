@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import fql.Pair;
+import fql.parse.PrettyPrinter;
 
 public abstract class InstExp {
 	
@@ -192,66 +193,70 @@ public abstract class InstExp {
 			return true;
 		}
 
+		
+		
 		@Override
 		public String toString() {
-			String x = "\nnodes\n";
+			String x = "\n nodes\n";
 			boolean b = false;
 			for (Pair<String, List<Pair<Object, Object>>> k : nodes) {
 				if (b) {
 					x += ", \n";
 				}
 				b = true;
-				x += " " + k.first + " -> {";
+				x += "  " + k.first + " -> {";
 				boolean d = false;
 				for (Pair<Object, Object> v : k.second) {
 					if (d) {
 						x += ", ";
 					}
 					d = true;
-					x += v.first;
+					x += PrettyPrinter.q(v.first);
 				}
 				x += "}";
 			}
+			x = x.trim();
 			x += ";\n";
-			x += "attributes\n";
+			x += " attributes\n";
 			b = false;
 			for (Pair<String, List<Pair<Object, Object>>> k : attrs) {
 				if (b) {
 					x += ", \n";
 				}
 				b = true;
-				x += " " + k.first + " -> {";
+				x += "  " + k.first + " -> {";
 				boolean d = false;
 				for (Pair<Object, Object> v : k.second) {
 					if (d) {
 						x += ", ";
 					}
 					d = true;
-					x += "(" + v.first + ", " + v.second + ")";
+					x += "(" + PrettyPrinter.q(v.first) + ", " + PrettyPrinter.q(v.second) + ")";
 				}
 				x += "}";
 			}
+			x = x.trim();
 			x += ";\n";
-			x += "arrows\n";
+			x += " arrows\n";
 			b = false;
 			for (Pair<String, List<Pair<Object, Object>>> k : arrows) {
 				if (b) {
 					x += ", \n";
 				}
 				b = true;
-				x += " " + k.first + " -> {";
+				x += "  " + k.first + " -> {";
 				boolean d = false;
 				for (Pair<Object, Object> v : k.second) {
 					if (d) {
 						x += ", ";
 					}
 					d = true;
-					x += "(" + v.first + ", " + v.second + ")";
+					x += "(" + PrettyPrinter.q(v.first) + ", " + PrettyPrinter.q(v.second) + ")";
 				}
 				x += "}";
 			}
-
-			return "{" + x + ";\n}";
+			x = x.trim();
+			return "{\n " + x + ";\n}";
 		}
 
 		@Override
@@ -859,7 +864,7 @@ public abstract class InstExp {
 
 		@Override
 		public String toString() {
-			return "external " + name + " " + sig;
+			return "external " + sig + " " + name;
 		}
 
 		@Override

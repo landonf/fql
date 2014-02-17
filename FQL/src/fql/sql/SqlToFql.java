@@ -43,7 +43,7 @@ import fql.gui.FQLTextPanel;
  * 
  * @author ryan
  *
- * Translates SQL (in categorical normal form) to FQL.
+ * Translates SQL schemas (in categorical normal form) to FQL.
  */
 public class SqlToFql {
 
@@ -52,7 +52,7 @@ public class SqlToFql {
 	String help = "SQL schemas and instances in categorical normal form (CNF) can be treated as FQL instances directly.  To be in CNF, every table must have a primary key column called id.  This column will be treated as a meaningless ID.  Every column in a table must either be a string, an integer, or a foreign key to another table.  Inserted values must be quoted.  See the People example for details.";
 
 	protected String kind() {
-		return "SQL";
+		return "SQL Schema";
 	}
 
 	static class PeopleExample extends Example {
@@ -122,7 +122,7 @@ public class SqlToFql {
 
 				JOptionPane pane = new JOptionPane(p);
 				 // Configure via set methods
-				 JDialog dialog = pane.createDialog(null, "Help on SQL to FQL");
+				 JDialog dialog = pane.createDialog(null, "Help on SQL Schema to FQL");
 				 dialog.setModal(false);
 				 dialog.setVisible(true);
 				 dialog.setResizable(true);

@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,7 @@ import fql.gui.FQLTextPanel;
  * 
  * @author ryan
  *
- * Translates RA (in the guise of SQL) to FQL using an active domain construction.
+ * Translates SPCU (in the guise of SQL) to FQL using an active domain construction.
  */
 public class RaToFql {
 
@@ -55,7 +56,7 @@ public class RaToFql {
 	String help = "Bags of tuples can be represented in FQL using an explicit active domain construction.  See the People example.  Unions of conjunctive queries are supported, using DISTINCT and ALL for set semantics.  Primary and foreign keys are not supported by this encoding.  WHERE clauses must have equalities between variables, not constants.";
 
 	protected String kind() {
-		return "RA";
+		return "SPCU";
 	}
 
 	static class PeopleExample extends Example {
@@ -128,7 +129,7 @@ public class RaToFql {
 
 				JOptionPane pane = new JOptionPane(p);
 				// Configure via set methods
-				JDialog dialog = pane.createDialog(null, "Help on RA to FQL");
+				JDialog dialog = pane.createDialog(null, "Help on SPCU to FQL");
 				dialog.setModal(false);
 				dialog.setVisible(true);
 				dialog.setResizable(true);
@@ -306,8 +307,10 @@ public class RaToFql {
 				int rc = ctx++;
 				int uc = ctx++;
 				xxx += trans(exp, g.l, "out" + lc + "_");
+				xxx += "\n\n";
 				xxx += trans(exp, g.r, "out" + rc + "_");
-				
+				xxx += "\n\n";
+				xxx += longSlash + "\n/* out" + uc + ": Translation of\n" + gh + "  */\n" + longSlash;
 				String ls = g.l.distinct ? "out" + lc + "_" + "relationalizeInstance" : "out" + lc + "_" + "selectInstance";
 				String rs = g.r.distinct ? "out" + rc + "_" + "relationalizeInstance" : "out" + rc + "_" + "selectInstance";
 								
@@ -324,7 +327,8 @@ public class RaToFql {
 
 		// FQLProgram ret = new FQLProgram();
 		// ret.sigs.put("S", exp);
-		return "schema S = " + exp + "\n\ninstance I = " + inst + " : S" + xxx;
+		String comment = "//schema S and instance I represent the entire input database.\n\n";
+		return comment + "schema S = " + exp + "\n\ninstance I = " + inst + " : S" + xxx;
 	}
 
 	private static String trans(Const src, EFlower fl, String pre) {
@@ -476,10 +480,13 @@ public class RaToFql {
 		if (fl.distinct) {
 			xxx += "\n\ninstance " + pre
 					+ "relationalizeInstance = relationalize " + pre
-					+ "selectInstance";
+					+ "selectInstance\n\n";
 		}
-		return xxx;
+		String comment = longSlash + "\n/* " + pre.substring(0, pre.length()-1) + ": Translation of\n" + fl.toString() + "  */\n" + longSlash;
+		return comment + xxx;
 	}
+	
+	static String longSlash = "////////////////////////////////////////////////////////////////////////////////";
 
 	private static List<List<Triple<String, String, String>>> merge(
 			List<Triple<String, String, String>> edges2,
@@ -600,6 +607,47 @@ public class RaToFql {
 			this.where = where;
 			this.distinct = distinct;
 		}
+		@Override
+		public String toString() {
+			String x = "SELECT ";
+			if (distinct) {
+				x += "DISTINCT ";
+			}
+			boolean b = false;
+			for (String k : select.keySet()) {
+				if (b) {
+					x += ", ";
+				}
+				b = true;
+				Pair<String, String> p = select.get(k);
+				x += p.first + "." + p.second + " AS " + k;
+			}
+			x += "\nFROM ";
+			
+			b = false;
+			for (String k : from.keySet()) {
+				if (b) {
+					x += ", ";
+				}
+				b = true;
+				String p = from.get(k);
+				x += p + " AS " + k;
+			}
+			if (where.size() > 0) {
+				x += "\nWHERE ";
+			}
+			
+			b = false;
+			for (Pair<Pair<String, String>, Pair<String, String>> k : where) {
+				if (b) {
+					x += " AND ";
+				}
+				b = true;
+				x += k.first.first + "." + k.first.second + " = " + k.second.first + "." + k.second.second;
+			}
+			
+			return x;
+		}
 	}
 
 	public static class EUnion extends EExternal {
@@ -611,6 +659,15 @@ public class RaToFql {
 			this.distinct = distinct;
 			this.l = l;
 			this.r = r;
+		}
+		
+		@Override
+		public String toString() {
+			String x = "";
+			if (!distinct) {
+				x += " ALL";
+			}
+			return l.toString() + "\n" + "UNION" + x + "\n" + r.toString();
 		}
 	}
 
@@ -732,8 +789,8 @@ public class RaToFql {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static EFlower toFlower(Object decl) {
-		Map<String, Pair<String, String>> select = new HashMap<String, Pair<String, String>>();
-		Map<String, String> from = new HashMap<String, String>();
+		Map<String, Pair<String, String>> select = new LinkedHashMap<String, Pair<String, String>>();
+		Map<String, String> from = new LinkedHashMap<String, String>();
 		List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
 
 		Tuple3 o = (Tuple3) decl;

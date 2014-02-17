@@ -53,11 +53,6 @@ import fql.parse.PrettyPrinter;
 
 public class Instance {
 
-	// public static String data(String s) {
-	// return s + " data";
-	// }
-
-	// public String name;
 
 	// TODO better drop handling, by kind, visitor
 
@@ -463,7 +458,7 @@ public class Instance {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer("{\n");
+/*		StringBuffer sb = new StringBuffer("{\n");
 
 		boolean first = true;
 		sb.append("nodes\n");
@@ -510,10 +505,74 @@ public class Instance {
 		}
 
 		sb.append(";\n}");
-		return sb.toString();
+		return sb.toString(); */
+		String x = "\n nodes\n";
+		boolean b = false;
+		
+		for (Node k0 : thesig.nodes) {
+			Set<Pair<Object, Object>> k = data.get(k0.string);
+			if (b) {
+				x += ", \n";
+			}
+			b = true;
+			x += "  " + k0.string + " -> {";
+			boolean d = false;
+			for (Pair<Object, Object> v : k) {
+				if (d) {
+					x += ", ";
+				}
+				d = true;
+				x += PrettyPrinter.q(v.first);
+			}
+			x += "}";
+		}
+		x = x.trim();
+		x += ";\n";
+		x += " attributes\n";
+		b = false;
+		for (Attribute<Node> k0 : thesig.attrs) {
+			Set<Pair<Object, Object>> k = data.get(k0.name);
+			if (b) {
+				x += ", \n";
+			}
+			b = true;
+			x += "  " + k0.name + " -> {";
+			boolean d = false;
+			for (Pair<Object, Object> v : k) {
+				if (d) {
+					x += ", ";
+				}
+				d = true;
+				x += "(" + PrettyPrinter.q(v.first) + ", " + PrettyPrinter.q(v.second) + ")";
+			}
+			x += "}";
+		}
+		x = x.trim();
+		x += ";\n";
+		x += " arrows\n";
+		b = false;
+		for (Edge k0 : thesig.edges) {
+			Set<Pair<Object, Object>> k = data.get(k0.name);
+			if (b) {
+				x += ", \n";
+			}
+			b = true;
+			x += "  " + k0.name + " -> {";
+			boolean d = false;
+			for (Pair<Object, Object> v : k) {
+				if (d) {
+					x += ", ";
+				}
+				d = true;
+				x += "(" + PrettyPrinter.q(v.first) + ", " + PrettyPrinter.q(v.second) + ")";
+			}
+			x += "}";
+		}
+		x = x.trim();
+		return "{\n " + x + ";\n}";
 
 	}
-
+/*
 	private String printNode(Set<Pair<Object, Object>> v) {
 		StringBuffer sb = new StringBuffer();
 		boolean first = true;
@@ -525,8 +584,8 @@ public class Instance {
 			sb.append(maybeQuote(p.first.toString()));
 		}
 		return sb.toString();
-	}
-
+	} */
+/*
 	private String printSet(Set<Pair<Object, Object>> v) {
 		StringBuffer sb = new StringBuffer();
 		boolean first = true;
@@ -545,8 +604,8 @@ public class Instance {
 			sb.append(")");
 		}
 		return sb.toString();
-	}
-
+	} */
+/*
 	private String maybeQuote(String s) {
 		if (s.contains(" ") || s.contains("\n") || s.contains("\r")
 				|| s.contains("\t")) {
@@ -554,7 +613,7 @@ public class Instance {
 		}
 		return s;
 	}
-
+*/
 	public JPanel view() throws FQLException {
 		List<JPanel> panels = new LinkedList<JPanel>();
 		// Map<String, Set<Pair<String,String>>> data;
@@ -886,7 +945,7 @@ public class Instance {
 			sorter.allRowsChanged();
 			TableRowSorter<?> sorter2 = new MyTableRowSorter(foo.getModel());
 
-			sorter.toggleSortOrder(0);
+			sorter2.toggleSortOrder(0);
 			foo.setRowSorter(sorter2);
 			sorter2.allRowsChanged();
 			// foo.set
@@ -1110,7 +1169,7 @@ public class Instance {
 		throw new RuntimeException("Not found: " + id + " in " + set);
 	}
 
-	//TODO add option for RDF id debug
+
 	public JPanel rdf(String name) {
 		JTextArea ta = new JTextArea(rdfX(name));
 		JPanel tap = new JPanel(new GridLayout(1, 1));
