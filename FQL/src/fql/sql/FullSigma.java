@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import fql.Pair;
+import fql.Quad;
 import fql.Triple;
 import fql.cat.Denotation;
 import fql.decl.Attribute;
@@ -42,6 +43,7 @@ public class FullSigma extends PSM {
 
 	@Override
 	public void exec(PSMInterp interp, Map<String, Set<Map<Object, Object>>> state) {
+		//interp.guid++; //TODO off by one error
 		Signature C = f.source;
 		Signature D = f.target;
 		List<Pair<String, List<Pair<Object, Object>>>> I0 = PSMGen.gather(inst, C, state);
@@ -49,7 +51,7 @@ public class FullSigma extends PSM {
 		try {
 			Instance I = new Instance(C, I0);
 			interp.sigmas.put(pre, interp.guid);
-			Triple<Instance, Map<Node, Map<Integer, Integer>>, Map<Node, Map<Integer, Integer>>> xxx = Denotation.fullSigmaWithAttrs(interp, f, I, null, null, null);
+			Quad<Instance, Map<Node, Map<Integer, Integer>>, Map<Node, Map<Integer, Integer>>, Map<Integer, List<Pair<String, Integer>>>> xxx = Denotation.fullSigmaWithAttrs(interp, f, I, null, null, null);
 			interp.sigmas2.put(pre, interp.guid);
 			Instance J = xxx.first;
 			Map<Node, Map<Integer, Integer>> yyy = xxx.second;
@@ -68,6 +70,30 @@ public class FullSigma extends PSM {
 				state.put(pre + "_" + n.name, conv(J.data.get(n.name)));
 			}
 			
+			Set<Map<Object, Object>> l = new HashSet<>();
+			for (Integer k : xxx.fourth.keySet()) {
+				List<Pair<String, Integer>> v = xxx.fourth.get(k);
+				if (v.isEmpty()) {
+					continue;
+				}
+				Map<Object, Object> m = new HashMap<>();
+				m.put("c0", k);
+				boolean first = true;
+				String rest = "";
+				for (Pair<String, Integer> p : v) {
+					if (first) {
+						first = false;
+						m.put("c1", p.first);
+						m.put("c2", p.second);
+					} else {
+						rest += p.first;
+					}
+				}
+				m.put("c3", rest);
+				l.add(m);
+			}
+			state.put(pre + "_lineage", l);
+						
 		} catch (Throwable e) {
 			e.printStackTrace();
 			throw new RuntimeException("Error in instance " + pre + ": " + e.getLocalizedMessage());

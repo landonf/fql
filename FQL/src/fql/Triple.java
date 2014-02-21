@@ -58,16 +58,16 @@ public class Triple<S1, S2, S3> implements Comparable<Triple<S1, S2, S3>> {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public int compareTo(Triple<S1, S2, S3> o) {
-		Comparable x = (Comparable) o.first;
-		Comparable y = (Comparable) first;
+		Comparable x = (Comparable) first;
+		Comparable y = (Comparable) o.first;
 		int c = x.compareTo(y);
 		if (c == 0) {
-			Comparable a = (Comparable) o.second;
-			Comparable b = (Comparable) second;
+			Comparable a = (Comparable) second;
+			Comparable b = (Comparable) o.second;
 			c = a.compareTo(b);
 			if (c == 0) {
-				Comparable i = (Comparable) o.third;
-				Comparable j = (Comparable) third;
+				Comparable i = (Comparable) third;
+				Comparable j = (Comparable) o.third;
 				return i.compareTo(j);
 			} else {
 				return c;

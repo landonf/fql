@@ -33,6 +33,7 @@ import fql.DEBUG;
 import fql.FQLException;
 import fql.Fn;
 import fql.Pair;
+import fql.Quad;
 import fql.Triple;
 import fql.decl.Attribute;
 import fql.decl.Edge;
@@ -180,7 +181,7 @@ public class Denotation {
 		};
 	}
 
-	public Instance sigma(PSMInterp interp) throws FQLException {
+	public Pair<Instance, Map<Integer, List<Pair<String, Integer>>>> sigma(PSMInterp interp) throws FQLException {
 		Map<String, Set<Pair<Object, Object>>> data = new HashMap<>();
 
 		if (!enumerate(DEBUG.debug.MAX_DENOTE_ITERATIONS)) {
@@ -196,7 +197,13 @@ public class Denotation {
 				data.put(x, conc(t));
 			}
 		}
-		return new Instance(sig, data);
+		Instance ret = new Instance(sig, data);
+		//if (X != null) {
+	//	System.out.println("input " + X);
+	//	System.out.println("output " + ret);
+	//	System.out.println("lineage " + lineage);
+		//}
+		return new Pair<>(ret, lineage);
 	}
 
 	private Set<Pair<Object, Object>> conc(Map<Integer, Integer> t) {
@@ -209,7 +216,7 @@ public class Denotation {
 		return ret;
 	}
 
-	public static Triple<Instance, Map<Node, Map<Integer, Integer>>, Map<Node, Map<Integer, Integer>>> fullSigmaWithAttrs(
+	public static Quad<Instance, Map<Node, Map<Integer, Integer>>, Map<Node, Map<Integer, Integer>>,  Map<Integer, List<Pair<String, Integer>>>> fullSigmaWithAttrs(
 			PSMInterp inter, Mapping f, Instance i, Transform t, Instance JJJ,
 			Integer xxx) throws FQLException {
 
@@ -233,11 +240,13 @@ public class Denotation {
 
 		Denotation D = new Denotation(inter, F, I.first, ttt, JJJ0);
 
-		Instance j = D.sigma(inter);
+		Pair<Instance, Map<Integer, List<Pair<String, Integer>>>> hhh = D.sigma(inter);
+		
+		Instance j = hhh.first;
 		// System.out.println("j " + j);
 		Instance ret = reAttr(D, f.target, j, I.second);
 		// System.out.println(" J " + J);
-		return new Triple<>(ret, D.etables, D.utables);
+		return new Quad<>(ret, D.etables, D.utables, hhh.second);
 	}
 
 	// maps fresh ID to attribute
@@ -429,6 +438,7 @@ public class Denotation {
 		source.doColors();
 	}
 
+	
 	public Denotation(PSMInterp inter, Mapping f, Instance I, Transform alpha,
 			Instance J) throws FQLException {
 		Map<String, Set<Pair<Object, Object>>> data = new HashMap<>(I.data);
@@ -458,7 +468,7 @@ public class Denotation {
 
 		this.A = A;
 		this.B = B;
-		this.F = new Mapping(A, B, f.nm, ff,
+		this.F = new Mapping(false, A, B, f.nm, ff,
 				new LinkedHashMap<Attribute<Node>, Attribute<Node>>());
 		this.X = new Instance(A, data);
 		this.R = B.eqs;
@@ -551,9 +561,15 @@ public class Denotation {
 	// Map<Node, Set<Pair<Integer, Integer>>> SA;// = new HashMap<>();
 
 	Set<Pair<Integer, Integer>> SA;
+	
+	Map<Integer, List<Pair<String, Integer>>> lineage;
 
 	// returns true if finished
 	public boolean enumerate(int size) throws FQLException {
+	//	if (J == null) {
+			//happens for category computation
+		//	throw new RuntimeException();
+	//	}
 		initTables();
 		// _FRESH = FRESH_START; // sig.nodes.size();// + sig.edges.size();
 
@@ -645,7 +661,7 @@ public class Denotation {
 	PSMInterp interp;
 
 	private int fresh() {
-		return interp.guid++;
+		return ++interp.guid;
 	}
 
 	/*
@@ -658,6 +674,15 @@ public class Denotation {
 	List<Node> ekeys;
 	// List<Node> ekeys2;
 	List<Edge> lkeys;
+	
+	void updateLineage(String col, Integer old, Integer nw) {
+		if (!lineage.containsKey(old)) {
+			lineage.put(old, new LinkedList<Pair<String, Integer>>());
+		}
+		List<Pair<String, Integer>> l = new LinkedList<>(lineage.get(old));
+		l.add(new Pair<>(col, old));
+		lineage.put(nw, l);
+	}
 
 	private Set<Pair<Node, Integer>> undefined() throws FQLException {
 		// ekeys = shift(ekeys);
@@ -674,6 +699,8 @@ public class Denotation {
 				if (x.get(i) == null) {
 					int ret = fresh();
 					x.put(i, ret);
+					
+					updateLineage(n0.string, i, new Integer(ret));
 
 					if (alpha != null) {
 						utables.get(n0).put(ret,
@@ -697,6 +724,7 @@ public class Denotation {
 				if (x.get(i) == null) {
 					int ret = fresh();
 					x.put(i, ret);
+					updateLineage(e0.name, i, new Integer(ret));
 					count++;
 
 					if (alpha != null) {
@@ -742,6 +770,7 @@ public class Denotation {
 	 */
 
 	private void deriveConsequences() {
+		//TODO why is SA getting reflexive replacements?
 		fillInPartial();
 		for (Eq e : rtables.keySet()) {
 			List<Integer[]> v = rtables.get(e);
@@ -893,6 +922,19 @@ public class Denotation {
 	}
 
 	private void replace(Pair<Integer, Integer> uv) {
+		//TODO also substitute in lineage - do need to replace columns?
+		
+		lineage.remove(uv.second);
+		for (Integer k : lineage.keySet()) {
+			List<Pair<String, Integer>> v = lineage.get(k);
+			for (Pair<String, Integer> p : v) {
+				if (p.second.equals(uv.second)) {
+//					System.out.println("replace " + uv);
+					p.second = uv.first;
+				}
+			}
+		}
+		
 		// System.out.println("replacing " + uv.second + " with " + uv.first);
 		for (Node n : etables.keySet()) {
 			Map<Integer, Integer> m = etables.get(n);
@@ -980,9 +1022,13 @@ public class Denotation {
 				continue;
 			}
 			if (k.second.equals(uv.second)) {
-				newX.add(new Pair<>(k.first, uv.first));
+				if (!k.first.equals(uv.first)) {
+					newX.add(new Pair<>(k.first, uv.first));
+				}
 			} else if (k.first.equals(uv.second)) {
-				newX.add(new Pair<>(uv.first, k.second));
+				if (!uv.first.equals(k.second)) {
+					newX.add(new Pair<>(uv.first, k.second));
+				}
 			}
 		}
 		SA.clear();
@@ -1031,6 +1077,7 @@ public class Denotation {
 	}
 
 	public void initTables() throws FQLException {
+		lineage = new HashMap<>();
 
 		utables = new HashMap<>();
 		utables0 = new HashMap<>();

@@ -262,6 +262,30 @@ public abstract class MapExp {
 			this.arrows = arrows;
 			this.src = src;
 			this.dst = dst;
+			if (src == null || dst == null) {
+				throw new RuntimeException(toString());
+			}
+			for (Pair<String, String> k : objs) {
+				if (k.first == null || k.second == null) {
+					throw new RuntimeException(toString());
+				}
+			}
+			for (Pair<String, String> k : attrs) {
+				if (k.first == null || k.second == null) {
+					throw new RuntimeException(toString());
+				}
+			}
+			for (Pair<String, List<String>> k : arrows) {
+				if (k.first == null || k.second == null) {
+					throw new RuntimeException(toString());
+				} 
+				for (String v : k.second) {
+					if (v == null) {
+						throw new RuntimeException(toString());
+					}
+				}
+			}
+ 			
 			Collections.sort(this.objs);
 			Collections.sort(this.attrs);
 			Collections.sort(this.arrows);

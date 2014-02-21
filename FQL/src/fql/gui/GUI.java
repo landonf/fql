@@ -25,6 +25,7 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -56,8 +57,11 @@ public class GUI extends JPanel {
 
 	public static JComboBox<Example> box = null;
 
-	public static Pair<JPanel, MenuBar> makeGUI() {
-
+	public static JFrame topFrame;
+	
+	public static Pair<JPanel, MenuBar> makeGUI(JFrame frame) {
+		topFrame = frame;
+		
 		JPanel pan = new JPanel();
 
 		MenuBar menuBar = new MenuBar();

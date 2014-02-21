@@ -25,6 +25,7 @@ import fql.parse.FQLParser;
  *         Program entry point.
  */
 public class FQL {
+	
 
 	public static void main(String[] args) {
 		if (args.length == 1) {
@@ -58,9 +59,13 @@ public class FQL {
 					Arrays.sort(Examples.key_examples);
 
 					DEBUG.load(true);
+					//f = new JFrame("FQL IDE");
+					
+					UIManager.setLookAndFeel(DEBUG.debug.look_and_feel);			
 
-					final Pair<JPanel, MenuBar> gui = GUI.makeGUI();
 					final JFrame f = new JFrame("FQL IDE");
+					final Pair<JPanel, MenuBar> gui = GUI.makeGUI(f);
+
 					f.setContentPane(gui.first);
 					f.setMenuBar(gui.second);
 					f.pack();
@@ -90,11 +95,5 @@ public class FQL {
 		});
 	}
 
-	static {
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception ee) {
-		}
-	}
 
 }

@@ -59,7 +59,7 @@ public class Mapping {
 
 	boolean ALLOW_WF_CHECK = true;
 	public boolean flag = false;
-
+/*
 	public Mapping(Signature src, Signature dst, LinkedHashMap<Node, Node> nm,
 			LinkedHashMap<Edge, Path> em,
 			LinkedHashMap<Attribute<Node>, Attribute<Node>> am) {
@@ -71,7 +71,20 @@ public class Mapping {
 		this.em = em;
 		this.am = am;
 	}
-
+*/
+	public Mapping(boolean b, Signature src, Signature dst, LinkedHashMap<Node, Node> nm,
+			LinkedHashMap<Edge, Path> em,
+			LinkedHashMap<Attribute<Node>, Attribute<Node>> am) throws FQLException {
+		ALLOW_WF_CHECK = b;
+		// this.name = name;
+		this.source = src;
+		this.target = dst;
+		this.nm = nm;
+		this.em = em;
+		this.am = am;
+		validate();
+	}
+	
 	public void validate() throws FQLException {
 		for (Attribute<Node> a : source.attrs) {
 			Attribute<Node> b = am.get(a);
@@ -186,6 +199,58 @@ public class Mapping {
 			List<Pair<String, List<String>>> arrows) throws FQLException {
 		initialize(source, target, objs, atts, arrows);
 		validate();
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (ALLOW_WF_CHECK ? 1231 : 1237);
+		result = prime * result + ((am == null) ? 0 : am.hashCode());
+		result = prime * result + ((em == null) ? 0 : em.hashCode());
+		result = prime * result + ((nm == null) ? 0 : nm.hashCode());
+		result = prime * result + ((source == null) ? 0 : source.hashCode());
+		result = prime * result + ((target == null) ? 0 : target.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Mapping other = (Mapping) obj;
+		if (ALLOW_WF_CHECK != other.ALLOW_WF_CHECK)
+			return false;
+		if (am == null) {
+			if (other.am != null)
+				return false;
+		} else if (!am.equals(other.am))
+			return false;
+		if (em == null) {
+			if (other.em != null)
+				return false;
+		} else if (!em.equals(other.em))
+			return false;
+		if (nm == null) {
+			if (other.nm != null)
+				return false;
+		} else if (!nm.equals(other.nm))
+			return false;
+		if (source == null) {
+			if (other.source != null)
+				return false;
+		} else if (!source.equals(other.source))
+			return false;
+		if (target == null) {
+			if (other.target != null)
+				return false;
+		} else if (!target.equals(other.target))
+			return false;
+		return true;
 	}
 
 	public Mapping(boolean b, Signature source, Signature target,
@@ -629,6 +694,9 @@ public class Mapping {
 		List<Edge> r = new LinkedList<Edge>();
 		for (Edge e : path.path) {
 			Path p = em.get(e);
+			if (p == null) {
+				throw new RuntimeException("No mapping for " + e + " in " + this);
+			}
 			r.addAll(p.path);
 		}
 
@@ -1195,8 +1263,13 @@ public class Mapping {
 	public Mapping clone() {
 		Signature s = source.clone();
 		Signature t = target.clone();
-		return new Mapping(s, t, new LinkedHashMap<>(nm), new LinkedHashMap<>(
+		try {
+		return new Mapping(false, s, t, new LinkedHashMap<>(nm), new LinkedHashMap<>(
 				em), new LinkedHashMap<>(am));
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e.getMessage());
+		}
 	}
 
 }

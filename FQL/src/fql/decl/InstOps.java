@@ -44,6 +44,7 @@ import fql.sql.CopyFlower;
 import fql.sql.CreateTable;
 import fql.sql.DropTable;
 import fql.sql.Flower;
+import fql.sql.FullSigmaCounit;
 import fql.sql.FullSigmaTrans;
 import fql.sql.InsertKeygen;
 import fql.sql.InsertSQL;
@@ -1260,6 +1261,15 @@ public class InstOps implements
 					// middle + "_" + f.nm.get(n) + "_subst",
 					// e.inst + "_" + n.string + "_subst" }), "c0", "c1"));
 				}
+			}
+		} else if (i1 instanceof InstExp.FullSigma) {
+			String middle = ((InstExp.FullSigma) i1).I;
+			InstExp i2 = prog.insts.get(middle); // can't be null
+			Mapping f = ((InstExp.FullSigma) i1).F.toMap(prog);
+			if (i2 instanceof InstExp.Delta) {
+				ret.add(new FullSigmaCounit(f, ((InstExp.Delta) i2).I, middle, e.inst, env));
+			} else {
+				throw new RuntimeException();
 			}
 		} else if (i1 instanceof InstExp.Delta) {
 			String middle = ((InstExp.Delta) i1).I;

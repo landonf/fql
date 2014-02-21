@@ -56,6 +56,26 @@ import fql.sql.EmbeddedDependency;
  */
 public class Signature {
 
+	public SigExp.Const toConst() {
+		List<String> nds = new LinkedList<>();
+		for (Node n : nodes) {
+			nds.add(n.string);
+		}
+		List<Triple<String, String, String>> atts = new LinkedList<>();
+		for (Attribute<Node> a : attrs) {
+			atts.add(new Triple<>(a.name, a.source.string, a.target.toString()));
+		}
+		List<Triple<String, String, String>> arrs = new LinkedList<>();
+		for (Edge e : edges) {
+			arrs.add(new Triple<>(e.name, e.source.string, e.target.string));
+		}
+		List<Pair<List<String>, List<String>>> es = new LinkedList<>();
+		for (Eq e : eqs) {
+			es.add(new Pair<>(e.lhs.asList(), e.rhs.asList()));
+		}
+		return new SigExp.Const(nds, atts, arrs, es);
+	}
+	
 	public List<Node> nodes;
 	public List<Edge> edges;
 	public List<Attribute<Node>> attrs;
@@ -98,9 +118,12 @@ public class Signature {
 			List<Triple<String, String, String>> arrows,
 			List<Pair<List<String>, List<String>>> equivs) throws FQLException {
 		Set<Node> nodesA = new HashSet<>();
-		Set<Edge> edgesA = new HashSet<>();
+		List<Edge> edgesA = new LinkedList<>();
+//		List<Edge> edgesX = new LinkedList<>();
 		Set<Attribute<Node>> attrsA = new HashSet<>();
 		// name0 = n;
+		
+		Collections.sort(arrows);
 
 		Set<String> seen = new HashSet<String>();
 		for (String s : nodes_str) {
@@ -156,7 +179,6 @@ public class Signature {
 			Attribute<Node> a = new Attribute<>(name, source_node, type);
 
 			attrsA.add(a);
-
 		}
 
 		nodes = new LinkedList<>(nodesA);
@@ -181,7 +203,6 @@ public class Signature {
 
 		Collections.sort(nodes);
 		Collections.sort(attrs);
-		Collections.sort(arrows);
 
 		// System.out.println(this);
 		if (!DEBUG.debug.ALLOW_INFINITES) {
@@ -197,7 +218,6 @@ public class Signature {
 			// throw fe;
 			// }
 		}
-
 		doColors();
 	}
 
@@ -301,6 +321,7 @@ public class Signature {
 		edges = e;
 		eqs = ee;
 		attrs = a;
+		//System.out.println("yyyyyy " + edges);
 	}
 
 	private Signature() {
@@ -1313,7 +1334,7 @@ public class Signature {
 
 		return tap;
 	}
-	/*
+	
 	public String rdfX() {
 		String xxx = "";
 	//  	String prefix = "fql://entity/"; // + name + "/";
@@ -1352,11 +1373,12 @@ public class Signature {
 				"\n    xmlns:arrow=\"fql://arrow/\"" +
 				"\n    xmlns:attribute=\"fql://attribute/\">\n\n" + 
 				xxx
+				+ "<!-- Note: generated OWL schemas do not include path equations, or enforce that properties must be total. -->\n\n"
 				+ "</rdf:RDF>";
 		return ret;
 	}
-*/
-	
+
+/*	
 	public String rdfX() {
 		String xxx = "";
 	//  	String prefix = "fql://entity/"; // + name + "/";
@@ -1397,5 +1419,5 @@ public class Signature {
 				+ "</rdf:RDF>";
 		return ret;
 	} 
-
+*/
 }

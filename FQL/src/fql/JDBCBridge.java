@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,9 @@ import fql.decl.Node;
 import fql.decl.SigExp;
 import fql.decl.Signature;
 import fql.decl.TransExp;
+import fql.sql.CreateTable;
 import fql.sql.FullSigma;
+import fql.sql.FullSigmaCounit;
 import fql.sql.FullSigmaTrans;
 import fql.sql.InsertValues;
 import fql.sql.PSM;
@@ -85,8 +88,6 @@ public class JDBCBridge {
 						break;
 					default:
 						if (v instanceof InstExp.FullSigma) {
-							// throw new
-							// RuntimeException("Cannot use full sigma with jdbc/h2");
 							List<PSM> xxx = v.accept(k, ops).first;
 							if (xxx.size() != 1) {
 								throw new RuntimeException();
@@ -101,9 +102,10 @@ public class JDBCBridge {
 									ret,
 									v.type(prog).toSig(prog),
 									((InstExp.FullSigma) v).F.toMap(prog).source));
-						} else if (v instanceof InstExp.External
+						} 
+						
+						else if (v instanceof InstExp.External
 								&& DEBUG.debug.sqlKind == DEBUG.SQLKIND.H2) {
-
 						} else {
 							psm.addAll(v.accept(k, ops).first);
 						}
@@ -113,6 +115,9 @@ public class JDBCBridge {
 						}
 						if (!(v instanceof InstExp.FullSigma)) {
 							gatherInstance(prog, ret, Stmt, k, v);
+							if (v instanceof InstExp.Delta) {
+								gatherSubstInv(prog, ret, Stmt, k, v);
+							}
 						}
 						break;
 					}
@@ -161,6 +166,18 @@ public class JDBCBridge {
 							FullSigmaTrans yyy = (FullSigmaTrans) xxx.get(0);
 							yyy.exec(interp, ret);
 							psm.addAll(makeInserts(k, ret, s, null));
+						} else if (v instanceof TransExp.Coreturn) { 
+							TransExp.Coreturn tex = (TransExp.Coreturn) v;
+							InstExp ie = prog.insts.get(tex.inst);
+							if (ie instanceof InstExp.FullSigma) {
+								List<PSM> xxx = v.accept(k, ops);
+								if (xxx.size() != 1) {
+									throw new RuntimeException();
+								}
+								FullSigmaCounit yyy = (FullSigmaCounit) xxx.get(0);
+								yyy.exec(interp, ret);
+								psm.addAll(makeInserts(k, ret, s, null));
+							} 
 						} else if (v instanceof TransExp.External
 								&& DEBUG.debug.sqlKind == DEBUG.SQLKIND.H2) {
 
@@ -271,6 +288,16 @@ public class JDBCBridge {
 				}
 				ret.add(new InsertValues(k + "_" + n.string + "_e", attrs, v));
 			}
+			Set<Map<Object, Object>> v = state.get(k + "_lineage");
+			//System.out.println("jdbc lineage input " + v);
+			Map<String, String> at = new LinkedHashMap<>();
+			at.put("c0", PSM.VARCHAR()); at.put("c1", PSM.VARCHAR()); at.put("c2", PSM.VARCHAR()); at.put("c3", PSM.VARCHAR());
+			ret.add(new CreateTable(k + "_lineage", at , false));
+			if (v.size() != 0) {
+				for (Map<Object, Object> m : v) {
+					ret.add(new InsertValues(k + "_lineage", new LinkedList<>(at.keySet()), v));
+				}
+			}			
 		}
 
 		for (Node n : sig.nodes) {
@@ -324,6 +351,27 @@ public class JDBCBridge {
 		}
 	}
 
+	private static void gatherSubstInv(FQLProgram prog,
+			Map<String, Set<Map<Object, Object>>> ret, Statement Stmt,
+			String k, InstExp v) throws SQLException {
+
+		SigExp.Const t = v.type(prog).toConst(prog);
+
+		for (String n : t.nodes) {
+			ResultSet RS = Stmt
+					.executeQuery("SELECT c0,c1 FROM " + k + "_" + n + "_subst_inv");
+			Set<Map<Object, Object>> ms = new HashSet<>();
+			while (RS.next() != false) {
+				Map<Object, Object> m = new HashMap<>();
+				m.put("c0", Integer.parseInt(RS.getObject("c0").toString()));
+				m.put("c1", Integer.parseInt(RS.getObject("c1").toString()));
+				ms.add(m);
+			}
+			RS.close();
+			ret.put(k + "_" + n + "_subst_inv", ms);
+		}
+	}
+	
 	private static void gatherInstance(FQLProgram prog,
 			Map<String, Set<Map<Object, Object>>> ret, Statement Stmt,
 			String k, InstExp v) throws SQLException {
@@ -370,103 +418,5 @@ public class JDBCBridge {
 		}
 	}
 
-	/*
-	 * public static Map<String, Set<Map<Object, Object>>> h2(List<PSM> sqls,
-	 * FQLProgram prog) {
-	 * 
-	 * for (PSM sql : sqls) { if (sql instanceof FullSigma) { throw new
-	 * RuntimeException("Cannot use h2 with full sigma"); } }
-	 * 
-	 * try { Class.forName("org.h2.Driver"); Connection Conn =
-	 * DriverManager.getConnection("jdbc:h2:mem:");
-	 * 
-	 * Statement Stmt = Conn.createStatement();
-	 * 
-	 * Stmt.execute("SET @GUID = 0");
-	 * 
-	 * for (PSM sql : sqls) { Stmt.execute(sql.toPSM()); }
-	 * 
-	 * Map<String, Set<Map<Object, Object>>> ret = gather(prog, Stmt);
-	 * 
-	 * return ret;
-	 * 
-	 * } catch (Exception exception) { exception.printStackTrace(); throw new
-	 * RuntimeException("JDBC error: " + exception.getLocalizedMessage()); } }
-	 */
-	/*
-	 * private static Map<String, Set<Map<Object, Object>>> gather( FQLProgram
-	 * prog, Statement Stmt) throws SQLException { Map<String, Set<Map<Object,
-	 * Object>>> ret = new HashMap<>();
-	 * 
-	 * for (String k : prog.insts.keySet()) { InstExp v = prog.insts.get(k);
-	 * gatherInstance(prog, ret, Stmt, k, v); }
-	 * 
-	 * for (String k : prog.transforms.keySet()) { TransExp v =
-	 * prog.transforms.get(k); gatherTransform(prog, ret, Stmt, k, v); } return
-	 * ret; }
-	 * 
-	 * public static Map<String, Set<Map<Object, Object>>> go(List<PSM> sqls,
-	 * List<PSM> drops, FQLProgram prog) { // Map<String, Set<Map<Object,
-	 * Object>>> ret = new HashMap<>();
-	 * 
-	 * for (PSM sql : sqls) { if (sql instanceof FullSigma) { throw new
-	 * RuntimeException("Cannot use JDBC with full sigma"); } }
-	 * 
-	 * try {
-	 * 
-	 * Class.forName(DEBUG.debug.jdbcClass);
-	 * 
-	 * Connection Conn = DriverManager.getConnection(DEBUG.debug.jdbcUrl);
-	 * 
-	 * Statement Stmt = Conn.createStatement();
-	 * 
-	 * String[] prel = DEBUG.debug.prelude.split(";"); for (String s : prel) {
-	 * Stmt.execute(s); }
-	 * 
-	 * for (PSM sql : sqls) { Stmt.execute(sql.toPSM()); }
-	 * 
-	 * Map<String, Set<Map<Object, Object>>> ret = gather(prog, Stmt); /* for
-	 * (String k : prog.insts.keySet()) { InstExp v = prog.insts.get(k);
-	 * SigExp.Const t = v.type(prog).toConst(prog); for (String n : t.nodes) {
-	 * ResultSet RS = Stmt.executeQuery("SELECT c0,c1 FROM " + k + "_" + n);
-	 * Set<Map<Object, Object>> ms = new HashSet<>(); while (RS.next() != false)
-	 * { Map<Object, Object> m = new HashMap<>(); m.put("c0",
-	 * RS.getObject("c0")); m.put("c1", RS.getObject("c1")); ms.add(m); }
-	 * RS.close(); ret.put(k + "_" + n, ms); } for (Triple<String, String,
-	 * String> n : t.attrs) { ResultSet RS =
-	 * Stmt.executeQuery("SELECT c0,c1 FROM " + k + "_" + n.first);
-	 * Set<Map<Object, Object>> ms = new HashSet<>(); while (RS.next() != false)
-	 * { Map<Object, Object> m = new HashMap<>(); m.put("c0",
-	 * RS.getObject("c0")); m.put("c1", RS.getObject("c1")); ms.add(m); }
-	 * RS.close(); ret.put(k + "_" + n.first, ms); } for (Triple<String, String,
-	 * String> n : t.arrows) { ResultSet RS =
-	 * Stmt.executeQuery("SELECT c0,c1 FROM " + k + "_" + n.first);
-	 * Set<Map<Object, Object>> ms = new HashSet<>(); while (RS.next() != false)
-	 * { Map<Object, Object> m = new HashMap<>(); m.put("c0",
-	 * RS.getObject("c0")); m.put("c1", RS.getObject("c1")); ms.add(m); }
-	 * RS.close(); ret.put(k + "_" + n.first, ms); } }
-	 * 
-	 * for (String k : prog.transforms.keySet()) { TransExp v =
-	 * prog.transforms.get(k); SigExp.Const t =
-	 * prog.insts.get(v.type(prog).first).type(prog) .toConst(prog); for (String
-	 * n : t.nodes) { ResultSet RS = Stmt.executeQuery("SELECT c0,c1 FROM " + k
-	 * + "_" + n); Set<Map<Object, Object>> ms = new HashSet<>(); while
-	 * (RS.next() != false) { Map<Object, Object> m = new HashMap<>();
-	 * m.put("c0", RS.getObject("c0")); m.put("c1", RS.getObject("c1"));
-	 * ms.add(m); } RS.close(); ret.put(k + "_" + n, ms); } for (Triple<String,
-	 * String, String> n : t.arrows) { ret.put(k + "_" + n.first, new
-	 * HashSet<Map<Object, Object>>()); } for (Triple<String, String, String> n
-	 * : t.attrs) { ret.put(k + "_" + n.first, new HashSet<Map<Object,
-	 * Object>>()); } }
-	 * 
-	 * for (PSM k : drops) { Stmt.execute(k.toPSM()); }
-	 * 
-	 * String[] prel0 = DEBUG.debug.afterlude.split(";"); for (String s : prel0)
-	 * { if (s.trim().length() > 0) { Stmt.execute(s); } }
-	 * 
-	 * return ret;
-	 * 
-	 * } catch (Exception exception) { exception.printStackTrace(); throw new
-	 * RuntimeException("JDBC error: " + exception.getLocalizedMessage()); } }
-	 */
+
 }

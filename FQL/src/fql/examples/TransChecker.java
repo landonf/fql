@@ -469,7 +469,18 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 			} else {
 				throw new RuntimeException("Not a sigma of a delta.");
 			} 
-		} else if (i1 instanceof InstExp.Delta) {
+		} else if (i1 instanceof InstExp.FullSigma) {
+			InstExp i2 = env.insts.get(((InstExp.FullSigma) i1).I); //can't be null
+			if (i2 instanceof InstExp.Delta) {
+				if (!((InstExp.Delta) i2).F.equals(((InstExp.FullSigma) i1).F)) {
+					throw new RuntimeException("Mappings not equal.");
+				}
+				return new Pair<>(e.inst, ((InstExp.Delta) i2).I);
+			} else {
+				throw new RuntimeException("Not a sigma of a delta.");
+			} 
+		}
+		else if (i1 instanceof InstExp.Delta) {
 			InstExp i2 = env.insts.get(((InstExp.Delta) i1).I); //can't be null
 			if (i2 instanceof InstExp.Pi) {
 				if (!((InstExp.Pi) i2).F.equals(((InstExp.Delta) i1).F)) {

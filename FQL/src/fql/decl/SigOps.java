@@ -1,16 +1,21 @@
 package fql.decl;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import fql.FQLException;
 import fql.Fn;
 import fql.Pair;
 import fql.Quad;
 import fql.Triple;
+import fql.cat.Arr;
+import fql.cat.FinCat;
+import fql.cat.Inst;
 import fql.decl.MapExp.Apply;
 import fql.decl.MapExp.Case;
 import fql.decl.MapExp.Comp;
@@ -42,6 +47,25 @@ import fql.decl.SigExp.Zero;
 public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 		MapExpVisitor<Const, FQLProgram> {
 
+	public FinCat<Mapping, Map<Node, Path>> exp(FQLProgram env,
+			final Signature base, final Signature exp) {
+		try {
+			return Inst.stuff(base, exp);
+			// System.out.println(xxx);
+			// Quad<Signature, Pair<Map<Mapping, String>, Map<String, Mapping>>,
+			// Pair<Map<Arr<Mapping, Map<Node, Path>>, String>, Map<String,
+			// Arr<Mapping, Map<Node, Path>>>>, Pair<Map<Attribute<Mapping>,
+			// String>, Map<String, Attribute<Mapping>>>> yyy =
+			// xxx.toSig(env.enums);
+			// return yyy;
+			// Signature ret = yyy.first;
+			// return ret.toConst();
+		} catch (FQLException fe) {
+			fe.printStackTrace();
+			throw new RuntimeException(fe.getMessage());
+		}
+	}
+
 	public Pair<SigExp.Const, Fn<SigExp.Const, MapExp.Const>> one(
 			final Set<String> at) {
 		List<String> nodes = new LinkedList<>();
@@ -69,7 +93,7 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 				List<Pair<String, String>> am = new LinkedList<>();
 				for (Triple<String, String, String> k : src.attrs) {
 					if (!at.contains(k.third)) {
-						throw new RuntimeException("Attribute not found: "
+						throw new RuntimeException("Enum/type not found: "
 								+ k.third);
 					}
 					am.add(new Pair<>(k.first, k.third + "_attr"));
@@ -106,7 +130,7 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 		return new Pair<>(sig, fn);
 	}
 
-	public Quad<SigExp.Const, Const, Const, Fn<Triple<SigExp.Const, Const, Const>, Const>> prod(
+	public Pair<Quad<fql.decl.SigExp.Const, Const, Const, Fn<Triple<fql.decl.SigExp.Const, Const, Const>, Const>>, Quad<Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>>> prod(
 			final SigExp.Const a, final SigExp.Const b) {
 		int node_count = 0;
 		final Map<Pair<String, String>, String> node_map = new LinkedHashMap<>();
@@ -339,7 +363,8 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 			}
 		};
 
-		return new Quad<>(sig, fst, snd, pair);
+		return new Pair<>(new Quad<>(sig, fst, snd, pair), new Quad<>(node_map,
+				attr_map, edge_map_1, edge_map_2));
 	}
 
 	public Quad<SigExp.Const, Const, Const, Fn<Triple<SigExp.Const, Const, Const>, Const>> plus(
@@ -534,12 +559,19 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 
 	@Override
 	public fql.decl.SigExp.Const visit(FQLProgram env, Times e) {
-		return prod(e.a.accept(env, this), e.b.accept(env, this)).first;
+		return prod(e.a.accept(env, this), e.b.accept(env, this)).first.first;
 	}
 
 	@Override
 	public fql.decl.SigExp.Const visit(FQLProgram env, Exp e) {
-		throw new RuntimeException();
+		try {
+			return exp(env, e.a.accept(env, this).toSig(env),
+					e.b.accept(env, this).toSig(env)).toSig(env.enums).first
+					.toConst();
+		} catch (FQLException fe) {
+			fe.printStackTrace();
+			throw new RuntimeException(fe.getMessage());
+		}
 	}
 
 	@Override
@@ -606,7 +638,7 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 			l.add(n);
 			for (int i = 1; i < x.second.size(); i++) {
 				List<String> p = lookup(x.second.get(i), b.arrows);
-				l.addAll(p.subList(1, x.second.size()));
+				l.addAll(p.subList(1, p.size()));
 			}
 			arrows.add(new Pair<>(x.first, l));
 		}
@@ -623,7 +655,6 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 	public Const visit(FQLProgram env, Dist2 e) {
 		throw new RuntimeException();
 	}
-
 
 	@Override
 	public Const visit(FQLProgram env, fql.decl.MapExp.Var e) {
@@ -648,12 +679,12 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 
 	@Override
 	public Const visit(FQLProgram env, Fst e) {
-		return prod(e.s.accept(env, this), e.t.accept(env, this)).second;
+		return prod(e.s.accept(env, this), e.t.accept(env, this)).first.second;
 	}
 
 	@Override
 	public Const visit(FQLProgram env, Snd e) {
-		return prod(e.s.accept(env, this), e.t.accept(env, this)).third;
+		return prod(e.s.accept(env, this), e.t.accept(env, this)).first.third;
 	}
 
 	@Override
@@ -668,12 +699,195 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 
 	@Override
 	public Const visit(FQLProgram env, Apply e) {
-		throw new RuntimeException();
+		try {
+			fql.decl.SigExp.Const A = e.s.accept(env, this);
+			fql.decl.SigExp.Const B = e.t.accept(env, this);
+			Signature Bsig = B.toSig(env);
+			Signature Asig = A.toSig(env);
+
+			FinCat<Mapping, Map<Node, Path>> cat = exp(env, A.toSig(env),
+					B.toSig(env));
+
+			Quad<Signature, Pair<Map<Mapping, String>, Map<String, Mapping>>, Pair<Map<Arr<Mapping, Map<Node, Path>>, String>, Map<String, Arr<Mapping, Map<Node, Path>>>>, Pair<Map<Attribute<Mapping>, String>, Map<String, Attribute<Mapping>>>> AeB_stuff = cat
+					.toSig(env.enums);
+
+			fql.decl.SigExp.Const AeB = AeB_stuff.first.toConst(); // A^B
+
+			Quad<fql.decl.SigExp.Const, Const, Const, Fn<Triple<fql.decl.SigExp.Const, Const, Const>, Const>> AeBtB_stuff = prod(
+					AeB, e.t.accept(env, this)).first;
+
+			fql.decl.SigExp.Const AeBtB = AeBtB_stuff.first; // A^B * B
+
+			if (AeBtB.attrs.size() > 0) {
+				throw new RuntimeException("found attributes in A^B*B");
+			}
+
+			List<Pair<String, String>> nm = new LinkedList<>();
+
+			for (String n : AeBtB.nodes) {
+				String n1 = lookup(n, AeBtB_stuff.second.objs); // node in A^B
+				String n2 = lookup(n, AeBtB_stuff.third.objs); // node in B
+
+				Mapping f = AeB_stuff.second.second.get(n1);
+
+				Node n0 = f.nm.get(new Node(n2));
+				nm.add(new Pair<>(n, n0.string));
+			}
+			// System.out.println(nm);
+
+			List<Pair<String, List<String>>> arrows = new LinkedList<>();
+
+			// Map<String, Path> pm = new HashMap<>();
+			for (Triple<String, String, String> n : AeBtB.arrows) {
+				// System.out.println("arrow is " + n);
+				List<String> n1 = lookup(n.first, AeBtB_stuff.second.arrows);
+				List<String> n2 = lookup(n.first, AeBtB_stuff.third.arrows);
+
+				// System.out.println("n1 " + n1);
+				// System.out.println("n2 " + n1);
+
+				// the path n1 corresponds to a morphism in the fincat
+				Mapping init = AeB_stuff.second.second.get(n1.get(0));
+				Arr<Mapping, Map<Node, Path>> nt = cat.identities.get(init);
+				for (int i = 1; i < n1.size(); i++) {
+					String s = n1.get(i);
+					nt = cat.compose(nt, AeB_stuff.third.second.get(s)); // nt
+				}
+				// System.out.println("nt " + nt);
+
+				Path j = nt.dst.appy(new Path(Bsig, n2));
+				// System.out.println("j " + j.toLong());
+
+				Path y = nt.arr.get(new Node(n2.get(0)));
+				// System.out.println("y " + y.toLong());
+
+				Path o = Path.append(Asig, y, j);
+				// System.out.println("o " + o);
+
+				arrows.add(new Pair<>(n.first, o.asList()));
+			}
+
+			List<Pair<String, String>> attrs = new LinkedList<>();
+			// List<Pair<String, String>> objs = new LinkedList<>();
+			return new MapExp.Const(nm, attrs, arrows, AeBtB, A);
+
+		} catch (FQLException fe) {
+			fe.printStackTrace();
+			throw new RuntimeException(fe.getMessage());
+		}
+
 	}
 
 	@Override
 	public Const visit(FQLProgram env, Curry e) {
-		throw new RuntimeException();
+		try {
+			MapExp.Const F = e.f.accept(env, this);
+
+			Pair<SigExp, SigExp> type = e.f.type(env);
+			SigExp.Const C = type.second.toConst(env);
+			Signature Csig = C.toSig(env);
+
+			if (!(type.first instanceof SigExp.Times)) {
+				throw new RuntimeException();
+			}
+
+			SigExp.Times src = (SigExp.Times) type.first;
+			SigExp.Const A = src.a.toConst(env);
+			SigExp.Const B = src.b.toConst(env);
+			Signature Asig = A.toSig(env);
+			Signature Bsig = B.toSig(env);
+			
+			if (A.attrs.size() > 0) {
+				throw new RuntimeException("Cannot curry when context has attributes.");
+			}
+
+			Pair<Quad<fql.decl.SigExp.Const, Const, Const, Fn<Triple<fql.decl.SigExp.Const, Const, Const>, Const>>, Quad<Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>>> AB_stuff = prod(
+					A, B);
+			SigExp.Const AB = AB_stuff.first.first;
+			Quad<Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>> maps = AB_stuff.second;
+
+			FinCat<Mapping, Map<Node, Path>> cat = exp(env, C.toSig(env),
+					B.toSig(env));
+			Quad<Signature, Pair<Map<Mapping, String>, Map<String, Mapping>>, Pair<Map<Arr<Mapping, Map<Node, Path>>, String>, Map<String, Arr<Mapping, Map<Node, Path>>>>, Pair<Map<Attribute<Mapping>, String>, Map<String, Attribute<Mapping>>>> CB_stuff = cat
+					.toSig(env.enums);
+			Signature CB = CB_stuff.first;
+
+			List<Pair<String, String>> nmret = new LinkedList<>();
+			for (String a : A.nodes) {
+				Mapping m = curry_helper(F, Csig, B, Bsig, maps, a);
+				String target = CB_stuff.second.first.get(m);
+				nmret.add(new Pair<>(a,target));
+			}
+			
+			List<Pair<String, List<String>>> amret = new LinkedList<>();
+			for (Triple<String, String, String> a : A.arrows) {
+
+				Mapping s = curry_helper(F, Csig, B, Bsig, maps, a.second);
+				Mapping t = curry_helper(F, Csig, B, Bsig, maps, a.third);
+				
+				Map<Node, Path> nt = new HashMap<>();
+
+				for (String b : B.nodes) {
+					String p = maps.third.get(new Pair<>(a.first, b)); //edge A*B
+					List<String> p0 = lookup(p, F.arrows); // path C
+					Path p1 = new Path(Csig, p0);
+					nt.put(new Node(b), p1);
+				}
+								
+				List<String> l = new LinkedList<>();
+				l.add(CB_stuff.second.first.get(s));
+				Arr<Mapping, Map<Node, Path>> arr = new Arr<>(nt, s, t);
+				//System.out.println("looking for " + arr + " in " + CB_stuff.third.first);
+				if (null != CB_stuff.third.first.get(arr)) {
+					l.add(CB_stuff.third.first.get(arr));
+				}
+				amret.add(new Pair<>(a.first, l));
+			}
+
+			
+			//System.out.println(nmret);
+
+			List<Pair<String, String>> attrs = new LinkedList<>();
+			// A*B -> C
+			// A -> C^B
+			
+			MapExp.Const ret = new MapExp.Const(nmret, attrs, amret, A, CB.toConst());
+			ret.toMap(env);
+			return ret;
+			
+		} catch (FQLException fe) {
+			fe.printStackTrace();
+			throw new RuntimeException(fe.getMessage());
+		}
+	}
+
+	private Mapping curry_helper(
+			MapExp.Const F,
+			Signature Csig,
+			SigExp.Const B,
+			Signature Bsig,
+			Quad<Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>> maps,
+			String a) throws FQLException {
+		List<Pair<String, String>> nm = new LinkedList<>();
+		List<Pair<String, String>> am = new LinkedList<>();
+		List<Pair<String, List<String>>> em = new LinkedList<>();
+
+		for (String b : B.nodes) {
+			String ab = maps.first.get(new Pair<>(a, b));
+			nm.add(new Pair<>(b, lookup(ab, F.objs)));
+		}
+		for (Triple<String, String, String> b : B.arrows) {
+		//	System.out.println(maps.fourth);
+		//	System.out.println(a);
+		//	System.out.println(b.first);
+			String i = maps.fourth.get(new Pair<>(b.first, a));
+			List<String> j = lookup(i, F.arrows);
+			em.add(new Pair<>(b.first, j));
+		}
+//	System.out.println(nm);
+//	System.out.println(em);
+		Mapping m = new Mapping(Bsig, Csig, nm, am, em);
+		return m;
 	}
 
 	@Override
@@ -698,7 +912,7 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 					+ " and " + rx);
 		}
 
-		return prod(lx.dst.accept(env, this), rx.dst.accept(env, this)).fourth
+		return prod(lx.dst.accept(env, this), rx.dst.accept(env, this)).first.fourth
 				.of(new Triple<>(cx, lx, rx));
 	}
 
@@ -806,12 +1020,12 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 		Pair<SigExp, SigExp> p = k.type(env);
 
 		List<Pair<String, List<String>>> arrows = new LinkedList<>();
-		
+
 		fql.decl.SigExp.Const yyy = p.second.toConst(env);
-		
+
 		for (Pair<String, List<String>> arrow : k.arrows) {
 			List<String> xxx = new LinkedList<>(arrow.second);
-			
+
 			xxx.remove(0);
 			Collections.reverse(xxx);
 			if (xxx.size() > 0) {
@@ -820,10 +1034,9 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 			} else {
 				xxx.add(arrow.second.get(0));
 			}
-			
+
 			arrows.add(new Pair<>(arrow.first, xxx));
 		}
-		
 
 		return new Const(new LinkedList<>(k.objs), new LinkedList<>(k.attrs),
 				arrows, p.first.toConst(env), yyy);

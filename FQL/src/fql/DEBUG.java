@@ -19,6 +19,9 @@ import javax.swing.JRadioButton;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 
 import fql.examples.Example;
 import fql.examples.Examples;
@@ -44,6 +47,8 @@ public class DEBUG implements Serializable {
 	public String inst_graph = "ISOMLayout";
 	public String trans_graph = "ISOMLayout";
 	public String query_graph = "ISOMLayout";
+	public String look_and_feel = UIManager.getSystemLookAndFeelClassName();
+
 
 	public SQLKIND sqlKind = SQLKIND.H2;
 
@@ -531,8 +536,18 @@ public class DEBUG implements Serializable {
 		sql1.add(new JLabel());
 		sql2.add(new JLabel());
 
-		general1.add(new JLabel());
-		general2.add(new JLabel());
+		general1.add(new JLabel("Look and feel:"));
+		String[] items = new String[UIManager.getInstalledLookAndFeels().length];
+		int i = 0;
+		for (LookAndFeelInfo k : UIManager.getInstalledLookAndFeels()) {
+			items[i++] = k.getClassName();
+		}
+		JComboBox<String> lfb = new JComboBox<>(items);
+		lfb.setSelectedItem(look_and_feel);
+		general2.add(lfb);
+		
+		//general1.add(new JLabel());
+		//general2.add(new JLabel());
 		
 		int ret = JOptionPane.showOptionDialog(null, jtb, "Options",
 				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null,
@@ -620,6 +635,18 @@ public class DEBUG implements Serializable {
 			jdbcUrl = jdbcField.getText();
 			jdbcClass = jdbcField2.getText();
 			FILE_PATH = fileArea.getText();
+			
+			if (!lfb.getSelectedItem().equals(look_and_feel)) {
+				try {
+					UIManager.setLookAndFeel(lfb.getSelectedItem().toString());
+					SwingUtilities.updateComponentTreeUI(GUI.topFrame);
+					look_and_feel = lfb.getSelectedItem().toString();
+					//FQL.f.pack();
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(null, e);
+				}
+			}
+			
 		} else if (ret == 2) {
 			new DEBUG().showOptions();
 		}

@@ -78,7 +78,7 @@ public abstract class SigExp {
 		}
 		
 	}
-	
+		
 	public static class Opposite extends SigExp {
 		SigExp e;
 
@@ -644,6 +644,7 @@ public abstract class SigExp {
 		public R visit (E env, Union e);
 		public R visit (E env, Opposite e);
 		public R visit (E env, Unknown e);
+
 	}
 	
 }

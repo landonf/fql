@@ -33,9 +33,8 @@ public class Driver {
 			try {
 				SigExp v = p.sigs.get(k);
 				v.typeOf(p);
-			} catch (RuntimeException re) {
-				re.printStackTrace();
-				throw new LineException(re.getLocalizedMessage(), k, "schema");
+			} catch (RuntimeException ex) {
+				ret += k + ": " + ex.getLocalizedMessage() + "\n\n";
 			}
 		}
 
@@ -50,6 +49,17 @@ public class Driver {
 			}
 		}
 		ret += "\n\n";
+		for (String k : p.insts.keySet()) {
+			try {
+				InstExp i = p.insts.get(k);
+				SigExp y = i.type(p);
+				ret += "instance " + k + ": " + y.unresolve(p.sigs) + "\n\n";
+			} catch (RuntimeException ex) {
+				ret += k + ": " + ex.getLocalizedMessage() + "\n\n";
+			}
+		}
+
+		ret += "\n\n";
 		for (String k : p.transforms.keySet()) {
 			try {
 				Pair<String, String> y = p.transforms.get(k).type(p);
@@ -59,17 +69,6 @@ public class Driver {
 				ret += k + ": " + ex.getLocalizedMessage() + "\n\n";
 			}
 		}
-		ret += "\n\n";
-		for (String k : p.insts.keySet()) {
-			try {
-				InstExp i = p.insts.get(k);
-				SigExp y = i.type(p);
-				ret += "instance " + k + ": " + y.unresolve(p.sigs) + "\n\n";
-			} catch (RuntimeException ex) {
-				ex.printStackTrace();
-				throw new LineException(ex.getLocalizedMessage(), k, "instance");
-			}
-		}
 
 		for (String k : p.queries.keySet()) {
 			try {
@@ -77,9 +76,8 @@ public class Driver {
 				Pair<SigExp, SigExp> t = v.type(p);
 				ret += "query " + k + ": " + t.first.unresolve(p.sigs) + " -> "
 						+ t.second.unresolve(p.sigs) + "\n\n";
-			} catch (RuntimeException re) {
-				re.printStackTrace();
-				throw new LineException(re.getLocalizedMessage(), k, "query");
+			} catch (RuntimeException ex) {
+				ret += k + ": " + ex.getLocalizedMessage() + "\n\n";
 			}
 		}
 
@@ -89,9 +87,8 @@ public class Driver {
 				Pair<SigExp, SigExp> t = v.type(p);
 				ret += "QUERY " + k + ": " + t.first.unresolve(p.sigs) + " -> "
 						+ t.second.unresolve(p.sigs) + "\n\n";
-			} catch (RuntimeException re) {
-				re.printStackTrace();
-				throw new LineException(re.getLocalizedMessage(), k, "query");
+			} catch (RuntimeException ex) {
+				ret += k + ": " + ex.getLocalizedMessage() + "\n\n";
 			}
 		}
 
@@ -112,6 +109,7 @@ public class Driver {
 		for (String k : prog.sigs.keySet()) {
 			try {
 				SigExp v = prog.sigs.get(k);
+				v.typeOf(prog);
 				sigs.put(k, v.toSig(prog));
 			} catch (RuntimeException re) {
 				re.printStackTrace();
@@ -129,6 +127,7 @@ public class Driver {
 		for (String k : prog.maps.keySet()) {
 			try {
 				MapExp v = prog.maps.get(k);
+				v.type(prog);
 				maps.put(k, v.toMap(prog));
 			} catch (RuntimeException re) {
 				re.printStackTrace();
@@ -145,6 +144,7 @@ public class Driver {
 			try {
 
 				QueryExp v = prog.queries.get(k);
+				v.type(prog);
 				queries.put(k, Query.toQuery(prog, v));
 			} catch (RuntimeException re) {
 				re.printStackTrace();

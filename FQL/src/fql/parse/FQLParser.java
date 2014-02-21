@@ -50,7 +50,7 @@ public class FQLParser {
 	static String[] res = new String[] { "return", "coreturn", "opposite", "EVAL", "QUERY", "union",
 			"subschema", "match", "drop", "nodes", "attributes", "enum",
 			"ASWRITTEN", "schema", "transform", "dist1", "dist2", "arrows",
-			"equations", "id", "delta", "sigma", "pi", "SIGMA", "apply", "eq",
+			"equations", "id", "delta", "sigma", "pi", "SIGMA", "eval", "eq",
 			"relationalize", "external", "then", "query", "instance", "fst",
 			"snd", "inl", "inr", "curry", "mapping", "eval", "void", "unit",
 			"prop", /* "tt", "ff" */};
@@ -534,14 +534,14 @@ public class FQLParser {
 				Parsers.tuple(term("snd"), schema(), schema()),
 				Parsers.tuple(term("inl"), schema(), schema()),
 				Parsers.tuple(term("inr"), schema(), schema()),
-				Parsers.tuple(term("apply"), schema(), schema()),
+				Parsers.tuple(term("eval"), schema(), schema()),
 				Parsers.tuple(term("opposite"), ref.lazy()),
 				Parsers.tuple(term("curry"), ref.lazy()),
 				Parsers.tuple(term("eq"), schema()),
 				Parsers.tuple(term("id"), schema()),
 				Parsers.tuple(term("subschema"), schema(), schema()),
-				Parsers.tuple(term("dist1"), schema(), schema(), schema()),
-				Parsers.tuple(term("dist2"), schema(), schema(), schema()),
+			//	Parsers.tuple(term("dist1"), schema(), schema(), schema()),
+			//	Parsers.tuple(term("dist2"), schema(), schema(), schema()),
 				compTy, plusTy, prodTy, ident(), mappingConst() });
 
 		ref.set(a);
@@ -602,7 +602,7 @@ public class FQLParser {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final MapExp toMapping(Object o) {
-		try {
+	/*	try {
 			Tuple4 p = (Tuple4) o;
 			String p1 = p.a.toString();
 			Object p2 = p.b;
@@ -613,18 +613,18 @@ public class FQLParser {
 						toSchema(p4));
 			} else if (p1.equals("dist2")) {
 				return new MapExp.Dist2(toSchema(p2), toSchema(p3),
-						toSchema(p4));
-			} else if (p1.equals("inl")) {
+						toSchema(p4)); 
+			} else  if (p1.equals("inl")) {
 				return new MapExp.Inl(toSchema(p2), toSchema(p3));
 			} else if (p1.equals("inr")) {
 				return new MapExp.Inr(toSchema(p2), toSchema(p3));
-			} else if (p1.equals("apply")) {
+			} else if (p1.equals("eval")) {
 				return new MapExp.Apply(toSchema(p2), toSchema(p3));
 			}
 		} catch (RuntimeException re) {
 
 		}
-
+*/
 		try {
 			Tuple3 p = (Tuple3) o;
 
@@ -646,7 +646,7 @@ public class FQLParser {
 				return new MapExp.Inl(toSchema(p2), toSchema(p3));
 			} else if (p1.equals("inr")) {
 				return new MapExp.Inr(toSchema(p2), toSchema(p3));
-			} else if (p1.equals("apply")) {
+			} else if (p1.equals("eval")) {
 				return new MapExp.Apply(toSchema(p2), toSchema(p3));
 			} else if (p2.toString().equals("then")) {
 				return new MapExp.Comp(toMapping(o1), toMapping(p3));

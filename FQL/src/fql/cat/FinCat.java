@@ -103,8 +103,7 @@ public class FinCat<Obj, Arrow> {
 			for (Arr<Obj, Arrow> a : arrows) {
 				if (a.src.equals(o)) {
 					if (!a.equals(compose(i, a))) {
-						throw new RuntimeException("Identity compose error1 "
-								+ i + o + a);
+						throw new RuntimeException("Identity compose error1\n identity for " + o + " is " + i + " but " + a);
 					}
 				}
 				if (a.dst.equals(o)) {
@@ -153,6 +152,12 @@ public class FinCat<Obj, Arrow> {
 	}
 
 	public Set<Arr<Obj, Arrow>> hom(Obj A, Obj B) {
+		if (!objects.contains(A)) {
+			throw new RuntimeException(A.toString() + " not in " + objects);
+		}
+		if (!objects.contains(B)) {
+			throw new RuntimeException(B.toString() + " not in " + objects);
+		}
 		Set<Arr<Obj, Arrow>> ret = new HashSet<>();
 		for (Arr<Obj, Arrow> a : arrows) {
 			if (a.src.equals(A) && a.dst.equals(B)) {

@@ -99,10 +99,10 @@ public class Transform {
 			}
 			for (Pair<Object, Object> k : v) {
 				if (!src.data.get(n.string).contains(new Pair<>(k.first, k.first))) {
-					throw new RuntimeException("Non-domain value in " + n + "\n\n" + this  );
+					throw new RuntimeException("Non-domain value in " + n + "\n\n" + this + "\n\nsrc " + src + "\n\ndst " + dst );
 				}
 				if (!dst.data.get(n.string).contains(new Pair<>(k.second, k.second))) {
-					throw new RuntimeException("Non-range value in " + n + "\n\n" + this /* + "\n\nsrc " + src + "\n\ndst " + dst */);					
+					throw new RuntimeException("Non-range value in " + n + "\n\n" + this  + "\n\nsrc " + src + "\n\ndst " + dst );					
 				}
 			}
 		}

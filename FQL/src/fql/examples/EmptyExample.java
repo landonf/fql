@@ -22,7 +22,7 @@ public class EmptyExample extends Example {
 					+ "\nschema C4 = (C * C)"
 					+ "\nschema C5 = (C union C)"
 					+ "\nschema C6 = opposite C"
-					+ "\n//schema C7 = (C ^ C)"
+					+ "\nschema C7 = (C ^ C)"
 					+ "\n"
 					+ "\nmapping F = id C"
 					+ "\nmapping F1 = (F then F)"

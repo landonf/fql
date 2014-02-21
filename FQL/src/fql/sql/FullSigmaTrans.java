@@ -9,6 +9,7 @@ import java.util.Set;
 
 import fql.FQLException;
 import fql.Pair;
+import fql.Quad;
 import fql.Triple;
 import fql.cat.Denotation;
 import fql.decl.Attribute;
@@ -58,7 +59,7 @@ public class FullSigmaTrans extends PSM {
 
 	@Override
 	public String toPSM() {
-		throw new RuntimeException("Cannot generate SQL for full sigma");
+		throw new RuntimeException("Cannot generate SQL for full sigma transform");
 	}
 
 	@Override
@@ -117,7 +118,7 @@ public class FullSigmaTrans extends PSM {
 
 			Integer current = interp.guid;
 			interp.guid = interp.sigmas.get(src);
-			Triple<Instance, Map<Node, Map<Integer, Integer>>, Map<Node, Map<Integer, Integer>>> xxx = Denotation
+			Quad<Instance, Map<Node, Map<Integer, Integer>>, Map<Node, Map<Integer, Integer>>, Map<Integer, List<Pair<String, Integer>>>> xxx = Denotation
 					.fullSigmaWithAttrs(interp, f, I, HX, JX,
 							interp.sigmas2.get(src));
 			interp.guid = current;

@@ -57,6 +57,8 @@ public class FullSigmaExample extends Example {
 			
 			+ "\n\ninstance deltasigmaI = delta F sigma_FI"
 			+ "\ntransform monad_unit = deltasigmaI.return"
+			+ "\ninstance sigmadeltasigmaI = SIGMA F deltasigmaI"
+			+ "\ntransform monad_counit = sigmadeltasigmaI.coreturn"
 			
 			+ "\n" + "\ninstance I0 = {" + "\n	nodes " + "\n		Amphibian->{1},"
 			+ "\n		LandAnimal->{1,2,3,4}," + "\n		WaterAnimal->{1,2,3};"
