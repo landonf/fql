@@ -758,7 +758,7 @@ public class Signature {
 			throws FQLException {
 		Denotation d = new Denotation(this);
 		Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> ret = d
-				.toCategory();
+				.toCategory(this);
 
 		ret.first.attrs = attrs;
 

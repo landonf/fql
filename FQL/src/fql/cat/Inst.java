@@ -163,7 +163,7 @@ public class Inst<Obj, Arrow, Y, X> {
 				}
 				Map<Node, Path> m = new HashMap<>();
 				for (Node n : exp.nodes) {
-					m.put(n, Path.append(base, a1.arr.get(n), a2.arr.get(n)));
+					m.put(n, xxx.second.of(Path.append(base, a1.arr.get(n), a2.arr.get(n))).arr);
 				}
 				composition.put(new Pair<>(a1, a2),
 						new Arr<>(m, a1.src, a2.dst));

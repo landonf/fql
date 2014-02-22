@@ -177,7 +177,9 @@ public class JDBCBridge {
 								FullSigmaCounit yyy = (FullSigmaCounit) xxx.get(0);
 								yyy.exec(interp, ret);
 								psm.addAll(makeInserts(k, ret, s, null));
-							} 
+							}  else {
+								psm.addAll(v.accept(k, ops));
+							}
 						} else if (v instanceof TransExp.External
 								&& DEBUG.debug.sqlKind == DEBUG.SQLKIND.H2) {
 

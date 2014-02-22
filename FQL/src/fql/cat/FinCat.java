@@ -134,7 +134,13 @@ public class FinCat<Obj, Arrow> {
 					}
 					for (Arr<Obj, Arrow> cc : arrows) {
 						if (cc.src.equals(b.dst)) {
-							if (!compose(a, compose(b, cc)).equals(
+							Arr<Obj, Arrow> xxx = compose(a, compose(b, cc));
+							if (xxx == null) {
+								throw new RuntimeException(
+										"Not closed under composition " + a + " then (" + b + " then " + cc + ")\nthis: "
+												+ this);
+							}
+							if (!xxx.equals(
 									compose(compose(a, b), cc))) {
 								throw new RuntimeException("Not associative "
 										+ a + b + cc);

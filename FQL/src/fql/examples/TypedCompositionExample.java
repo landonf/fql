@@ -12,7 +12,8 @@ public class TypedCompositionExample extends Example {
 		return s;
 	}
 	
-	String s = "schema S = { nodes s ; attributes satt : s -> string; arrows; equations; }"
+	String s = "//requires parallel or hybrid left-kan"
+			+ "\nschema S = { nodes s ; attributes satt : s -> string; arrows; equations; }"
 			+ "\nschema T = { nodes t1,t2 ; attributes t1att : t1 -> string; arrows; equations; }"
 			+ "\nschema B = { nodes b1,b2; attributes b1att : b1 -> string,b2att : b2 -> string; arrows; equations; }"
 			+ "\nschema A = { nodes a1,a2,a3,a4; attributes a1att : a1 -> string,a2att : a2 -> string; arrows; equations; }"

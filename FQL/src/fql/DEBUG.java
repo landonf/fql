@@ -40,6 +40,12 @@ public class DEBUG implements Serializable {
 		H2, NATIVE, JDBC
 	};
 
+	static String[] kan_options = new String[] {
+		"Hybrid (dangerous, fast)", "Parallel (very dangerous, very fast)", "Standard (probably correct, slow)"
+	};
+	
+	public String kan_option = kan_options[0];
+	
 	public String instFlow_graph = "ISOMLayout";
 	public String schFlow_graph = "ISOMLayout";
 	public String schema_graph = "ISOMLayout";
@@ -174,8 +180,8 @@ public class DEBUG implements Serializable {
 
 		JTabbedPane jtb = new JTabbedPane();
 
-		JPanel general1 = new JPanel(new GridLayout(10, 1));
-		JPanel general2 = new JPanel(new GridLayout(10, 1));
+		JPanel general1 = new JPanel(new GridLayout(12, 1));
+		JPanel general2 = new JPanel(new GridLayout(12, 1));
 
 		JPanel sql1 = new JPanel(new GridLayout(10, 1));
 		JPanel sql2 = new JPanel(new GridLayout(10, 1));
@@ -313,8 +319,8 @@ public class DEBUG implements Serializable {
 		JTextField plen = new JTextField(Integer.toString(MAX_PATH_LENGTH));
 		JLabel label6 = new JLabel("Maximum path length:");
 		label6.setToolTipText(label6text);
-		sql1.add(label6);
-		sql2.add(plen);
+		general1.add(label6);
+		general2.add(plen);
 
 		JTextField iter = new JTextField(
 				Integer.toString(MAX_DENOTE_ITERATIONS));
@@ -535,6 +541,8 @@ public class DEBUG implements Serializable {
 		sql2.add(new JLabel());
 		sql1.add(new JLabel());
 		sql2.add(new JLabel());
+		sql1.add(new JLabel());
+		sql2.add(new JLabel());
 
 		general1.add(new JLabel("Look and feel:"));
 		String[] items = new String[UIManager.getInstalledLookAndFeels().length];
@@ -545,6 +553,11 @@ public class DEBUG implements Serializable {
 		JComboBox<String> lfb = new JComboBox<>(items);
 		lfb.setSelectedItem(look_and_feel);
 		general2.add(lfb);
+		
+		general1.add(new JLabel("Left-Kan Algorithm:"));
+		JComboBox<String> lkb = new JComboBox<>(kan_options);
+		lkb.setSelectedItem(kan_option);
+		general2.add(lkb);
 		
 		//general1.add(new JLabel());
 		//general2.add(new JLabel());
@@ -635,6 +648,8 @@ public class DEBUG implements Serializable {
 			jdbcUrl = jdbcField.getText();
 			jdbcClass = jdbcField2.getText();
 			FILE_PATH = fileArea.getText();
+			
+			kan_option =  lkb.getSelectedItem().toString();
 			
 			if (!lfb.getSelectedItem().equals(look_and_feel)) {
 				try {

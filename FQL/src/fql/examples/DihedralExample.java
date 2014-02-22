@@ -15,8 +15,21 @@ public class DihedralExample extends Example {
 	}
 
 	String s =
-			"// should have 4 elements "
+			"// should have 4 elements. "
 					+ "\nschema Dihedral2 = {"
+					+ "\n nodes G;"
+					+ "\n attributes;"
+					+ "\n arrows"
+					+ "\n	r: G -> G, "
+					+ "\n	s: G -> G;"
+					+ "\n equations"
+					+ "\n	G.r.r = G,"
+					+ "\n	G.s.s = G,"
+					+ "\n	G.s.r.s = G.r;"
+					+ "\n}"
+					+ "\n"
+					+ "\n//requires standard left-kan "
+					+ "\n/* schema Dihedral2 = {"
 					+ "\n nodes G;"
 					+ "\n attributes;"
 					+ "\n arrows"
@@ -32,6 +45,9 @@ public class DihedralExample extends Example {
 					+ "\n	G.r.r = G,"
 					+ "\n	G.s.s = G,"
 					+ "\n	G.S0.r.s = G.R0;"
-					+ "\n}\n";
+					+ "\n} */"
+;
+
+
 
 }

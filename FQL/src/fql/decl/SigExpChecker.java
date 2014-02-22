@@ -82,7 +82,8 @@ public class SigExpChecker implements SigExpVisitor<SigExp, FQLProgram>{
 		try {
 			new Signature(env.enums, e.nodes, e.attrs, e.arrows, e.eqs);
 		} catch (FQLException ee) {
-			throw new RuntimeException(ee.getLocalizedMessage() + " in " + e);
+			ee.printStackTrace();
+			throw new RuntimeException(ee.getLocalizedMessage()); // + " in " + e);
 		}
 		return e;
 	}

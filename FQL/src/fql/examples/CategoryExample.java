@@ -12,7 +12,8 @@ public class CategoryExample extends Example {
 		return s;
 	}
 
-	String s = "schema Category = {"
+	String s = "//requires parallel or hybrid left kan" 
+			+ "\nschema Category = {"
 			+ "\n	nodes "
 			+ "\n		Ob, "
 			+ "\n		Hom, "

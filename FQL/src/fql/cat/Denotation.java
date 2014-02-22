@@ -18,6 +18,8 @@ import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
@@ -58,23 +60,80 @@ public class Denotation {
 
 	static int LIMIT = 20, INC = 1;
 
-	public Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> toCategory()
-			throws FQLException {
+	Signature xxxSig;
 
-		List<Node> objects = B.nodes;
-
-		Set<Arr<Node, Path>> arrows = new HashSet<>();
-		Map<Node, Arr<Node, Path>> identities = new HashMap<>();
-
+	public Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> toCategory(
+			Signature sig) throws FQLException {
+		xxxSig = sig;
 		if (!enumerate(DEBUG.debug.MAX_DENOTE_ITERATIONS)) {
 			throw new FQLException(
 					"Category computation has exceeded allowed iterations.");
 		}
 
+		return toCategoryHelper(sig, true);
+	}
+	/*
+	private Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> catInv() throws FQLException {
+		List<Node> objects = B.nodes;
+
+		Set<Arr<Node, Path>> arrows = new HashSet<>();
+		Map<Node, Arr<Node, Path>> identities = new HashMap<>();
+
+		final Fn<Path, Integer> fn = makeFn();
+		List<Path> paths = new LinkedList<>(); 
+		final Map<Integer, Path> fn2 = new HashMap<>();
+
+//		int numarrs = numarrs();
+		for (Node n : B.nodes) {
+			paths.add(new Path(B, n));
+		}
+		outer: for (int iter = 0; iter < DEBUG.debug.MAX_PATH_LENGTH; iter++) {
+			for (Path p : paths) {
+				Integer i = fn.of(p);
+				if (fn2.get(i) == null) {
+					fn2.put(i, p);
+				}
+				if (fn2.size() == numarrs) {
+					break outer;
+				}
+			}
+			List<Path> paths0 = new LinkedList<>();
+			for (Path p : paths) {
+				for (Edge e : B.outEdges(p.target)) {
+					paths0.add(Path.append(B, p, new Path(B, e)));
+				}
+			}
+			paths = paths0;
+		}
+
+		if (fn2.size() < numarrs) {
+			for (Entry<Integer, Path> k : fn2.entrySet()) {
+				if (k.getValue() == null) {
+					System.out.println("missing " + k.getKey());
+					if (replacees.contains(k.getKey())) {
+						throw new RuntimeException();
+					}
+				}
+			}
+			String old_str = "Basis path lengths exceed allowed limit ("
+					+ DEBUG.debug.MAX_PATH_LENGTH + ").  Only have "
+					+ fn2.size() + " basis paths out of required " + numarrs();
+//					+ ".  Sig is " + sig;
+			throw new FQLException(old_str);
+		}
+*/
+
+	private Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> toCategoryHelper(
+			Signature sig, boolean b) throws FQLException {
+		List<Node> objects = B.nodes;
+
+		Set<Arr<Node, Path>> arrows = new HashSet<>();
+		Map<Node, Arr<Node, Path>> identities = new HashMap<>();
+
 		final Fn<Path, Integer> fn = makeFn();
 		List<Path> paths = new LinkedList<>(); // B.pathsLessThan(DEBUG.debug.MAX_PATH_LENGTH);
 		final Map<Integer, Path> fn2 = new HashMap<>();
-
+		
 		int numarrs = numarrs();
 		for (Node n : B.nodes) {
 			paths.add(new Path(B, n));
@@ -99,8 +158,19 @@ public class Denotation {
 		}
 
 		if (fn2.size() < numarrs) {
-			String old_str = "Basis path lengths exceed allowed limit.  size is "
-					+ fn2.size() + " numarrs " + numarrs();
+			for (Entry<Integer, Path> k : fn2.entrySet()) {
+				if (k.getValue() == null) {
+					System.out.println("missing " + k.getKey());
+					if (replacees.contains(k.getKey())) {
+						throw new RuntimeException();
+					}
+				}
+			}
+			String old_str = "Basis path lengths exceed allowed limit ("
+					+ DEBUG.debug.MAX_PATH_LENGTH + ").  Only have "
+					+ fn2.size() + " basis paths out of required " + numarrs() + "."
+					+ "  Probable cause: using parallel or hybrid left-kan algorithm (see options).";
+//					+ ".  Sig is " + sig;
 			throw new FQLException(old_str);
 		}
 
@@ -114,12 +184,12 @@ public class Denotation {
 			identities.put(n, a);
 			// arrows.add(a);
 		}
-		for (Edge e : Ltables.keySet()) {
+/*		for (Edge e : Ltables.keySet()) {
 			for (Integer i : Ltables.get(e).keySet()) {
 				Path p = fn2.get(i);
 				arrows.add(new Arr<>(p, p.source, p.target));
 			}
-		}
+		} */
 
 		Fn<Path, Arr<Node, Path>> r2 = new Fn<Path, Arr<Node, Path>>() {
 			@Override
@@ -143,27 +213,36 @@ public class Denotation {
 			}
 		}
 
-		FinCat<Node, Path> r1 = new FinCat<Node, Path>(objects,
-				new LinkedList<>(arrows), composition, identities);
+		if (b) {
+			FinCat<Node, Path> r1 = new FinCat<Node, Path>(objects,
+					new LinkedList<>(arrows), composition, identities);
 
-		return new Pair<>(r1, r2);
+			return new Pair<>(r1, r2);
+		} else {
+			return null;
+		}
 	}
 
 	private int numarrs() {
 		Set<Integer> x = new HashSet<>();
 		for (Node n : etables.keySet()) {
+			if (x.contains(etables.get(n).get(-1))) {
+				throw new RuntimeException();
+			}
 			x.add(etables.get(n).get(-1));
 		}
 		for (Edge e : Ltables.keySet()) {
 			x.addAll(Ltables.get(e).keySet());
 			x.addAll(Ltables.get(e).values());
 		}
+		//TODO should only have nulls if computation incomplete
 		Iterator<Integer> it = x.iterator();
 		while (it.hasNext()) {
 			if (it.next() == null) {
 				it.remove();
 			}
 		}
+//		 System.out.println(x.size());
 		return x.size();
 	}
 
@@ -175,13 +254,17 @@ public class Denotation {
 				for (Edge e : x.path) {
 					i = Ltables.get(e).get(i);
 				}
+				if (i == null) {
+					throw new RuntimeException(); // TODO
+				}
 				return i;
 			}
 
 		};
 	}
 
-	public Pair<Instance, Map<Integer, List<Pair<String, Integer>>>> sigma(PSMInterp interp) throws FQLException {
+	public Pair<Instance, Map<Integer, List<Pair<String, Integer>>>> sigma(
+			PSMInterp interp) throws FQLException {
 		Map<String, Set<Pair<Object, Object>>> data = new HashMap<>();
 
 		if (!enumerate(DEBUG.debug.MAX_DENOTE_ITERATIONS)) {
@@ -198,11 +281,11 @@ public class Denotation {
 			}
 		}
 		Instance ret = new Instance(sig, data);
-		//if (X != null) {
-	//	System.out.println("input " + X);
-	//	System.out.println("output " + ret);
-	//	System.out.println("lineage " + lineage);
-		//}
+		// if (X != null) {
+		// System.out.println("input " + X);
+		// System.out.println("output " + ret);
+		// System.out.println("lineage " + lineage);
+		// }
 		return new Pair<>(ret, lineage);
 	}
 
@@ -216,7 +299,7 @@ public class Denotation {
 		return ret;
 	}
 
-	public static Quad<Instance, Map<Node, Map<Integer, Integer>>, Map<Node, Map<Integer, Integer>>,  Map<Integer, List<Pair<String, Integer>>>> fullSigmaWithAttrs(
+	public static Quad<Instance, Map<Node, Map<Integer, Integer>>, Map<Node, Map<Integer, Integer>>, Map<Integer, List<Pair<String, Integer>>>> fullSigmaWithAttrs(
 			PSMInterp inter, Mapping f, Instance i, Transform t, Instance JJJ,
 			Integer xxx) throws FQLException {
 
@@ -240,8 +323,9 @@ public class Denotation {
 
 		Denotation D = new Denotation(inter, F, I.first, ttt, JJJ0);
 
-		Pair<Instance, Map<Integer, List<Pair<String, Integer>>>> hhh = D.sigma(inter);
-		
+		Pair<Instance, Map<Integer, List<Pair<String, Integer>>>> hhh = D
+				.sigma(inter);
+
 		Instance j = hhh.first;
 		// System.out.println("j " + j);
 		Instance ret = reAttr(D, f.target, j, I.second);
@@ -308,16 +392,16 @@ public class Denotation {
 				map.put(k0, v0);
 			}
 		}
-		
+
 		for (Attribute<Node> k : thesig.attrs) {
 			Set<Pair<Object, Object>> t = new HashSet<>();
 			for (Pair<Object, Object> v : i.data.get(k.name + "_edge")) {
 				Integer v0 = (Integer) v.second;
 				// System.out.println("etables is " + D.etables);
 				// System.out.println("looking for " + k.name);
-				//System.out.println("Map is " + map);
-				//System.out.println("want " + k);
-				Object v1 = getFrom(k, D,  map /*().get(k)*/, v0);
+				// System.out.println("Map is " + map);
+				// System.out.println("want " + k);
+				Object v1 = getFrom(k, D, map /* ().get(k) */, v0);
 				// System.out.println("v1 is " + v1);
 				t.add(new Pair<Object, Object>(v.first, v1));
 			}
@@ -326,8 +410,8 @@ public class Denotation {
 		return new Instance(thesig, d);
 	}
 
-	private static Object getFrom(Attribute<Node> attr, Denotation D, Map<Object, Object> saved,
-			Integer newkey) {
+	private static Object getFrom(Attribute<Node> attr, Denotation D,
+			Map<Object, Object> saved, Integer newkey) {
 		List<Pair<Integer, Object>> pre = new LinkedList<>();
 
 		for (Node kkk : D.etables.keySet()) {
@@ -359,7 +443,8 @@ public class Denotation {
 		}
 		if (DEBUG.debug.ALLOW_NULLS) {
 			if (!(attr.target instanceof Type.Varchar)) {
-				throw new RuntimeException("Cannot create nulls for any type but string");
+				throw new RuntimeException(
+						"Cannot create nulls for any type but string");
 			}
 			return "NULL" + newkey; // TODO null hack
 		}
@@ -438,7 +523,6 @@ public class Denotation {
 		source.doColors();
 	}
 
-	
 	public Denotation(PSMInterp inter, Mapping f, Instance I, Transform alpha,
 			Instance J) throws FQLException {
 		Map<String, Set<Pair<Object, Object>>> data = new HashMap<>(I.data);
@@ -479,9 +563,9 @@ public class Denotation {
 		initTables();
 		makeJTables();
 
-		// JPanel p = view(); JFrame fr = new JFrame("Full Sigma");
-		// fr.setContentPane(p); fr.pack(); fr.setSize(600, 400);
-		// fr.setVisible(true);
+//		 JPanel p = view(); JFrame fr = new JFrame("Full Sigma");
+	//	 fr.setContentPane(p); fr.pack(); fr.setSize(600, 400);
+//		 fr.setVisible(true);
 
 	}
 
@@ -498,9 +582,9 @@ public class Denotation {
 		makeJTables();
 		interp = new PSMInterp();
 
-		// JPanel p = view(); JFrame fr = new JFrame("Denotation");
-		// fr.setContentPane(p); fr.pack(); fr.setSize(600, 400);
-		// fr.setVisible(true);
+//		 JPanel p = view(); JFrame fr = new JFrame("Denotation");
+//		 fr.setContentPane(p); fr.pack(); fr.setSize(600, 400);
+//		 fr.setVisible(true);
 
 	}
 
@@ -560,21 +644,32 @@ public class Denotation {
 	// node in B (paper switch A and B between main text and appendix)
 	// Map<Node, Set<Pair<Integer, Integer>>> SA;// = new HashMap<>();
 
-	Set<Pair<Integer, Integer>> SA;
-	
+	List<Pair<Integer, Integer>> SA;
+
 	Map<Integer, List<Pair<String, Integer>>> lineage;
 
 	// returns true if finished
 	public boolean enumerate(int size) throws FQLException {
-	//	if (J == null) {
-			//happens for category computation
-		//	throw new RuntimeException();
-	//	}
+		// if (J == null) {
+		// happens for category computation
+		// throw new RuntimeException();
+		// }
 		initTables();
 		// _FRESH = FRESH_START; // sig.nodes.size();// + sig.edges.size();
 
+		List<Pair<String, JComponent>> l = new LinkedList<>();
+		
 		int xxx = 0;
+		//System.out.println("start");
 		while (notComplete()) {
+	//		l.add(new Pair<String, JComponent>("start " + (xxx+1), viewCurrentX()));
+			//showView("iteration " + xxx);
+			
+			if (xxxSig != null) {
+				// toCategoryHelper(xxxSig, false);
+			}
+		//	System.out.println("***");
+		//	System.out.println(this);
 			// if (xxx % 100 == 0) {
 			// System.out.println("-- " + xxx);
 			// for (Edge k : Ltables.keySet()) {
@@ -583,18 +678,37 @@ public class Denotation {
 			// }
 			// fillInPartial();
 			if (xxx++ >= size) {
+		//		popup(l);
 				return false;
 			}
-			// checkRtables() ;
-			Set<Pair<Node, Integer>> a0s = undefined();
+	//		 checkRtables() ;			
+			
+			Set<Pair<Node, Integer>> a0s;
+			if (DEBUG.debug.kan_option.startsWith("Hybrid")) {
+				a0s = undefined();
+			} else if (DEBUG.debug.kan_option.startsWith("Parallel")) {
+				a0s = undefinedFull();
+			} else {
+				a0s = undefinedO();
+			}
+//			Set<Pair<Node, Integer>> a0s = undefinedO();
+//			Set<Pair<Node, Integer>> a0s = undefinedFull();
+	//		Set<Pair<Node, Integer>> a0s = undefined(); 
+	//		System.out.println("created " + a0s);
 			if (a0s.size() == 0) {
 				throw new RuntimeException("no smallest");
 			}
 			for (Pair<Node, Integer> a0 : a0s) {
 				create(a0.first, a0.second);
 			}
-			// checkRtables() ;
+//			System.out.println("after filling in");
+//			System.out.println(this);
+		//	 checkRtables() ;
+			//l.add(new Pair<String, JComponent>("filled in " + xxx, viewCurrentX()));
 			deriveConsequences();
+		//	l.add(new Pair<String, JComponent>(xxx + "consequences " + xxx, viewCurrentX()));
+		//	l.add(new Pair<String, JComponent>(xxx + " consequences ", new JTextArea(SA.toString())));
+//			System.out.println(this);
 			// }
 			// checkRtables() ;
 			// Node a;
@@ -604,15 +718,17 @@ public class Denotation {
 				// Pair<Integer, Integer> uv = take(SA);
 				// checkRtables() ;
 				delete(uv); // update in place
-				// checkRtables() ;
+		//		 checkRtables() ;
 				replace(uv);
-				// checkRtables() ;
+		//		 checkRtables() ;
 				deriveConsequences();
 				// checkRtables() ;
 				// if (xxx >= size) {
 				// return false;
 				// }
-
+//				System.out.println();
+			//	l.add(new Pair<String, JComponent>(xxx + " after " + uv, viewCurrentX()));
+//				System.out.println(this);
 			}
 			// checkRtables() ;
 			dedupl();
@@ -620,15 +736,26 @@ public class Denotation {
 		return true;
 	}
 
+	private void popup(List<Pair<String, JComponent>> l) {
+		JTabbedPane ret = new JTabbedPane();
+		for (Pair<String, JComponent> k : l) {
+			ret.add(k.first, k.second);
+		}
+		
+		JPanel p = new JPanel(new GridLayout(1,1));
+		p.add(ret);
+		JFrame f = new JFrame("X");
+		f.setContentPane(p);
+		f.pack();
+		f.setSize(300, 300);
+		f.show();
+	}
+
 	@Override
 	public String toString() {
-		return "Denotation [etables=" + etables + ", etables0=" + etables0
-				+ ", etables1=" + etables1 + ", Ltables=" + Ltables
-				+ ", Ltables0=" + Ltables0 + ", Ltables1=" + Ltables1
-				+ ", rtables=" + rtables + ", rtables0=" + rtables0
-				+ ", rtables1=" + rtables1 + ", rtables2=" + rtables2
-				+ ", ntables=" + ntables + ", ntables0=" + ntables0
-				+ ", ntables1=" + ntables1 + ", SA=" + SA + "]";
+		return "Denotation [\netables=" + etables 
+				+ "\n Ltables=" + Ltables
+				+ "\n SA="+ SA + "\n]";
 	}
 
 	private void create(Node n, int i) {
@@ -661,6 +788,7 @@ public class Denotation {
 	PSMInterp interp;
 
 	private int fresh() {
+		// System.out.println(interp.guid);
 		return ++interp.guid;
 	}
 
@@ -674,7 +802,7 @@ public class Denotation {
 	List<Node> ekeys;
 	// List<Node> ekeys2;
 	List<Edge> lkeys;
-	
+
 	void updateLineage(String col, Integer old, Integer nw) {
 		if (!lineage.containsKey(old)) {
 			lineage.put(old, new LinkedList<Pair<String, Integer>>());
@@ -682,6 +810,71 @@ public class Denotation {
 		List<Pair<String, Integer>> l = new LinkedList<>(lineage.get(old));
 		l.add(new Pair<>(col, old));
 		lineage.put(nw, l);
+	}
+
+	private Set<Pair<Node, Integer>> undefinedO() throws FQLException {
+
+		Set<Pair<Node, Integer>> realret = new HashSet<>();
+
+		for (Node n0 : ekeys) {
+			Map<Integer, Integer> x = etables.get(n0);
+
+			for (Integer i : x.keySet()) {
+				if (i == null) {
+					throw new RuntimeException();
+				}
+				if (x.get(i) == null) {
+					int ret = fresh();
+					x.put(i, ret);
+
+					updateLineage(n0.string, i, new Integer(ret));
+
+					if (alpha != null) {
+						utables.get(n0).put(ret,
+								lookup(alpha.data.get(n0.string), i));
+					}
+
+					realret.add(new Pair<>(etables1.get(n0), ret));
+					ekeys = shift(ekeys);
+
+					return realret;
+				}
+			}
+		}
+
+		outer: for (Edge e0 : lkeys) {
+			Map<Integer, Integer> x = Ltables.get(e0);
+
+			int count = 0;
+			for (Integer i : x.keySet()) {
+				if (i == null) {
+					throw new RuntimeException("very bad");
+				}
+				if (x.get(i) == null) {
+					int ret = fresh();
+					x.put(i, ret);
+					updateLineage(e0.name, i, new Integer(ret));
+					count++;
+
+					if (alpha != null) {
+						String sss = e0.name;
+						if (sss.endsWith(" id")) {
+							sss = sss.substring(0, sss.length() - 3);
+						}
+						Integer xxx = lookup(J.data.get(sss),
+								utables.get(e0.source).get(i));
+						utables.get(e0.target).put(ret, xxx);
+					}
+
+					realret.add(new Pair<>(e0.target, ret));
+					lkeys = shift(lkeys);
+
+					return realret;
+				}
+			}
+
+		}
+		return realret;
 	}
 
 	private Set<Pair<Node, Integer>> undefined() throws FQLException {
@@ -699,7 +892,7 @@ public class Denotation {
 				if (x.get(i) == null) {
 					int ret = fresh();
 					x.put(i, ret);
-					
+
 					updateLineage(n0.string, i, new Integer(ret));
 
 					if (alpha != null) {
@@ -748,6 +941,69 @@ public class Denotation {
 		return realret;
 	}
 
+	private Set<Pair<Node, Integer>> undefinedFull() throws FQLException {
+		// ekeys = shift(ekeys);
+
+		Set<Pair<Node, Integer>> realret = new HashSet<>();
+
+		for (Node n0 : etables.keySet()) {
+			Map<Integer, Integer> x = etables.get(n0);
+
+			for (Integer i : x.keySet()) {
+				if (i == null) {
+					throw new RuntimeException();
+				}
+				if (x.get(i) == null) {
+					int ret = fresh();
+					x.put(i, ret);
+
+					updateLineage(n0.string, i, new Integer(ret));
+
+					if (alpha != null) {
+						utables.get(n0).put(ret,
+								lookup(alpha.data.get(n0.string), i));
+					}
+
+					realret.add(new Pair<>(etables1.get(n0), ret));
+				}
+			}
+		}
+
+		// lkeys = shift(lkeys);
+		outer: for (Edge e0 : lkeys) {
+			Map<Integer, Integer> x = Ltables.get(e0);
+
+		//	int count = 0;
+			for (Integer i : x.keySet()) {
+				if (i == null) {
+					throw new RuntimeException("very bad");
+				}
+				if (x.get(i) == null) {
+					int ret = fresh();
+					x.put(i, ret);
+					updateLineage(e0.name, i, new Integer(ret));
+			//		count++;
+
+					if (alpha != null) {
+						String sss = e0.name;
+						if (sss.endsWith(" id")) {
+							sss = sss.substring(0, sss.length() - 3);
+						}
+						Integer xxx = lookup(J.data.get(sss),
+								utables.get(e0.source).get(i));
+						utables.get(e0.target).put(ret, xxx);
+					}
+
+					realret.add(new Pair<>(e0.target, ret));
+				//	if (count > 1) {
+				//		continue outer;
+				//	}
+				}
+			}
+
+		}
+		return realret;
+	}
 	private Integer lookup(Set<Pair<Object, Object>> set, Integer i) {
 		if (i == null) {
 			throw new RuntimeException();
@@ -763,14 +1019,18 @@ public class Denotation {
 		throw new RuntimeException();
 	}
 
-	/*
-	 * private <X> List<X> shift(List<X> l) { if (l.size() == 0) { return l; }
-	 * List<X> ret = new LinkedList<>(l); X x = ret.remove(0); ret.add(x);
-	 * return ret; }
-	 */
+	private <X> List<X> shift(List<X> l) {
+		if (l.size() == 0) {
+			return l;
+		}
+		List<X> ret = new LinkedList<>(l);
+		X x = ret.remove(0);
+		ret.add(x);
+		return ret;
+	}
 
 	private void deriveConsequences() {
-		//TODO why is SA getting reflexive replacements?
+		// TODO why is SA getting reflexive replacements?
 		fillInPartial();
 		for (Eq e : rtables.keySet()) {
 			List<Integer[]> v = rtables.get(e);
@@ -788,9 +1048,9 @@ public class Denotation {
 				if (row[n - 1] != null && row[c.length - 1] != null
 						&& !row[n - 1].equals(row[c.length - 1])) {
 					if (row[n - 1] < row[c.length - 1]) {
-						SA.add(new Pair<>(row[n - 1], row[c.length - 1]));
+						addToSA(new Pair<>(row[n - 1], row[c.length - 1]));
 					} else {
-						SA.add(new Pair<>(row[c.length - 1], row[n - 1]));
+						addToSA(new Pair<>(row[c.length - 1], row[n - 1]));
 					}
 				}
 			}
@@ -811,9 +1071,9 @@ public class Denotation {
 				if (row[n - 1] != null && row[c.length - 1] != null
 						&& !(row[n - 1].equals(row[c.length - 1]))) {
 					if (row[n - 1] < row[c.length - 1]) {
-						SA.add(new Pair<>(row[n - 1], row[c.length - 1]));
+						addToSA(new Pair<>(row[n - 1], row[c.length - 1]));
 					} else {
-						SA.add(new Pair<>(row[c.length - 1], row[n - 1]));
+						addToSA(new Pair<>(row[c.length - 1], row[n - 1]));
 					}
 				}
 			}
@@ -921,21 +1181,35 @@ public class Denotation {
 		return true;
 	}
 
+	List<Integer> replacees = new LinkedList<>();
 	private void replace(Pair<Integer, Integer> uv) {
-		//TODO also substitute in lineage - do need to replace columns?
-		
+		// TODO also substitute in lineage - do need to replace columns?
+		List<Pair<Integer, Integer>> ret = new LinkedList<>();
+		if (uv.second.equals(uv.first)) {
+			throw new RuntimeException("xxx"); //TODO check
+		}
+		if (uv.first == null) {
+			throw new RuntimeException("null first");
+		}
+		if (uv.second == null) {
+			throw new RuntimeException("null second");
+		}
 		lineage.remove(uv.second);
 		for (Integer k : lineage.keySet()) {
 			List<Pair<String, Integer>> v = lineage.get(k);
 			for (Pair<String, Integer> p : v) {
 				if (p.second.equals(uv.second)) {
-//					System.out.println("replace " + uv);
+					// System.out.println("replace " + uv);
 					p.second = uv.first;
 				}
 			}
 		}
-		
-		// System.out.println("replacing " + uv.second + " with " + uv.first);
+
+//		 System.out.println("replacing " + uv.second + " with " + uv.first);
+		//if (replacees.contains(uv.second)) {
+		//	throw new RuntimeException();
+		//}
+		// replacees.add(uv.second);
 		for (Node n : etables.keySet()) {
 			Map<Integer, Integer> m = etables.get(n);
 			Map<Integer, Integer> mm = new HashMap<>();
@@ -951,7 +1225,61 @@ public class Denotation {
 			}
 			etables.put(n, mm);
 		}
+		
 		for (Edge n : Ltables.keySet()) {
+			Map<Integer, Integer> m = Ltables.get(n);
+			Map<Integer, Integer> mm = new HashMap<>();
+			for (Entry<Integer, Integer> e : m.entrySet()) {
+
+				if (e.getKey().equals(uv.second)) {
+					
+				} else if (e.getValue() != null && e.getValue().equals(uv.second)) {
+					mm.put(e.getKey(), uv.first);
+				} else {
+					mm.put(e.getKey(), e.getValue());
+				}
+				
+/*				if (e.getKey().equals(uv.second) && e.getValue() == null) {
+					mm.put(uv.first, null);
+				} else if (!e.getKey().equals(uv.second) && e.getValue() == null) { 
+					mm.put(e.getKey(), null);				
+			    } else if (e.getKey().equals(uv.second) && e.getValue().equals(uv.second)) {
+					mm.put(uv.first, uv.first);
+				} else if (e.getValue().equals(uv.second)) {
+					mm.put(e.getKey(), uv.first);
+				} 
+			    else if (e.getKey().equals(uv.second)) {
+			    				    	
+					//choice to make here - use e's value, or use uv.first's value
+					Integer cand = mm.get(uv.first);
+					if (cand != null) {
+						cand = (cand.equals(uv.second) ? uv.first : cand);
+					}
+
+					if (e.getValue() == null && cand != null) {
+						mm.put(uv.first, cand);
+					} else if (e.getValue() != null && cand == null) {
+						mm.put(uv.first, e.getValue());
+					} else if (e.getValue() == null && cand == null) {
+						mm.put(uv.first, null);
+					} else if (e.getValue() != null && cand != null) {
+						mm.put(uv.first, cand); 
+				   // 		if (!e.getValue().equals(cand)) {
+				   // 			ret.add(new Pair<>(cand, e.getValue()));
+				   // 		}
+
+					} else {
+						throw new RuntimeException("uuu");
+					}  
+					*/
+
+				
+			
+			}
+			Ltables.put(n, mm);
+		}
+		
+/*		for (Edge n : Ltables.keySet()) {
 			Map<Integer, Integer> m = Ltables.get(n);
 			Map<Integer, Integer> mm = new HashMap<>();
 			for (Entry<Integer, Integer> e : m.entrySet()) {
@@ -978,6 +1306,18 @@ public class Denotation {
 				}
 			}
 			Ltables.put(n, mm);
+		}
+		*/
+		//TODO this checks
+		for (Edge n : Ltables.keySet()) {
+			Map<Integer, Integer> m = Ltables.get(n);
+			if (m.containsKey(uv.second)) {
+				throw new RuntimeException("key");
+			}
+			if (m.containsValue(uv.second)) {
+				throw new RuntimeException("value");
+			}
+
 		}
 
 		for (Eq n : rtables.keySet()) {
@@ -1008,6 +1348,22 @@ public class Denotation {
 				v.remove(uv.second);
 			}
 		}
+		
+		//return ret;
+	}
+	
+	private void addToSA(Pair<Integer, Integer> uv) {
+		if (uv.first.equals(uv.second)) {
+			return;
+		}
+		if (SA.contains(uv) || SA.contains(new Pair<>(uv.second, uv.first)) ) {
+			return;
+		}
+		if (uv.second > uv.first) {
+			SA.add(uv);
+		} else {
+			SA.add(new Pair<>(uv.second, uv.first));
+		}
 	}
 
 	// suppose a -> b
@@ -1015,50 +1371,57 @@ public class Denotation {
 	// if have c -> a, now have c -> b
 	// if have c -> b, now have
 	private void delete(Pair<Integer, Integer> uv) {
-		// System.out.println("deleting node " + n + " pair " + uv);
-		Set<Pair<Integer, Integer>> newX = new HashSet<>();
-		for (Pair<Integer, Integer> k : SA) {
-			if (k.equals(uv)) {
-				continue;
-			}
+		//System.out.println("deleting  " + uv);
+		int i = 0;
+
+		for (;;) {
+		Set<Pair<Integer, Integer>> newX = new HashSet<>(SA);
+		SA.clear();
+		//System.out.println("it" + i++);
+
+		for (Pair<Integer, Integer> k : newX) {
 			if (k.second.equals(uv.second)) {
-				if (!k.first.equals(uv.first)) {
-					newX.add(new Pair<>(k.first, uv.first));
-				}
+				Pair<Integer, Integer> toAdd = new Pair<>(k.first, uv.first);
+					addToSA(toAdd);
 			} else if (k.first.equals(uv.second)) {
-				if (!uv.first.equals(k.second)) {
-					newX.add(new Pair<>(uv.first, k.second));
-				}
+				Pair<Integer, Integer> toAdd = new Pair<>(uv.first, k.second);
+				addToSA(toAdd); 
 			}
 		}
-		SA.clear();
-		SA.addAll(newX);
-
+		if (new HashSet<>(SA).equals(newX)) {
+			break;
+		}
+		}
+		
 		for (Edge e : Ltables.keySet()) {
 			Integer gu = Ltables.get(e).get(uv.first);
 			Integer gv = Ltables.get(e).get(uv.second);
 			if (gu != null && gv != null && !gu.equals(gv)) {
-				if (gu < gv) {
-					SA.add(new Pair<>(gu, gv));
-				} else {
-					SA.add(new Pair<>(gv, gu));
-				}
+					addToSA(new Pair<>(gu, gv));
 			}
 		}
-
 	}
 
 	private Pair<Integer, Integer> take() {
-		for (Pair<Integer, Integer> p : SA) {
-			return p;
+		if (SA.isEmpty()) {
+			return null;
 		}
-		return null;
+		Pair<Integer, Integer> ret = null;
+		for (Pair<Integer, Integer> p : SA) {
+			ret = p;
+			break;
+		}
+		SA.remove(ret);
+		return ret;
 	}
 
 	private boolean notComplete() {
 		for (Node n : etables.keySet()) {
 			Map<Integer, Integer> xxx = etables.get(n);
 			for (Integer yyy : xxx.keySet()) {
+				if (yyy == null) {
+					throw new RuntimeException();
+				}
 				if (xxx.get(yyy) == null) {
 					return true;
 				}
@@ -1068,6 +1431,9 @@ public class Denotation {
 		for (Edge k : Ltables.keySet()) {
 			Map<Integer, Integer> v = Ltables.get(k);
 			for (Integer i : v.keySet()) {
+				if (i == null) {
+					throw new RuntimeException();
+				}
 				if (v.get(i) == null) {
 					return true;
 				}
@@ -1106,7 +1472,7 @@ public class Denotation {
 		ntables3 = new HashMap<>();
 
 		// node in B (paper switch A and B between main text and appendix)
-		SA = new HashSet<>();
+		SA = new LinkedList<>();
 
 		for (Node a : A.nodes) {
 			Map<Integer, Integer> etable = new HashMap<>();
@@ -1200,15 +1566,15 @@ public class Denotation {
 				r[1] = Integer.parseInt(x.second.toString());
 				r[3] = Integer.parseInt(x.first.toString());
 
-			//	if (x.first instanceof String) {
-//					r[0] = Integer.parseInt((String) x.first);
-//					r[1] = Integer.parseInt((String) x.second);
-//					r[3] = Integer.parseInt((String) x.first);
-			//	} else {
-			//		r[0] = (Integer) x.first;
-			//		r[1] = (Integer) x.second;
-			//		r[3] = (Integer) x.first;
-				//}
+				// if (x.first instanceof String) {
+				// r[0] = Integer.parseInt((String) x.first);
+				// r[1] = Integer.parseInt((String) x.second);
+				// r[3] = Integer.parseInt((String) x.first);
+				// } else {
+				// r[0] = (Integer) x.first;
+				// r[1] = (Integer) x.second;
+				// r[3] = (Integer) x.first;
+				// }
 				l.add(r);
 			}
 
@@ -1261,6 +1627,7 @@ public class Denotation {
 	Map<Node, DefaultTableModel> ut = new HashMap<>();
 
 	public void makeJTables() {
+
 		for (Node n : etables0.keySet()) {
 			et.put(n,
 					new DefaultTableModel(graph(etables.get(n)), etables0
@@ -1314,15 +1681,135 @@ public class Denotation {
 			}
 		}
 	}
+	
+/*	void showView(String s) {
+		JPanel p = new JPanel(new GridLayout(1,1));
+		p.add(viewCurrentX());
+		JFrame f = new JFrame(s);
+		f.setContentPane(p);
+		f.pack();
+		f.setSize(300, 300);
+		f.show();
+	} */
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public JTabbedPane view(int l) throws FQLException {
 		enumerate(l);
+		return viewCurrent();
+	}
+	
+	private JTabbedPane viewCurrentX() {
+		JTabbedPane t = new JTabbedPane();
+
+		Map<Node, DefaultTableModel> et = new HashMap<>();
+		Map<Edge, DefaultTableModel> lt = new HashMap<>();
+		Map<Eq, DefaultTableModel> rt = new HashMap<>();
+		Map<Edge, DefaultTableModel> nt = new HashMap<>();
+		Map<Node, DefaultTableModel> ut = new HashMap<>();
+
+		for (Node n : etables0.keySet()) {
+			et.put(n,
+					new DefaultTableModel(graph(etables.get(n)), etables0
+							.get(n)));
+		}
+		for (Edge e : Ltables.keySet()) {
+			lt.put(e,
+					new DefaultTableModel(graph(Ltables.get(e)), Ltables0
+							.get(e)));
+		}
+		for (Eq e : rtables.keySet()) {
+			rt.put(e,
+					new DefaultTableModel(graph2(rtables.get(e),
+							rtables0.get(e).length), rtables0.get(e)));
+		}
+		for (Edge e : ntables.keySet()) {
+			nt.put(e,
+					new DefaultTableModel(graph2(ntables.get(e),
+							ntables0.get(e).length), ntables0.get(e)));
+		}
+		if (alpha != null) {
+			for (Node n : utables.keySet()) {
+				ut.put(n,
+						new DefaultTableModel(graph(utables.get(n)), utables0
+								.get(n)));
+			}
+		}
+
+	//	Triple<JPanel, JPanel, JPanel> xxx = toCat();
+	//	t.addTab("Category", xxx.first);
+	//	 t.addTab("Signature", xxx.third);
+	//	t.addTab("Normalizer", xxx.second);
+
+		Map<String, JTable> m = new HashMap<>();
+		for (Node n : etables0.keySet()) {
+			// et.get(n).en`
+			JTable table = new JTable(et.get(n));
+			TableRowSorter<?> sorter = new TableRowSorter(table.getModel());
+			table.setRowSorter(sorter);
+			sorter.allRowsChanged();
+			// sorter.toggleSortOrder(0);
+
+			m.put("e_" + n.string, table);
+		}
+		t.addTab("e-Tables", makePanels(m));
+
+		m = new HashMap<>();
+		for (Edge e : Ltables.keySet()) {
+			JTable table = new JTable(lt.get(e));
+			TableRowSorter<?> sorter = new TableRowSorter(table.getModel());
+			table.setRowSorter(sorter);
+			sorter.allRowsChanged();
+			// sorter.toggleSortOrder(0);
+
+			m.put("L(" + e.name + ")", table);
+		}
+		t.addTab("L-Tables", makePanels(m));
+
+		m = new HashMap<>();
+		for (Eq e : rtables.keySet()) {
+			JTable table = new JTable(rt.get(e));
+			TableRowSorter<?> sorter = new TableRowSorter(table.getModel());
+			table.setRowSorter(sorter);
+			sorter.allRowsChanged();
+			// sorter.toggleSortOrder(0);
+
+			m.put(e.toString(), table);
+		}
+		t.addTab("Relation Tables", makePanels(m));
+
+		m = new HashMap<>();
+		for (Edge e : ntables.keySet()) {
+			JTable table = new JTable(nt.get(e));
+			TableRowSorter<?> sorter = new TableRowSorter(table.getModel());
+			table.setRowSorter(sorter);
+			sorter.allRowsChanged();
+			// sorter.toggleSortOrder(0);
+
+			m.put("F" + e.name + " = " + F.em.get(e), table);
+		}
+		if (alpha != null) {
+			t.addTab("Naturality Tables", makePanels(m));
+			m = new HashMap<>();
+			for (Node n : utables.keySet()) {
+				JTable table = new JTable(ut.get(n));
+				TableRowSorter<?> sorter = new TableRowSorter(table.getModel());
+				table.setRowSorter(sorter);
+				sorter.allRowsChanged();
+				// sorter.toggleSortOrder(0);
+
+				m.put("alpha " + n.string, table);
+			}
+			t.addTab("Universal Tables", makePanels(m));
+		}
+		return t;
+	}
+
+	private JTabbedPane viewCurrent() {
 		JTabbedPane t = new JTabbedPane();
 
 		Triple<JPanel, JPanel, JPanel> xxx = toCat();
 		t.addTab("Category", xxx.first);
-		// t.addTab("Signature", xxx.third);
+		t.addTab("Signature", xxx.third);
 		t.addTab("Normalizer", xxx.second);
 
 		Map<String, JTable> m = new HashMap<>();
@@ -1397,17 +1884,17 @@ public class Denotation {
 
 		try {
 
-			Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> xxx = toCategory();
+			Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> xxx = toCategory(null);
 
 			a.setText(xxx.first.toString());
 			a.setCaretPosition(0);
 
 			q = makeNormalizer(xxx.second);
 
-			// JTextArea ra = new JTextArea(
-			// xxx.first.toSig(new HashMap<String, Type>()).first
-			// .toString());
-			// rr.add(new JScrollPane(ra));
+			 JTextArea ra = new JTextArea(
+			 xxx.first.toSig(new HashMap<String, Type>()).first
+			 .toString());
+			 rr.add(new JScrollPane(ra));
 
 		} catch (Throwable e) {
 
