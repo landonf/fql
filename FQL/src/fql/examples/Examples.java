@@ -47,8 +47,10 @@ public class Examples {
 	public static Example cat = new CategoryExample();
 	public static Example eds2fql = new EDsToFqlExample();
 	public static Example fncomp = new FnCompExample();
+	public static Example auto = new AutoIsoExample();
+	public static Example exp2 = new Exponentials2Example();
 	
-	public static Example[] examples = new Example[] { exp, fncomp, graph, eds2fql, cat, surj,
+	public static Example[] examples = new Example[] { exp2, auto, exp, fncomp, graph, eds2fql, cat, surj,
 			full2, match2, match, sub, /* functor, */enums, people,
 			external, typeddelta, /* delta, pi, */ typedPi,
 			typedsigma,  /* sigma, */  full, employess, typedemployees, /* composition, */

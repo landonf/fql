@@ -54,7 +54,11 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 
 	@Override
 	public SigExp visit(FQLProgram env, Plus e) {
-		return visit2(env, e.a, e.b);
+		SigExp x = visit2(env, e.a, e.b);
+		if (e.a.equals(e.b)) {
+			throw new RuntimeException("Cannot sum the same instance");
+		}
+		return x;
 	}
 
 	@Override

@@ -17,6 +17,7 @@ import fql.decl.MapExp.Fst;
 import fql.decl.MapExp.Id;
 import fql.decl.MapExp.Inl;
 import fql.decl.MapExp.Inr;
+import fql.decl.MapExp.Iso;
 import fql.decl.MapExp.MapExpVisitor;
 import fql.decl.MapExp.Opposite;
 import fql.decl.MapExp.Prod;
@@ -238,6 +239,18 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, FQLPro
 		Pair<SigExp, SigExp> k = e.e.accept(env, this);
 		
 		return new Pair<SigExp, SigExp>(new SigExp.Opposite(k.first), new SigExp.Opposite(k.second));
+	}
+
+	@Override
+	public Pair<SigExp, SigExp> visit(FQLProgram env, Iso e) {
+		SigExp l = e.l.typeOf(env);
+		SigExp r = e.r.typeOf(env);
+		
+		if (e.lToR) {
+			return new Pair<>(l,r);
+		} else {
+			return new Pair<>(r,l);
+		}
 	}
 
 }

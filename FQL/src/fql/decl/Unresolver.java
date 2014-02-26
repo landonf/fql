@@ -18,27 +18,65 @@ public class Unresolver implements SigExpVisitor<SigExp, Map<String, SigExp>> {
 
 	@Override
 	public SigExp visit(Map<String, SigExp> env, Zero e) {
+		for (String k : env.keySet()) {
+			SigExp e0 = env.get(k);
+			if (e0.equals(e)) {
+				return new SigExp.Var(k);
+			}
+		}
 		return e;
 	}
 
 	@Override
 	public SigExp visit(Map<String, SigExp> env, One e) {
+		for (String k : env.keySet()) {
+			SigExp e0 = env.get(k);
+			if (e0.equals(e)) {
+				return new SigExp.Var(k);
+			}
+		}
 		return e;
 	}
 
 	@Override
 	public SigExp visit(Map<String, SigExp> env, Plus e) {
-		return new SigExp.Plus(e.a.accept(env, this), e.b.accept(env, this));
+		SigExp t = new SigExp.Plus(e.a.accept(env, this), e.b.accept(env, this));
+		for (String k : env.keySet()) {
+			SigExp e0 = env.get(k);
+			if (e0.equals(t)) {
+				return new SigExp.Var(k);
+			}
+		}
+		return t;
 	}
 
 	@Override
 	public SigExp visit(Map<String, SigExp> env, Times e) {
-		return new SigExp.Times(e.a.accept(env, this), e.b.accept(env, this));
+		SigExp t = new SigExp.Times(e.a.accept(env, this), e.b.accept(env, this));
+		for (String k : env.keySet()) {
+			SigExp e0 = env.get(k);
+			if (e0.equals(t)) {
+				return new SigExp.Var(k);
+			}
+		}
+		return t;
 	}
 
 	@Override
 	public SigExp visit(Map<String, SigExp> env, Exp e) {
-		return new SigExp.Exp(e.a.accept(env, this), e.b.accept(env, this));
+	//	System.out.println("unresolving " + e);
+		SigExp t = new SigExp.Exp(e.a.accept(env, this), e.b.accept(env, this));
+	//	System.out.println(t);
+		for (String k : env.keySet()) {
+			SigExp e0 = env.get(k);
+	//		System.out.println("k " + e0);
+			if (e0.equals(t)) {
+	//			System.out.println("returning " + k);
+				return new SigExp.Var(k);
+			}
+		}
+	//	System.out.println("nope");
+		return t;
 	}
 
 	@Override
@@ -59,13 +97,26 @@ public class Unresolver implements SigExpVisitor<SigExp, Map<String, SigExp>> {
 
 	@Override
 	public SigExp visit(Map<String, SigExp> env, Union e) {
-		return new SigExp.Union(e.l.accept(env, this), e.r.accept(env, this));
-
+		SigExp t = new SigExp.Union(e.l.accept(env, this), e.r.accept(env, this));
+		for (String k : env.keySet()) {
+			SigExp e0 = env.get(k);
+			if (e0.equals(t)) {
+				return new SigExp.Var(k);
+			}
+		}
+		return t;
 	}
 
 	@Override
 	public SigExp visit(Map<String, SigExp> env, Opposite e) {
-		return new SigExp.Opposite(e.e.accept(env, this));
+		SigExp t = new SigExp.Opposite(e.e.accept(env, this));
+		for (String k : env.keySet()) {
+			SigExp e0 = env.get(k);
+			if (e0.equals(t)) {
+				return new SigExp.Var(k);
+			}
+		}
+		return t;
 	}
 	
 	@Override

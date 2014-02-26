@@ -53,7 +53,7 @@ public class FQLParser {
 			"equations", "id", "delta", "sigma", "pi", "SIGMA", "eval", "eq",
 			"relationalize", "external", "then", "query", "instance", "fst",
 			"snd", "inl", "inr", "curry", "mapping", "eval", "void", "unit",
-			"prop", /* "tt", "ff" */};
+			"prop", "iso1", "iso2"/* "tt", "ff" */};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -530,6 +530,8 @@ public class FQLParser {
 		Parser a = Parsers.or(new Parser[] {
 				Parsers.tuple(term("unit"), xxx, schema()),
 				Parsers.tuple(term("void"), schema()),
+				Parsers.tuple(term("iso1"), schema(), schema()),
+				Parsers.tuple(term("iso2"), schema(), schema()),
 				Parsers.tuple(term("fst"), schema(), schema()),
 				Parsers.tuple(term("snd"), schema(), schema()),
 				Parsers.tuple(term("inl"), schema(), schema()),
@@ -646,6 +648,10 @@ public class FQLParser {
 				return new MapExp.Inl(toSchema(p2), toSchema(p3));
 			} else if (p1.equals("inr")) {
 				return new MapExp.Inr(toSchema(p2), toSchema(p3));
+			} else if (p1.equals("iso1")) {
+				return new MapExp.Iso(true, toSchema(p2), toSchema(p3));
+			} else if (p1.equals("iso2")) {
+				return new MapExp.Iso(false, toSchema(p2), toSchema(p3));
 			} else if (p1.equals("eval")) {
 				return new MapExp.Apply(toSchema(p2), toSchema(p3));
 			} else if (p2.toString().equals("then")) {

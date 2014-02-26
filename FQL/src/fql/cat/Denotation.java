@@ -1787,7 +1787,7 @@ public class Denotation {
 
 			m.put("F" + e.name + " = " + F.em.get(e), table);
 		}
-		if (alpha != null) {
+		if (alpha != null) { //TODO XXX this should go down one line?
 			t.addTab("Naturality Tables", makePanels(m));
 			m = new HashMap<>();
 			for (Node n : utables.keySet()) {

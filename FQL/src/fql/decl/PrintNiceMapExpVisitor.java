@@ -12,6 +12,7 @@ import fql.decl.MapExp.Fst;
 import fql.decl.MapExp.Id;
 import fql.decl.MapExp.Inl;
 import fql.decl.MapExp.Inr;
+import fql.decl.MapExp.Iso;
 import fql.decl.MapExp.MapExpVisitor;
 import fql.decl.MapExp.Opposite;
 import fql.decl.MapExp.Prod;
@@ -84,12 +85,12 @@ public class PrintNiceMapExpVisitor implements MapExpVisitor<String, FQLProgram>
 
 	@Override
 	public String visit(FQLProgram env, Apply e) {
-		throw new RuntimeException();
+		return "eval " + e.s.unresolve(env.sigs) + " " + e.t.unresolve(env.sigs);
 	}
 
 	@Override
 	public String visit(FQLProgram env, Curry e) {
-		throw new RuntimeException();
+		return "curry " + e.f.accept(env, this);
 	}
 
 	@Override
@@ -110,6 +111,12 @@ public class PrintNiceMapExpVisitor implements MapExpVisitor<String, FQLProgram>
 	@Override
 	public String visit(FQLProgram env, Opposite e) {
 		return "opposite " + e.e.accept(env, this);
+	}
+
+	@Override
+	public String visit(FQLProgram env, Iso e) {
+		String x = e.lToR ? "1" : "2";
+		return "iso" + x + " " + e.l.unresolve(env.sigs) + " " + e.r.unresolve(env.sigs);
 	}
 
 }

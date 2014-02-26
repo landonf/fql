@@ -72,6 +72,25 @@ public class Mapping {
 		this.am = am;
 	}
 */
+	
+	public MapExp.Const toConst() {
+		List<Pair<String, String>> objs = new LinkedList<>();
+		List<Pair<String, String>> attrs = new LinkedList<>();
+		List<Pair<String, List<String>>> arrows = new LinkedList<>();
+		
+		for (Node n : source.nodes) {
+			objs.add(new Pair<>(n.string, nm.get(n).string));
+		}
+		for (Attribute<Node> a : source.attrs) {
+			attrs.add(new Pair<>(a.name, am.get(a).name));
+		}
+		for (Edge e : source.edges) {
+			arrows.add(new Pair<>(e.name, em.get(e).asList()));
+		}
+		
+		return new MapExp.Const(objs, attrs, arrows, source.toConst(), target.toConst());
+	}
+	
 	public Mapping(boolean b, Signature src, Signature dst, LinkedHashMap<Node, Node> nm,
 			LinkedHashMap<Edge, Path> em,
 			LinkedHashMap<Attribute<Node>, Attribute<Node>> am) throws FQLException {

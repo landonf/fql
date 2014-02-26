@@ -28,6 +28,7 @@ import fql.decl.MapExp.Fst;
 import fql.decl.MapExp.Id;
 import fql.decl.MapExp.Inl;
 import fql.decl.MapExp.Inr;
+import fql.decl.MapExp.Iso;
 import fql.decl.MapExp.MapExpVisitor;
 import fql.decl.MapExp.Prod;
 import fql.decl.MapExp.Snd;
@@ -51,15 +52,6 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 			final Signature base, final Signature exp) {
 		try {
 			return Inst.stuff(base, exp);
-			// System.out.println(xxx);
-			// Quad<Signature, Pair<Map<Mapping, String>, Map<String, Mapping>>,
-			// Pair<Map<Arr<Mapping, Map<Node, Path>>, String>, Map<String,
-			// Arr<Mapping, Map<Node, Path>>>>, Pair<Map<Attribute<Mapping>,
-			// String>, Map<String, Attribute<Mapping>>>> yyy =
-			// xxx.toSig(env.enums);
-			// return yyy;
-			// Signature ret = yyy.first;
-			// return ret.toConst();
 		} catch (FQLException fe) {
 			fe.printStackTrace();
 			throw new RuntimeException(fe.getMessage());
@@ -1045,6 +1037,27 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 	@Override
 	public fql.decl.SigExp.Const visit(FQLProgram env, Unknown e) {
 		throw new RuntimeException("Encountered unknown type.");
+	}
+
+	@Override
+	public Const visit(FQLProgram env, Iso e) {
+		try {
+		Signature l = e.l.toSig(env);
+		Signature r = e.r.toSig(env);
+		
+		Pair<Mapping, Mapping> s = Inst.iso(l, r);
+		if (s == null) {
+			throw new RuntimeException("Cannot find isomorphism for " + e);
+		}
+		if (e.lToR) {
+			return s.first.toConst();
+		} else {
+			return s.second.toConst();
+		}
+		} catch (FQLException fe) {
+			fe.printStackTrace();
+			throw new RuntimeException(fe.getMessage());
+		}
 	}
 
 }

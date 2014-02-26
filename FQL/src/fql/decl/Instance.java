@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -1198,10 +1199,14 @@ public class Instance {
 		for (Node n : sig.nodes) {
 			String k = n.string;
 
-			List<Map<Object, Object>> i1i2 = Inst.bijections(
+			Object i1i2X = Inst.bijections(
 					dedupl(i1.data.get(k)), dedupl(i2.data.get(k)));
-			List<Map<Object, Object>> i2i1 = Inst.bijections(
+			Object i2i1X = Inst.bijections(
 					dedupl(i2.data.get(k)), dedupl(i1.data.get(k)));
+
+			
+			List<Map<Object, Object>> i1i2 = (List<Map<Object, Object>>) i1i2X;
+			List<Map<Object, Object>> i2i1 = (List<Map<Object, Object>>) i2i1X;
 
 			subs1.put(k, i1i2);
 			subs2.put(k, i2i1);

@@ -3,6 +3,7 @@ package fql.cat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,6 +39,227 @@ import fql.decl.Signature;
  */
 public class Inst<Obj, Arrow, Y, X> {
 
+	public static Pair<Mapping, Mapping> iso(Signature a, Signature b)
+			throws FQLException {
+		List<Mapping> ls = bistuff(b, a);
+	//	System.out.println("ls " + ls);
+		if (ls == null) {
+			return null;
+		}
+		List<Mapping> rs = bistuff(a, b);
+	//	System.out.println("rs " + rs);
+		if (rs == null) {
+			return null;
+		}
+
+		Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> a1 = a
+				.toCategory2();
+		Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> b1 = b
+				.toCategory2();
+
+	/*	for (Node aa : a1.first.objects) {
+			for (Node bb : a1.first.objects) {
+				System.out.println("hom " + aa + " " + bb + " " + a1.first.hom(aa, bb).size());
+			}
+		}
+		System.out.println("**");
+		for (Node aa : b1.first.objects) {
+			for (Node bb : b1.first.objects) {
+				System.out.println("hom " + aa + " " + bb + " " + b1.first.hom(aa, bb).size());
+			}
+		} */
+		
+		for (Mapping l : ls) {
+			inner: for (Mapping r : rs) {
+				for (Node n : a.nodes) {
+					if (!n.equals(r.nm.get(l.nm.get(n)))) {
+						continue inner;
+					}
+				}
+				for (Node m : b.nodes) {
+					if (!m.equals(l.nm.get(r.nm.get(m)))) {
+						continue inner;
+					}
+				}
+				for (Attribute<Node> n : a.attrs) {
+					if (!n.equals(r.am.get(l.am.get(n)))) {
+						continue inner;
+					}
+				}
+				for (Attribute<Node> m : b.attrs) {
+					if (!m.equals(l.am.get(r.am.get(m)))) {
+						continue inner;
+					}
+				}
+				for (Edge n : a.edges) {
+					if (!a1.second.of(new Path(a, n)).equals(
+							a1.second.of(r.appy(l.em.get(n))))) {
+						continue inner;
+					}
+				}
+				for (Edge m : b.edges) {
+					if (!b1.second.of(new Path(b, m)).equals(
+							b1.second.of(l.appy(r.em.get(m))))) {
+						continue inner;
+					}
+				}
+				return new Pair<>(l, r);
+			}
+		}
+
+		return null;
+	}
+
+	public static List<Mapping> bistuff(Signature base, Signature exp)
+			throws FQLException {
+
+		if (base.nodes.size() != exp.nodes.size()) {
+			return null;
+		}
+		if (base.attrs.size() != exp.attrs.size()) {
+			return null;
+		}
+
+		Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> xxx = base
+				.toCategory2();
+		FinCat<Node, Path> base0 = xxx.first;
+		Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> yyy = exp
+				.toCategory2();
+		FinCat<Node, Path> exp0 = yyy.first;
+
+		if (xxx.first.arrows.size() != yyy.first.arrows.size()) {
+			return null;
+		}
+
+		List<LinkedHashMap<Node, Node>> nms = bijections(exp.nodes, base.nodes);
+
+//		 System.out.println("nms " + nms);
+
+		// List<Mapping> mappings = new LinkedList<>();
+
+		// List<Triple<Map<Node, Node>, Map<Node, Attribute<Node>>, Map<Edge,
+		// Path>>> temp = new LinkedList<>();
+
+		// List<Map<Node, Pair<List<Map<Attribute<Node>, Attribute<Node>>>,
+		// Map<Node, List<Map<Arr<Node, Path>, Arr<Node, Path>>>>>>> oml = new
+		// LinkedList<>();
+		List<Mapping> ret = new LinkedList<>();
+		outmost: for (LinkedHashMap<Node, Node> nm : nms) {
+	//		System.out.println(nm);
+			// Map<Node, Pair<List<Map<Attribute<Node>, Attribute<Node>>>,
+			// Map<Node, List<Map<Arr<Node, Path>, Arr<Node, Path>>>>>> om
+			// = new HashMap<>();
+			Map<Pair<Node, Node>, List<LinkedHashMap<Arr<Node, Path>, Arr<Node, Path>>>> bijm = new HashMap<>();
+			Map<Node, List<LinkedHashMap<Attribute<Node>, Attribute<Node>>>> atm = new HashMap<>();
+			for (Node s : nm.keySet()) {
+				List<Attribute<Node>> sa = exp.attrsFor(s);
+				List<Attribute<Node>> ta = base.attrsFor(nm.get(s));
+				if (sa.size() != ta.size()) {
+					continue outmost;
+				}
+				List<LinkedHashMap<Attribute<Node>, Attribute<Node>>> am = bijections(
+						sa, ta);
+				Iterator<LinkedHashMap<Attribute<Node>, Attribute<Node>>> it = am
+						.iterator();
+				outer: while (it.hasNext()) {
+					Map<Attribute<Node>, Attribute<Node>> k = it.next();
+					for (Entry<Attribute<Node>, Attribute<Node>> v : k
+							.entrySet()) {
+						if (!v.getKey().target.equals(v.getValue().target)) {
+							it.remove();
+							continue outer;
+						}
+					}
+				}
+				if (am.isEmpty() && !sa.isEmpty()) {
+					continue outmost;
+				}
+				atm.put(s, am);
+				// System.out.println("am " + am);
+				// Map<Pair<Node, Node>, List<Map<Arr<Node, Path>, Arr<Node,
+				// Path>>>> bijm = new HashMap<>();
+				Node sx = nm.get(s);
+				for (Node t : nm.keySet()) {
+					Set<Arr<Node, Path>> h1 = exp0.hom(s, t);
+					Node st = nm.get(t);
+					Set<Arr<Node, Path>> h2 = base0.hom(sx, st);
+					if (h1.size() != h2.size()) {
+	/*					 System.out.println("exp0 hom " + s + " " + t +
+						 " size " + h1.size());
+						 System.out.println("base0 hom " + sx + " " + st +
+						 " size " + h2.size()); */
+						continue outmost;
+					}
+					List<LinkedHashMap<Arr<Node, Path>, Arr<Node, Path>>> bij = bijections(
+							new LinkedList<>(h1), new LinkedList<>(h2));
+					//System.out.println("hit " + s + " " + t + " " + bij);
+					if (!bij.isEmpty()) {
+						bijm.put(new Pair<>(s, t), bij);
+					}
+				}
+				// om.put(s, new Pair<>(am, bijm));
+			}
+		
+			// oml.add(om);
+		//	 System.out.println("bijm " + bijm);
+			List<LinkedHashMap<Pair<Node, Node>, LinkedHashMap<Arr<Node, Path>, Arr<Node, Path>>>> bijmX = homomorphs(bijm);
+			// System.out.println("bijmX " + bijmX);
+			// System.out.println("atm " + atm);
+			List<LinkedHashMap<Node, LinkedHashMap<Attribute<Node>, Attribute<Node>>>> atmX = homomorphs(atm);
+			// System.out.println("atmX " + atmX);
+
+			List<LinkedHashMap<Arr<Node, Path>, Arr<Node, Path>>> bijmZ = new LinkedList<>();
+			for (LinkedHashMap<Pair<Node, Node>, LinkedHashMap<Arr<Node, Path>, Arr<Node, Path>>> k : bijmX) {
+				LinkedHashMap<Arr<Node, Path>, Arr<Node, Path>> bijmY = new LinkedHashMap<>();
+				for (Entry<Pair<Node, Node>, LinkedHashMap<Arr<Node, Path>, Arr<Node, Path>>> v : k
+						.entrySet()) {
+					bijmY.putAll(v.getValue());
+				}
+				bijmZ.add(bijmY);
+			}
+
+			List<LinkedHashMap<Attribute<Node>, Attribute<Node>>> atmZ = new LinkedList<>();
+			for (LinkedHashMap<Node, LinkedHashMap<Attribute<Node>, Attribute<Node>>> k : atmX) {
+				LinkedHashMap<Attribute<Node>, Attribute<Node>> atmY = new LinkedHashMap<>();
+				for (Entry<Node, LinkedHashMap<Attribute<Node>, Attribute<Node>>> v : k
+						.entrySet()) {
+					atmY.putAll(v.getValue());
+				}
+				atmZ.add(atmY);
+			}
+			if (exp.attrs.isEmpty()) {
+				atmZ.add(new LinkedHashMap<Attribute<Node>, Attribute<Node>>());
+			}
+			if (exp.edges.isEmpty()) {
+				bijmZ.add(new LinkedHashMap<Arr<Node, Path>, Arr<Node, Path>>());
+			}
+
+//			 System.out.println("bijmZ " + bijmZ);
+//			 System.out.println("atmZ " + atmZ);
+
+			for (Map<Arr<Node, Path>, Arr<Node, Path>> f : bijmZ) {
+				LinkedHashMap<Edge, Path> em = new LinkedHashMap<>();
+				for (Edge e : exp.edges) {
+					// System.out.println("yyy.second.of " + yyy.second.of(new
+					// Path(exp, e)));
+					// System.out.println(f);
+					em.put(e, f.get(yyy.second.of(new Path(exp, e))).arr);
+				}
+				for (LinkedHashMap<Attribute<Node>, Attribute<Node>> g : atmZ) {
+					try {
+						Mapping m = new Mapping(true, exp, base, nm, em, g);
+						ret.add(m);
+					} catch (FQLException fe) {
+						//fe.printStackTrace(); 
+					}
+				}
+			}
+			//break;
+		}
+
+		return ret;
+	}
+
 	// base^exp
 	public static FinCat<Mapping, Map<Node, Path>> stuff(Signature base,
 			Signature exp) throws FQLException {
@@ -51,7 +273,7 @@ public class Inst<Obj, Arrow, Y, X> {
 
 		List<LinkedHashMap<Node, Node>> nms = homomorphs(exp.nodes, base.nodes);
 
-		// System.out.println(nms);
+//		 System.out.println(nms);
 
 		List<Mapping> mappings = new LinkedList<>();
 
@@ -80,10 +302,10 @@ public class Inst<Obj, Arrow, Y, X> {
 			List<LinkedHashMap<Attribute<Node>, Attribute<Node>>> ams0 = homomorphs(ams);
 			List<LinkedHashMap<Edge, Path>> ems0 = homomorphs(ems);
 
-			if (ams0.isEmpty()) {
+			if (exp.attrs.isEmpty()) {
 				ams0.add(new LinkedHashMap<Attribute<Node>, Attribute<Node>>());
 			}
-			if (ems0.isEmpty()) {
+			if (exp.edges.isEmpty()) {
 				ems0.add(new LinkedHashMap<Edge, Path>());
 			}
 
@@ -91,10 +313,10 @@ public class Inst<Obj, Arrow, Y, X> {
 				for (LinkedHashMap<Edge, Path> em : ems0) {
 					try {
 						Mapping m = new Mapping(true, exp, base, nm, em, am);
-					//	System.out.println(m);
+					//	 System.out.println("*****" + m);
 						mappings.add(m);
 					} catch (Exception e) {
-					//	e.printStackTrace();
+					//	 e.printStackTrace();
 					}
 				}
 			}
@@ -116,28 +338,28 @@ public class Inst<Obj, Arrow, Y, X> {
 					map.put(n, p);
 				}
 				List<LinkedHashMap<Node, Path>> map0 = homomorphs(map);
-			//	System.out.println("on " + s + " and " + t
-			//			+ " trans cands are " + map0);
+				// System.out.println("on " + s + " and " + t
+				// + " trans cands are " + map0);
 				outer: for (Map<Node, Path> k : map0) {
 					for (Node x : k.keySet()) {
 						for (Node y : k.keySet()) {
 							for (Arr<Node, Path> f : exp0.hom(x, y)) {
-				//				System.out.println("f " + f.arr.toLong());
-					//			System.out
-						//				.println("kgetx " + k.get(x).toLong());
-						//		System.out.println("tappy "
-							//			+ t.appy(f.arr).toLong()); 
+								// System.out.println("f " + f.arr.toLong());
+								// System.out
+								// .println("kgetx " + k.get(x).toLong());
+								// System.out.println("tappy "
+								// + t.appy(f.arr).toLong());
 								Path lhs = Path.append(base, k.get(x),
 										t.appy(f.arr));
 								Path rhs = Path.append(base, s.appy(f.arr),
 										k.get(y));
-							//	System.out.println("for " + k + " x " + x
-								//		+ " y " + y + " lhs " + lhs + " rhs "
-									//	+ rhs);
+								// System.out.println("for " + k + " x " + x
+								// + " y " + y + " lhs " + lhs + " rhs "
+								// + rhs);
 								if (!xxx.second.of(lhs).equals(
 										xxx.second.of(rhs))) {
 									continue outer;
-								}				
+								}
 							}
 						}
 					}
@@ -152,9 +374,13 @@ public class Inst<Obj, Arrow, Y, X> {
 			for (Node n : m.source.nodes) {
 				map.put(n, new Path(m.target, m.nm.get(n)));
 			}
-			identities.put(m, (new Arr<>(map, m, m)));
+			Arr<Mapping, Map<Node, Path>> uuu = new Arr<>(map, m, m);
+			identities.put(m, new Arr<>(map, m, m));
+			if (!arrows.contains(uuu)) {
+				arrows.add(uuu);
+			}
 		}
-	//	System.out.println("identities " + identities);
+		// System.out.println("identities " + identities);
 		Map<Pair<Arr<Mapping, Map<Node, Path>>, Arr<Mapping, Map<Node, Path>>>, Arr<Mapping, Map<Node, Path>>> composition = new HashMap<>();
 		for (Arr<Mapping, Map<Node, Path>> a1 : arrows) {
 			for (Arr<Mapping, Map<Node, Path>> a2 : arrows) {
@@ -163,41 +389,20 @@ public class Inst<Obj, Arrow, Y, X> {
 				}
 				Map<Node, Path> m = new HashMap<>();
 				for (Node n : exp.nodes) {
-					m.put(n, xxx.second.of(Path.append(base, a1.arr.get(n), a2.arr.get(n))).arr);
+					m.put(n, xxx.second.of(Path.append(base, a1.arr.get(n),
+							a2.arr.get(n))).arr);
 				}
 				composition.put(new Pair<>(a1, a2),
 						new Arr<>(m, a1.src, a2.dst));
 			}
 		}
-		//System.out.println(composition);
+		// System.out.println(composition);
 		return new FinCat<>(mappings, arrows, composition, identities);
 	}
 
-	/*
-	 * public static void main(String[] args) { Map<String, List<String>> map =
-	 * new HashMap<>();
-	 * 
-	 * List<String> l1 = new LinkedList<>(); l1.add("a"); l1.add("b");
-	 * l1.add("c");
-	 * 
-	 * List<String> l2 = new LinkedList<>(); l2.add("x"); l2.add("y");
-	 * 
-	 * map.put("l1", l1); map.put("l2", l1); map.put("l3", l1);
-	 * 
-	 * System.out.println(homomorphs(map)); }
-	 */
-	/*
-	 * public static void main(String[] args) { List<String> A = new
-	 * LinkedList<>(); List<String> B = new LinkedList<>();
-	 * 
-	 * A.add("a"); A.add("b"); A.add("c"); // A.add("d"); B.add("x");
-	 * B.add("y"); B.add("z"); System.out.println("bijections " + bijections(A,
-	 * B)); System.out.println("morphisms " + homomorphs(A, B)); }
-	 */
-
-	public static <Obj, Arrow, Y, X> List<Map<Obj, Map<Value<Y, X>, Value<Y, X>>>> morphsX(
-			Map<Obj, List<Map<Value<Y, X>, Value<Y, X>>>> map) {
-		List<Map<Obj, Map<Value<Y, X>, Value<Y, X>>>> ret = new LinkedList<>();
+	public static <Obj, Arrow, Y, X> List<LinkedHashMap<Obj, LinkedHashMap<Value<Y, X>, Value<Y, X>>>> morphsX(
+			LinkedHashMap<Obj, List<LinkedHashMap<Value<Y, X>, Value<Y, X>>>> map) {
+		List<LinkedHashMap<Obj, LinkedHashMap<Value<Y, X>, Value<Y, X>>>> ret = new LinkedList<>();
 
 		List<Obj> A = new LinkedList<>(map.keySet());
 		int[] sizes = new int[A.size()];
@@ -222,10 +427,10 @@ public class Inst<Obj, Arrow, Y, X> {
 		return ret;
 	}
 
-	private static <Obj, Arrow, Y, X> Map<Obj, Map<Value<Y, X>, Value<Y, X>>> make5(
+	private static <Obj, Arrow, Y, X> LinkedHashMap<Obj, LinkedHashMap<Value<Y, X>, Value<Y, X>>> make5(
 			int[] counters, List<Obj> A,
-			Map<Obj, List<Map<Value<Y, X>, Value<Y, X>>>> B) {
-		Map<Obj, Map<Value<Y, X>, Value<Y, X>>> ret = new HashMap<>();
+			LinkedHashMap<Obj, List<LinkedHashMap<Value<Y, X>, Value<Y, X>>>> B) {
+		LinkedHashMap<Obj, LinkedHashMap<Value<Y, X>, Value<Y, X>>> ret = new LinkedHashMap<>();
 		int i = 0;
 		for (Obj x : A) {
 			ret.put(x, B.get(x).get(counters[i++]));
@@ -243,13 +448,13 @@ public class Inst<Obj, Arrow, Y, X> {
 		}
 	}
 
-	public static <Obj, Arrow, Y, X> Map<Obj, List<Map<Value<Y, X>, Value<Y, X>>>> morphs2(
+	public static <Obj, Arrow, Y, X> LinkedHashMap<Obj, List<LinkedHashMap<Value<Y, X>, Value<Y, X>>>> morphs2(
 			Inst<Obj, Arrow, Y, X> i1, Inst<Obj, Arrow, Y, X> i2) {
-		Map<Obj, List<Map<Value<Y, X>, Value<Y, X>>>> ret = new HashMap<>();
+		LinkedHashMap<Obj, List<LinkedHashMap<Value<Y, X>, Value<Y, X>>>> ret = new LinkedHashMap<>();
 
 		for (Obj o : i1.cat.objects) {
 
-			List<Map<Value<Y, X>, Value<Y, X>>> morphs3 = bijections(
+			List<LinkedHashMap<Value<Y, X>, Value<Y, X>>> morphs3 = bijections(
 					new LinkedList<>(i1.applyO(o)),
 					new LinkedList<>(i2.applyO(o)));
 
@@ -319,12 +524,17 @@ public class Inst<Obj, Arrow, Y, X> {
 		// + " morphs " + B.size() + " and " + A.size());
 
 		if (A.size() == 0) {
+			ret.add(new LinkedHashMap<X,Y>());
 			return ret;
 		}
-
 		if (B.size() == 0) {
-			throw new RuntimeException();
+			return ret;
 		}
+		
+
+//		if (B.size() == 0) {
+//			throw new RuntimeException();
+//		}
 
 		int[] counters = new int[A.size() + 1];
 
@@ -351,23 +561,26 @@ public class Inst<Obj, Arrow, Y, X> {
 
 	//
 
-	public static <X> List<Map<X, X>> bijections(List<X> A, List<X> B) {
-		List<Map<X, X>> ret = new LinkedList<>();
+	public static <X> List<LinkedHashMap<X, X>> bijections(List<X> A, List<X> B) {
+		List<LinkedHashMap<X, X>> ret = new LinkedList<>();
 
 		// System.out.println("Expecting " + Math. + " morphs " + B.size() +
 		// " and " + A.size());
 
-		if (A.size() == 0) {
-			return ret;
-		}
 
-		if (B.size() == 0) {
-			throw new RuntimeException();
-		}
+//		if (B.size() == 0) {
+//			throw new RuntimeException();
+//		}
 
 		if (A.size() != B.size()) {
 			throw new RuntimeException();
 		}
+		
+		if (A.size() == 0 ) {
+			ret.add(new LinkedHashMap<X,X>());
+			return ret;
+		}
+
 
 		List<Integer> seq = new LinkedList<>();
 		for (int i = 0; i < A.size(); i++) {
@@ -380,7 +593,7 @@ public class Inst<Obj, Arrow, Y, X> {
 		// System.out.println(xxx);
 
 		for (List<Integer> l : xxx) {
-			Map<X, X> m = new HashMap<>();
+			LinkedHashMap<X, X> m = new LinkedHashMap<>();
 			int j = 0;
 			for (Integer i : l) {
 				m.put(A.get(j), B.get(i));
@@ -417,14 +630,16 @@ public class Inst<Obj, Arrow, Y, X> {
 
 		Set<SetFunTrans<Obj, Arrow, Y, X>> ret = new HashSet<>();
 
-		Map<Obj, List<Map<Value<Y, X>, Value<Y, X>>>> x = morphs2(i1, i2);
+		LinkedHashMap<Obj, List<LinkedHashMap<Value<Y, X>, Value<Y, X>>>> x = morphs2(
+				i1, i2);
 
-		List<Map<Obj, Map<Value<Y, X>, Value<Y, X>>>> y = morphsX(x);
+		List<LinkedHashMap<Obj, LinkedHashMap<Value<Y, X>, Value<Y, X>>>> y = morphsX(x);
 
-		for (Map<Obj, Map<Value<Y, X>, Value<Y, X>>> map : y) {
+		for (LinkedHashMap<Obj, LinkedHashMap<Value<Y, X>, Value<Y, X>>> map : y) {
 			try {
-				SetFunTrans<Obj, Arrow, Y, X> xxx = new SetFunTrans<>(map, i1,
-						i2);
+				Map<Obj, Map<Value<Y, X>, Value<Y, X>>> uuu = (Map<Obj, Map<Value<Y, X>, Value<Y, X>>>) ((Object) map);
+				SetFunTrans<Obj, Arrow, Y, X> xxx = new SetFunTrans<Obj, Arrow, Y, X>(
+						uuu, i1, i2);
 				xxx.validate();
 				ret.add(xxx);
 			} catch (FQLException e) {

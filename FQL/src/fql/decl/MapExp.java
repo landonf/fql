@@ -35,6 +35,63 @@ public abstract class MapExp {
 				new LinkedList<String>()));
 	}
 	
+	public static class Iso extends MapExp {
+		
+		public Iso(boolean lToR, SigExp l, SigExp r) {
+			this.lToR = lToR;
+			this.l = l;
+			this.r = r;
+		}
+		@Override
+		public String toString() {
+			if (lToR) {
+				return "iso1 " + l + " " + r;
+			} else {
+				return "iso2 " + l + " " + r;
+			}
+		}
+		
+		boolean lToR;
+		SigExp l, r;
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((l == null) ? 0 : l.hashCode());
+			result = prime * result + (lToR ? 1231 : 1237);
+			result = prime * result + ((r == null) ? 0 : r.hashCode());
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Iso other = (Iso) obj;
+			if (l == null) {
+				if (other.l != null)
+					return false;
+			} else if (!l.equals(other.l))
+				return false;
+			if (lToR != other.lToR)
+				return false;
+			if (r == null) {
+				if (other.r != null)
+					return false;
+			} else if (!r.equals(other.r))
+				return false;
+			return true;
+		}
+		@Override
+		public <R, E> R accept(E env, MapExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+	}
+	
 	public static class Sub extends MapExp {
 		SigExp s, t;
 
@@ -1047,6 +1104,7 @@ public abstract class MapExp {
 		public R visit(E env, Prod e);
 		public R visit(E env, Sub e);
 		public R visit(E env, Opposite e);
+		public R visit(E env, Iso e);
 	}
 
 	public String printNicely(FQLProgram p) {
