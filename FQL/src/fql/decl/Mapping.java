@@ -147,6 +147,7 @@ public class Mapping {
 
 	}
 
+	//luckily equality of linked maps doesn't take order into account
 	public LinkedHashMap<Node, Node> nm = new LinkedHashMap<>();
 	public LinkedHashMap<Edge, Path> em = new LinkedHashMap<>();
 	public LinkedHashMap<Attribute<Node>, Attribute<Node>> am = new LinkedHashMap<>();

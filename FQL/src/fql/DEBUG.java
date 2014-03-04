@@ -120,7 +120,7 @@ public class DEBUG implements Serializable {
 
 	public int MAX_PATH_LENGTH = 8;
 
-	public int MAX_DENOTE_ITERATIONS = 64;
+	public int MAX_DENOTE_ITERATIONS = 65536;
 
 	public boolean ALL_GR_PATHS = false;
 

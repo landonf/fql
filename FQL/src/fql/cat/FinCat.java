@@ -157,7 +157,13 @@ public class FinCat<Obj, Arrow> {
 		return identities.get(o);
 	}
 
+	Map<Pair<Obj,Obj>, Set<Arr<Obj, Arrow>>> cached = new HashMap<>();
 	public Set<Arr<Obj, Arrow>> hom(Obj A, Obj B) {
+		Pair<Obj,Obj> p = new Pair<>(A,B);
+		Set<Arr<Obj, Arrow>> retX = cached.get(p);
+		if (retX != null) {
+			return retX;
+		}
 		if (!objects.contains(A)) {
 			throw new RuntimeException(A.toString() + " not in " + objects);
 		}
@@ -170,6 +176,7 @@ public class FinCat<Obj, Arrow> {
 				ret.add(a);
 			}
 		}
+		cached.put(p, ret);
 		return ret;
 	}
 

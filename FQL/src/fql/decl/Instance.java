@@ -54,6 +54,20 @@ import fql.parse.PrettyPrinter;
 
 public class Instance {
 
+	public Set<Object> getNode(Node n) {
+		Set<Object> ret = new HashSet<>();
+		for (Pair<Object, Object> k : data.get(n.string)) {
+			ret.add(k.first);
+		}
+		return ret;
+	}
+	public Map<Object, Object> getNode2(Node n) {
+		Map<Object, Object> ret = new HashMap<>();
+		for (Pair<Object, Object> k : data.get(n.string)) {
+			ret.put(k.first, k.second);
+		}
+		return ret;
+	}
 
 	// TODO better drop handling, by kind, visitor
 
@@ -198,14 +212,14 @@ public class Instance {
 		return x;
 	}
 
-	public static Set<Pair<Object, Object>> compose(
-			Set<Pair<Object, Object>> x, Set<Pair<Object, Object>> y) {
-		Set<Pair<Object, Object>> ret = new HashSet<>();
+	public static <X, Y, Z> Set<Pair<X, Z>> compose(
+			Set<Pair<X, Y>> x, Set<Pair<Y, Z>> y) {
+		Set<Pair<X, Z>> ret = new HashSet<>();
 
-		for (Pair<Object, Object> p1 : x) {
-			for (Pair<Object, Object> p2 : y) {
+		for (Pair<X, Y> p1 : x) {
+			for (Pair<Y, Z> p2 : y) {
 				if (p1.second.equals(p2.first)) {
-					Pair<Object, Object> p = new Pair<>(p1.first, p2.second);
+					Pair<X, Z> p = new Pair<>(p1.first, p2.second);
 					ret.add(p);
 				}
 			}
@@ -1741,15 +1755,18 @@ public class Instance {
 	// return ret;
 	// }
 
-	public static Instance terminal(Signature s, String g) throws FQLException {
+	public static Instance terminal(Signature s, String init) throws FQLException {
 		List<Pair<String, List<Pair<Object, Object>>>> ret = new LinkedList<>();
 
 		int i = 0;
+		String g = init;
 		Map<Node, String> map = new HashMap<>();
 		for (Node node : s.nodes) {
+//			System.out.println("i is" + i);
+//			System.out.println("g is" + g);
 			List<Pair<Object, Object>> tuples = new LinkedList<>();
 
-			if (g == null) {
+			if (init == null) {
 				g = Integer.toString(i);
 			}
 
@@ -1769,6 +1786,8 @@ public class Instance {
 		// return null;
 		return new Instance(s, ret);
 	}
+	
+	
 
 	public Inst<Node, Path, Object, Object> toFunctor2() throws FQLException {
 		FinCat<Node, Path> cat = thesig.toCategory2().first;

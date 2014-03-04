@@ -48,7 +48,18 @@ public class GraphExample extends Example {
 + "\ninstance I = delta F Components"
 + "\n"
 + "\n//gives the transform from the original graph to the connected components"
-+ "\ntransform t = I.return";
++ "\ntransform t = I.return"
++ "\n"
++ "\n//has 1 row"
++ "\ninstance Loops=pi F G"
++ "\n"
++ "\n//puts 1 row into vertex, 1 row into arrow, corresponding to the single loop."
++ "\ninstance J = delta F Loops"
++ "\n"
++ "\n//gives the transform including the subgraph of instances into the original graph."
++ "\ntransform u = J.coreturn";
+
+;
 
 
 }

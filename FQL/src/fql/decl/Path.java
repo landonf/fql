@@ -43,7 +43,7 @@ public class Path  {
 
 	public Path(Signature schema, List<String> strings) throws FQLException {
 		if (strings.isEmpty()) {
-			throw new FQLException("Empty path");
+			throw new RuntimeException("Empty path");
 		}
 
 		path = new LinkedList<Edge>();
@@ -51,7 +51,7 @@ public class Path  {
 		String head = strings.get(0);
 		source = schema.getNode(head);
 		if (source == null) {
-			throw new FQLException("bad path: " + strings);
+			throw new RuntimeException("bad path: " + strings);
 		}
 
 		target = source;
@@ -59,22 +59,22 @@ public class Path  {
 			String string = strings.get(i);
 			Edge e = schema.getEdge(string);
 			if (e == null) {
-				throw new FQLException("bad path: " + strings);
+				throw new RuntimeException("bad path: " + strings);
 			}
 			if (schema.getNode(source.string) == null) {
-				throw new FQLException("bad path: " + strings);
+				throw new RuntimeException("bad path: " + strings);
 			}
 			if (schema.getNode(target.string) == null) {
-				throw new FQLException("bad path: " + strings);
+				throw new RuntimeException("bad path: " + strings);
 			}
 			if (!e.source.equals(target)) {
-				throw new FQLException("bad path: " + strings);
+				throw new RuntimeException("bad path: " + strings);
 			}
 
 			path.add(e);
 			target = e.target;
 			if (target == null) {
-				throw new FQLException("bad path: " + strings);
+				throw new RuntimeException("bad path: " + strings);
 			}
 		}
 	}
@@ -151,8 +151,8 @@ public class Path  {
 		this(a, foo(a2));
 	}
 
-	public static Path append(Signature s, Path arr, Path arr2)
-			throws FQLException {
+	public static Path append(Signature s, Path arr, Path arr2) {
+//			throws FQLException {
 		if (!arr.target.equals(arr2.source)) {
 			throw new RuntimeException("bad path append " + arr.toLong() + " and " + arr2.toLong());
 		}
@@ -160,7 +160,12 @@ public class Path  {
 		List<String> y = new LinkedList<>(arr2.asList());
 		y.remove(0);
 		x.addAll(y);
-		return new Path(s, x);
+		try {
+			return new Path(s, x);
+		} catch (FQLException fe) {
+			fe.printStackTrace();
+			throw new RuntimeException(fe.getMessage());
+		}
 	}
 	
 	public static Path append2(Signature s, Path arr2, Path arr)

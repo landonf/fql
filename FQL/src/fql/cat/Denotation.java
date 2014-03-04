@@ -61,9 +61,23 @@ public class Denotation {
 	static int LIMIT = 20, INC = 1;
 
 	Signature xxxSig;
-
+/*
 	public Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> toCategory(
 			Signature sig) throws FQLException {
+		/*
+		this.sig = sig;
+
+		B = sig;
+		A = B.onlyObjects();
+		X = A.terminal("-1");
+		F = subset(A, B);
+		R = B.eqs;
+
+		initTables();
+		makeJTables();
+		interp = new PSMInterp();
+		
+		
 		xxxSig = sig;
 		if (!enumerate(DEBUG.debug.MAX_DENOTE_ITERATIONS)) {
 			throw new FQLException(
@@ -71,7 +85,7 @@ public class Denotation {
 		}
 
 		return toCategoryHelper(sig, true);
-	}
+	} */
 	/*
 	private Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> catInv() throws FQLException {
 		List<Node> objects = B.nodes;
@@ -1656,7 +1670,7 @@ public class Denotation {
 			}
 		}
 	}
-
+/*
 	public void updateView(int x) throws FQLException {
 		enumerate(x);
 		for (Node n : etables0.keySet()) {
@@ -1680,7 +1694,7 @@ public class Denotation {
 				ut.get(n).setDataVector(graph(utables.get(n)), utables0.get(n));
 			}
 		}
-	}
+	} */
 	
 /*	void showView(String s) {
 		JPanel p = new JPanel(new GridLayout(1,1));
@@ -1691,13 +1705,13 @@ public class Denotation {
 		f.setSize(300, 300);
 		f.show();
 	} */
-
+/*
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public JTabbedPane view(int l) throws FQLException {
 		enumerate(l);
 		return viewCurrent();
 	}
-	
+	*/
 	private JTabbedPane viewCurrentX() {
 		JTabbedPane t = new JTabbedPane();
 
@@ -1803,7 +1817,7 @@ public class Denotation {
 		}
 		return t;
 	}
-
+/*
 	private JTabbedPane viewCurrent() {
 		JTabbedPane t = new JTabbedPane();
 
@@ -1874,8 +1888,8 @@ public class Denotation {
 			t.addTab("Universal Tables", makePanels(m));
 		}
 		return t;
-	}
-
+	} */
+/*
 	private Triple<JPanel, JPanel, JPanel> toCat() {
 		JPanel p = new JPanel(new GridLayout(1, 1));
 		JTextArea a = new JTextArea();
@@ -1905,7 +1919,7 @@ public class Denotation {
 
 		return new Triple<>(p, q, rr);
 	}
-
+*/ /*
 	private JPanel makeNormalizer(final Fn<Path, Arr<Node, Path>> f) {
 		final JPanel ret = new JPanel(new BorderLayout());
 
@@ -1933,9 +1947,9 @@ public class Denotation {
 		ret.add(b, BorderLayout.PAGE_END);
 
 		return ret;
-	}
+	} */
 
-	public JPanel view() throws FQLException {
+/*	public JPanel view() throws FQLException {
 		final JPanel ret = new JPanel(new BorderLayout());
 
 		JTabbedPane t = view(0);
@@ -1966,8 +1980,8 @@ public class Denotation {
 		});
 
 		ret.setBorder(BorderFactory.createEtchedBorder());
-		return ret;
-	}
+		return ret; 
+	} */
 
 	private <X, Y> Object[][] graph2(List<X[]> list, int n) {
 		Object[][] ret = new Object[list.size()][n];

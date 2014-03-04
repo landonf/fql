@@ -3,12 +3,18 @@ package fql.decl;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
-import java.awt.Paint;
+import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Point2D;
 import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.Comparator;
@@ -37,16 +43,19 @@ import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
+import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
+import edu.uci.ics.jung.visualization.renderers.Renderer;
 import edu.uci.ics.jung.visualization.renderers.VertexLabelRenderer;
+import edu.uci.ics.jung.visualization.transform.shape.GraphicsDecorator;
 import fql.DEBUG;
 import fql.FQLException;
 import fql.Pair;
-import fql.Triple;
+import fql.Quad;
 import fql.cat.Arr;
 import fql.cat.FinCat;
 import fql.parse.PrettyPrinter;
@@ -346,16 +355,16 @@ public class Transform {
 		return "{\n " + nm + "}";
 	}
 
-	private Pair<Graph<Triple<Node, Object, String>, Pair<Path, Integer>>, HashMap<Triple<Node, Object, String>, Map<Attribute<Node>, Object>>> build(
+	private Pair<Graph<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>>, HashMap<Quad<Node, Object, String, Boolean>, Map<Attribute<Node>, Object>>> build(
 			String src_n, String dst_n) throws FQLException {
 		FinCat<Node, Path> c = src.thesig.toCategory2().first;
-		HashMap<Triple<Node, Object, String>, Map<Attribute<Node>, Object>> map = new HashMap<>();
+		HashMap<Quad<Node, Object, String, Boolean>, Map<Attribute<Node>, Object>> map = new HashMap<>();
 
-		Graph<Triple<Node, Object, String>, Pair<Path, Integer>> g2 = new DirectedSparseMultigraph<>();
+		Graph<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>> g2 = new DirectedSparseMultigraph<>();
 		for (Node n : c.objects) {
 			for (Pair<Object, Object> o : src.data.get(n.string)) {
-				Triple<Node, Object, String> xx = new Triple<>(n, o.first,
-						src_n);
+				Quad<Node, Object, String, Boolean> xx = new Quad<>(n, o.first,
+						src_n, true);
 				g2.addVertex(xx);
 
 				List<Attribute<Node>> attrs = src.thesig.attrsFor(n);
@@ -369,8 +378,8 @@ public class Transform {
 		}
 
 		int j = 0;
-		for (Triple<Node, Object, String> x : g2.getVertices()) {
-			for (Triple<Node, Object, String> y : g2.getVertices()) {
+		for (Quad<Node, Object, String, Boolean> x : g2.getVertices()) {
+			for (Quad<Node, Object, String, Boolean> y : g2.getVertices()) {
 				if (!x.third.equals(y.third)) {
 					continue;
 				}
@@ -391,8 +400,8 @@ public class Transform {
 
 		for (Node n : c.objects) {
 			for (Pair<Object, Object> o : dst.data.get(n.string)) {
-				Triple<Node, Object, String> xx = new Triple<>(n, o.first,
-						dst_n);
+				Quad<Node, Object, String, Boolean> xx = new Quad<>(n, o.first,
+						dst_n, false);
 				g2.addVertex(xx);
 
 				List<Attribute<Node>> attrs = dst.thesig.attrsFor(n);
@@ -405,8 +414,8 @@ public class Transform {
 			}
 		}
 
-		for (Triple<Node, Object, String> x : g2.getVertices()) {
-			for (Triple<Node, Object, String> y : g2.getVertices()) {
+		for (Quad<Node, Object, String, Boolean> x : g2.getVertices()) {
+			for (Quad<Node, Object, String, Boolean> y : g2.getVertices()) {
 				Set<Arr<Node, Path>> h = c.hom(x.first, y.first);
 				for (Arr<Node, Path> arr : h) {
 					if (c.isId(arr)) {
@@ -426,8 +435,8 @@ public class Transform {
 			Set<Pair<Object, Object>> v = data.get(k);
 			for (Pair<Object, Object> i : v) {
 				Node n = src.thesig.getNode(k);
-				g2.addEdge(new Pair<Path, Integer>(null, j++), new Triple<>(n,
-						i.first, src_n), new Triple<>(n, i.second, dst_n));
+				g2.addEdge(new Pair<Path, Integer>(null, j++), new Quad<>(n,
+						i.first, src_n, true), new Quad<>(n, i.second, dst_n, false));
 			}
 		}
 
@@ -458,10 +467,10 @@ public class Transform {
 	//	return c;
 	//}
 
-	public JComponent lowerComp() {
+	public JComponent lowerComp(String s, String d) {
 		int size = src.thesig.nodes.size();
 
-		JPanel pan = new JPanel(new GridLayout(1, size));
+		JPanel pan = new JPanel(new GridLayout(1, size + 1));
 		for (Node n : src.thesig.nodes) {
 			JLabel l = new JLabel(n.string);
 			l.setOpaque(true);
@@ -469,10 +478,25 @@ public class Transform {
 			l.setBackground(src.thesig.colors.get(n.string));
 			pan.add(l);
 		}
+		
+		JPanel xxx = new JPanel();
+		//xxx.add(new JLabel(" "));
+		JPanel yu = new MyLabel2();
+		yu.setSize(20, 12);
+		xxx.add(new MyLabel2());
+		xxx.add(new JLabel(s + " (source)"));
+		xxx.add(new JLabel("    "));
+		JPanel uy = new MyLabel();
+		uy.setSize(20,12);
+		xxx.add(uy);
+		xxx.add(new JLabel(d + " (target)"));
+		pan.add(xxx);
+		
 		pan.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Legend"));
-		
-		return new JScrollPane(pan);
+		JScrollPane p = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		p.setViewportView(pan);
+		return p;
 	} 
 	
 
@@ -480,8 +504,8 @@ public class Transform {
 	public JPanel doView(
 			final String src_n,
 			final String dst_n,
-			Graph<Triple<Node, Object, String>, Pair<Path, Integer>> first,
-			HashMap<Triple<Node, Object, String>, Map<Attribute<Node>, Object>> second) throws FQLException {
+			Graph<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>> first,
+			HashMap<Quad<Node, Object, String, Boolean>, Map<Attribute<Node>, Object>> second) throws FQLException {
 
 		// HashMap<Pair<Node, Object>,String> map = new HashMap<>();
 		JPanel cards = new JPanel(new CardLayout());
@@ -489,7 +513,7 @@ public class Transform {
 		try {
 			Class<?> c = Class.forName(DEBUG.layout_prefix + DEBUG.debug.trans_graph);
 			Constructor<?> x = c.getConstructor(Graph.class);
-			Layout<Triple<Node, Object, String>, Pair<Path, Integer>> layout = (Layout<Triple<Node, Object, String>, Pair<Path, Integer>>) x.newInstance(first);
+			Layout<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>> layout = (Layout<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>>) x.newInstance(first);
 
 		// Layout<V, E>, BasicVisualizationServer<V,E>
 //		Layout<Triple<Node, Object, String>, Pair<Path, Integer>> layout = new FRLayout<>(
@@ -501,15 +525,15 @@ public class Transform {
 		// BasicVisualizationServer<String, String> vv = new
 		// BasicVisualizationServer<String, String>(
 		// layout);
-		VisualizationViewer<Triple<Node, Object, String>, Pair<Path, Integer>> vv = new VisualizationViewer<>(
+		VisualizationViewer<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>> vv = new VisualizationViewer<>(
 				layout);
 		//vv.setPreferredSize(new Dimension(600, 350));
 		// Setup up a new vertex to paint transformer...
-		Transformer<Triple<Node, Object, String>, Paint> vertexPaint = new Transformer<Triple<Node, Object, String>, Paint>() {
-			public Paint transform(Triple<Node, Object, String> i) {
+	/*	Transformer<Quad<Node, Object, String, Boolean>, Paint> vertexPaint = new Transformer<Quad<Node, Object, String, Boolean>, Paint>() {
+			public Paint transform(Quad<Node, Object, String, Boolean> i) {
 				return src.thesig.colors.get(i.first.string);
 			}
-		};
+		}; */
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
@@ -534,7 +558,7 @@ public class Transform {
 				return bs;
 			}
 		};
-		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+		//vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 		vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
 		// vv.getRenderContext().setVertexLabelTransformer(
 		// new ToStringLabeller<String>());
@@ -556,20 +580,21 @@ public class Transform {
 		// vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
 
 		vv.getRenderContext().setVertexLabelTransformer(
-				new ToStringLabeller<Triple<Node, Object, String>>() {
+				new ToStringLabeller<Quad<Node, Object, String, Boolean>>() {
 
 					@Override
-					public String transform(Triple<Node, Object, String> t) {
+					public String transform(Quad<Node, Object, String, Boolean> t) {
 						return t.third + "." + t.first + "."
 								+ t.second.toString();
 					}
 
 				});
+		vv.getRenderer().setVertexRenderer(new MyRenderer());
 
 		JPanel ret = new JPanel(new BorderLayout());
 		JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 
-		for (Triple<Node, Object, String> n : first.getVertices()) {
+		for (Quad<Node, Object, String, Boolean> n : first.getVertices()) {
 			Map<Attribute<Node>, Object> s = second.get(n);
 
 			Object[] columnNames = new Object[s.keySet().size()];
@@ -606,7 +631,7 @@ public class Transform {
 		cards.setPreferredSize(new Dimension(400, 100));
 
 		ret.add(pane, BorderLayout.CENTER);
-		ret.add(lowerComp(), BorderLayout.NORTH);
+		ret.add(lowerComp(src_n, dst_n), BorderLayout.NORTH);
 		ret.setBorder(BorderFactory.createEtchedBorder());
 		return ret;
 		} catch (Throwable t) {
@@ -617,7 +642,7 @@ public class Transform {
 
 	public JPanel makePanel(String src_n, String dst_n) {
 		try {
-			Pair<Graph<Triple<Node, Object, String>, Pair<Path, Integer>>, HashMap<Triple<Node, Object, String>, Map<Attribute<Node>, Object>>> g = build(
+			Pair<Graph<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>>, HashMap<Quad<Node, Object, String, Boolean>, Map<Attribute<Node>, Object>>> g = build(
 					src_n, dst_n);
 			if (g.first.getVertexCount() == 0) {
 				return new JPanel();
@@ -644,7 +669,7 @@ public class Transform {
 		@Override
 		public <T> Component getVertexLabelRendererComponent(JComponent arg0,
 				Object arg1, Font arg2, boolean arg3, T arg4) {
-			Triple<Node, Object, String> p = (Triple<Node, Object, String>) arg4;
+			Quad<Node, Object, String, Boolean> p = (Quad<Node, Object, String, Boolean>) arg4;
 			if (arg3) {
 				CardLayout c = (CardLayout) cards.getLayout();
 				c.show(cards, p.second.toString());
@@ -654,5 +679,56 @@ public class Transform {
 
 		}
 	}
+	
+	class MyLabel extends JPanel {
+		@Override
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			Graphics2D g2d = (Graphics2D) g;
+			Shape shape = new Ellipse2D.Double(0, 0, 10, 10);
+			g2d.setColor(Color.black);
+			g2d.setPaint(Color.black);
+		//	g2d.draw(shape);
+			g2d.fill(shape);
+		}
+	}
+	class MyLabel2 extends JPanel {
+		@Override
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			Graphics2D g2d = (Graphics2D) g;
+			Shape shape = new Rectangle(0, 0, 26, 26);
+			g2d.setColor(Color.black);
+			g2d.setPaint(Color.black);
+		//	g2d.draw(shape);
+			g2d.fill(shape);
+		}
+	}
+	
+	//Quad<Node, Object, String, Boolean>
+	class  MyRenderer implements Renderer.Vertex<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>> {
+
+		@Override
+		public void paintVertex(
+				RenderContext<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>> rc,
+				Layout<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>> layout,
+				Quad<Node, Object, String, Boolean> vertex) {
+			GraphicsDecorator graphicsContext = rc.getGraphicsContext();
+			Point2D center = layout.transform(vertex);
+			Shape shape = null;
+			//src.thesig.colors.get(n.string)
+			Color color = src.thesig.colors.get(vertex.first.string);
+		//	Shape shape2 = null;
+			if(vertex.fourth) {
+				shape = new Rectangle((int)center.getX()-10, (int)center.getY()-10, 20, 20);
+			} else {
+				shape = new Ellipse2D.Double(center.getX()-10, center.getY()-10, 20, 20);
+			}
+			graphicsContext.setPaint(color);
+	//		graphicsContext.
+			graphicsContext.fill(shape);
+		}
+	}
+
 
 }

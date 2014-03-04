@@ -1,12 +1,15 @@
 package fql.decl;
 
 import java.awt.BasicStroke;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Stroke;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,9 +23,11 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
@@ -44,8 +49,9 @@ import fql.Fn;
 import fql.Pair;
 import fql.Triple;
 import fql.cat.Arr;
-import fql.cat.Denotation;
 import fql.cat.FinCat;
+import fql.cat.LeftKanCat;
+import fql.gui.FQLTextPanel;
 import fql.sql.EmbeddedDependency;
 
 /**
@@ -113,10 +119,12 @@ public class Signature {
 		return s;
 	}
 
+	Map<String, Type> types;
 	public Signature(Map<String, Type> types, List<String> nodes_str,
 			List<Triple<String, String, String>> attrs_str,
 			List<Triple<String, String, String>> arrows,
 			List<Pair<List<String>, List<String>>> equivs) throws FQLException {
+		this.types = types;
 		Set<Node> nodesA = new HashSet<>();
 		List<Edge> edgesA = new LinkedList<>();
 //		List<Edge> edgesX = new LinkedList<>();
@@ -754,15 +762,21 @@ public class Signature {
 		return ret;
 	}
 
-	public Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> toCategory2()
-			throws FQLException {
+	//TODO dangerous
+	Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> cached = null;
+	public Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> toCategory2() throws FQLException {
+		if (cached != null) {
+			return cached;
+		}
+		
+		/*
 		Denotation d = new Denotation(this);
-		Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> ret = d
-				.toCategory(this);
+		cached = d.toCategory(this);
+		*/
+		cached = LeftKanCat.toCategory(this);
+		cached.first.attrs = attrs;
 
-		ret.first.attrs = attrs;
-
-		return ret;
+		return cached;
 	}
 
 	public static List<String> pathToList(Path p) {
@@ -1023,10 +1037,69 @@ public class Signature {
 
 	public JPanel denotation() throws FQLException {
 		if (den == null) {
-			den = new Denotation(this).view();
+			toCategory2();
+			den = makePanel();
 		}
 		return den;
 	}
+	
+	public JPanel makePanel() throws FQLException {
+		JPanel ret = new JPanel(new GridLayout(1,1));
+		JTabbedPane t = new JTabbedPane();
+		
+		JPanel p = new JPanel(new GridLayout(1, 1));
+		JTextArea a = new JTextArea();
+		JPanel q = null;
+		JPanel rr = new JPanel(new GridLayout(1, 1));
+
+		a.setText(cached.first.toString());
+		a.setCaretPosition(0);
+
+		q = makeNormalizer();
+
+		JTextArea ra = new JTextArea(
+		cached.first.toSig(types).first.toString());
+		rr.add(new JScrollPane(ra));
+
+		p.add(new JScrollPane(a));
+
+		t.addTab("Category", p);
+		t.addTab("Signature", rr);
+		t.addTab("Normalizer", q);
+		
+		ret.add(t);
+		return ret;
+	}
+	
+	private JPanel makeNormalizer() {
+		final JPanel ret = new JPanel(new BorderLayout());
+
+		JPanel p = new JPanel(new GridLayout(2, 1));
+		final FQLTextPanel p1 = new FQLTextPanel("Input path", "");
+		final FQLTextPanel p2 = new FQLTextPanel("Normalized path", "");
+		p.add(p1);
+		p.add(p2);
+
+		JButton b = new JButton("Normalize");
+		b.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String s = p1.getText();
+				try {
+					Path path = Path.parsePath(Signature.this, s);
+					Path ap = cached.second.of(path).arr;
+					p2.setText(ap.toString());
+				} catch (FQLException ex) {
+					p2.setText(ex.toString());
+				}
+			}
+		});
+
+		ret.add(p, BorderLayout.CENTER);
+		ret.add(b, BorderLayout.PAGE_END);
+
+		return ret;
+	}
+	
 
 	public Signature onlyObjects() {
 		return new Signature(nodes, new LinkedList<Edge>(),
