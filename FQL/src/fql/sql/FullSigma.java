@@ -8,7 +8,6 @@ import java.util.Set;
 
 import fql.Pair;
 import fql.Quad;
-import fql.Triple;
 import fql.cat.Denotation;
 import fql.decl.Attribute;
 import fql.decl.Edge;
@@ -107,8 +106,8 @@ public class FullSigma extends PSM {
 		for (Integer k : map.keySet()) {
 			Integer v = map.get(k);
 			Map<Object, Object> m = new HashMap<>();
-			m.put("c0", k);
-			m.put("c1", v);
+			m.put("c0", k.toString());
+			m.put("c1", v.toString());
 			ret.add(m);
 		}
 		

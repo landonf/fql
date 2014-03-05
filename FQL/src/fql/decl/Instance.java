@@ -14,7 +14,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +86,9 @@ public class Instance {
 					throw new FQLException("Not reflexive: " + s + " and "
 							+ this);
 				}
+				if (!(p.first instanceof String && p.second instanceof String)) {
+					throw new RuntimeException("Non string IDs in " + this);
+				}
 			}
 		}
 		for (Attribute<Node> a : s.attrs) {
@@ -99,6 +101,12 @@ public class Instance {
 			HashSet<Object> x = new HashSet<>();
 			for (Pair<Object, Object> p : i) {
 				x.add(p.first);
+				if (!(p.first instanceof String)) {
+					throw new RuntimeException("Not string ID in attr " + this);
+				}
+				if (!a.target.in(p.second)) {
+					throw new RuntimeException("Bad attr domain " + this);
+				}
 			}
 			if (data.get(a.source.string).size() != x.size()) {
 				throw new RuntimeException("Instance " + this
@@ -1202,6 +1210,7 @@ public class Instance {
 		return tap;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static boolean iso(Instance i1, Instance i2) {
 		sameNodes(i1, i2);
 		sameEdges(i1, i2);

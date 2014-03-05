@@ -786,7 +786,7 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 			SigExp.Times src = (SigExp.Times) type.first;
 			SigExp.Const A = src.a.toConst(env);
 			SigExp.Const B = src.b.toConst(env);
-			Signature Asig = A.toSig(env);
+			//Signature Asig = A.toSig(env);
 			Signature Bsig = B.toSig(env);
 			
 			if (A.attrs.size() > 0) {
@@ -795,7 +795,7 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 
 			Pair<Quad<fql.decl.SigExp.Const, Const, Const, Fn<Triple<fql.decl.SigExp.Const, Const, Const>, Const>>, Quad<Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>>> AB_stuff = prod(
 					A, B);
-			SigExp.Const AB = AB_stuff.first.first;
+		//	SigExp.Const AB = AB_stuff.first.first;
 			Quad<Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>> maps = AB_stuff.second;
 
 			FinCat<Mapping, Map<Node, Path>> cat = exp(env, C.toSig(env),

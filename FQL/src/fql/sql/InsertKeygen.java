@@ -70,7 +70,7 @@ public class InsertKeygen extends PSM {
 		if (attrs.size() == 0) {
 			Map<Object, Object> m = new HashMap<>();
 			ret.add(m);
-			m.put(col, ++interp.guid);
+			m.put(col, new Integer(++interp.guid).toString());
 			state.put(name, ret);
 		} else {
 			for (Map<Object, Object> row : state.get(r)) {
@@ -78,7 +78,7 @@ public class InsertKeygen extends PSM {
 				for (Object s : row.keySet()) {
 					row0.put(s, row.get(s));
 				}
-				row0.put(col, ++interp.guid);
+				row0.put(col, new Integer(++interp.guid).toString());
 				ret.add(row0);
 			}
 			state.put(name, ret);

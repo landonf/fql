@@ -296,9 +296,9 @@ public class JDBCBridge {
 			at.put("c0", PSM.VARCHAR()); at.put("c1", PSM.VARCHAR()); at.put("c2", PSM.VARCHAR()); at.put("c3", PSM.VARCHAR());
 			ret.add(new CreateTable(k + "_lineage", at , false));
 			if (v.size() != 0) {
-				for (Map<Object, Object> m : v) {
+				//for (Map<Object, Object> m : v) {
 					ret.add(new InsertValues(k + "_lineage", new LinkedList<>(at.keySet()), v));
-				}
+				//}
 			}			
 		}
 
@@ -338,8 +338,8 @@ public class JDBCBridge {
 			Set<Map<Object, Object>> ms = new HashSet<>();
 			while (RS.next() != false) {
 				Map<Object, Object> m = new HashMap<>();
-				m.put("c0", Integer.parseInt(RS.getObject("c0").toString()));
-				m.put("c1", Integer.parseInt(RS.getObject("c1").toString()));
+				m.put("c0", RS.getObject("c0"));
+				m.put("c1", RS.getObject("c1"));
 				ms.add(m);
 			}
 			RS.close();
@@ -385,8 +385,10 @@ public class JDBCBridge {
 			Set<Map<Object, Object>> ms = new HashSet<>();
 			while (RS.next() != false) {
 				Map<Object, Object> m = new HashMap<>();
-				m.put("c0", Integer.parseInt(RS.getObject("c0").toString()));
-				m.put("c1", Integer.parseInt(RS.getObject("c1").toString()));
+				m.put("c0", RS.getObject("c0"));
+				m.put("c1", RS.getObject("c1"));
+//				m.put("c0", Integer.parseInt( RS.getObject("c0").toString()));
+	//			m.put("c1", Integer.parseInt(RS.getObject("c1").toString()));
 				ms.add(m);
 			}
 			RS.close();
@@ -398,7 +400,7 @@ public class JDBCBridge {
 			Set<Map<Object, Object>> ms = new HashSet<>();
 			while (RS.next() != false) {
 				Map<Object, Object> m = new HashMap<>();
-				m.put("c0", Integer.parseInt(RS.getObject("c0").toString()));
+				m.put("c0", RS.getObject("c0"));
 				m.put("c1", RS.getObject("c1"));
 				ms.add(m);
 			}
@@ -411,8 +413,8 @@ public class JDBCBridge {
 			Set<Map<Object, Object>> ms = new HashSet<>();
 			while (RS.next() != false) {
 				Map<Object, Object> m = new HashMap<>();
-				m.put("c0", Integer.parseInt(RS.getObject("c0").toString()));
-				m.put("c1", Integer.parseInt(RS.getObject("c1").toString()));
+				m.put("c0", RS.getObject("c0"));
+				m.put("c1", RS.getObject("c1"));
 				ms.add(m);
 			}
 			RS.close();

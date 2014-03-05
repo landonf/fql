@@ -625,6 +625,7 @@ public class Inst<Obj, Arrow, Y, X> {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <Obj, Arrow, Y, X> Set<SetFunTrans<Obj, Arrow, Y, X>> morphs(
 			Inst<Obj, Arrow, Y, X> i1, Inst<Obj, Arrow, Y, X> i2) {
 

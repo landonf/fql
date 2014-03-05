@@ -482,19 +482,20 @@ public class Transform {
 		JPanel xxx = new JPanel();
 		//xxx.add(new JLabel(" "));
 		JPanel yu = new MyLabel2();
-		yu.setSize(20, 12);
+		//yu.setSize(20, 12);
 		xxx.add(new MyLabel2());
 		xxx.add(new JLabel(s + " (source)"));
 		xxx.add(new JLabel("    "));
 		JPanel uy = new MyLabel();
-		uy.setSize(20,12);
+		//uy.setSize(20,20);
 		xxx.add(uy);
 		xxx.add(new JLabel(d + " (target)"));
 		pan.add(xxx);
+		//pan.set
+		JScrollPane p = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		
 		pan.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Legend"));
-		JScrollPane p = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		p.setViewportView(pan);
 		return p;
 	} 
@@ -631,7 +632,9 @@ public class Transform {
 		cards.setPreferredSize(new Dimension(400, 100));
 
 		ret.add(pane, BorderLayout.CENTER);
-		ret.add(lowerComp(src_n, dst_n), BorderLayout.NORTH);
+		JComponent iii = lowerComp(src_n, dst_n);
+		iii.setPreferredSize(new Dimension(1, 60));
+		ret.add(iii, BorderLayout.NORTH);
 		ret.setBorder(BorderFactory.createEtchedBorder());
 		return ret;
 		} catch (Throwable t) {
@@ -680,6 +683,7 @@ public class Transform {
 		}
 	}
 	
+	@SuppressWarnings("serial")
 	class MyLabel extends JPanel {
 		@Override
 		public void paintComponent(Graphics g) {
@@ -692,6 +696,7 @@ public class Transform {
 			g2d.fill(shape);
 		}
 	}
+	@SuppressWarnings("serial")
 	class MyLabel2 extends JPanel {
 		@Override
 		public void paintComponent(Graphics g) {

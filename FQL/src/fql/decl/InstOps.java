@@ -1113,7 +1113,6 @@ public class InstOps implements
 		return ret;
 	}
 
-	// TODO cache toSig results
 	@Override
 	public List<PSM> visit(String env, Return e) {
 	//	String xxx = "return_temp_xxx";

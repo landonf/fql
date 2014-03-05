@@ -13,6 +13,9 @@ import java.util.Set;
 public class PrettyPrinter {
 
 	public static Object q(Object o) {
+		if (o == null) {
+			return "!!!NULL!!!";
+		}
 		String s = o.toString();
 		if ((s.contains("\t") || s.contains("\n") || s.contains("\r") || s.contains(" ") || s.contains("-") || s.length() == 0) && !s.contains("\"")) {
 			return "\"" + s + "\"";

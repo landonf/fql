@@ -3,6 +3,8 @@ package fql.cat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -17,6 +19,7 @@ import fql.decl.Mapping;
 import fql.decl.Node;
 import fql.decl.Path;
 import fql.decl.Signature;
+import fql.decl.Transform;
 
 public class LeftKan {
 
@@ -24,7 +27,6 @@ public class LeftKan {
 	private Signature A, B;
 	private Mapping F;
 	private Instance X;
-	private Set<Object> rank = new HashSet<>();
 	//Map<Object, Integer> rank = new HashMap<>(); //assumes all IDs globally unique
 	public int fresh; 	
 	
@@ -113,6 +115,17 @@ public class LeftKan {
 			}
 			set.addAll(a);
 			filter(set, y);
+		}
+		
+		lineage.remove(y);
+		for (Integer k : lineage.keySet()) {
+			List<Pair<String, Integer>> v = lineage.get(k);
+			for (Pair<String, Integer> p : v) {
+				if (p.second.equals(y)) {
+					// System.out.println("replace " + uv);
+					p.second = x;
+				}
+			}
 		}
 //		System.out.println("after " + this);
 	}
@@ -265,6 +278,8 @@ public class LeftKan {
 		Pb.get(b2).add(new Pair<>(y,y));
 		Pg.get(g ).add(new Pair<>(x,y));
 		
+		updateLineage(g, x, y);
+		
 //		System.out.println("add " + y + " for " + p);
 		
 		return true;
@@ -298,20 +313,46 @@ public class LeftKan {
 		return ret;
 	}
 	
+	
+	public Map<Integer, List<Pair<String, Integer>>> lineage = new HashMap<>();
+	
+	void updateLineage(Edge col, Integer old, Integer nw) {
+		if (!lineage.containsKey(old)) {
+			lineage.put(old, new LinkedList<Pair<String, Integer>>());
+		}
+		List<Pair<String, Integer>> l = new LinkedList<>(lineage.get(old));
+		l.add(new Pair<>(col.name, old));
+		lineage.put(nw, l);
+	}
+
+	private Instance J;
+	private Transform alpha;
+	
 	public LeftKan(int fresh, Mapping f, Instance x) {
+		this(fresh, f, x, null, null);
+	}
+	public LeftKan(int fresh, Mapping f, Instance x, Transform alpha,
+			Instance J) {
 		A = f.source;
 		B = f.target;
 		F = f;
 		X = x;
 		this.fresh = fresh;
+		this.J = J;
+		this.alpha = alpha;
 		
 		for (Node n : B.nodes) {
 			Pb.put(n, new HashSet<Pair<Integer, Integer>>());
 			Sb.put(n, new HashSet<Pair<Integer, Integer>>());
+			if (alpha != null) {
+				utables.put(n, new HashSet<Pair<Integer, Object>>());
+			}
 		}
 		for (Edge e : B.edges) {
 			Pg.put(e, new HashSet<Pair<Integer, Integer>>());
 		}
+		Set<Object> rank = new HashSet<>();
+
 		for (Node n : A.nodes) {
 			Set<Pair<Object, Integer>> j = new HashSet<>();
 			Set<Pair<Integer, Integer>> i = Pb.get(F.nm.get(n));
@@ -332,13 +373,14 @@ public class LeftKan {
 	
 	@Override
 	public String toString() {
-		return "LeftKan [Pb=" + Pb + ", Pg=" + Pg + ", ua=" + ua + ", Sb=" + Sb
-				+ "]";
+		return "LeftKan [lineage=" + lineage + ", Pb=" + Pb + ", Pg=" + Pg
+				+ ", ua=" + ua + ", Sb=" + Sb + "]";
 	}
 
 	public Map<Node, Set<Pair<Integer, Integer>>> Pb = new HashMap<>(); 
 	public Map<Edge, Set<Pair<Integer, Integer>>> Pg = new HashMap<>();
 	public Map<Node, Set<Pair<Object , Integer>>> ua = new HashMap<>();
+	public Map<Node, Set<Pair<Integer, Object>>> utables = new HashMap<>();
 
 	private Map<Node, Set<Pair<Integer, Integer>>> Sb = new HashMap<>();
 }

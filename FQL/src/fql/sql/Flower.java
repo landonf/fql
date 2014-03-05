@@ -112,6 +112,9 @@ public class Flower extends SQL {
 				// System.out.println(row.get(eq.second));
 				if (row.get(eq.first) != null & row.get(eq.second) != null) {
 					if (!row.get(eq.first).equals(row.get(eq.second))) {
+						if (row.get(eq.first).getClass() != row.get(eq.second).getClass() ) {
+							throw new RuntimeException();
+						}
 						// System.out.println("failed");
 						continue a;
 					}

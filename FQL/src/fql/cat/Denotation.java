@@ -1,14 +1,7 @@
 package fql.cat;
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,27 +9,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSlider;
-import javax.swing.JTabbedPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableRowSorter;
 
 import fql.DEBUG;
 import fql.FQLException;
-import fql.Fn;
 import fql.Pair;
 import fql.Quad;
-import fql.Triple;
 import fql.decl.Attribute;
 import fql.decl.Edge;
 import fql.decl.Eq;
@@ -47,7 +25,6 @@ import fql.decl.Path;
 import fql.decl.Signature;
 import fql.decl.Transform;
 import fql.decl.Type;
-import fql.gui.FQLTextPanel;
 import fql.sql.PSMInterp;
 
 /**
@@ -136,7 +113,7 @@ public class Denotation {
 			throw new FQLException(old_str);
 		}
 */
-
+/*
 	private Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> toCategoryHelper(
 			Signature sig, boolean b) throws FQLException {
 		List<Node> objects = B.nodes;
@@ -198,12 +175,12 @@ public class Denotation {
 			identities.put(n, a);
 			// arrows.add(a);
 		}
-/*		for (Edge e : Ltables.keySet()) {
+		for (Edge e : Ltables.keySet()) {
 			for (Integer i : Ltables.get(e).keySet()) {
 				Path p = fn2.get(i);
 				arrows.add(new Arr<>(p, p.source, p.target));
 			}
-		} */
+		} 
 
 		Fn<Path, Arr<Node, Path>> r2 = new Fn<Path, Arr<Node, Path>>() {
 			@Override
@@ -275,7 +252,7 @@ public class Denotation {
 			}
 
 		};
-	}
+	} */
 
 	public Pair<Instance, Map<Integer, List<Pair<String, Integer>>>> sigma(
 			PSMInterp interp) throws FQLException {
@@ -307,7 +284,7 @@ public class Denotation {
 		Set<Pair<Object, Object>> ret = new HashSet<>();
 
 		for (Entry<Integer, Integer> i : t.entrySet()) {
-			ret.add(new Pair<Object, Object>(i.getKey(), i.getValue()));
+			ret.add(new Pair<Object, Object>(i.getKey().toString(), i.getValue().toString()));
 		}
 
 		return ret;
@@ -326,14 +303,27 @@ public class Denotation {
 		Integer kkk = inter.guid;
 		Instance JJJ0 = null;
 		Transform ttt = null;
+		
+		//the de-attrd t depends on j. t : I =<
 		if (JJJ != null) {
 			inter.guid = xxx;
+
 			Pair<Instance, Map<Attribute<Node>, Map<Object, Object>>> JJJ0X = deAttr(
 					inter, JJJ, F.target);
-			ttt = deAttr(f.target, I, JJJ0X, t);
+
+//			Pair<Instance, Map<Attribute<Node>, Map<Object, Object>>> qqq = deAttr(
+	//				inter, t.dst, F.source);
+		
+			Pair<Instance, Map<Attribute<Node>, Map<Object, Object>>> qqq = delta(f,
+					F, JJJ0X);
+			
+			ttt = deAttr(f.source, I, qqq, t);
+
+
 			JJJ0 = JJJ0X.first;
 			inter.guid = kkk;
 		}
+
 
 		Denotation D = new Denotation(inter, F, I.first, ttt, JJJ0);
 
@@ -345,6 +335,28 @@ public class Denotation {
 		Instance ret = reAttr(D, f.target, j, I.second);
 		// System.out.println(" J " + J);
 		return new Quad<>(ret, D.etables, D.utables, hhh.second);
+	}
+
+	private static Pair<Instance, Map<Attribute<Node>, Map<Object, Object>>> delta(Mapping f0,
+			Mapping f,
+			Pair<Instance, Map<Attribute<Node>, Map<Object, Object>>> p) throws FQLException {
+
+		Map<String, Set<Pair<Object, Object>>> data = new HashMap<>();
+		for (Node n : f.source.nodes) {
+			data.put(n.string, p.first.data.get(f.nm.get(n).string));
+		}
+		for (Edge e : f.source.edges) {
+			data.put(e.name, p.first.evaluate(f.em.get(e)));
+		}
+		
+		Instance J = new Instance(f.source, data);
+		
+		Map<Attribute<Node>, Map<Object, Object>> m = new HashMap<>();
+		for (Attribute<Node> a : f0.source.attrs) {
+			m.put(a, p.second.get(f0.am.get(a)));
+		}
+		
+		return new Pair<>(J, m);
 	}
 
 	// maps fresh ID to attribute
@@ -361,6 +373,9 @@ public class Denotation {
 			// Node n = k.source;
 			Set<Pair<Object, Object>> s = src.first.data.get(k.name);
 			Map<Object, Object> t = dst.second.get(k);
+			if (t == null) {
+				throw new RuntimeException();
+			}
 			for (Pair<Object, Object> i : s) {
 				Object v = src.second.get(k).get(i.first); // v is the constant
 				if (v == null) {
@@ -410,12 +425,12 @@ public class Denotation {
 		for (Attribute<Node> k : thesig.attrs) {
 			Set<Pair<Object, Object>> t = new HashSet<>();
 			for (Pair<Object, Object> v : i.data.get(k.name + "_edge")) {
-				Integer v0 = (Integer) v.second;
+				//Integer v0 = (Integer) v.second;
 				// System.out.println("etables is " + D.etables);
 				// System.out.println("looking for " + k.name);
 				// System.out.println("Map is " + map);
 				// System.out.println("want " + k);
-				Object v1 = getFrom(k, D, map /* ().get(k) */, v0);
+				Object v1 = getFrom(k, D, map /* ().get(k) */, v.second.toString());
 				// System.out.println("v1 is " + v1);
 				t.add(new Pair<Object, Object>(v.first, v1));
 			}
@@ -425,14 +440,17 @@ public class Denotation {
 	}
 
 	private static Object getFrom(Attribute<Node> attr, Denotation D,
-			Map<Object, Object> saved, Integer newkey) {
+			Map<Object, Object> saved, String newkey) {
 		List<Pair<Integer, Object>> pre = new LinkedList<>();
 
 		for (Node kkk : D.etables.keySet()) {
 			Map<Integer, Integer> nt = D.etables.get(kkk);
 			for (Integer k : nt.keySet()) {
-				if (nt.get(k).equals(newkey)) {
-					pre.add(new Pair<>(k, saved.get(k)));
+				if (nt.get(k).toString().equals(newkey)) {
+					if (saved.get(k.toString()) == null) {
+						throw new RuntimeException();
+					}
+					pre.add(new Pair<>(k, saved.get(k.toString())));
 				}
 			}
 		}
@@ -481,13 +499,13 @@ public class Denotation {
 			Set<Pair<Object, Object>> tn = new HashSet<>();
 			Set<Pair<Object, Object>> te = new HashSet<>();
 			for (Pair<Object, Object> v : i.data.get(k.name)) {
-				Integer x = revLookup(ret0, v.second);
+				Object x = revLookup(ret0, v.second);
 				if (x == null) {
 					x = new Integer(inter.guid++);
-					ret0.put(x, v.second);
+					ret0.put(x.toString(), v.second);
 				}
-				tn.add(new Pair<Object, Object>(x, x));
-				te.add(new Pair<Object, Object>(v.first, x));
+				tn.add(new Pair<Object, Object>(x.toString(), x.toString()));
+				te.add(new Pair<Object, Object>(v.first, x.toString()));
 			}
 			ret.put(k, ret0);
 			d.put(k.name, tn);
@@ -496,13 +514,13 @@ public class Denotation {
 		return new Pair<>(new Instance(sig, d), ret);
 	}
 
-	private static Integer revLookup(Map<Object, Object> map, Object x) {
+	private static Object revLookup(Map<Object, Object> map, Object x) {
 		if (x == null) {
 			throw new RuntimeException();
 		}
 		for (Object k : map.keySet()) {
 			if (map.get(k).equals(x)) {
-				return (Integer) k;
+				return k;
 			}
 		}
 		return null;
@@ -625,7 +643,8 @@ public class Denotation {
 	// xxx0 are the column names for display
 
 	// nodes in B
-	Map<Node, Map<Integer, Integer>> utables;// = new HashMap<>();
+	Map<Node, Map<Integer, Integer>> utables;// = new HashMap<>(); //TODO XXX
+	
 	Map<Node, String[]> utables0;// = new HashMap<>();
 
 	// nodes in A
@@ -671,7 +690,7 @@ public class Denotation {
 		initTables();
 		// _FRESH = FRESH_START; // sig.nodes.size();// + sig.edges.size();
 
-		List<Pair<String, JComponent>> l = new LinkedList<>();
+	//	List<Pair<String, JComponent>> l = new LinkedList<>();
 		
 		int xxx = 0;
 		//System.out.println("start");
@@ -749,7 +768,7 @@ public class Denotation {
 		}
 		return true;
 	}
-
+/*
 	private void popup(List<Pair<String, JComponent>> l) {
 		JTabbedPane ret = new JTabbedPane();
 		for (Pair<String, JComponent> k : l) {
@@ -763,7 +782,7 @@ public class Denotation {
 		f.pack();
 		f.setSize(300, 300);
 		f.show();
-	}
+	} */
 
 	@Override
 	public String toString() {
@@ -824,7 +843,7 @@ public class Denotation {
 		List<Pair<String, Integer>> l = new LinkedList<>(lineage.get(old));
 		l.add(new Pair<>(col, old));
 		lineage.put(nw, l);
-	}
+	} 
 
 	private Set<Pair<Node, Integer>> undefinedO() throws FQLException {
 
@@ -844,6 +863,7 @@ public class Denotation {
 					updateLineage(n0.string, i, new Integer(ret));
 
 					if (alpha != null) {
+						System.out.println("1*****");
 						utables.get(n0).put(ret,
 								lookup(alpha.data.get(n0.string), i));
 					}
@@ -856,10 +876,10 @@ public class Denotation {
 			}
 		}
 
-		outer: for (Edge e0 : lkeys) {
+		 for (Edge e0 : lkeys) {
 			Map<Integer, Integer> x = Ltables.get(e0);
 
-			int count = 0;
+			//int count = 0;
 			for (Integer i : x.keySet()) {
 				if (i == null) {
 					throw new RuntimeException("very bad");
@@ -868,7 +888,7 @@ public class Denotation {
 					int ret = fresh();
 					x.put(i, ret);
 					updateLineage(e0.name, i, new Integer(ret));
-					count++;
+				//	count++;
 
 					if (alpha != null) {
 						String sss = e0.name;
@@ -910,8 +930,16 @@ public class Denotation {
 					updateLineage(n0.string, i, new Integer(ret));
 
 					if (alpha != null) {
-						utables.get(n0).put(ret,
+						//System.out.println("2***** ");
+						//System.out.println(utables.keySet());
+						utables.get(F.nm.get(n0)).put(ret,
 								lookup(alpha.data.get(n0.string), i));
+					/*	System.out.println("trigger " + i);
+						System.out.println("alpha " + alpha);
+						System.out.println("J " + J);
+						System.out.println("X " + X);
+						System.out.println("lineage " + lineage);
+						System.out.println(this); */
 					}
 
 					realret.add(new Pair<>(etables1.get(n0), ret));
@@ -939,9 +967,14 @@ public class Denotation {
 						if (sss.endsWith(" id")) {
 							sss = sss.substring(0, sss.length() - 3);
 						}
+//						System.out.println("J " + J);
+	//					System.out.println("utables " + utables);
+		//				System.out.println("alpha " + alpha);
+						//System.out.println("lin " + lineage);
 						Integer xxx = lookup(J.data.get(sss),
 								utables.get(e0.source).get(i));
 						utables.get(e0.target).put(ret, xxx);
+						//System.out.println("ok on " + );
 					}
 
 					realret.add(new Pair<>(e0.target, ret));
@@ -974,6 +1007,8 @@ public class Denotation {
 					updateLineage(n0.string, i, new Integer(ret));
 
 					if (alpha != null) {
+						System.out.println("3*****");
+
 						utables.get(n0).put(ret,
 								lookup(alpha.data.get(n0.string), i));
 					}
@@ -984,7 +1019,7 @@ public class Denotation {
 		}
 
 		// lkeys = shift(lkeys);
-		outer: for (Edge e0 : lkeys) {
+		 for (Edge e0 : lkeys) {
 			Map<Integer, Integer> x = Ltables.get(e0);
 
 		//	int count = 0;
@@ -1026,11 +1061,11 @@ public class Denotation {
 			throw new RuntimeException();
 		}
 		for (Pair<Object, Object> k : set) {
-			if (k.first.equals(i)) {
-				return (Integer) k.second;
+			if (k.first.equals(i.toString())) {
+				return Integer.parseInt(k.second.toString());
 			}
 		}
-		throw new RuntimeException();
+		throw new RuntimeException("Cannot find " + i + " in " + set);
 	}
 
 	private <X> List<X> shift(List<X> l) {
@@ -1198,7 +1233,7 @@ public class Denotation {
 	List<Integer> replacees = new LinkedList<>();
 	private void replace(Pair<Integer, Integer> uv) {
 		// TODO also substitute in lineage - do need to replace columns?
-		List<Pair<Integer, Integer>> ret = new LinkedList<>();
+		//List<Pair<Integer, Integer>> ret = new LinkedList<>();
 		if (uv.second.equals(uv.first)) {
 			throw new RuntimeException("xxx"); //TODO check
 		}
@@ -1386,7 +1421,7 @@ public class Denotation {
 	// if have c -> b, now have
 	private void delete(Pair<Integer, Integer> uv) {
 		//System.out.println("deleting  " + uv);
-		int i = 0;
+		//int i = 0;
 
 		for (;;) {
 		Set<Pair<Integer, Integer>> newX = new HashSet<>(SA);
@@ -1508,6 +1543,7 @@ public class Denotation {
 		for (Node b : B.nodes) {
 			if (alpha != null) {
 				utables.put(b, new HashMap<Integer, Integer>());
+				//System.out.println("add to utable " + b);
 				utables0.put(b, new String[] { "in", "out" });
 			}
 		}
@@ -1597,7 +1633,7 @@ public class Denotation {
 		}
 
 	}
-
+/*
 	private JPanel makePanels(Map<String, JTable> in) {
 		List<JPanel> ret = new LinkedList<>();
 
@@ -1633,7 +1669,7 @@ public class Denotation {
 		return panel;
 
 	}
-
+*/
 	Map<Node, DefaultTableModel> et = new HashMap<>();
 	Map<Edge, DefaultTableModel> lt = new HashMap<>();
 	Map<Eq, DefaultTableModel> rt = new HashMap<>();
@@ -1712,6 +1748,7 @@ public class Denotation {
 		return viewCurrent();
 	}
 	*/
+	/*
 	private JTabbedPane viewCurrentX() {
 		JTabbedPane t = new JTabbedPane();
 
@@ -1817,7 +1854,7 @@ public class Denotation {
 		}
 		return t;
 	}
-/*
+
 	private JTabbedPane viewCurrent() {
 		JTabbedPane t = new JTabbedPane();
 
