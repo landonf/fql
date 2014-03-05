@@ -19,6 +19,8 @@ import fql.decl.Path;
 import fql.decl.Signature;
 
 public class LeftKanCat {
+	
+	
 
 	private static Mapping subset(Signature a, Signature b) throws FQLException {
 		List<Pair<String, String>> obm = new LinkedList<>();

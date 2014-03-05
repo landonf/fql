@@ -8,7 +8,7 @@ import java.util.Set;
 
 import fql.Pair;
 import fql.Quad;
-import fql.cat.Denotation;
+import fql.cat.LeftKanSigma;
 import fql.decl.Attribute;
 import fql.decl.Edge;
 import fql.decl.Instance;
@@ -50,10 +50,10 @@ public class FullSigma extends PSM {
 		try {
 			Instance I = new Instance(C, I0);
 			interp.sigmas.put(pre, interp.guid);
-			Quad<Instance, Map<Node, Map<Integer, Integer>>, Map<Node, Map<Integer, Integer>>, Map<Integer, List<Pair<String, Integer>>>> xxx = Denotation.fullSigmaWithAttrs(interp, f, I, null, null, null);
+			Quad<Instance, Map<Node, Map<Object, Integer>>, Map<Node, Map<Integer, Object>>, Map<Object, List<Pair<String, Object>>>> xxx = LeftKanSigma.fullSigmaWithAttrs(interp, f, I, null, null, null);
 			interp.sigmas2.put(pre, interp.guid);
 			Instance J = xxx.first;
-			Map<Node, Map<Integer, Integer>> yyy = xxx.second;
+			Map<Node, Map<Object, Integer>> yyy = xxx.second;
 
 			for (Node n : C.nodes) {
 				state.put(pre + "_" + n.string + "_e", conv2(yyy.get(n)));				
@@ -70,8 +70,8 @@ public class FullSigma extends PSM {
 			}
 			
 			Set<Map<Object, Object>> l = new HashSet<>();
-			for (Integer k : xxx.fourth.keySet()) {
-				List<Pair<String, Integer>> v = xxx.fourth.get(k);
+			for (Object k : xxx.fourth.keySet()) {
+				List<Pair<String, Object>> v = xxx.fourth.get(k);
 				if (v.isEmpty()) {
 					continue;
 				}
@@ -79,7 +79,7 @@ public class FullSigma extends PSM {
 				m.put("c0", k);
 				boolean first = true;
 				String rest = "";
-				for (Pair<String, Integer> p : v) {
+				for (Pair<String, Object> p : v) {
 					if (first) {
 						first = false;
 						m.put("c1", p.first);
@@ -100,10 +100,10 @@ public class FullSigma extends PSM {
 		
 	}
 
-	private Set<Map<Object, Object>> conv2(Map<Integer, Integer> map) {
+	private Set<Map<Object, Object>> conv2(Map<Object, Integer> map) {
 		Set<Map<Object, Object>> ret = new HashSet<>();
 		
-		for (Integer k : map.keySet()) {
+		for (Object k : map.keySet()) {
 			Integer v = map.get(k);
 			Map<Object, Object> m = new HashMap<>();
 			m.put("c0", k.toString());

@@ -1,5 +1,6 @@
 package fql.sql;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -45,13 +46,14 @@ public class FullSigmaCounit extends PSM {
 						String idX = v.get("c2").toString();
 						String[] cols = v.get("c3").toString().split("\\s+");
 						
-						//System.out.println("initial " + node + " idX " + idX + " cols " + Arrays.toString(cols));
+					//	System.out.println("initial " + node + " idX " + idX + " cols " + Arrays.toString(cols));
 						
 						Set<Map<Object, Object>> subst_inv = state.get(i2 + "_" + node + "_subst_inv");
+					//	System.out.println("i2 is " + i2);
 					//	System.out.println("node is " + node);
-					//	System.out.println("Fn" + F.nm.get(n));
+					//	System.out.println("Fn " + F.nm.get(n));
 					//	System.out.println("Fnode " + F.nm.get(node));
-			//			System.out.println(state.keySet());
+					//	System.out.println(state.keySet());
 					//	System.out.println("subst_inv: " + subst_inv);
 						for (Map<Object, Object> y : subst_inv) {
 							if (y.get("c0").toString().equals(idX)) {

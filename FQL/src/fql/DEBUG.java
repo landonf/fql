@@ -40,11 +40,11 @@ public class DEBUG implements Serializable {
 		H2, NATIVE, JDBC
 	};
 
-	static String[] kan_options = new String[] {
-		"Hybrid (dangerous, fast)", "Parallel (very dangerous, very fast)", "Standard (probably correct, slow)"
-	};
+//	static String[] kan_options = new String[] {
+//		"Hybrid (dangerous, fast)", "Parallel (very dangerous, very fast)", "Standard (probably correct, slow)"
+//	};
 	
-	public String kan_option = kan_options[0];
+//	public String kan_option = kan_options[0];
 	
 	public String instFlow_graph = "ISOMLayout";
 	public String schFlow_graph = "ISOMLayout";
@@ -180,8 +180,8 @@ public class DEBUG implements Serializable {
 
 		JTabbedPane jtb = new JTabbedPane();
 
-		JPanel general1 = new JPanel(new GridLayout(12, 1));
-		JPanel general2 = new JPanel(new GridLayout(12, 1));
+		JPanel general1 = new JPanel(new GridLayout(11, 1));
+		JPanel general2 = new JPanel(new GridLayout(11, 1));
 
 		JPanel sql1 = new JPanel(new GridLayout(10, 1));
 		JPanel sql2 = new JPanel(new GridLayout(10, 1));
@@ -554,10 +554,10 @@ public class DEBUG implements Serializable {
 		lfb.setSelectedItem(look_and_feel);
 		general2.add(lfb);
 		
-		general1.add(new JLabel("Left-Kan Algorithm:"));
-		JComboBox<String> lkb = new JComboBox<>(kan_options);
-		lkb.setSelectedItem(kan_option);
-		general2.add(lkb);
+	//	general1.add(new JLabel("Left-Kan Algorithm:"));
+	//	JComboBox<String> lkb = new JComboBox<>(kan_options);
+	//	lkb.setSelectedItem(kan_option);
+	//	general2.add(lkb);
 		
 		//general1.add(new JLabel());
 		//general2.add(new JLabel());
@@ -649,7 +649,7 @@ public class DEBUG implements Serializable {
 			jdbcClass = jdbcField2.getText();
 			FILE_PATH = fileArea.getText();
 			
-			kan_option =  lkb.getSelectedItem().toString();
+		//	kan_option =  lkb.getSelectedItem().toString();
 			
 			if (!lfb.getSelectedItem().equals(look_and_feel)) {
 				try {

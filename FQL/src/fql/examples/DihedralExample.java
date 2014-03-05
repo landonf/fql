@@ -28,8 +28,8 @@ public class DihedralExample extends Example {
 					+ "\n	G.s.r.s = G.r;"
 					+ "\n}"
 					+ "\n"
-					+ "\n//requires standard left-kan "
-					+ "\n/* schema Dihedral2 = {"
+					+ "\n//alternative presentation "
+					+ "\n schema Dihedral2x = {"
 					+ "\n nodes G;"
 					+ "\n attributes;"
 					+ "\n arrows"
@@ -45,7 +45,7 @@ public class DihedralExample extends Example {
 					+ "\n	G.r.r = G,"
 					+ "\n	G.s.s = G,"
 					+ "\n	G.S0.r.s = G.R0;"
-					+ "\n} */"
+					+ "\n} "
 ;
 
 

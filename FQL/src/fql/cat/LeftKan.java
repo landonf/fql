@@ -25,7 +25,7 @@ public class LeftKan {
 
 	
 	private Signature A, B;
-	private Mapping F;
+	public Mapping F;
 	private Instance X;
 	//Map<Object, Integer> rank = new HashMap<>(); //assumes all IDs globally unique
 	public int fresh; 	
@@ -118,9 +118,9 @@ public class LeftKan {
 		}
 		
 		lineage.remove(y);
-		for (Integer k : lineage.keySet()) {
-			List<Pair<String, Integer>> v = lineage.get(k);
-			for (Pair<String, Integer> p : v) {
+		for (Object k : lineage.keySet()) {
+			List<Pair<String, Object>> v = lineage.get(k);
+			for (Pair<String, Object> p : v) {
 				if (p.second.equals(y)) {
 					// System.out.println("replace " + uv);
 					p.second = x;
@@ -138,6 +138,13 @@ public class LeftKan {
 				}
 			}
 		}
+		if (alpha != null) {
+			for (Node k : utables.keySet()) {
+				Map<Integer, Object> v = utables.get(k);
+				v.remove(y);
+			}
+		}
+
 	}
 	
 	private Pair<Node, Pair<Integer, Integer>> gamma0() {
@@ -278,7 +285,13 @@ public class LeftKan {
 		Pb.get(b2).add(new Pair<>(y,y));
 		Pg.get(g ).add(new Pair<>(x,y));
 		
-		updateLineage(g, x, y);
+		updateLineage(g.name, x, y);
+		
+		if (alpha != null) {
+			Object xxx = lookup(J.data.get(p.second.name),
+				utables.get(p.second.source).get(p.first));
+			utables.get(p.second.target).put(y, xxx);
+		}
 		
 //		System.out.println("add " + y + " for " + p);
 		
@@ -314,14 +327,14 @@ public class LeftKan {
 	}
 	
 	
-	public Map<Integer, List<Pair<String, Integer>>> lineage = new HashMap<>();
+	public Map<Object, List<Pair<String, Object>>> lineage = new HashMap<>();
 	
-	void updateLineage(Edge col, Integer old, Integer nw) {
+	void updateLineage(String col, Object old, Object nw) {
 		if (!lineage.containsKey(old)) {
-			lineage.put(old, new LinkedList<Pair<String, Integer>>());
+			lineage.put(old, new LinkedList<Pair<String, Object>>());
 		}
-		List<Pair<String, Integer>> l = new LinkedList<>(lineage.get(old));
-		l.add(new Pair<>(col.name, old));
+		List<Pair<String, Object>> l = new LinkedList<>(lineage.get(old));
+		l.add(new Pair<>(col, old));
 		lineage.put(nw, l);
 	}
 
@@ -345,7 +358,7 @@ public class LeftKan {
 			Pb.put(n, new HashSet<Pair<Integer, Integer>>());
 			Sb.put(n, new HashSet<Pair<Integer, Integer>>());
 			if (alpha != null) {
-				utables.put(n, new HashSet<Pair<Integer, Object>>());
+				utables.put(n, new HashMap<Integer, Object>());
 			}
 		}
 		for (Edge e : B.edges) {
@@ -365,10 +378,31 @@ public class LeftKan {
 				rank.add(v.first);
 				j.add(new Pair<>(v.first, id));
 				i.add(new Pair<>(id, id));
+				updateLineage(n.string, v.first, new Integer(id));
+
+				if (alpha != null) {
+					utables.get(F.nm.get(n)).put(id,
+						lookup(alpha.data.get(n.string), v.first));
+				}
 			}
 			ua.put(n, j);
 		}
 //		System.out.println("initial: " + this);
+	}
+	
+	private Object lookup(Set<Pair<Object, Object>> set, Object i) {
+		if (i == null) {
+			throw new RuntimeException();
+		}
+		if (set == null) {
+			throw new RuntimeException();
+		}
+		for (Pair<Object, Object> k : set) {
+			if (k.first.equals(i.toString())) {
+				return k.second;
+			}
+		}
+		throw new RuntimeException("Cannot find " + i + " in " + set);
 	}
 	
 	@Override
@@ -380,7 +414,7 @@ public class LeftKan {
 	public Map<Node, Set<Pair<Integer, Integer>>> Pb = new HashMap<>(); 
 	public Map<Edge, Set<Pair<Integer, Integer>>> Pg = new HashMap<>();
 	public Map<Node, Set<Pair<Object , Integer>>> ua = new HashMap<>();
-	public Map<Node, Set<Pair<Integer, Object>>> utables = new HashMap<>();
+	public Map<Node, Map<Integer, Object>> utables = new HashMap<>();
 
 	private Map<Node, Set<Pair<Integer, Integer>>> Sb = new HashMap<>();
 }

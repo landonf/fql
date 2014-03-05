@@ -10,7 +10,7 @@ import java.util.Set;
 import fql.FQLException;
 import fql.Pair;
 import fql.Quad;
-import fql.cat.Denotation;
+import fql.cat.LeftKanSigma;
 import fql.decl.Attribute;
 import fql.decl.Edge;
 import fql.decl.Instance;
@@ -126,7 +126,7 @@ public class FullSigmaTrans extends PSM {
 			
 			Integer current = interp.guid;
 			interp.guid = interp.sigmas.get(src);
-			Quad<Instance, Map<Node, Map<Integer, Integer>>, Map<Node, Map<Integer, Integer>>, Map<Integer, List<Pair<String, Integer>>>> xxx = Denotation
+			Quad<Instance, Map<Node, Map<Object, Integer>>, Map<Node, Map<Integer, Object>>, Map<Object, List<Pair<String, Object>>>> xxx = LeftKanSigma
 					.fullSigmaWithAttrs(interp, f, I, HX, JX,
 							interp.sigmas2.get(src));
 			interp.guid = current;
@@ -181,7 +181,7 @@ public class FullSigmaTrans extends PSM {
 		return ret;
 	}
 
-	private Set<Map<Object, Object>> conv0(Map<Integer, Integer> map) {
+	private Set<Map<Object, Object>> conv0(Map<Integer, Object> map) {
 		Set<Map<Object, Object>> ret = new HashSet<>();
 		for (Integer k : map.keySet()) {
 			Map<Object, Object> m = new HashMap<>();
