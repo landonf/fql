@@ -8,6 +8,13 @@ import java.util.Set;
 
 import fql.DEBUG;
 import fql.Pair;
+import fql.Quad;
+import fql.Triple;
+import fql.decl.Edge;
+import fql.decl.Instance;
+import fql.decl.Node;
+import fql.decl.Path;
+import fql.decl.Transform;
 
 /**
  * 
@@ -24,6 +31,7 @@ public class PSMInterp {
 	public Map<String, Integer> sigmas = new HashMap<>();
 	public Map<String, Integer> sigmas2 = new HashMap<>();
 
+	Map<String, Quad<Instance, Map<Node, Map<Object, Transform>>, Map<Node, Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>>>, Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>>>> exps = new HashMap<>();
 
 	public  Pair<Map<String, Set<Map<Object, Object>>>, List<Throwable>> interpX(List<PSM> prog,
 			Map<String, Set<Map<Object, Object>>> state) {

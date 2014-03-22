@@ -317,10 +317,12 @@ public class FQLParser {
 				Parsers.tuple(term("external"), ident(), ident(), ident()),
 				Parsers.tuple(ident(), term("."), term("unit"), ident()),
 				Parsers.tuple(ident(), term("."), term("void"), ident()),
+				Parsers.tuple(ident(), term("."), term("curry"), ident()),
 				Parsers.tuple(ident(), term("."), term("fst")),
 				Parsers.tuple(ident(), term("."), term("return")),
 				Parsers.tuple(ident(), term("."), term("coreturn")),
 				Parsers.tuple(ident(), term("."), term("snd")),
+				Parsers.tuple(ident(), term("."), term("eval")),
 				Parsers.tuple(ident(), term("."), term("inl")),
 				Parsers.tuple(ident(), term("."), term("inr")),
 				Parsers.tuple(ident(), term("."), term("relationalize")),
@@ -433,6 +435,8 @@ public class FQLParser {
 				return new TransExp.FF(obj, dst);
 			} else if (p.c.toString().equals("unit")) {
 				return new TransExp.TT(obj, dst);
+			} else if (p.c.toString().equals("curry")) {
+				return new TransExp.TransCurry(obj, dst);
 			}
 
 		} catch (RuntimeException re) {
@@ -449,6 +453,8 @@ public class FQLParser {
 
 			if (p3.toString().equals("fst")) {
 				return new TransExp.Fst(p1);
+			} else if (p3.toString().equals("eval")) { 
+				return new TransExp.TransEval(p1);
 			} else if (p3.toString().equals("relationalize")) {
 				return new TransExp.Squash(p1);
 			} else if (p3.toString().equals("snd")) {

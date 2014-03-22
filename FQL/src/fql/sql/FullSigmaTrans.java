@@ -43,7 +43,7 @@ public class FullSigmaTrans extends PSM {
 	String srcH, src;
 	String dstH, dst;
 	String h;
-	String pre;
+	public String pre;
 
 	public FullSigmaTrans(Mapping f, String srcH, String src, String dstH,
 			String dst, String h, String out) {

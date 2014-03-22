@@ -12,6 +12,100 @@ public abstract class TransExp {
 		return accept(p, new TransChecker());
 	}
 	
+	public static class TransCurry extends TransExp {
+		
+		public String inst;
+		public String trans;
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((inst == null) ? 0 : inst.hashCode());
+			result = prime * result + ((trans == null) ? 0 : trans.hashCode());
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			TransCurry other = (TransCurry) obj;
+			if (inst == null) {
+				if (other.inst != null)
+					return false;
+			} else if (!inst.equals(other.inst))
+				return false;
+			if (trans == null) {
+				if (other.trans != null)
+					return false;
+			} else if (!trans.equals(other.trans))
+				return false;
+			return true;
+		}
+		public TransCurry(String inst, String trans) {
+			super();
+			this.inst = inst;
+			this.trans = trans;
+		}
+		public String toString() {
+			return inst + ".curry " + trans;
+		}
+		@Override
+		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+	}	
+	
+	public static class TransEval extends TransExp {
+		
+		public String inst;
+		
+		@Override
+		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+		public TransEval(String inst) {
+			super();
+			this.inst = inst;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((inst == null) ? 0 : inst.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			TransEval other = (TransEval) obj;
+			if (inst == null) {
+				if (other.inst != null)
+					return false;
+			} else if (!inst.equals(other.inst))
+				return false;
+			return true;
+		}
+		
+		@Override
+		public String toString() {
+			return inst + ".eval";
+		}
+		
+	}
+	
 	public static class Return extends TransExp {
 		
 		public String inst;
@@ -1390,8 +1484,8 @@ public abstract class TransExp {
 		public R visit(E env, Pi e);
 		public R visit(E env, Relationalize e);
 		public R visit(E env, Squash e);
-//		public R visit(E env, Apply e);
-	//	public R visit(E env, Curry e);
+		public R visit(E env, TransCurry e);
+		public R visit(E env, TransEval e);
 		public R visit(E env, Case e);
 		public R visit(E env, Prod e);
 		public R visit(E env, External e);

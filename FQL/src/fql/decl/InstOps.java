@@ -28,6 +28,8 @@ import fql.decl.InstExp.Two;
 import fql.decl.TransExp.Case;
 import fql.decl.TransExp.Comp;
 import fql.decl.TransExp.Coreturn;
+import fql.decl.TransExp.TransCurry;
+import fql.decl.TransExp.TransEval;
 import fql.decl.TransExp.FF;
 import fql.decl.TransExp.Fst;
 import fql.decl.TransExp.Id;
@@ -43,6 +45,7 @@ import fql.decl.TransExp.Var;
 import fql.sql.CopyFlower;
 import fql.sql.CreateTable;
 import fql.sql.DropTable;
+import fql.sql.Exp;
 import fql.sql.Flower;
 import fql.sql.FullSigmaCounit;
 import fql.sql.FullSigmaTrans;
@@ -808,7 +811,11 @@ public class InstOps implements
 
 	@Override
 	public Pair<List<PSM>, Object> visit(String dst, fql.decl.InstExp.Exp e) {
-		throw new RuntimeException();
+		List<PSM> ret = new LinkedList<>();
+		
+		ret.add(new Exp(dst, e.a, e.b, prog.insts.get(e.a).type(prog).toSig(prog)));
+		
+		return new Pair<>(ret, new Object());
 	}
 
 	/*
@@ -1332,6 +1339,40 @@ public class InstOps implements
 			throw new RuntimeException();
 		}
 
+		return ret;
+	}
+
+	@Override
+	public List<PSM> visit(String env, TransEval e) {
+		List<PSM> ret = new LinkedList<>();
+		
+		InstExp k = prog.insts.get(e.inst);
+		InstExp.Times t = (InstExp.Times) k;
+		InstExp v = prog.insts.get(t.a);
+		InstExp.Exp i = (InstExp.Exp) v;
+		
+		ret.add(new fql.sql.PSMEval(env, i.a, i.b, t.a, e.inst, t.type(prog).toSig(prog)));
+				
+		//e.inst is a^b*b
+		//t.a is a^b
+		//t.b is b
+		//i.a is a
+		//i.b is b
+				
+		return ret;
+	}
+
+	@Override
+	public List<PSM> visit(String env, TransCurry e) {
+		List<PSM> ret = new LinkedList<>();
+		
+		Signature sig = prog.insts.get(e.inst).type(prog).toSig(prog);
+				
+		Pair<String, String> k = prog.transforms.get(e.trans).type(prog);
+		InstExp.Times t = (InstExp.Times) prog.insts.get(k.first);
+
+		ret.add(new fql.sql.PSMCurry(env, t.a, e.inst, e.trans, k.first, k.second, t.b, sig));		
+		
 		return ret;
 	}
 

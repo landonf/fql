@@ -520,7 +520,7 @@ public abstract class SigExp {
 	}
 
 	public static class Times extends SigExp {
-		SigExp a, b;
+		public SigExp a, b;
 
 		public Times(SigExp a, SigExp b) {
 			this.a = a;
@@ -570,7 +570,7 @@ public abstract class SigExp {
 	}
 
 	public static class Exp extends SigExp {
-		SigExp a, b;
+		public SigExp a, b;
 
 		public Exp(SigExp a, SigExp b) {
 			this.a = a;

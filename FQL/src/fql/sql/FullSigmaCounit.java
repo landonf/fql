@@ -14,7 +14,8 @@ import fql.decl.Node;
 public class FullSigmaCounit extends PSM {
 	
 	Mapping F;
-	String i1, i2, i3, trans;
+	String i1, i2, i3;
+	public String trans;
 	
 	
 	public FullSigmaCounit(Mapping F, String i1, String i2, String i3, String trans) {

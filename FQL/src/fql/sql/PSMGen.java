@@ -20,10 +20,12 @@ import fql.cat.FinCat;
 import fql.cat.FinFunctor;
 import fql.decl.Attribute;
 import fql.decl.Edge;
+import fql.decl.Instance;
 import fql.decl.Mapping;
 import fql.decl.Node;
 import fql.decl.Path;
 import fql.decl.Signature;
+import fql.decl.Transform;
 
 /**
  * 
@@ -991,6 +993,62 @@ public class PSMGen {
 		}
 
 		return ret;
+	}
+
+	public static void shred(String pre, Instance I,
+			Map<String, Set<Map<Object, Object>>> state) {
+		for (Node n : I.thesig.nodes) {
+			Set<Map<Object, Object>> m = new HashSet<>();
+			for (Pair<Object, Object> k : I.data.get(n.string)) {
+				Map<Object, Object> map = new HashMap<>();
+				map.put("c0", k.first);
+				map.put("c1", k.second);
+				m.add(map);
+			}
+			state.put(pre + "_" + n.string, m);
+		}
+		for (Edge n : I.thesig.edges) {
+			Set<Map<Object, Object>> m = new HashSet<>();
+			for (Pair<Object, Object> k : I.data.get(n.name)) {
+				Map<Object, Object> map = new HashMap<>();
+				map.put("c0", k.first);
+				map.put("c1", k.second);
+				m.add(map);
+			}
+			state.put(pre + "_" + n.name, m);
+		}
+		for (Attribute<Node> n : I.thesig.attrs) {
+			Set<Map<Object, Object>> m = new HashSet<>();
+			for (Pair<Object, Object> k : I.data.get(n.name)) {
+				Map<Object, Object> map = new HashMap<>();
+				map.put("c0", k.first);
+				map.put("c1", k.second);
+				m.add(map);
+			}
+			state.put(pre + "_" + n.name, m);
+		}	
+	}
+	
+	public static void shred(String pre, Transform I,
+			Map<String, Set<Map<Object, Object>>> state) {
+		for (Node n : I.src.thesig.nodes) {
+			Set<Map<Object, Object>> m = new HashSet<>();
+			for (Pair<Object, Object> k : I.data.get(n.string)) {
+				Map<Object, Object> map = new HashMap<>();
+				map.put("c0", k.first);
+				map.put("c1", k.second);
+				m.add(map);
+			}
+			state.put(pre + "_" + n.string, m);
+		}
+		for (Edge n : I.src.thesig.edges) {
+			Set<Map<Object, Object>> m = new HashSet<>();
+			state.put(pre + "_" + n.name, m);
+		}
+		for (Attribute<Node> n : I.src.thesig.attrs) {
+			Set<Map<Object, Object>> m = new HashSet<>();
+			state.put(pre + "_" + n.name, m);
+		}	
 	}
 
 }

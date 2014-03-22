@@ -42,7 +42,6 @@ public class FullSigma extends PSM {
 
 	@Override
 	public void exec(PSMInterp interp, Map<String, Set<Map<Object, Object>>> state) {
-		//interp.guid++; //TODO off by one error
 		Signature C = f.source;
 		Signature D = f.target;
 		List<Pair<String, List<Pair<Object, Object>>>> I0 = PSMGen.gather(inst, C, state);

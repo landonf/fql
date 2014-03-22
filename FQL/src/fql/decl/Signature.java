@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
@@ -81,7 +82,7 @@ public class Signature {
 		}
 		return new SigExp.Const(nds, atts, arrs, es);
 	}
-	
+
 	public List<Node> nodes;
 	public List<Edge> edges;
 	public List<Attribute<Node>> attrs;
@@ -120,6 +121,7 @@ public class Signature {
 	}
 
 	Map<String, Type> types;
+
 	public Signature(Map<String, Type> types, List<String> nodes_str,
 			List<Triple<String, String, String>> attrs_str,
 			List<Triple<String, String, String>> arrows,
@@ -127,10 +129,10 @@ public class Signature {
 		this.types = types;
 		Set<Node> nodesA = new HashSet<>();
 		List<Edge> edgesA = new LinkedList<>();
-//		List<Edge> edgesX = new LinkedList<>();
+		// List<Edge> edgesX = new LinkedList<>();
 		Set<Attribute<Node>> attrsA = new HashSet<>();
 		// name0 = n;
-		
+
 		Collections.sort(arrows);
 
 		Set<String> seen = new HashSet<String>();
@@ -329,7 +331,7 @@ public class Signature {
 		edges = e;
 		eqs = ee;
 		attrs = a;
-		//System.out.println("yyyyyy " + edges);
+		// System.out.println("yyyyyy " + edges);
 	}
 
 	private Signature() {
@@ -537,8 +539,9 @@ public class Signature {
 				sb.append(",\n");
 			}
 			first = false;
-			String z =  eq.first.source + "." + eq.first.name + " = " + eq.second.first.source.string + "." + eq.second.first.name + "."
-					+ eq.second.second.name;
+			String z = eq.first.source + "." + eq.first.name + " = "
+					+ eq.second.first.source.string + "."
+					+ eq.second.first.name + "." + eq.second.second.name;
 			sb.append(z);
 		}
 		sb.append("\n");
@@ -552,54 +555,27 @@ public class Signature {
 
 	@Override
 	public String toString() {
-/*		StringBuffer sb = new StringBuffer("{\n");
-
-		boolean first = true;
-		sb.append("nodes\n");
-		for (Node n : nodes) {
-			if (!first) {
-				sb.append(",\n");
-			}
-			first = false;
-			sb.append(n.string);
-		}
-		sb.append("\n ;\n");
-
-		first = true;
-		sb.append("attributes\n");
-		for (Attribute<Node> a : attrs) {
-			if (!first) {
-				sb.append(",\n");
-			}
-			first = false;
-			sb.append(a);
-		}
-		sb.append("\n ;\n");
-
-		first = true;
-		sb.append("arrows\n");
-		for (Edge e : edges) {
-			if (!first) {
-				sb.append(",\n");
-			}
-			first = false;
-			sb.append(e);
-		}
-		// first = true;
-
-		sb.append("\n ;\n");
-
-		first = true;
-		sb.append("equations\n");
-		for (Eq eq : eqs) {
-			if (!first) {
-				sb.append(",\n");
-			}
-			first = false;
-			sb.append(eq);
-		}
-		sb.append("\n ;\n}");
-		return sb.toString(); */
+		/*
+		 * StringBuffer sb = new StringBuffer("{\n");
+		 * 
+		 * boolean first = true; sb.append("nodes\n"); for (Node n : nodes) { if
+		 * (!first) { sb.append(",\n"); } first = false; sb.append(n.string); }
+		 * sb.append("\n ;\n");
+		 * 
+		 * first = true; sb.append("attributes\n"); for (Attribute<Node> a :
+		 * attrs) { if (!first) { sb.append(",\n"); } first = false;
+		 * sb.append(a); } sb.append("\n ;\n");
+		 * 
+		 * first = true; sb.append("arrows\n"); for (Edge e : edges) { if
+		 * (!first) { sb.append(",\n"); } first = false; sb.append(e); } //
+		 * first = true;
+		 * 
+		 * sb.append("\n ;\n");
+		 * 
+		 * first = true; sb.append("equations\n"); for (Eq eq : eqs) { if
+		 * (!first) { sb.append(",\n"); } first = false; sb.append(eq); }
+		 * sb.append("\n ;\n}"); return sb.toString();
+		 */
 		String x = "\n nodes\n";
 		boolean b = false;
 		for (Node n : nodes) {
@@ -617,7 +593,8 @@ public class Signature {
 			if (b) {
 				x += ",\n";
 			}
-			x += "  " + a.name + ": " + a.source.string + " -> " + a.target.toString();
+			x += "  " + a.name + ": " + a.source.string + " -> "
+					+ a.target.toString();
 			b = true;
 		}
 
@@ -630,7 +607,8 @@ public class Signature {
 			if (b) {
 				x += ",\n";
 			}
-			x += "  " + a.name + ": " + a.source.string + " -> " + a.target.string;
+			x += "  " + a.name + ": " + a.source.string + " -> "
+					+ a.target.string;
 			b = true;
 		}
 
@@ -762,17 +740,18 @@ public class Signature {
 		return ret;
 	}
 
-	//TODO dangerous
+	// TODO dangerous
 	Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> cached = null;
-	public Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> toCategory2() throws FQLException {
+
+	public Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> toCategory2()
+			throws FQLException {
 		if (cached != null) {
 			return cached;
 		}
-		
+
 		/*
-		Denotation d = new Denotation(this);
-		cached = d.toCategory(this);
-		*/
+		 * Denotation d = new Denotation(this); cached = d.toCategory(this);
+		 */
 		cached = LeftKanCat.toCategory(this);
 		cached.first.attrs = attrs;
 
@@ -844,7 +823,7 @@ public class Signature {
 
 	@SuppressWarnings("unchecked")
 	public JComponent doView(
-			/* final Environment env, */Graph<String, String> sgv) {
+	/* final Environment env, */Graph<String, String> sgv) {
 		// Layout<V, E>, BasicVisualizationServer<V,E>
 		// Layout<String, String> layout = new FRLayout(sgv);
 
@@ -1042,11 +1021,11 @@ public class Signature {
 		}
 		return den;
 	}
-	
+
 	public JPanel makePanel() throws FQLException {
-		JPanel ret = new JPanel(new GridLayout(1,1));
+		JPanel ret = new JPanel(new GridLayout(1, 1));
 		JTabbedPane t = new JTabbedPane();
-		
+
 		JPanel p = new JPanel(new GridLayout(1, 1));
 		JTextArea a = new JTextArea();
 		JPanel q = null;
@@ -1057,8 +1036,7 @@ public class Signature {
 
 		q = makeNormalizer();
 
-		JTextArea ra = new JTextArea(
-		cached.first.toSig(types).first.toString());
+		JTextArea ra = new JTextArea(cached.first.toSig(types).first.toString());
 		rr.add(new JScrollPane(ra));
 
 		p.add(new JScrollPane(a));
@@ -1066,11 +1044,11 @@ public class Signature {
 		t.addTab("Category", p);
 		t.addTab("Signature", rr);
 		t.addTab("Normalizer", q);
-		
+
 		ret.add(t);
 		return ret;
 	}
-	
+
 	private JPanel makeNormalizer() {
 		final JPanel ret = new JPanel(new BorderLayout());
 
@@ -1099,7 +1077,6 @@ public class Signature {
 
 		return ret;
 	}
-	
 
 	public Signature onlyObjects() {
 		return new Signature(nodes, new LinkedList<Edge>(),
@@ -1322,8 +1299,7 @@ public class Signature {
 		for (Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>> eq : xxx.second) {
 			ret.add(EmbeddedDependency.eq3(pre, eq));
 		}
-		
-		
+
 		return ret;
 	}
 
@@ -1390,15 +1366,15 @@ public class Signature {
 
 		return new Signature(types, o, a, e, cc);
 	}
-	
+
 	public JPanel rdf() {
 		JTextArea ta = new JTextArea(rdfX());
 		JPanel tap = new JPanel(new GridLayout(1, 1));
 		ta.setBorder(BorderFactory.createEmptyBorder());
 		//
 		tap.setBorder(BorderFactory.createEmptyBorder());
-	//	ta.setWrapStyleWord(true);
-	//	ta.setLineWrap(true);
+		// ta.setWrapStyleWord(true);
+		// ta.setLineWrap(true);
 		JScrollPane xxx = new JScrollPane(ta);
 		// xxx.setBorder(BorderFactory.createEmptyBorder());
 		//
@@ -1407,19 +1383,21 @@ public class Signature {
 
 		return tap;
 	}
-	
+
 	public String rdfX() {
 		String xxx = "";
-	//  	String prefix = "fql://entity/"; // + name + "/";
-		
+		// String prefix = "fql://entity/"; // + name + "/";
+
 		for (Node n : nodes) {
 			xxx += "<owl:Class rdf:about=\"fql://node/" + n.string + "\"/>\n";
 			xxx += "\n";
 		}
-	//	xxx += "\n";
+		// xxx += "\n";
 		for (Attribute<Node> a : attrs) {
-			xxx += "<owl:FunctionalProperty rdf:about=\"fql://attribute/" + a.name + "\">\n";
-			xxx += "    <rdfs:domain rdf:resource=\"fql://node/" + a.source.string + "\"/>\n";
+			xxx += "<owl:FunctionalProperty rdf:about=\"fql://attribute/"
+					+ a.name + "\">\n";
+			xxx += "    <rdfs:domain rdf:resource=\"fql://node/"
+					+ a.source.string + "\"/>\n";
 			if (a.target instanceof Type.Int) {
 				xxx += "    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#int\"/>\n";
 			} else {
@@ -1428,69 +1406,154 @@ public class Signature {
 			xxx += "</owl:FunctionalProperty>\n";
 			xxx += "\n";
 		}
-	//	xxx += "\n";
+		// xxx += "\n";
 		for (Edge a : edges) {
-			xxx += "<owl:FunctionalProperty rdf:about=\"fql://arrow/" + a.name + "\">\n";
-			xxx += "    <rdfs:domain rdf:resource=\"fql://node/" + a.source.string + "\"/>\n";
-			xxx += "    <rdfs:range rdf:resource=\"fql://node/" + a.target.string + "\"/>\n";
+			xxx += "<owl:FunctionalProperty rdf:about=\"fql://arrow/" + a.name
+					+ "\">\n";
+			xxx += "    <rdfs:domain rdf:resource=\"fql://node/"
+					+ a.source.string + "\"/>\n";
+			xxx += "    <rdfs:range rdf:resource=\"fql://node/"
+					+ a.target.string + "\"/>\n";
 			xxx += "</owl:FunctionalProperty>\n";
 			xxx += "\n";
 		}
-	//	xxx += "\n";
-		String ret =
-				"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-				"\n<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"" +
-				"\n    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"" +		
-				"\n    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"" +
-				"\n    xmlns:node=\"fql://node/\"" +		
-				"\n    xmlns:arrow=\"fql://arrow/\"" +
-				"\n    xmlns:attribute=\"fql://attribute/\">\n\n" + 
-				xxx
+		// xxx += "\n";
+		String ret = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+				+ "\n<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\""
+				+ "\n    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\""
+				+ "\n    xmlns:owl=\"http://www.w3.org/2002/07/owl#\""
+				+ "\n    xmlns:node=\"fql://node/\""
+				+ "\n    xmlns:arrow=\"fql://arrow/\""
+				+ "\n    xmlns:attribute=\"fql://attribute/\">\n\n"
+				+ xxx
 				+ "<!-- Note: generated OWL schemas do not include path equations, or enforce that properties must be total. -->\n\n"
 				+ "</rdf:RDF>";
 		return ret;
 	}
 
-/*	
-	public String rdfX() {
-		String xxx = "";
-	//  	String prefix = "fql://entity/"; // + name + "/";
-		
+	
+
+	private Triple<Instance, Map<Object, Path>, Map<Path, Object>> rep(
+			IntRef idx, Node c) throws FQLException {
+		Map<Object, Path> m1 = new HashMap<>();
+		Map<Path, Object> m2 = new HashMap<>();
+		Map<String, Set<Pair<Object, Object>>> data = new HashMap<>();
+
+		Pair<Map<Node, Set<Path>>, Map<Edge, Map<Path, Path>>> xxx = rep0(c);
+		Map<Node, Set<Path>> nm = xxx.first;
+		Map<Edge, Map<Path, Path>> em = xxx.second;
+
 		for (Node n : nodes) {
-			xxx += "<rdfs:Class rdf:about=\"fql://node/" + n.string + "\"/>\n";
-			xxx += "\n";
-		}
-	//	xxx += "\n";
-		for (Attribute<Node> a : attrs) {
-			xxx += "<rdf:Property rdf:about=\"fql://attribute/" + a.name + "\">\n";
-			xxx += "    <rdfs:domain rdf:resource=\"fql://node/" + a.source.string + "\"/>\n";
-			if (a.target instanceof Type.Int) {
-				xxx += "    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#int\"/>\n";
-			} else {
-				xxx += "    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n";
+			Set<Path> s = nm.get(n);
+			Set<Pair<Object, Object>> t = new HashSet<>();
+			for (Path p : s) {
+				String str = Integer.toString(++idx.i);
+				m1.put(str, p);
+				if (m2.containsKey(p)) {
+					throw new RuntimeException();
+				}
+				m2.put(p, str);
+				t.add(new Pair<Object, Object>(str, str));
 			}
-			xxx += "</rdf:Property>\n";
-			xxx += "\n";
+			data.put(n.string, t);
 		}
-	//	xxx += "\n";
-		for (Edge a : edges) {
-			xxx += "<rdf:Property rdf:about=\"fql://arrow/" + a.name + "\">\n";
-			xxx += "    <rdfs:domain rdf:resource=\"fql://node/" + a.source.string + "\"/>\n";
-			xxx += "    <rdfs:range rdf:resource=\"fql://node/" + a.target.string + "\"/>\n";
-			xxx += "</rdf:Property>\n";
-			xxx += "\n";
+		for (Edge e : edges) {
+			Map<Path, Path> s = em.get(e);
+			Set<Pair<Object, Object>> t = new HashSet<>();
+			for (Entry<Path, Path> p : s.entrySet()) {
+				t.add(new Pair<Object, Object>(m2.get(p.getKey()), m2.get(p
+						.getValue())));
+			}
+			data.put(e.name, t);
+
 		}
-	//	xxx += "\n";
-		String ret =
-				"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-				"\n<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"" +
-				"\n    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"" +		
-				"\n    xmlns:node=\"fql://node/\"" +		
-				"\n    xmlns:arrow=\"fql://arrow/\"" +
-				"\n    xmlns:attribute=\"fql://attribute/\">\n\n" + 
-				xxx
-				+ "</rdf:RDF>";
-		return ret;
-	} 
-*/
+
+		return new Triple<>(new Instance(this, data), m1, m2);
+	}
+
+	public Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>> repX(
+			IntRef i) throws FQLException {
+		toCategory2();
+		Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>> ret = new HashMap<>();
+		for (Node n : nodes) {
+			ret.put(n, rep(i, n));
+		}
+		Map<Edge, Transform> ret0 = new HashMap<>();
+		for (Edge e : edges) {
+			List<Pair<String, List<Pair<Object, Object>>>> d = new LinkedList<>();
+
+			Triple<Instance, Map<Object, Path>, Map<Path, Object>> s = ret
+					.get(e.source);
+			Triple<Instance, Map<Object, Path>, Map<Path, Object>> t = ret
+					.get(e.target);
+			
+			for (Node n : nodes) {
+				List<Pair<Object, Object>> set = new LinkedList<>();
+				for (Pair<Object, Object> id : t.first.data.get(n.string)) {
+					Arr<Node, Path> uuu = cached.second.of(Path.append(this, new Path(this, e), t.second.get(id.first)));
+				//	System.out.println("uuu " + uuu);
+				//	System.out.println("st" + s.third);
+					set.add(new Pair<>(id.first, s.third.get(uuu.arr)));
+				}
+				d.add(new Pair<>(n.string, set));
+			}
+			ret0.put(e, new Transform(t.first, s.first, d));
+		}
+		return new Pair<>(ret, ret0);
+	}
+
+	private Pair<Map<Node, Set<Path>>, Map<Edge, Map<Path, Path>>> rep0(Node c)
+			throws FQLException {
+		// Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> xxx =
+		// toCategory2();
+		// FinCat<Node, Path> cat = xxx.first;
+		// Fn<Path, Arr<Node, Path>> fn = xxx.second;
+
+		Map<Node, Set<Path>> m1 = new HashMap<>();
+		Map<Edge, Map<Path, Path>> m2 = new HashMap<>();
+
+		for (Node a : nodes) {
+			Set<Path> p = new HashSet<>();
+			for (Arr<Node, Path> arr : cached.first.hom(c, a)) {
+				p.add(arr.arr);
+			}
+			m1.put(a, p);
+		}
+		for (Edge arr : edges) {
+			Map<Path, Path> m = new HashMap<>();
+			for (Path p : m1.get(arr.source)) {
+				m.put(p, cached.second.of(Path.append(this, p, new Path(this,
+						arr))).arr);
+			}
+			m2.put(arr, m);
+		}
+
+		return new Pair<>(m1, m2);
+	}
+
+	/*
+	 * public String rdfX() { String xxx = ""; // String prefix =
+	 * "fql://entity/"; // + name + "/";
+	 * 
+	 * for (Node n : nodes) { xxx += "<rdfs:Class rdf:about=\"fql://node/" +
+	 * n.string + "\"/>\n"; xxx += "\n"; } // xxx += "\n"; for (Attribute<Node>
+	 * a : attrs) { xxx += "<rdf:Property rdf:about=\"fql://attribute/" + a.name
+	 * + "\">\n"; xxx += "    <rdfs:domain rdf:resource=\"fql://node/" +
+	 * a.source.string + "\"/>\n"; if (a.target instanceof Type.Int) { xxx +=
+	 * "    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#int\"/>\n"
+	 * ; } else { xxx +=
+	 * "    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n"
+	 * ; } xxx += "</rdf:Property>\n"; xxx += "\n"; } // xxx += "\n"; for (Edge
+	 * a : edges) { xxx += "<rdf:Property rdf:about=\"fql://arrow/" + a.name +
+	 * "\">\n"; xxx += "    <rdfs:domain rdf:resource=\"fql://node/" +
+	 * a.source.string + "\"/>\n"; xxx +=
+	 * "    <rdfs:range rdf:resource=\"fql://node/" + a.target.string +
+	 * "\"/>\n"; xxx += "</rdf:Property>\n"; xxx += "\n"; } // xxx += "\n";
+	 * String ret = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+	 * "\n<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"" +
+	 * "\n    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"" +
+	 * "\n    xmlns:node=\"fql://node/\"" + "\n    xmlns:arrow=\"fql://arrow/\""
+	 * + "\n    xmlns:attribute=\"fql://attribute/\">\n\n" + xxx + "</rdf:RDF>";
+	 * return ret; }
+	 */
 }

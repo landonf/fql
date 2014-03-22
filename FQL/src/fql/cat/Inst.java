@@ -17,10 +17,12 @@ import fql.Fn;
 import fql.Pair;
 import fql.decl.Attribute;
 import fql.decl.Edge;
+import fql.decl.Instance;
 import fql.decl.Mapping;
 import fql.decl.Node;
 import fql.decl.Path;
 import fql.decl.Signature;
+import fql.decl.Transform;
 
 /**
  * 
@@ -257,6 +259,50 @@ public class Inst<Obj, Arrow, Y, X> {
 			//break;
 		}
 
+		return ret;
+	}
+	
+	// I => J
+	public static List<Transform> hom(Instance I, Instance J) {
+		if (!I.thesig.equals(J.thesig)) {
+			throw new RuntimeException();
+		}
+		
+		List<Transform> ret = new LinkedList<>();
+		
+		Map<Node, List<LinkedHashMap<Pair<Object, Object>, Pair<Object, Object>>>> m = new HashMap<>();
+		for (Node n : I.thesig.nodes) {
+			LinkedList<Pair<Object, Object>> src = new LinkedList<>(I.data.get(n.string));
+			LinkedList<Pair<Object, Object>> dst = new LinkedList<>(J.data.get(n.string));
+			
+			List<LinkedHashMap<Pair<Object, Object>, Pair<Object, Object>>> h = homomorphs(src, dst);
+			m.put(n, h);
+		}
+		List<LinkedHashMap<Node, LinkedHashMap<Pair<Object, Object>, Pair<Object, Object>>>> map = homomorphs(m);
+		
+		for (LinkedHashMap<Node, LinkedHashMap<Pair<Object, Object>, Pair<Object, Object>>> t : map) {
+			try {
+				List<Pair<String, List<Pair<Object, Object>>>> l = new LinkedList<>();
+				for (Entry<Node, LinkedHashMap<Pair<Object, Object>, Pair<Object, Object>>> u : t.entrySet()) {
+					l.add(new Pair<>(u.getKey().string, conv(u.getValue())));
+				}
+				Transform tr = new Transform(I, J, l);
+				ret.add(tr);
+			} catch (Exception e) { }
+		}
+		
+	//	System.out.println("hom size on " + I + "\n" + J + "\n" + ret.size());
+		return ret;
+	}
+
+	private static List<Pair<Object, Object>> conv(
+			LinkedHashMap<Pair<Object, Object>, Pair<Object, Object>> l) {
+		List<Pair<Object, Object>> ret = new LinkedList<>();
+		
+		for (Entry<Pair<Object, Object>, Pair<Object, Object>> k : l.entrySet()) {
+			ret.add(new Pair<>(k.getKey().first, k.getValue().first));
+		}
+		
 		return ret;
 	}
 

@@ -43,6 +43,8 @@ import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import fql.DEBUG;
 import fql.FQLException;
 import fql.Pair;
+import fql.Quad;
+import fql.Triple;
 import fql.cat.Arr;
 import fql.cat.FDM;
 import fql.cat.FinCat;
@@ -1183,7 +1185,7 @@ public class Instance {
 		return ret;
 	} */
 	
-	private Object lookupX(Set<Pair<Object, Object>> set, Object id) {
+	private static Object lookupX(Set<Pair<Object, Object>> set, Object id) {
 		for (Pair<Object, Object> k : set) {
 			if (k.first.equals(id)) {
 				return k.second;
@@ -2099,6 +2101,87 @@ public class Instance {
 		}
 		return true;
 		//return l;
+	}
+	
+	public static Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>> prod(IntRef idx, Instance I, Instance J) throws FQLException {
+		if (!I.thesig.equals(J.thesig)) {
+			throw new RuntimeException();
+		}
+		Map<String, Set<Pair<Object, Object>>> d = new HashMap<>();
+		Map<Object, Pair<Object, Object>> m1 = new HashMap<>();
+		Map<Pair<Object, Object>, Object> m2 = new HashMap<>();
+		
+		for (Node n : I.thesig.nodes) {
+			Set<Pair<Object, Object>> s = new HashSet<>();
+			for (Pair<Object, Object> id1 : I.data.get(n.string)) {
+				for (Pair<Object, Object> id2 : J.data.get(n.string)) {
+					Pair<Object, Object> p = new Pair<>(id1.first, id2.second);
+					String str = Integer.toString(++idx.i);
+					m1.put(str, p);
+					m2.put(p, str);
+					s.add(new Pair<Object, Object>(str, str));
+				}
+			}
+			d.put(n.string, s);
+		}
+		for (Edge e : I.thesig.edges) {
+			Set<Pair<Object, Object>> s = new HashSet<>();
+			for (Pair<Object, Object> k : d.get(e.source.string)) {
+				Pair<Object, Object> y = m1.get(k.first);
+				Object p = m2.get(new Pair<>(lookupX(I.data.get(e.name), y.first),
+				lookupX(J.data.get(e.name), y.second)));
+				s.add(new Pair<>(k.first, p));
+			}
+			d.put(e.name, s);
+		}
+//		System.out.println("d" + d);
+		Instance K = new Instance(I.thesig, d);
+		return new Triple<>(K, m1, m2) ;
+	}
+	
+	public static Quad<Instance, Map<Node, Map<Object, Transform>>, Map<Node, Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>>>, Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>>> exp(IntRef idx, Instance J, Instance I) throws FQLException {
+		//System.out.println("*** " + Inst.hom(I, J).size());
+		
+		Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>> xxx = I.thesig.repX(idx);
+		Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>> nm = xxx.first;
+		Map<Edge, Transform> em = xxx.second;
+		
+		Map<Node, Map<Object, Transform>> map1 = new HashMap<>();
+		Map<Node, Map<Transform, Object>> map2 = new HashMap<>();
+		Map<Node, Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>>> map4 = new HashMap<>();
+		Map<String, Set<Pair<Object, Object>>> data = new HashMap<>();
+
+		for (Node n : I.thesig.nodes) {
+			Map<Object, Transform> m1 = new HashMap<>();
+			Map<Transform, Object> m2 = new HashMap<>();
+			Set<Pair<Object, Object>> d = new HashSet<>();
+			Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>> yyy = prod(idx, I, nm.get(n).first);
+			map4.put(n, yyy);
+			for (Transform t : Inst.hom(yyy.first, J)) {
+				Object str = Integer.toString(++idx.i);
+				m1.put(str, t);
+				m2.put(t, str);
+				d.add(new Pair<>(str, str));
+			}
+			map1.put(n, m1);
+			map2.put(n, m2);
+			data.put(n.string, d);
+		}
+		for (Edge e : I.thesig.edges) {
+			Set<Pair<Object, Object>> d = new HashSet<>();
+			for (Entry<Object, Transform> k : map1.get(e.source).entrySet()) {
+				Transform h0 = em.get(e);
+				Transform h = Transform.prod(I, map4.get(e.target), map4.get(e.source), h0);
+				Transform t = Transform.composeX(h, k.getValue());
+				Object o = map2.get(e.target).get(t);
+				d.add(new Pair<>(k.getKey(), o));
+			}
+			data.put(e.name, d);
+		}
+		
+		Instance IJ = new Instance(I.thesig, data);
+						
+		return new Quad<>(IJ, map1, map4, xxx);
 	}
 
 }

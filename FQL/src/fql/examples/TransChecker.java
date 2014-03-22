@@ -7,6 +7,7 @@ import fql.FQLException;
 import fql.Pair;
 import fql.decl.FQLProgram;
 import fql.decl.InstExp;
+import fql.decl.InstExp.Times;
 import fql.decl.Instance;
 import fql.decl.SigExp;
 import fql.decl.Signature;
@@ -14,6 +15,8 @@ import fql.decl.TransExp.Case;
 import fql.decl.TransExp.Comp;
 import fql.decl.TransExp.Const;
 import fql.decl.TransExp.Coreturn;
+import fql.decl.TransExp.TransCurry;
+import fql.decl.TransExp.TransEval;
 import fql.decl.TransExp.Delta;
 import fql.decl.TransExp.External;
 import fql.decl.TransExp.FF;
@@ -494,5 +497,56 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 			throw new RuntimeException("Can only coreturn a sigma of a delta or a delta of a pi."); 
 		}
 	}
+
+	@Override
+	public Pair<String, String> visit(FQLProgram env, TransEval e) {
+		InstExp k = env.insts.get(e.inst);
+		if (k == null) {
+			throw new RuntimeException("Missing instance: " + e.inst);
+		}
+		if (!(k instanceof InstExp.Times)) {
+			throw new RuntimeException("Not a product: " + k + " in " + e);
+		}
+		InstExp.Times t = (InstExp.Times) k;
+		InstExp v = env.insts.get(t.a);
+		if (!(v instanceof InstExp.Exp)) {
+			throw new RuntimeException("Not an exponential: " + v + " in " + e);
+		}
+		InstExp.Exp i = (InstExp.Exp) v;
+		if (!(t.b.equals(i.b))) {
+			throw new RuntimeException("Exponent and product do not match in " + e);
+		}
+		return new Pair<>(e.inst, i.a);
+	}
+
+	@Override
+	public Pair<String, String> visit(FQLProgram env, TransCurry e) {
+		InstExp inst = env.insts.get(e.inst);
+		if (inst == null) {
+			throw new RuntimeException("Missing instance: " + inst);
+		}
+		if (!(inst instanceof InstExp.Exp)) {
+			throw new RuntimeException("Instance is not an exponential");
+		}
+		InstExp.Exp i = (InstExp.Exp) inst;
+
+		Pair<String, String> k = env.transforms.get(e.trans).accept(env, this);
+		InstExp ab = env.insts.get(k.first);
+		if (!(ab instanceof InstExp.Times)) {
+			throw new RuntimeException("Source is not a product");
+		}
+		Times t = (InstExp.Times) ab;
+		
+		if (!i.a.equals(k.second)) {
+			throw new RuntimeException("Bases do not match");
+		}
+		if (!i.b.equals(t.b)) {
+			throw new RuntimeException("Exponents do not match");
+		}
+		
+		return new Pair<>(t.a, e.inst);
+	}
+	
+	//TODO check circularity
 
 }
