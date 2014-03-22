@@ -12,6 +12,65 @@ public abstract class TransExp {
 		return accept(p, new TransChecker());
 	}
 	
+	public static class TransIso extends TransExp {
+		public boolean lToR;
+		public String l, r;
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((l == null) ? 0 : l.hashCode());
+			result = prime * result + (lToR ? 1231 : 1237);
+			result = prime * result + ((r == null) ? 0 : r.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			TransIso other = (TransIso) obj;
+			if (l == null) {
+				if (other.l != null)
+					return false;
+			} else if (!l.equals(other.l))
+				return false;
+			if (lToR != other.lToR)
+				return false;
+			if (r == null) {
+				if (other.r != null)
+					return false;
+			} else if (!r.equals(other.r))
+				return false;
+			return true;
+		}
+
+		public TransIso(boolean lToR, String l, String r) {
+			super();
+			this.lToR = lToR;
+			this.l = l;
+			this.r = r;
+		}
+
+		@Override
+		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+		public String toString() {
+			if (lToR) {
+				return "iso1 " + l + " " + r;
+			} else {
+				return "iso2 " + l + " " + r;
+			}
+		}
+	}
+	
 	public static class TransCurry extends TransExp {
 		
 		public String inst;
@@ -1491,6 +1550,7 @@ public abstract class TransExp {
 		public R visit(E env, External e);
 		public R visit(E env, Return e);
 		public R visit(E env, Coreturn e);
+		public R visit(E env, TransIso e);
 		
 	}
 

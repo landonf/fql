@@ -55,5 +55,27 @@ public class AutoIsoExample extends Example {
 			+ "\n"
 			+ "\nmapping i2 = iso2 T T1"
 			+ "\nmapping f1 = (i1 then i2)"
-			+ "\nmapping f2 = (i2 then i1)";
+			+ "\nmapping f2 = (i2 then i1)"
+			+ "\n\n////// isomorphisms of instances"
+			+ "\n"
+			+ "\ninstance I = {"
+			+ "\n	nodes a1 -> {a,b}, a2 -> {c,d,e};"
+			+ "\n	attributes;"
+			+ "\n	arrows af -> {(a,c),(b,d)};"
+			+ "\n} : A"
+			+ "\n"
+			+ "\ninstance J = {"
+			+ "\n	nodes a1 -> {u,v}, a2 -> {x,y,z};"
+			+ "\n	attributes;"
+			+ "\n	arrows af -> {(u,x),(v,y)};"
+			+ "\n} : A"
+			+ "\n"
+			+ "\ntransform tx = iso1 I J"
+			+ "\ntransform ty = iso2 I J"
+			+ "\n"
+			+ "\ntransform id1 = (tx then ty)"
+			+ "\ntransform id2 = (ty then tx)"
+;
+
+
 }

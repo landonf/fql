@@ -78,8 +78,8 @@ public class FullSigmaTrans extends PSM {
 	//	System.out.println("H0 is " + H0);
 	//	System.out.println("state is " + state);
 		
-		 List<Pair<String, List<Pair<Object, Object>>>> I0X =
-		 PSMGen.gather(src, D, state);
+		// List<Pair<String, List<Pair<Object, Object>>>> I0X =
+		// PSMGen.gather(src, D, state);
 		List<Pair<String, List<Pair<Object, Object>>>> J0X = PSMGen.gather(dst,
 				D, state);
 

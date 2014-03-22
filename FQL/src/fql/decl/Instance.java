@@ -342,8 +342,8 @@ public class Instance {
 				return secol(p.second);
 			}
 		}
-		throw new RuntimeException("conformsTo failure: cannot find " + string
-				+ " in " + data2);
+		throw new RuntimeException("conformsTo failure: cannot find table " + string);
+//				+ " in " + data2);
 	}
 
 	private Set<Pair<Object, Object>> secol(List<Pair<Object, Object>> second) {

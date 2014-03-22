@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.Set;
 
 import fql.FQLException;
-import fql.Fn;
 import fql.Pair;
 import fql.Quad;
 import fql.Triple;

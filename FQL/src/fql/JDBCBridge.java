@@ -23,7 +23,6 @@ import fql.decl.Node;
 import fql.decl.SigExp;
 import fql.decl.Signature;
 import fql.decl.TransExp;
-import fql.decl.TransExp.TransCurry;
 import fql.sql.CreateTable;
 import fql.sql.Exp;
 import fql.sql.FullSigma;
@@ -35,6 +34,7 @@ import fql.sql.PSMCurry;
 import fql.sql.PSMEval;
 import fql.sql.PSMGen;
 import fql.sql.PSMInterp;
+import fql.sql.PSMIso;
 import fql.sql.SimpleCreateTable;
 
 //TODO always execute postlude
@@ -187,7 +187,7 @@ public class JDBCBridge {
 							psm.addAll(v.accept(k, ops));
 						}
 						maybeExec(psm, Stmt, ret, interp, s); 
-						if (!(v instanceof TransExp.FullSigma || v instanceof TransExp.TransCurry || v instanceof TransExp.TransEval || (v instanceof TransExp.Coreturn && (prog.insts.get(((TransExp.Coreturn)v).inst)) instanceof InstExp.FullSigma))) { 
+						if (!(v instanceof TransExp.TransIso || v instanceof TransExp.FullSigma || v instanceof TransExp.TransCurry || v instanceof TransExp.TransEval || (v instanceof TransExp.Coreturn && (prog.insts.get(((TransExp.Coreturn)v).inst)) instanceof InstExp.FullSigma))) { 
 								gatherTransform(prog, ret, Stmt, k, v);
 							//TODO have non SQL transform output into temps, so can gather them like any other
 						}
@@ -254,7 +254,7 @@ public class JDBCBridge {
 	
 	private static void maybeExec(List<PSM> sqls, Statement stmt, Map<String, Set<Map<Object, Object>>> state, PSMInterp interp, Signature s) throws SQLException {
 		for (PSM sql : sqls) {
-			if (!(sql instanceof FullSigmaTrans || sql instanceof FullSigmaCounit || sql instanceof PSMEval || sql instanceof PSMCurry)) {
+			if (!(sql instanceof FullSigmaTrans || sql instanceof FullSigmaCounit || sql instanceof PSMEval || sql instanceof PSMCurry || sql instanceof PSMIso)) {
 				stmt.execute(sql.toPSM());
 			} else {
 				sql.exec(interp, state);
@@ -267,7 +267,9 @@ public class JDBCBridge {
 					k = ((PSMEval)sql).pre;
 				} else if (sql instanceof PSMCurry) {
 					k = ((PSMCurry)sql).ret;
-				} else {
+				} else if (sql instanceof PSMIso) {
+			        k = ((PSMIso)sql).pre;
+			    } else {
 					throw new RuntimeException();
 				}
 //				System.out.println("Making inserts for " + k);

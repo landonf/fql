@@ -41,6 +41,7 @@ import fql.decl.TransExp.Snd;
 import fql.decl.TransExp.Squash;
 import fql.decl.TransExp.TT;
 import fql.decl.TransExp.TransExpVisitor;
+import fql.decl.TransExp.TransIso;
 import fql.decl.TransExp.Var;
 import fql.sql.CopyFlower;
 import fql.sql.CreateTable;
@@ -1372,6 +1373,17 @@ public class InstOps implements
 		InstExp.Times t = (InstExp.Times) prog.insts.get(k.first);
 
 		ret.add(new fql.sql.PSMCurry(env, t.a, e.inst, e.trans, k.first, k.second, t.b, sig));		
+		
+		return ret;
+	}
+
+	@Override
+	public List<PSM> visit(String env, TransIso e) {
+		List<PSM> ret = new LinkedList<>();
+		
+		Signature sig = prog.insts.get(e.l).type(prog).toSig(prog);
+		
+		ret.add(new fql.sql.PSMIso(e.lToR, env, e.l, e.r, sig));
 		
 		return ret;
 	}

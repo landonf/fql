@@ -88,6 +88,8 @@ public class EmptyExample extends Example {
 					+ "\ntransform t21 = external I6 I6 name"
 					+ "\ntransform t22 = I9.eval"
 					+ "\ntransform t23 = I10.curry t22"
+					+ "\ntransform t24 = iso1 I I"
+					+ "\ntransform t25 = iso2 I I"
 					+ "\n"
 					+ "\n////(co)monads also work for SIGMA and pi"
 					+ "\ninstance I3X = delta F I3"

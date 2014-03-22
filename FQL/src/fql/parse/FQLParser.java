@@ -50,7 +50,7 @@ public class FQLParser {
 	static String[] res = new String[] { "return", "coreturn", "opposite", "EVAL", "QUERY", "union",
 			"subschema", "match", "drop", "nodes", "attributes", "enum",
 			"ASWRITTEN", "schema", "transform", "dist1", "dist2", "arrows",
-			"equations", "id", "delta", "sigma", "pi", "SIGMA", "eval", "eq",
+			"equations", "id", "delta", "sigma", "pi", "SIGMA", "eval", /* "eq" , */
 			"relationalize", "external", "then", "query", "instance", "fst",
 			"snd", "inl", "inr", "curry", "mapping", "eval", "void", "unit",
 			"prop", "iso1", "iso2"/* "tt", "ff" */};
@@ -325,6 +325,8 @@ public class FQLParser {
 				Parsers.tuple(ident(), term("."), term("eval")),
 				Parsers.tuple(ident(), term("."), term("inl")),
 				Parsers.tuple(ident(), term("."), term("inr")),
+				Parsers.tuple(term("iso1"), ident(), ident()),
+				Parsers.tuple(term("iso2"), ident(), ident()),
 				Parsers.tuple(ident(), term("."), term("relationalize")),
 				Parsers.tuple(term("delta"), ident(), ident(), ref.lazy()),
 				Parsers.tuple(term("sigma"), ident(), ident(), ref.lazy()),
@@ -451,7 +453,11 @@ public class FQLParser {
 			Object o1 = p.a;
 			String p1 = p.a.toString();
 
-			if (p3.toString().equals("fst")) {
+			if (p1.toString().equals("iso1")) {
+				return new TransExp.TransIso(true, p2.toString(), p3.toString());
+			} else if (p1.toString().equals("iso2")) {
+				return new TransExp.TransIso(false, p2.toString(), p3.toString());
+			} else if (p3.toString().equals("fst")) {
 				return new TransExp.Fst(p1);
 			} else if (p3.toString().equals("eval")) { 
 				return new TransExp.TransEval(p1);
@@ -545,7 +551,7 @@ public class FQLParser {
 				Parsers.tuple(term("eval"), schema(), schema()),
 				Parsers.tuple(term("opposite"), ref.lazy()),
 				Parsers.tuple(term("curry"), ref.lazy()),
-				Parsers.tuple(term("eq"), schema()),
+			//	Parsers.tuple(term("eq"), schema()),
 				Parsers.tuple(term("id"), schema()),
 				Parsers.tuple(term("subschema"), schema(), schema()),
 			//	Parsers.tuple(term("dist1"), schema(), schema(), schema()),

@@ -480,7 +480,7 @@ public class Transform {
 
 		JPanel xxx = new JPanel();
 		// xxx.add(new JLabel(" "));
-		JPanel yu = new MyLabel2();
+		//JPanel yu = new MyLabel2();
 		// yu.setSize(20, 12);
 		xxx.add(new MyLabel2());
 		xxx.add(new JLabel(s + " (source)"));
@@ -775,4 +775,41 @@ public class Transform {
 		return new Transform(IHc.first, IHd.first, d);
 	}
 
+	public Instance apply(Instance a) throws FQLException {
+		Map<String, Set<Pair<Object, Object>>> map = new HashMap<>();
+		
+		for (Node n : src.thesig.nodes) {
+			Set<Pair<Object, Object>> kx = new HashSet<>();
+			for (Pair<Object, Object> i : src.data.get(n.string)) {
+				Object v = lookup(data.get(n.string), i.first);
+				kx.add(new Pair<>(v,v));
+			}
+			map.put(n.string, kx);
+		}
+		
+		for (Edge n : src.thesig.edges) {
+			Set<Pair<Object, Object>> kx = new HashSet<>();
+			for (Pair<Object, Object> i : src.data.get(n.name)) {
+				Object v1 = lookup(data.get(n.source.string), i.first);
+				Object v2 = lookup(data.get(n.target.string), i.second);
+				kx.add(new Pair<>(v1,v2));
+			}
+			map.put(n.name, kx);
+		}
+		
+		for (Attribute<Node> n : src.thesig.attrs) {
+			Set<Pair<Object, Object>> kx = new HashSet<>();
+			for (Pair<Object, Object> i : src.data.get(n.name)) {
+				Object v1 = lookup(data.get(n.source.string), i.first);
+				kx.add(new Pair<>(v1,i.second));
+			}
+			map.put(n.name, kx);
+		}
+		
+		return new Instance(src.thesig, map);
+	}
+
 }
+
+
+

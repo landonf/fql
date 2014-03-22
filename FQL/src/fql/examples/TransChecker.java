@@ -34,6 +34,7 @@ import fql.decl.TransExp.Snd;
 import fql.decl.TransExp.Squash;
 import fql.decl.TransExp.TT;
 import fql.decl.TransExp.TransExpVisitor;
+import fql.decl.TransExp.TransIso;
 import fql.decl.TransExp.Var;
 import fql.decl.Transform;
 
@@ -545,6 +546,23 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		}
 		
 		return new Pair<>(t.a, e.inst);
+	}
+
+	@Override
+	public Pair<String, String> visit(FQLProgram env, TransIso e) {
+		InstExp l = env.insts.get(e.l);
+		if (l == null) {
+			throw new RuntimeException("Missing instance: " + l);
+		}
+		InstExp r = env.insts.get(e.r);
+		if (r == null) {
+			throw new RuntimeException("Missing instance: " + r);
+		}
+		if (e.lToR) {
+			return new Pair<>(e.l, e.r);
+		} else {
+			return new Pair<>(e.r, e.l);
+		}
 	}
 	
 	//TODO check circularity
