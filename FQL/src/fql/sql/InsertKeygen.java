@@ -84,5 +84,11 @@ public class InsertKeygen extends PSM {
 			state.put(name, ret);
 		}
 	}
+	
+	@Override
+	public String isSql() {
+		return null;
+	}
+
 
 }

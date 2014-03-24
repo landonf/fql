@@ -63,5 +63,11 @@ public class PSMIso extends PSM {
 			return "iso2 " + l + " " + r;
 		}
 	}
+	
+	@Override
+	public String isSql() {
+		return pre;
+	}
+
 
 }

@@ -1470,6 +1470,52 @@ public class Signature {
 
 		return new Triple<>(new Instance(this, data), m1, m2);
 	}
+	
+	public Pair<Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>>, Pair<Instance, Map<Node, Pair<Map<Object, Instance>, Map<Instance, Object>>>>> omega(IntRef ref) throws FQLException {
+		IntRef ix = new IntRef(0);
+		Map<String, Set<Pair<Object, Object>>> data = new HashMap<>();
+		Map<Node, Pair<Map<Object, Instance>, Map<Instance, Object>>> m = new HashMap<>();
+		
+		Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>> rx = repX(ix);
+		
+		for (Node n : nodes) {
+			Set<Pair<Object, Object>> set = new HashSet<>();
+			Map<Object, Instance> m1 = new HashMap<>();
+			Map<Instance, Object> m2 = new HashMap<>();
+			Triple<Instance, Map<Object, Path>, Map<Path, Object>> t = rx.first.get(n);
+			List<Instance> l = t.first.subInstances();
+			for (Instance i : l) {
+				Object id = Integer.toString(++ref.i);
+				set.add(new Pair<>(id, id));
+				m1.put(id, i);
+				m2.put(i, id);
+			}
+			data.put(n.string, set);
+			m.put(n, new Pair<>(m1, m2));
+		}
+		
+		for (Edge e : edges) {
+			Set<Pair<Object, Object>> set = new HashSet<>();
+			for (Pair<Object, Object> j : data.get(e.source.string)) {
+			//	System.out.println("j " + j);
+				Instance u = m.get(e.source).first.get(j.first);
+			//	System.out.println("u " + u);
+			//	System.out.println("trans " + rx.second.get(e));
+				Instance v = rx.second.get(e).preimage(u);
+			//	System.out.println("v " + v); 
+				Object o = m.get(e.target).second.get(v);
+			//	System.out.println("mgetarget " + m.get(e.target).second);
+			//	System.out.println("o " + o);
+				set.add(new Pair<>(j.first, o));
+			}			
+			data.put(e.name, set);
+		}
+		
+		Instance omega = new Instance(this, data);
+		
+		return new Pair<>(rx, new Pair<>(omega, m));
+	}
+	
 
 	public Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>> repX(
 			IntRef i) throws FQLException {
@@ -1531,29 +1577,6 @@ public class Signature {
 		return new Pair<>(m1, m2);
 	}
 
-	/*
-	 * public String rdfX() { String xxx = ""; // String prefix =
-	 * "fql://entity/"; // + name + "/";
-	 * 
-	 * for (Node n : nodes) { xxx += "<rdfs:Class rdf:about=\"fql://node/" +
-	 * n.string + "\"/>\n"; xxx += "\n"; } // xxx += "\n"; for (Attribute<Node>
-	 * a : attrs) { xxx += "<rdf:Property rdf:about=\"fql://attribute/" + a.name
-	 * + "\">\n"; xxx += "    <rdfs:domain rdf:resource=\"fql://node/" +
-	 * a.source.string + "\"/>\n"; if (a.target instanceof Type.Int) { xxx +=
-	 * "    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#int\"/>\n"
-	 * ; } else { xxx +=
-	 * "    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n"
-	 * ; } xxx += "</rdf:Property>\n"; xxx += "\n"; } // xxx += "\n"; for (Edge
-	 * a : edges) { xxx += "<rdf:Property rdf:about=\"fql://arrow/" + a.name +
-	 * "\">\n"; xxx += "    <rdfs:domain rdf:resource=\"fql://node/" +
-	 * a.source.string + "\"/>\n"; xxx +=
-	 * "    <rdfs:range rdf:resource=\"fql://node/" + a.target.string +
-	 * "\"/>\n"; xxx += "</rdf:Property>\n"; xxx += "\n"; } // xxx += "\n";
-	 * String ret = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-	 * "\n<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"" +
-	 * "\n    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"" +
-	 * "\n    xmlns:node=\"fql://node/\"" + "\n    xmlns:arrow=\"fql://arrow/\""
-	 * + "\n    xmlns:attribute=\"fql://attribute/\">\n\n" + xxx + "</rdf:RDF>";
-	 * return ret; }
-	 */
+	
+	
 }

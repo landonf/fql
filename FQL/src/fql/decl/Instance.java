@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -362,7 +363,7 @@ public class Instance {
 				return new HashSet<>(p.second);
 			}
 		}
-		throw new FQLException("cannot find " + n);
+		throw new FQLException("cannot find " + n + " in " + data2);
 	}
 
 	// public Instance(String name, Query thequery, Instance theinstance)
@@ -2182,6 +2183,73 @@ public class Instance {
 		Instance IJ = new Instance(I.thesig, data);
 						
 		return new Quad<>(IJ, map1, map4, xxx);
+	}
+	
+	public List<Pair<Object, Object>> ids() {
+		List<Pair<Object, Object>> ret = new LinkedList<>();
+		
+		for (Node n : thesig.nodes) {
+			ret.addAll(data.get(n.string));
+		}
+		
+		return ret;
+	}
+	
+	//TODO make faster
+	public List<Instance> subInstances() {
+		List<Instance> ret = new LinkedList<>();
+		
+		List<Pair<Object, Object>> ids = ids();
+		List<Boolean> tf = new LinkedList<>();
+		tf.add(true);
+		tf.add(false);
+		
+		List<LinkedHashMap<Pair<Object, Object>, Boolean>> subsets = Inst.homomorphs(ids, tf);
+		for (LinkedHashMap<Pair<Object, Object>, Boolean> subset : subsets) {
+			try {
+				ret.add(filter(subset));
+			} catch (FQLException fe) { }			
+		}
+		
+		return ret;
+	}
+	
+	private Instance filter(LinkedHashMap<Pair<Object, Object>, Boolean> subset) throws FQLException {
+		Map<String, Set<Pair<Object, Object>>> d = new HashMap<>();
+		
+		for (Node n : thesig.nodes) {
+			Set<Pair<Object, Object>> set = new HashSet<>();
+			for (Pair<Object, Object> k : data.get(n.string)) {
+				Boolean b = subset.get(k);
+				if (b) {
+					set.add(k);
+				}
+			}
+			d.put(n.string, set);
+		}
+		for (Edge n : thesig.edges) {
+			Set<Pair<Object, Object>> set = new HashSet<>();
+			for (Pair<Object, Object> k : data.get(n.name)) {
+				Boolean b = subset.get(new Pair<>(k.first, k.first));
+				Boolean bx = subset.get(new Pair<>(k.second, k.second));
+				if (b && bx) {
+					set.add(k);
+				}
+			}
+			d.put(n.name, set);
+		}
+		for (Attribute<Node> n : thesig.attrs) {
+			Set<Pair<Object, Object>> set = new HashSet<>();
+			for (Pair<Object, Object> k : data.get(n.name)) {
+				Boolean b = subset.get(new Pair<>(k.first, k.first));
+				if (b) {
+					set.add(k);
+				}
+			}
+			d.put(n.name, set);
+		}
+		
+		return new Instance(thesig, d);
 	}
 
 }

@@ -128,5 +128,10 @@ public class FullSigma extends PSM {
 	public String toPSM() {
 		throw new RuntimeException("Cannot generate SQL for full sigma");
 	}
+	
+	@Override
+	public String isSql() {
+		throw new RuntimeException();
+	}
 
 }

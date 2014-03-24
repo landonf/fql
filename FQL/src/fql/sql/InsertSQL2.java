@@ -39,5 +39,11 @@ public class InsertSQL2 extends PSM {
 		}
 		state.put(name, sql.eval(state));
 	}
+	
+	@Override
+	public String isSql() {
+		return null;
+	}
+
 
 }

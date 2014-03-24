@@ -26,15 +26,11 @@ import fql.decl.TransExp;
 import fql.sql.CreateTable;
 import fql.sql.Exp;
 import fql.sql.FullSigma;
-import fql.sql.FullSigmaCounit;
-import fql.sql.FullSigmaTrans;
 import fql.sql.InsertValues;
 import fql.sql.PSM;
-import fql.sql.PSMCurry;
-import fql.sql.PSMEval;
 import fql.sql.PSMGen;
 import fql.sql.PSMInterp;
-import fql.sql.PSMIso;
+import fql.sql.PropPSM;
 import fql.sql.SimpleCreateTable;
 
 //TODO always execute postlude
@@ -118,6 +114,18 @@ public class JDBCBridge {
 							Stmt.execute("SET @guid = " + interp.guid);
 							psm.addAll(makeInserts(k, ret,
 									v.type(prog).toSig(prog), null));
+						} else if (v instanceof InstExp.Two) {
+							List<PSM> xxx = v.accept(k, ops).first;
+							if (xxx.size() != 1) {
+								throw new RuntimeException();
+							}
+							PropPSM yyy = (PropPSM) xxx.get(0);
+							int theguid = getGuid(Stmt);
+							interp.guid = theguid;
+							yyy.exec(interp, ret);
+							Stmt.execute("SET @guid = " + interp.guid);
+							psm.addAll(makeInserts(k, ret,
+									v.type(prog).toSig(prog), null));
 						}
 
 						else if (v instanceof InstExp.External
@@ -130,7 +138,7 @@ public class JDBCBridge {
 							Stmt.execute(sql.toPSM());
 						}
 						if (!(v instanceof InstExp.FullSigma)
-								&& !(v instanceof InstExp.Exp)) {
+								&& !(v instanceof InstExp.Exp) && !(v instanceof InstExp.Two)) {
 							gatherInstance(prog, ret, Stmt, k, v);
 							if (v instanceof InstExp.Delta) {
 								gatherSubstInv(prog, ret, Stmt, k, v);
@@ -187,7 +195,8 @@ public class JDBCBridge {
 							psm.addAll(v.accept(k, ops));
 						}
 						maybeExec(psm, Stmt, ret, interp, s); 
-						if (!(v instanceof TransExp.TransIso || v instanceof TransExp.FullSigma || v instanceof TransExp.TransCurry || v instanceof TransExp.TransEval || (v instanceof TransExp.Coreturn && (prog.insts.get(((TransExp.Coreturn)v).inst)) instanceof InstExp.FullSigma))) { 
+						if (v.gather()) {
+//						if (!(v instanceof TransExp.TransIso || v instanceof TransExp.FullSigma || v instanceof TransExp.TransCurry || v instanceof TransExp.TransEval || (v instanceof TransExp.Coreturn && (prog.insts.get(((TransExp.Coreturn)v).inst)) instanceof InstExp.FullSigma))) { 
 								gatherTransform(prog, ret, Stmt, k, v);
 							//TODO have non SQL transform output into temps, so can gather them like any other
 						}
@@ -254,11 +263,13 @@ public class JDBCBridge {
 	
 	private static void maybeExec(List<PSM> sqls, Statement stmt, Map<String, Set<Map<Object, Object>>> state, PSMInterp interp, Signature s) throws SQLException {
 		for (PSM sql : sqls) {
-			if (!(sql instanceof FullSigmaTrans || sql instanceof FullSigmaCounit || sql instanceof PSMEval || sql instanceof PSMCurry || sql instanceof PSMIso)) {
+			String k = sql.isSql();
+			if (k == null) {
+//			if (!(sql instanceof FullSigmaTrans || sql instanceof FullSigmaCounit || sql instanceof PSMEval || sql instanceof PSMCurry || sql instanceof PSMIso)) {
 				stmt.execute(sql.toPSM());
 			} else {
 				sql.exec(interp, state);
-				String k = null;
+		/* 		String k = null;
 				if (sql instanceof FullSigmaTrans) {
 					k = ((FullSigmaTrans)sql).pre;
 				} else if (sql instanceof FullSigmaCounit) {
@@ -271,7 +282,7 @@ public class JDBCBridge {
 			        k = ((PSMIso)sql).pre;
 			    } else {
 					throw new RuntimeException();
-				}
+				} */
 //				System.out.println("Making inserts for " + k);
 				List<PSM> yyy = makeInserts(k, state, s, null);
 				for (PSM y : yyy) {

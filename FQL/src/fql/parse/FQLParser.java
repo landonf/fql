@@ -53,7 +53,7 @@ public class FQLParser {
 			"equations", "id", "delta", "sigma", "pi", "SIGMA", "eval", /* "eq" , */
 			"relationalize", "external", "then", "query", "instance", "fst",
 			"snd", "inl", "inr", "curry", "mapping", "eval", "void", "unit",
-			"prop", "iso1", "iso2"/* "tt", "ff" */};
+			"prop", "iso1", "iso2", "true", "false", "chi" /*, "unchi" */};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -315,6 +315,8 @@ public class FQLParser {
 
 		Parser a = Parsers.or(new Parser[] {
 				Parsers.tuple(term("external"), ident(), ident(), ident()),
+				Parsers.tuple(ident(), term("."), term("chi"), ident()),
+			//	Parsers.tuple(term("unchi"), ident(), ident()),
 				Parsers.tuple(ident(), term("."), term("unit"), ident()),
 				Parsers.tuple(ident(), term("."), term("void"), ident()),
 				Parsers.tuple(ident(), term("."), term("curry"), ident()),
@@ -323,6 +325,8 @@ public class FQLParser {
 				Parsers.tuple(ident(), term("."), term("coreturn")),
 				Parsers.tuple(ident(), term("."), term("snd")),
 				Parsers.tuple(ident(), term("."), term("eval")),
+				Parsers.tuple(ident(), term("."), term("true"), ident()),
+				Parsers.tuple(ident(), term("."), term("false"), ident()),
 				Parsers.tuple(ident(), term("."), term("inl")),
 				Parsers.tuple(ident(), term("."), term("inr")),
 				Parsers.tuple(term("iso1"), ident(), ident()),
@@ -439,7 +443,13 @@ public class FQLParser {
 				return new TransExp.TT(obj, dst);
 			} else if (p.c.toString().equals("curry")) {
 				return new TransExp.TransCurry(obj, dst);
-			}
+			} else if (p.c.toString().equals("true")) {
+				return new TransExp.Bool(true, dst, obj);
+			} else if (p.c.toString().equals("false")) {
+				return new TransExp.Bool(false, dst, obj);
+			} else if (p.c.toString().equals("chi")) {
+				return new TransExp.Chi(obj, dst);
+			} 
 
 		} catch (RuntimeException re) {
 
@@ -471,6 +481,8 @@ public class FQLParser {
 				return new TransExp.Coreturn(p1);
 			} else if (p3.toString().equals("inl")) {
 				return new TransExp.Inl(p1);
+//			} else if (p1.toString().equals("unchi")) {
+	//			return new TransExp.UnChi(p2.toString(), p3.toString());
 			} else if (p3.toString().equals("inr")) {
 				return new TransExp.Inr(p1);
 			} else if (p2.toString().equals("then")) {

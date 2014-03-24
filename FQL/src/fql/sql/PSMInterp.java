@@ -33,6 +33,9 @@ public class PSMInterp {
 
 	Map<String, Quad<Instance, Map<Node, Map<Object, Transform>>, Map<Node, Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>>>, Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>>>> exps = new HashMap<>();
 
+	Map<String, Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>>> prop1 = new HashMap<>();
+	Map<String, Pair<Instance, Map<Node, Pair<Map<Object, Instance>, Map<Instance, Object>>>>> prop2 = new HashMap<>();
+
 	public  Pair<Map<String, Set<Map<Object, Object>>>, List<Throwable>> interpX(List<PSM> prog,
 			Map<String, Set<Map<Object, Object>>> state) {
 		List<Throwable> ret = new LinkedList<>();

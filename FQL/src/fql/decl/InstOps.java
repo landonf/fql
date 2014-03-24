@@ -25,11 +25,11 @@ import fql.decl.InstExp.Pi;
 import fql.decl.InstExp.Relationalize;
 import fql.decl.InstExp.Sigma;
 import fql.decl.InstExp.Two;
+import fql.decl.TransExp.Bool;
 import fql.decl.TransExp.Case;
+import fql.decl.TransExp.Chi;
 import fql.decl.TransExp.Comp;
 import fql.decl.TransExp.Coreturn;
-import fql.decl.TransExp.TransCurry;
-import fql.decl.TransExp.TransEval;
 import fql.decl.TransExp.FF;
 import fql.decl.TransExp.Fst;
 import fql.decl.TransExp.Id;
@@ -40,8 +40,11 @@ import fql.decl.TransExp.Return;
 import fql.decl.TransExp.Snd;
 import fql.decl.TransExp.Squash;
 import fql.decl.TransExp.TT;
+import fql.decl.TransExp.TransCurry;
+import fql.decl.TransExp.TransEval;
 import fql.decl.TransExp.TransExpVisitor;
 import fql.decl.TransExp.TransIso;
+import fql.decl.TransExp.UnChi;
 import fql.decl.TransExp.Var;
 import fql.sql.CopyFlower;
 import fql.sql.CreateTable;
@@ -56,6 +59,7 @@ import fql.sql.InsertSQL2;
 import fql.sql.InsertValues;
 import fql.sql.PSM;
 import fql.sql.PSMGen;
+import fql.sql.PropPSM;
 import fql.sql.Relationalizer;
 import fql.sql.SQL;
 import fql.sql.SimpleCreateTable;
@@ -574,7 +578,11 @@ public class InstOps implements
 
 	@Override
 	public Pair<List<PSM>, Object> visit(String dst, Two e) {
-		throw new RuntimeException();
+		List<PSM> ret = new LinkedList<>();
+		
+		ret.add(new PropPSM(dst, e.sig.toSig(prog)));
+		
+		return new Pair<>(ret, new Object());
 	}
 
 	@Override
@@ -1387,5 +1395,46 @@ public class InstOps implements
 		
 		return ret;
 	}
+
+	@Override
+	public List<PSM> visit(String env, Bool e) {
+		List<PSM> ret = new LinkedList<>();
+
+		Signature sig = prog.insts.get(e.unit).type(prog).toSig(prog);
+		
+		ret.add(new fql.sql.PSMBool(e.bool, e.unit, e.prop, sig, env));
+		
+		return ret;
+	}
+
+	@Override
+	public List<PSM> visit(String env, Chi e) {
+		List<PSM> ret = new LinkedList<>();
+
+		Signature sig = prog.insts.get(e.prop).type(prog).toSig(prog);
+
+		TransExp t = prog.transforms.get(e.trans);
+		Pair<String, String> k = t.type(prog);
+		
+		ret.add(new fql.sql.PSMChi(sig, env, k.first, k.second, e.prop, e.trans));
+		
+		return ret;
+	}
+
+	@Override
+	public List<PSM> visit(String env, UnChi e) {
+		List<PSM> ret = new LinkedList<>();
+
+		Signature sig = prog.insts.get(e.a).type(prog).toSig(prog);
+
+		TransExp t = prog.transforms.get(e.trans);
+		Pair<String, String> k = t.type(prog);
+		
+		ret.add(new fql.sql.PSMChi(sig, env, e.a, k.first, k.second, e.trans));
+		
+		return ret;
+	}
+
+	
 
 }

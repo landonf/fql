@@ -209,5 +209,11 @@ public class FullSigmaTrans extends PSM {
 
 		return ret;
 	}
+	
+	@Override
+	public String isSql() {
+		return pre;
+	}
+
 
 }

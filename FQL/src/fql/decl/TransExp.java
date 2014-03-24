@@ -8,8 +8,185 @@ import fql.examples.TransChecker;
 import fql.parse.PrettyPrinter;
 
 public abstract class TransExp {
+	
+	public abstract boolean gather();
+	
 	public Pair<String, String> type(FQLProgram p) {
 		return accept(p, new TransChecker());
+	}
+	
+	public static class Chi extends TransExp {
+		
+		public String prop, trans;
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((prop == null) ? 0 : prop.hashCode());
+			result = prime * result + ((trans == null) ? 0 : trans.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Chi other = (Chi) obj;
+			if (prop == null) {
+				if (other.prop != null)
+					return false;
+			} else if (!prop.equals(other.prop))
+				return false;
+			if (trans == null) {
+				if (other.trans != null)
+					return false;
+			} else if (!trans.equals(other.trans))
+				return false;
+			return true;
+		}
+
+		public Chi(String prop, String trans) {
+			super();
+			this.prop = prop;
+			this.trans = trans;
+		}
+
+		@Override
+		public boolean gather() {
+			return false;
+		}
+
+		@Override
+		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		@Override
+		public String toString() {
+			return prop + ".chi " + trans;
+		}
+	}
+	
+public static class UnChi extends TransExp {
+		
+		public String a, trans;
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((a == null) ? 0 : a.hashCode());
+			result = prime * result + ((trans == null) ? 0 : trans.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			UnChi other = (UnChi) obj;
+			if (a == null) {
+				if (other.a != null)
+					return false;
+			} else if (!a.equals(other.a))
+				return false;
+			if (trans == null) {
+				if (other.trans != null)
+					return false;
+			} else if (!trans.equals(other.trans))
+				return false;
+			return true;
+		}
+
+		public UnChi(String a, String trans) {
+			super();
+			this.a = a;
+			this.trans = trans;
+		}
+
+		@Override
+		public boolean gather() {
+			return false;
+		}
+
+		@Override
+		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		@Override
+		public String toString() {
+			return "unchi " + a + " " + trans;
+		}
+	}
+	
+	public static class Bool extends TransExp {
+		
+		public boolean bool;
+		public String unit, prop;
+		
+		public Bool(boolean bool, String unit, String prop) {
+			super();
+			this.bool = bool;
+			this.unit = unit;
+			this.prop = prop;
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + (bool ? 1231 : 1237);
+			result = prime * result + ((prop == null) ? 0 : prop.hashCode());
+			result = prime * result + ((unit == null) ? 0 : unit.hashCode());
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Bool other = (Bool) obj;
+			if (bool != other.bool)
+				return false;
+			if (prop == null) {
+				if (other.prop != null)
+					return false;
+			} else if (!prop.equals(other.prop))
+				return false;
+			if (unit == null) {
+				if (other.unit != null)
+					return false;
+			} else if (!unit.equals(other.unit))
+				return false;
+			return true;
+		}
+		@Override
+		public boolean gather() {
+			return false;
+		}
+		@Override
+		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		@Override
+		public String toString() {
+			if (bool) {
+				return prop + ".true " + unit;
+			} else {
+				return prop + ".false " + unit;
+			}
+		}
+		
 	}
 	
 	public static class TransIso extends TransExp {
@@ -69,6 +246,11 @@ public abstract class TransExp {
 				return "iso2 " + l + " " + r;
 			}
 		}
+
+		@Override
+		public boolean gather() {
+			return false;
+		}
 	}
 	
 	public static class TransCurry extends TransExp {
@@ -117,6 +299,11 @@ public abstract class TransExp {
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
+		@Override
+		public boolean gather() {
+			return false;
+		}
+
 	}	
 	
 	public static class TransEval extends TransExp {
@@ -162,6 +349,11 @@ public abstract class TransExp {
 		public String toString() {
 			return inst + ".eval";
 		}
+		@Override
+		public boolean gather() {
+			return false;
+		}
+
 		
 	}
 	
@@ -208,11 +400,23 @@ public abstract class TransExp {
 			return inst + ".return";
 		}
 		
+		@Override
+		public boolean gather() {
+			return true;
+		}
+
 	}
 	
 	public static class Coreturn extends TransExp {
 		
+		@Override
+		public boolean gather() {
+			return !isFull;
+		}
+
 		public String inst;
+		public boolean isFull = false; //should be set by checker
+		
 		
 		public Coreturn(String inst) {
 			this.inst = inst;
@@ -308,6 +512,10 @@ public abstract class TransExp {
 		public String toString() {
 			return "external " + src + " " + dst + " " + name;
 		}
+		@Override
+		public boolean gather() {
+			return true;
+		}
 
 	}
 	
@@ -354,7 +562,11 @@ public abstract class TransExp {
 			result = prime * result + ((src == null) ? 0 : src.hashCode());
 			return result;
 		}
-		
+		@Override
+		public boolean gather() {
+			return true;
+		}
+
 	}
 	
 	public static class Delta extends TransExp {
@@ -412,6 +624,11 @@ public abstract class TransExp {
 			result = prime * result + ((src == null) ? 0 : src.hashCode());
 			return result;
 		}
+		@Override
+		public boolean gather() {
+			return true;
+		}
+
 	}
 	
 	public static class Sigma extends TransExp {
@@ -472,6 +689,12 @@ public abstract class TransExp {
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
+		
+		@Override
+		public boolean gather() {
+			return true;
+		}
+
 	}
 	
 	public static class FullSigma extends TransExp {
@@ -532,7 +755,11 @@ public abstract class TransExp {
 			return true;
 		}
 
-		
+		@Override
+		public boolean gather() {
+			return false;
+		}
+
 
 	}
 	
@@ -595,6 +822,12 @@ public abstract class TransExp {
 				return false;
 			return true;
 		}
+		
+		@Override
+		public boolean gather() {
+			return true;
+		}
+
 	}
 	
 	public static class Relationalize extends TransExp {
@@ -655,6 +888,11 @@ public abstract class TransExp {
 		@Override
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
 			return v.visit(env, this);
+		}
+
+		@Override
+		public boolean gather() {
+			return true;
 		}
 
 	}
@@ -730,6 +968,11 @@ public abstract class TransExp {
 		@Override
 		public String toString() {
 			return "id " + t;
+		}
+
+		@Override
+		public boolean gather() {
+			return true;
 		}
 
 	}
@@ -934,6 +1177,12 @@ public abstract class TransExp {
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
+		
+		@Override
+		public boolean gather() {
+			return true;
+		}
+
 
 	}
 
@@ -980,6 +1229,11 @@ public abstract class TransExp {
 		@Override
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
 			return v.visit(env, this);
+		}
+
+		@Override
+		public boolean gather() {
+			return true;
 		}
 
 	}
@@ -1034,6 +1288,11 @@ public abstract class TransExp {
 			return v.visit(env, this);
 		}
 
+		@Override
+		public boolean gather() {
+			return true;
+		}
+
 	}
 
 	public static class FF extends TransExp {
@@ -1085,6 +1344,11 @@ public abstract class TransExp {
 			return v.visit(env, this);
 		}
 
+		@Override
+		public boolean gather() {
+			return true;
+		}
+
 	}
 
 	public static class Fst extends TransExp {
@@ -1127,6 +1391,11 @@ public abstract class TransExp {
 		@Override
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
 			return v.visit(env, this);
+		}
+
+		@Override
+		public boolean gather() {
+			return true;
 		}
 
 	}
@@ -1173,6 +1442,11 @@ public abstract class TransExp {
 			return v.visit(env, this);
 		}
 
+		@Override
+		public boolean gather() {
+			return true;
+		}
+
 	}
 
 	public static class Inl extends TransExp {
@@ -1217,6 +1491,11 @@ public abstract class TransExp {
 			return v.visit(env, this);
 		}
 
+		@Override
+		public boolean gather() {
+			return true;
+		}
+
 	}
 
 	public static class Inr extends TransExp {
@@ -1259,6 +1538,11 @@ public abstract class TransExp {
 		@Override
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
 			return v.visit(env, this);
+		}
+
+		@Override
+		public boolean gather() {
+			return true;
 		}
 
 	}
@@ -1412,6 +1696,12 @@ public abstract class TransExp {
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
+		
+		@Override
+		public boolean gather() {
+			return true;
+		}
+
 
 	}
 
@@ -1462,6 +1752,12 @@ public abstract class TransExp {
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
+		
+		@Override
+		public boolean gather() {
+			return true;
+		}
+
 
 	}
 
@@ -1520,6 +1816,12 @@ public abstract class TransExp {
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
+		
+		@Override
+		public boolean gather() {
+			return true;
+		}
+
 
 	}
 
@@ -1551,7 +1853,9 @@ public abstract class TransExp {
 		public R visit(E env, Return e);
 		public R visit(E env, Coreturn e);
 		public R visit(E env, TransIso e);
-		
+		public R visit(E env, Bool e);
+		public R visit(E env, Chi e);
+		public R visit(E env, UnChi e);
 	}
 
 

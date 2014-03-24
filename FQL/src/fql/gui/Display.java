@@ -704,6 +704,8 @@ public class Display {
 					return null;
 				}
 
+				
+
 			});
 
 		}
@@ -898,6 +900,8 @@ public class Display {
 			public Object visit(Unit env, FullEval e) {
 				return e.q;
 			}
+
+			
 		});
 		if (f == null) {
 			return;

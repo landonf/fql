@@ -774,6 +774,50 @@ public class Transform {
 		
 		return new Transform(IHc.first, IHd.first, d);
 	}
+	
+	public Instance preimage(Instance a) throws FQLException {
+		//System.out.println("Doing preimage");
+		//System.out.println("Transform " + this);
+		//System.out.println("a " + a);
+		Map<String, Set<Pair<Object, Object>>> map = new HashMap<>();
+		
+		for (Node n : src.thesig.nodes) {
+			Set<Pair<Object, Object>> kx = new HashSet<>();
+			for (Pair<Object, Object> i : src.data.get(n.string)) {
+				Object v = lookup(data.get(n.string), i.first);
+				if (a.data.get(n.string).contains(new Pair<>(v,v))) {
+					kx.add(i);
+				}
+			}
+			map.put(n.string, kx);
+		}
+		
+		for (Edge n : src.thesig.edges) {
+			Set<Pair<Object, Object>> kx = new HashSet<>();
+			for (Pair<Object, Object> i : src.data.get(n.name)) {
+				if (map.get(n.source.string).contains(new Pair<>(i.first, i.first))) {
+					kx.add(i);
+				}
+			}
+			map.put(n.name, kx);
+		}
+		
+		for (Attribute<Node> n : src.thesig.attrs) {
+			Set<Pair<Object, Object>> kx = new HashSet<>();
+			for (Pair<Object, Object> i : src.data.get(n.name)) {
+				if (map.get(n.source.string).contains(new Pair<>(i.first, i.first))) {
+					kx.add(i);				
+				}
+			}
+			map.put(n.name, kx);
+		}
+		
+		Instance ret = new Instance(src.thesig, map);
+		//System.out.println("result " + ret);
+		return ret;
+	}
+
+
 
 	public Instance apply(Instance a) throws FQLException {
 		Map<String, Set<Pair<Object, Object>>> map = new HashMap<>();

@@ -46,5 +46,11 @@ public class SimpleCreateTable extends PSM {
 		}
 		state.put(name, new HashSet<Map<Object, Object>>());
 	}
+	
+	@Override
+	public String isSql() {
+		return null;
+	}
+
 
 }

@@ -13,6 +13,8 @@ import fql.DEBUG;
  */
 public abstract class PSM {
 	
+	public abstract String isSql();
+	
 	public final static String INTEGER = "INTEGER";
 	public final static String VARCHAR() {
 		return "VARCHAR(" + DEBUG.debug.varlen + ")";

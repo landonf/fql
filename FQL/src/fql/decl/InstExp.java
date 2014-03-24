@@ -7,12 +7,54 @@ import fql.Pair;
 import fql.parse.PrettyPrinter;
 
 public abstract class InstExp {
-	
-	
 
 	public final SigExp type(FQLProgram prog) {
 		return accept(prog, new InstChecker());
 	}
+	
+/*	public static class Prop extends InstExp {
+		public Prop(SigExp sig) {
+			super();
+			this.sig = sig;
+		}
+		
+		@Override 
+		public String toString() {
+			return "prop " + sig;
+		}
+
+		public SigExp sig;
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Prop other = (Prop) obj;
+			if (sig == null) {
+				if (other.sig != null)
+					return false;
+			} else if (!sig.equals(other.sig))
+				return false;
+			return true;
+		}
+
+		@Override
+		public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((sig == null) ? 0 : sig.hashCode());
+			return result;
+		}
+	} */
 	
 	public static class FullEval extends InstExp {
 		public FullQueryExp q;

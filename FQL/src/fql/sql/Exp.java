@@ -97,5 +97,11 @@ public class Exp extends PSM {
 	public String toPSM() {
 		throw new RuntimeException("Cannot generate SQL for exponentials.");
 	}
+	
+	@Override
+	public String isSql() {
+		return pre;
+	}
+
 
 }

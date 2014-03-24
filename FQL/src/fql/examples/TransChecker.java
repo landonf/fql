@@ -11,7 +11,10 @@ import fql.decl.InstExp.Times;
 import fql.decl.Instance;
 import fql.decl.SigExp;
 import fql.decl.Signature;
+import fql.decl.TransExp;
+import fql.decl.TransExp.Bool;
 import fql.decl.TransExp.Case;
+import fql.decl.TransExp.Chi;
 import fql.decl.TransExp.Comp;
 import fql.decl.TransExp.Const;
 import fql.decl.TransExp.Coreturn;
@@ -35,6 +38,7 @@ import fql.decl.TransExp.Squash;
 import fql.decl.TransExp.TT;
 import fql.decl.TransExp.TransExpVisitor;
 import fql.decl.TransExp.TransIso;
+import fql.decl.TransExp.UnChi;
 import fql.decl.TransExp.Var;
 import fql.decl.Transform;
 
@@ -474,6 +478,7 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 				throw new RuntimeException("Not a sigma of a delta.");
 			} 
 		} else if (i1 instanceof InstExp.FullSigma) {
+			e.isFull = true;
 			InstExp i2 = env.insts.get(((InstExp.FullSigma) i1).I); //can't be null
 			if (i2 instanceof InstExp.Delta) {
 				if (!((InstExp.Delta) i2).F.equals(((InstExp.FullSigma) i1).F)) {
@@ -531,6 +536,10 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		}
 		InstExp.Exp i = (InstExp.Exp) inst;
 
+		if (seen.contains(e.trans)) {
+			throw new RuntimeException("Circular transform " + e);
+		}
+		seen.add(e.trans);
 		Pair<String, String> k = env.transforms.get(e.trans).accept(env, this);
 		InstExp ab = env.insts.get(k.first);
 		if (!(ab instanceof InstExp.Times)) {
@@ -563,6 +572,71 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		} else {
 			return new Pair<>(e.r, e.l);
 		}
+	}
+
+	@Override
+	public Pair<String, String> visit(FQLProgram env, Bool e) {
+		InstExp u = env.insts.get(e.unit);
+		if (u == null) {
+			throw new RuntimeException("Missing instance: " + e.unit);
+		}
+		if (!(u instanceof InstExp.One)) {
+			throw new RuntimeException("Not a unit in " + e);
+		}
+		InstExp v = env.insts.get(e.prop);
+		if (v == null) {
+			throw new RuntimeException("Missing instance: " + e.prop);
+		}
+		if (!(v instanceof InstExp.Two)) {
+			throw new RuntimeException("Not a prop in " + e);
+		}
+		
+		return new Pair<>(e.unit, e.prop);
+	}
+
+	@Override
+	public Pair<String, String> visit(FQLProgram env, Chi e) {
+		InstExp prop = env.insts.get(e.prop);
+		if (prop == null) {
+			throw new RuntimeException("Missing instance " + e.prop);
+		}
+		if (!(prop instanceof InstExp.Two)) {
+			throw new RuntimeException("Not a prop " + e);
+		}
+		if (seen.contains(e.trans)) {
+			throw new RuntimeException("Circular transform " + e);
+		}
+		seen.add(e.trans);
+		TransExp t = env.transforms.get(e.trans);
+		if (t == null) {
+			throw new RuntimeException("Missing transform " + t);
+		}
+		Pair<String, String> k = t.accept(env, this);
+		return new Pair<>(k.second, e.prop);
+	}
+
+	@Override
+	public Pair<String, String> visit(FQLProgram env, UnChi e) {
+		if (seen.contains(e.trans)) {
+			throw new RuntimeException("Circular transform " + e);
+		}
+		seen.add(e.trans);
+		TransExp t = env.transforms.get(e.trans);
+		if (t == null) {
+			throw new RuntimeException("Missing transform " + t);
+		}
+		Pair<String, String> k = t.accept(env, this);
+		InstExp p = env.insts.get(k.second);
+		if (!(p instanceof InstExp.Two)) {
+			throw new RuntimeException("Not a prop " + e);
+		}
+	//	InstExp b = env.insts.get(k.first); //b -> prop
+		
+		InstExp a = env.insts.get(e.a);
+		if (a == null) {
+			throw new RuntimeException("Missing instance " + e.a);
+		}
+		return new Pair<>(e.a, k.first);
 	}
 	
 	//TODO check circularity

@@ -157,5 +157,10 @@ public class PSMEval extends PSM {
 	public String toPSM() {
 		throw new RuntimeException("Cannot generate SQL for eval.");
 	}
+	
+	@Override
+	public String isSql() {
+		return pre;
+	}
 
 }

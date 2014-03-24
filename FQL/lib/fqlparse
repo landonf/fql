@@ -29,6 +29,7 @@
     <keyword>apply</keyword>
     <keyword>arrows</keyword>
     <keyword>attributes</keyword>
+    <keyword>chi</keyword>
     <keyword>coreturn</keyword>
     <keyword>curry</keyword>
     <keyword>delta</keyword>
@@ -36,6 +37,7 @@
     <keyword>equations</keyword>
     <keyword>eval</keyword>
     <keyword>external</keyword>
+    <keyword>false</keyword>
     <keyword>fst</keyword>
     <keyword>id</keyword>
     <keyword>inl</keyword>
@@ -53,6 +55,7 @@
     <keyword>snd</keyword>
     <keyword>subschema</keyword>
     <keyword>then</keyword>
+    <keyword>true</keyword>
     <keyword>union</keyword>
     <keyword>unit</keyword>
     <keyword>void</keyword>

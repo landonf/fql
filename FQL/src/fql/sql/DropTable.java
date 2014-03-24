@@ -32,5 +32,11 @@ public class DropTable extends PSM {
 		}
 		state.remove(name);
 	}
+	
+	@Override
+	public String isSql() {
+		return null;
+	}
+
 
 }

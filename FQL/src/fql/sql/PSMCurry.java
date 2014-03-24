@@ -225,5 +225,11 @@ public class PSMCurry extends PSM {
 			return false;
 		return true;
 	}
+	
+	@Override
+	public String isSql() {
+		return ret;
+	}
+
 
 }

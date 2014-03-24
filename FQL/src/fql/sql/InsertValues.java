@@ -72,4 +72,9 @@ public class InsertValues extends PSM {
 		state.put(name, values);
 	}
 
+	@Override
+	public String isSql() {
+		return null;
+	}
+
 }

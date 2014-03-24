@@ -98,5 +98,11 @@ public class FullSigmaCounit extends PSM {
 	public String toPSM() {
 		throw new RuntimeException("Cannot generate SQL for full sigma counit");
 	}
+	
+	@Override
+	public String isSql() {
+		return trans;
+	}
+
 
 }
