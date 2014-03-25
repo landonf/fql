@@ -67,7 +67,7 @@ public abstract class TransExp {
 		}
 		@Override
 		public String toString() {
-			return prop + ".chi " + trans;
+			return prop + ".char " + trans;
 		}
 	}
 	

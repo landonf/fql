@@ -7,6 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
@@ -62,6 +64,7 @@ import fql.decl.InstExp;
 import fql.decl.InstanceEditor;
 import fql.decl.MapExp;
 import fql.decl.TransExp;
+import fql.decl.TransformEditor;
 import fql.decl.Type;
 import fql.examples.Example;
 import fql.parse.FQLParser;
@@ -225,6 +228,12 @@ public class CodeEditor extends JPanel implements Runnable {
 					frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 					// frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 					frame.setLocationRelativeTo(null);
+					frame.addWindowListener(new WindowAdapter() {
+			            public void windowClosing(WindowEvent evt) {
+							SearchContext context = new SearchContext();
+							SearchEngine.markAll(topArea, context);
+				        }
+			        });
 
 					ActionListener escListener = new ActionListener() {
 						@Override
@@ -295,14 +304,18 @@ public class CodeEditor extends JPanel implements Runnable {
 		// System.out.println("end: " + end);
 
 		InstExp ie = init.insts.get(which);
-		if (ie == null || !(ie instanceof InstExp.Const)) {
+		TransExp te = init.transforms.get(which);
+		if ( (ie == null && te == null) 
+		   ||(ie != null && !(ie instanceof InstExp.Const))
+		   ||(te != null && !(te instanceof TransExp.Const)) ) {
 			respArea.setText("Cannot visually edit "
 					+ which
-					+ ": only constant instances are visually editable.");
+					+ ": only constant instances or transforms are visually editable.");
 			return;
 		}
-		InstExp.Const iec = (InstExp.Const) ie;
 		try {
+		if (ie != null) {
+		InstExp.Const iec = (InstExp.Const) ie;
 			InstExp.Const n = new InstanceEditor(which, iec.sig
 					.toSig(init), iec).show();
 			if (n == null) {
@@ -311,10 +324,26 @@ public class CodeEditor extends JPanel implements Runnable {
 			String newText = "instance " + which + " = " + n.toString()
 					+ " : " + n.sig + "\n\n";
 			topArea.replaceRange(newText, start, end);
+		} else {
+			TransExp.Const iec = (TransExp.Const) te;
+			
+			InstExp.Const s = (InstExp.Const) init.insts.get(iec.src);
+			InstExp.Const t = (InstExp.Const) init.insts.get(iec.dst);
+			
+			TransExp.Const n = new TransformEditor(which, init.insts.get(iec.src).type(init).toSig(init), iec, s, t).show();
+			if (n == null) {
+				return;
+			}
+			String newText = "transform " + which + " = " + n.toString()
+					+ " : " + n.src + " -> " + n.dst + "\n\n";
+			topArea.replaceRange(newText, start, end);
+			
+		}
 		} catch (FQLException fe) {
 			fe.printStackTrace();
 			respArea.setText(fe.getLocalizedMessage());
 		}
+
 	}
 
 	public CodeEditor(Integer id, String content) {

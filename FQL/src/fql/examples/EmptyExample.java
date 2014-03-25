@@ -92,7 +92,7 @@ public class EmptyExample extends Example {
 					+ "\ntransform t25 = iso2 I I"
 					+ "\ntransform t26 = I13.true I11"
 					+ "\ntransform t27 = I13.false I11"
-					+ "\ntransform t28 = I13.chi t26"
+					+ "\ntransform t28 = I13.char t26"
 					+ "\n"
 					+ "\n////(co)monads also work for SIGMA and pi"
 					+ "\ninstance I3X = delta F I3"

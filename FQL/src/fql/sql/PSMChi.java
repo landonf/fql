@@ -71,8 +71,8 @@ public class PSMChi extends PSM {
 					for (Edge e : sig.edges) {
 						Set<Pair<Object, Object>> set = new HashSet<>();
 						for (Pair<Object, Object> j : Hc.data.get(e.name)) {
-							if (proj1(Hc.data.get(e.source.string)).contains(j.first) && 
-								proj2(Hc.data.get(e.target.string)).contains(j.second)) {
+							if (proj1(q.get(e.source.string)).contains(j.first) && 
+								proj2(q.get(e.target.string)).contains(j.second)) {
 								set.add(j);
 							}
 						}

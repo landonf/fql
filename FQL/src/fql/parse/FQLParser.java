@@ -53,7 +53,7 @@ public class FQLParser {
 			"equations", "id", "delta", "sigma", "pi", "SIGMA", "eval", /* "eq" , */
 			"relationalize", "external", "then", "query", "instance", "fst",
 			"snd", "inl", "inr", "curry", "mapping", "eval", "void", "unit",
-			"prop", "iso1", "iso2", "true", "false", "chi" /*, "unchi" */};
+			"prop", "iso1", "iso2", "true", "false", "char" /*, "unchi" */};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -315,7 +315,7 @@ public class FQLParser {
 
 		Parser a = Parsers.or(new Parser[] {
 				Parsers.tuple(term("external"), ident(), ident(), ident()),
-				Parsers.tuple(ident(), term("."), term("chi"), ident()),
+				Parsers.tuple(ident(), term("."), term("char"), ident()),
 			//	Parsers.tuple(term("unchi"), ident(), ident()),
 				Parsers.tuple(ident(), term("."), term("unit"), ident()),
 				Parsers.tuple(ident(), term("."), term("void"), ident()),
@@ -447,7 +447,7 @@ public class FQLParser {
 				return new TransExp.Bool(true, dst, obj);
 			} else if (p.c.toString().equals("false")) {
 				return new TransExp.Bool(false, dst, obj);
-			} else if (p.c.toString().equals("chi")) {
+			} else if (p.c.toString().equals("char")) {
 				return new TransExp.Chi(obj, dst);
 			} 
 
