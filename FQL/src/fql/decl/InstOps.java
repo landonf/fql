@@ -15,12 +15,14 @@ import fql.Quad;
 import fql.Triple;
 import fql.cat.Arr;
 import fql.decl.FullQuery.FullQueryVisitor;
+import fql.decl.InstExp.Const;
 import fql.decl.InstExp.Delta;
 import fql.decl.InstExp.Eval;
 import fql.decl.InstExp.External;
 import fql.decl.InstExp.FullEval;
 import fql.decl.InstExp.FullSigma;
 import fql.decl.InstExp.InstExpVisitor;
+import fql.decl.InstExp.Kernel;
 import fql.decl.InstExp.Pi;
 import fql.decl.InstExp.Relationalize;
 import fql.decl.InstExp.Sigma;
@@ -571,9 +573,9 @@ public class InstOps implements
 
 	@Override
 	public Pair<List<PSM>, Object> visit(String dst, fql.decl.InstExp.One e) {
-		fql.decl.InstExp.Const k = Relationalizer.terminal(prog,
+		Triple<Const, Map<Node, Map<Object, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>>, Map<Node, Map<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Object>>> k = Relationalizer.terminal(prog,
 				e.sig.toConst(prog));
-		return k.accept(dst, this);
+		return k.first.accept(dst, this);
 	}
 
 	@Override
@@ -1400,9 +1402,13 @@ public class InstOps implements
 	public List<PSM> visit(String env, Bool e) {
 		List<PSM> ret = new LinkedList<>();
 
-		Signature sig = prog.insts.get(e.unit).type(prog).toSig(prog);
+		SigExp.Const sigX = prog.insts.get(e.unit).type(prog).toConst(prog); //.toSig(prog);
 		
-		ret.add(new fql.sql.PSMBool(e.bool, e.unit, e.prop, sig, env));
+		Signature sig = sigX.toSig(prog);
+		
+		Triple<Const, Map<Node, Map<Object, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>>, Map<Node, Map<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Object>>> kkk = Relationalizer.terminal(prog, sigX);
+			
+		ret.add(new fql.sql.PSMBool(e.bool, e.unit, e.prop, sig, env, kkk.first, kkk.second, kkk.third));
 		
 		return ret;
 	}
@@ -1426,13 +1432,28 @@ public class InstOps implements
 		List<PSM> ret = new LinkedList<>();
 
 		Signature sig = prog.insts.get(e.a).type(prog).toSig(prog);
+		
+		for (Node n : sig.nodes) {
+//			ret.addAll(PSMGen.makeTables(env, sig, false));
+	//		System.out.println("adding insert sql " + env + "_" + n.string);
+			ret.add(new InsertSQL(env + "_" + n.string, new CopyFlower(e.a + "_trans_" + n, "c0", "c1"), "c0", "c1"));
+		}
+		
+		return ret;
+	}
+
+	@Override
+	public Pair<List<PSM>, Object> visit(String env, Kernel e) {
+		List<PSM> ret = new LinkedList<>();
 
 		TransExp t = prog.transforms.get(e.trans);
 		Pair<String, String> k = t.type(prog);
+	
+		Signature sig = prog.insts.get(k.first).type(prog).toSig(prog);
+
+		ret.add(new fql.sql.PSMUnChi(sig, env, k.first, k.second, e.trans));
 		
-		ret.add(new fql.sql.PSMChi(sig, env, e.a, k.first, k.second, e.trans));
-		
-		return ret;
+		return new Pair<>(ret, new Object());
 	}
 
 	

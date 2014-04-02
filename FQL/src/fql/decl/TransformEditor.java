@@ -26,7 +26,6 @@ import java.util.Vector;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -129,6 +128,7 @@ public class TransformEditor {
 		return doView(g);
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked", "serial" })
 	private JPanel doLower(String n) {
 		JPanel ret = new JPanel(new GridLayout(1,1));
 		ret.setBorder(BorderFactory.createEmptyBorder());
@@ -233,7 +233,7 @@ public class TransformEditor {
 		for (Node n : thesig.nodes) {
 			JTable t = tj.get(n.string);
 			DefaultTableModel m = (DefaultTableModel) t.getModel();
-			int cols = m.getColumnCount();
+			//int cols = m.getColumnCount();
 			Vector<Vector> rows = m.getDataVector();
 			List<Pair<Object, Object>> ids = new LinkedList<>();
 			for (Vector row : rows) {

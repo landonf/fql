@@ -93,6 +93,8 @@ public class EmptyExample extends Example {
 					+ "\ntransform t26 = I13.true I11"
 					+ "\ntransform t27 = I13.false I11"
 					+ "\ntransform t28 = I13.char t26"
+					+ "\ninstance Is = kernel t28"
+					+ "\ntransform t29 = Is.kernel"
 					+ "\n"
 					+ "\n////(co)monads also work for SIGMA and pi"
 					+ "\ninstance I3X = delta F I3"

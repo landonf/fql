@@ -439,12 +439,12 @@ public class Inst<Obj, Arrow, Y, X> {
 			List<LinkedHashMap<Attribute<Node>, Attribute<Node>>> ams0 = homomorphs(ams);
 			List<LinkedHashMap<Edge, Path>> ems0 = homomorphs(ems);
 
-			if (exp.attrs.isEmpty()) {
+			/*if (exp.attrs.isEmpty()) {
 				ams0.add(new LinkedHashMap<Attribute<Node>, Attribute<Node>>());
 			}
 			if (exp.edges.isEmpty()) {
 				ems0.add(new LinkedHashMap<Edge, Path>());
-			}
+			}*/
 
 			for (LinkedHashMap<Attribute<Node>, Attribute<Node>> am : ams0) {
 				for (LinkedHashMap<Edge, Path> em : ems0) {
@@ -605,6 +605,7 @@ public class Inst<Obj, Arrow, Y, X> {
 		List<LinkedHashMap<X, Y>> ret = new LinkedList<>();
 
 		if (L.isEmpty()) {
+			ret.add(new LinkedHashMap<X,Y>()); //TODO
 			return ret;
 		}
 		for (Entry<X, List<Y>> k : L.entrySet()) {

@@ -12,6 +12,50 @@ public abstract class InstExp {
 		return accept(prog, new InstChecker());
 	}
 	
+	public static class Kernel extends InstExp {
+		public String trans;
+
+		public Kernel(String trans) {
+			super();
+			this.trans = trans;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Kernel other = (Kernel) obj;
+			if (trans == null) {
+				if (other.trans != null)
+					return false;
+			} else if (!trans.equals(other.trans))
+				return false;
+			return true;
+		}
+
+		@Override
+		public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((trans == null) ? 0 : trans.hashCode());
+			return result;
+		}
+		
+		@Override
+		public String toString() {
+			return "kernel " + trans;
+		}
+	}
+	
 /*	public static class Prop extends InstExp {
 		public Prop(SigExp sig) {
 			super();
@@ -942,6 +986,7 @@ public abstract class InstExp {
 		public R visit(E env, External e);
 		public R visit(E env, Eval e);
 		public R visit(E env, FullEval e);
+		public R visit(E env, Kernel e);
 	}
 
 }

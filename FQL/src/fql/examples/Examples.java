@@ -50,9 +50,10 @@ public class Examples {
 	public static Example auto = new AutoIsoExample();
 	public static Example exp2 = new Exponentials2Example();
 	public static Example prop = new PropExample();
+	public static Example chare = new CharExample();
 	
 	public static Example[] examples = new Example[] { prop, exp2, auto, exp, fncomp, graph, eds2fql, cat, surj,
-			full2, match2, match, sub, /* functor, */enums, people,
+			full2, match2, match, sub, /* functor, */enums, people, chare,
 			external, typeddelta, /* delta, pi, */ typedPi,
 			typedsigma,  /* sigma, */  full, employess, typedemployees, /* composition, */
 			tcomp, iso, triangle, cyclicgroup, transform2, dihedral, empty,
@@ -60,7 +61,7 @@ public class Examples {
 			relative, plusSig, products, transform, gene };
 	
 	public static Example[] key_examples = new Example[] { prop, exp, surj,
-		 enums, people,
+		 enums, people, chare,
 		external, typeddelta, typedPi,
 		typedsigma, full, typedemployees, 
 		tcomp, empty,

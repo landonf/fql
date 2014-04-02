@@ -9,6 +9,7 @@ import java.awt.Stroke;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -53,6 +54,7 @@ import fql.cat.Inst;
 import fql.cat.Value;
 import fql.gui.CategoryOfElements;
 import fql.parse.PrettyPrinter;
+import fql.sql.PropPSM;
 
 public class Instance {
 
@@ -108,12 +110,12 @@ public class Instance {
 					throw new RuntimeException("Not string ID in attr " + this);
 				}
 				if (!a.target.in(p.second)) {
-					throw new RuntimeException("Bad attr domain " + this);
+					throw new RuntimeException("Bad attr domain: " + p.second + " not in " + a.target + " in " + this);
 				}
 			}
 			if (data.get(a.source.string).size() != x.size()) {
 				throw new RuntimeException("Instance " + this
-						+ " does not map all domain values in " + a.name);
+						+ " does not map all domain values in " + a.name + "\n\ndata size " + data.get(a.source.string).size() + " expected " + x.size());
 			}
 
 			for (Pair<Object, Object> p1 : i) {
@@ -208,6 +210,13 @@ public class Instance {
 	 * ED.from(ed) + "\n" + ED.conv(data)); } } }
 	 */
 
+	public Object follow(Path p, Object id) {
+		for (Edge e : p.path) {
+			id = PropPSM.lookup(data.get(e.name), id);
+		}
+		return id;
+	}
+	
 	public Set<Pair<Object, Object>> evaluate(Path p) {
 		Set<Pair<Object, Object>> x = data.get(p.source.string);
 		if (x == null) {
@@ -334,6 +343,7 @@ public class Instance {
 			throw new FQLException("Type-checking failure " + this);
 		}
 		conformsTo(thesig);
+		
 	}
 
 	private Set<Pair<Object, Object>> makeFirst(String string,
@@ -595,8 +605,8 @@ public class Instance {
 			x += "}";
 		}
 		x = x.trim();
-		return "{\n " + x + ";\n}";
 
+		return "{\n " + x + ";\n}";
 	}
 /*
 	private String printNode(Set<Pair<Object, Object>> v) {
@@ -2195,14 +2205,13 @@ public class Instance {
 		return ret;
 	}
 	
-	//TODO make faster
-	public List<Instance> subInstances() {
+	public List<Instance> subInstances_slow() {
 		List<Instance> ret = new LinkedList<>();
 		
 		List<Pair<Object, Object>> ids = ids();
-		List<Boolean> tf = new LinkedList<>();
-		tf.add(true);
-		tf.add(false);
+//		List<Boolean> tf = new LinkedList<>();
+//		tf.add(true);
+//		tf.add(false);
 		
 		List<LinkedHashMap<Pair<Object, Object>, Boolean>> subsets = Inst.homomorphs(ids, tf);
 		for (LinkedHashMap<Pair<Object, Object>, Boolean> subset : subsets) {
@@ -2210,10 +2219,160 @@ public class Instance {
 				ret.add(filter(subset));
 			} catch (FQLException fe) { }			
 		}
-		
+		//System.out.println("tf " + tf);
+//		System.out.println("subinstances for " + this);
+	//	System.out.println("Correct answer: " + ret.size());
+		//System.out.println("Correct answer: " + ret);
+	//	List<Instance> uuu = subInstances_fast();
+		//System.out.println("New answer: " + uuu);
 		return ret;
 	}
 	
+	static List<Boolean> tf = Arrays.asList(new Boolean[] { true, false });
+			
+	public static Set<Map<String, Set<Pair<Object, Object>>>> subInstances_fast0(Signature sig, List<Node> list, Map<String, Set<Pair<Object, Object>>> inst) {
+	//	System.out.println("Called on " + list + " and " + inst);
+		Set<Map<String, Set<Pair<Object, Object>>>> ret = new HashSet<>();
+		if (list.size() == 0) {
+			ret.add(inst);
+		//	System.out.println("bottom out with " + inst);
+			return ret;
+		}
+		List<Node> rest = new LinkedList<>(list);
+		Node n = rest.remove(0);
+		List<LinkedHashMap<Object, Boolean>> subsets = Inst.homomorphs(toList(inst.get(n.string)), tf);
+	//	Map<LinkedHashMap<Object, Boolean>, Map<String, Set<Pair<Object, Object>>>> cur = new HashMap<>();
+		for (LinkedHashMap<Object, Boolean> subset : subsets) {
+			//System.out.println("doing subset " + subset);
+			Map<String, Set<Pair<Object, Object>>> j = recDel(sig, n, inst, subset);
+			if (rest.size() == 0) {
+				ret.add(j);
+			} else {
+				Set<Map<String, Set<Pair<Object, Object>>>> h = subInstances_fast0(sig, rest, j);
+				ret.addAll(h);
+			}
+		}
+	//	System.out.println("returning " + ret);
+		//System.out.println("New answer: " + ret.size());
+		
+		return ret;
+	}
+
+	private static Map<String, Set<Pair<Object, Object>>> copyMap(
+			Map<String, Set<Pair<Object, Object>>> inst) {
+		Map<String, Set<Pair<Object, Object>>> m = new HashMap<>();
+		for (String k : inst.keySet()) {
+			m.put(k, new HashSet<>(inst.get(k)));
+		}
+		return m;
+	} 
+	public List<Instance> subInstances() {
+		List<Instance> ret = new LinkedList<>();
+		for (Map<String, Set<Pair<Object, Object>>> k : subInstances_fast0(thesig, thesig.order(), data)) {
+			try {
+				ret.add(new Instance(thesig, k));
+			} catch (Exception e) { }
+		}
+		return ret;
+	}
+	
+	private static List<Object> toList(Set<Pair<Object, Object>> set) {
+		List<Object> ret = new LinkedList<>();
+		for (Pair<Object, Object> s : set) {
+			ret.add(s.first);
+		}
+		return ret;
+	}
+	
+	private static void remove(Set<Pair<Object, Object>> set, Object o) {
+		Iterator<Pair<Object, Object>> it = set.iterator();
+		while (it.hasNext()) {
+			if (it.next().first.equals(o)) {
+				it.remove();
+			}
+		}
+	} /*
+	private static Set<Object> clear(Set<Pair<Object, Object>> set, Object o) {
+		Iterator<Pair<Object, Object>> it = set.iterator();
+		Set<Object> ret = new HashSet<>();
+		while (it.hasNext()) {
+			Pair<Object, Object> kkk = it.next();
+			if (kkk.first.equals(o)) {
+				it.remove();
+				ret.add(kkk.second);
+			}
+		}
+		return ret;
+	} */
+	private static Set<Object> clearX(Set<Pair<Object, Object>> set, Object o) {
+		Iterator<Pair<Object, Object>> it = set.iterator();
+		Set<Object> ret = new HashSet<>();
+		while (it.hasNext()) {
+			Pair<Object, Object> kkk = it.next();
+			if (kkk.second.equals(o)) {
+				it.remove();
+				ret.add(kkk.first);
+			}
+		}
+		return ret;
+	}
+	
+	private static Map<String, Set<Pair<Object, Object>>> recDel(Signature sig, Node init, Map<String, Set<Pair<Object, Object>>> inst, LinkedHashMap<Object, Boolean> del0) {
+		//System.out.println("recursive delete on " + init + " with " + del0 + " against " + inst);
+		Map<String, Set<Pair<Object, Object>>> ret = copyMap(inst);
+		Map<Node, Set<Object>> del = new HashMap<>();
+		for (Node node : sig.nodes) {
+			del.put(node, new HashSet<>());
+		}
+		
+		for (Entry<Object, Boolean> k : del0.entrySet()) {
+			if (!k.getValue()) {
+				del.get(init).add(k.getKey());
+			}
+		}
+
+		
+		for (;;) {
+			Pair<Node, Object> toDel = pick(del); //removes in place
+			if (toDel == null) {
+			//	System.out.println("del fin " + ret);
+				return ret;
+			}
+			Node n = toDel.first;
+			Object kill = toDel.second;
+	//		System.out.println("killing ID " + kill + " on table " + n);
+			//delete from n, and clear attrs
+			remove(ret.get(n.string), kill);
+			for (Attribute<Node> a : sig.attrsFor(n)) {
+				remove(ret.get(a.name), kill);
+			}
+	//		System.out.println("after remove from node and attrs " + ret);
+			for (Edge e : sig.edgesFrom(n)) {
+				remove(ret.get(e.name), kill);
+//				Set<Object> cleared = clear(ret.get(e.name), kill); //returns elements that deleted mapped to
+			//	del.get(e.target).addAll(cleared);
+		//		System.out.println("cleared from " + e + " now " + ret + ", toDel now " + del);
+			}
+			for (Edge e : sig.edgesTo(n)) {
+				Set<Object> cleared = clearX(ret.get(e.name), kill); //returns elements that deleted mapped to
+				del.get(e.source).addAll(cleared);
+			//	System.out.println("cleared from " + e + " now " + ret + ", toDel now " + del);
+			}
+		}
+	}
+
+	
+	private static Pair<Node, Object> pick(Map<Node, Set<Object>> del) {
+		for (Entry<Node, Set<Object>> k : del.entrySet()) {
+			Iterator<Object> it = k.getValue().iterator();
+			while (it.hasNext()) {
+				Pair<Node, Object> ret = new Pair<>(k.getKey(), it.next());
+				it.remove();
+				return ret;
+			}
+		}
+		return null;
+	}
 	private Instance filter(LinkedHashMap<Pair<Object, Object>, Boolean> subset) throws FQLException {
 		Map<String, Set<Pair<Object, Object>>> d = new HashMap<>();
 		

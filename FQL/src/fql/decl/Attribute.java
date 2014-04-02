@@ -54,8 +54,12 @@ public class Attribute<Node> implements Comparable<Attribute<Node>> {
 	}
 
 	public String toString() {
-		return name + " : " + source + " -> " + target;
+		return name; // + " : " + source + " -> " + target;
 	}
+	
+//	public String toString() {
+	//	return name + " : " + source + " -> " + target;
+	//}
 
 	public String name;
 	public Node source;

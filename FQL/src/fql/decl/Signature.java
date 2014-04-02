@@ -1091,16 +1091,66 @@ public class Signature {
 		}
 	}
 
+	private Map<Node, List<Attribute<Node>>> attrsFor_cache = new HashMap<>();
 	public List<Attribute<Node>> attrsFor(Node n) {
-		List<Attribute<Node>> a = new LinkedList<>();
+		List<Attribute<Node>> a = attrsFor_cache.get(n);
+		if (a != null) {
+			return a;
+		}
+		a = new LinkedList<>();
 		for (Attribute<Node> x : attrs) {
 			if (x.source.equals(n)) {
 				a.add(x);
 			}
 		}
+		attrsFor_cache.put(n, a);
 		return a;
 	}
 
+	public List<Node> order() {
+		List<Node> ret = new LinkedList<>(nodes);
+		Comparator<Node> c = new Comparator<Node>() {
+			@Override
+			public int compare(Node o1, Node o2) {
+				return edgesFrom(o1).size() - edgesFrom(o2).size(); 
+			}			
+		};
+		Collections.sort(ret, c);
+	//	System.out.println("order " + ret);
+		return ret;
+	}
+	
+	private Map<Node, List<Edge>> edgesFrom_cache = new HashMap<>();
+	public List<Edge> edgesFrom(Node n) {
+		List<Edge> a = edgesFrom_cache.get(n);
+		if (a != null) {
+			return a;
+		}
+		a = new LinkedList<>();
+		for (Edge x : edges) {
+			if (x.source.equals(n)) {
+				a.add(x);
+			}
+		}
+		edgesFrom_cache.put(n, a);
+		return a;
+	}
+	
+	private Map<Node, List<Edge>> edgesTo_cache = new HashMap<>();
+	public List<Edge> edgesTo(Node n) {
+		List<Edge> a = edgesTo_cache.get(n);
+		if (a != null) {
+			return a;
+		}
+		a = new LinkedList<>();
+		for (Edge x : edges) {
+			if (x.target.equals(n)) {
+				a.add(x);
+			}
+		}
+		edgesTo_cache.put(n, a);
+		return a;
+	}
 	/*
 	 * public JPanel initial() throws FQLException { List<Pair<String,
 	 * List<Pair<Object, Object>>>> b = new LinkedList<>(); for (Node n : nodes)
@@ -1472,6 +1522,7 @@ public class Signature {
 	}
 	
 	public Pair<Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>>, Pair<Instance, Map<Node, Pair<Map<Object, Instance>, Map<Instance, Object>>>>> omega(IntRef ref) throws FQLException {
+		//System.out.println("Starting omega");
 		IntRef ix = new IntRef(0);
 		Map<String, Set<Pair<Object, Object>>> data = new HashMap<>();
 		Map<Node, Pair<Map<Object, Instance>, Map<Instance, Object>>> m = new HashMap<>();
@@ -1512,7 +1563,7 @@ public class Signature {
 		}
 		
 		Instance omega = new Instance(this, data);
-		
+		//System.out.println("End omega");
 		return new Pair<>(rx, new Pair<>(omega, m));
 	}
 	
@@ -1577,6 +1628,7 @@ public class Signature {
 		return new Pair<>(m1, m2);
 	}
 
+	
 	
 	
 }

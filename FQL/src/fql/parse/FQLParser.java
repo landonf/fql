@@ -53,7 +53,7 @@ public class FQLParser {
 			"equations", "id", "delta", "sigma", "pi", "SIGMA", "eval", /* "eq" , */
 			"relationalize", "external", "then", "query", "instance", "fst",
 			"snd", "inl", "inr", "curry", "mapping", "eval", "void", "unit",
-			"prop", "iso1", "iso2", "true", "false", "char" /*, "unchi" */};
+			"prop", "iso1", "iso2", "true", "false", "char", "kernel" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -316,7 +316,7 @@ public class FQLParser {
 		Parser a = Parsers.or(new Parser[] {
 				Parsers.tuple(term("external"), ident(), ident(), ident()),
 				Parsers.tuple(ident(), term("."), term("char"), ident()),
-			//	Parsers.tuple(term("unchi"), ident(), ident()),
+				Parsers.tuple(ident(), term("."), term("kernel")),
 				Parsers.tuple(ident(), term("."), term("unit"), ident()),
 				Parsers.tuple(ident(), term("."), term("void"), ident()),
 				Parsers.tuple(ident(), term("."), term("curry"), ident()),
@@ -481,8 +481,8 @@ public class FQLParser {
 				return new TransExp.Coreturn(p1);
 			} else if (p3.toString().equals("inl")) {
 				return new TransExp.Inl(p1);
-//			} else if (p1.toString().equals("unchi")) {
-	//			return new TransExp.UnChi(p2.toString(), p3.toString());
+			} else if (p3.toString().equals("kernel")) {
+				return new TransExp.UnChi(p1.toString());
 			} else if (p3.toString().equals("inr")) {
 				return new TransExp.Inr(p1);
 			} else if (p2.toString().equals("then")) {
@@ -745,6 +745,7 @@ public class FQLParser {
 				ref.lazy());
 
 		Parser a = Parsers.or(new Parser[] {
+				Parsers.tuple(term("kernel"), ident()),
 				Parsers.tuple(term("prop"), schema()),
 				Parsers.tuple(term("void"), schema()),
 				Parsers.tuple(term("unit"), schema()), plusTy, prodTy, expTy,
@@ -915,6 +916,8 @@ public class FQLParser {
 				return new InstExp.Two(toSchema(pr.b));
 			} else if (pr.a.toString().equals("relationalize")) {
 				return new InstExp.Relationalize(pr.b.toString());
+			} else if (pr.a.toString().equals("kernel")) {
+				return new InstExp.Kernel(pr.b.toString());
 			}
 			throw new RuntimeException();
 		} catch (RuntimeException cce) {

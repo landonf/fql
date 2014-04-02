@@ -2,6 +2,7 @@ package fql.sql;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,8 @@ import java.util.Set;
 
 import fql.FQLException;
 import fql.Pair;
+import fql.cat.Arr;
+import fql.decl.Attribute;
 import fql.decl.Edge;
 import fql.decl.Instance;
 import fql.decl.Node;
@@ -20,6 +23,8 @@ public class PSMChi extends PSM {
 
 	Signature sig;
 	String pre, a, b, prop, f;
+	
+	Signature fullSig;
 
 	@Override
 	public String toString() {
@@ -36,8 +41,10 @@ public class PSMChi extends PSM {
 			Map<String, Set<Map<Object, Object>>> state) {
 		try {
 			Instance I = new Instance(sig, PSMGen.gather(a, sig, state));
+			Instance Jfull = new Instance(fullSig, PSMGen.gather(b, fullSig, state));
 			Instance J = new Instance(sig, PSMGen.gather(b, sig, state));
-			Instance P = new Instance(sig, PSMGen.gather(prop, sig, state));
+			Instance Pfull = new Instance(fullSig, PSMGen.gather(prop, fullSig, state));
+			Instance P = interp.prop2.get(prop).first;
 			Transform t= new Transform(I, J, PSMGen.gather(f, sig, state));
 			
 			List<Pair<String, List<Pair<Object, Object>>>> data = new LinkedList<>();
@@ -76,19 +83,6 @@ public class PSMChi extends PSM {
 								set.add(j);
 							}
 						}
-/*						for (Pair<Object, Object> j : q.get(e.source.string)) {
-							System.out.println("j " + j);
-							Instance u = interp.prop2.get(prop).second.get(e.source).first.get(j.first);
-							System.out.println("map " + interp.prop2.get(prop).second.get(e.source).first);
-							System.out.println("u " + u);
-						//	System.out.println("trans " + rx.second.get(e));
-							Instance v = interp.prop1.get(prop).second.get(e).preimage(u);
-						//	System.out.println("v " + v); 
-							Object o = interp.prop2.get(prop).second.get(e.target).second.get(v);
-						//	System.out.println("mgetarget " + m.get(e.target).second);
-						//	System.out.println("o " + o);
-							set.add(new Pair<>(j.first, o));
-						}			*/
 						q.put(e.name, set);
 					}
 					//also do edges
@@ -98,9 +92,22 @@ public class PSMChi extends PSM {
 				}
 				data.add(new Pair<>(c.string, l));
 			}
+			Transform ret = new Transform(J, P, data);
 			
-			Transform ret = new Transform(J, P, data );
-			PSMGen.shred(pre, ret, state);
+			List<Pair<String, List<Pair<Object, Object>>>> dataFull = new LinkedList<>();
+			for (Node n : sig.nodes) {
+				List<Pair<Object, Object>> set = new LinkedList<>();
+				for (Pair<Object, Object> k : ret.data.get(n.string)) {
+					Object lhs = k.second;
+					LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> rhs = Relationalizer.flag(n, Jfull, k.first);
+					Object xxx = interp.prop4.get(prop).get(n).get(new Pair<>(lhs, rhs));
+					set.add(new Pair<>(k.first, xxx));
+				}
+				dataFull.add(new Pair<>(n.string, set));
+			}
+			
+			Transform ret0 = new Transform(Jfull, Pfull, dataFull);			
+			PSMGen.shred(pre, ret0, state);
 		} catch (FQLException fe) {
 			fe.printStackTrace();
 			throw new RuntimeException(fe.getLocalizedMessage());
@@ -195,7 +202,8 @@ public class PSMChi extends PSM {
 	public PSMChi(Signature sig, String pre, String a, String b, String prop,
 			String f) {
 		super();
-		this.sig = sig;
+		this.fullSig = sig;
+		this.sig = new Signature(fullSig.nodes, fullSig.edges, new LinkedList<Attribute<Node>>(), fullSig.eqs);
 		this.pre = pre;
 		this.a = a;
 		this.b = b;

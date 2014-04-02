@@ -63,6 +63,7 @@ import fql.decl.InstExp.External;
 import fql.decl.InstExp.FullEval;
 import fql.decl.InstExp.FullSigma;
 import fql.decl.InstExp.InstExpVisitor;
+import fql.decl.InstExp.Kernel;
 import fql.decl.InstExp.One;
 import fql.decl.InstExp.Pi;
 import fql.decl.InstExp.Plus;
@@ -78,6 +79,7 @@ import fql.decl.Query;
 import fql.decl.QueryExp;
 import fql.decl.SigExp;
 import fql.decl.Signature;
+import fql.decl.TransExp;
 import fql.decl.Transform;
 import fql.decl.Unresolver;
 //import org.apache.commons.collections15.Transformer;
@@ -139,7 +141,18 @@ public class Display {
 		JPanel top = new JPanel(new GridLayout(1, 1));
 		top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 		top.add(px);
+		/*
+		System.out.println("start");
+		long start = System.currentTimeMillis();
+		System.out.println("fast " + view.subInstances_fast().size()); //TODO remove
+		long x1 = System.currentTimeMillis();
+		System.out.println("old " + view.subInstances().size());
+		long x2 = System.currentTimeMillis();
+		System.out.println("fast time " + (x1 - start));
+		System.out.println("old time " + (x2 - x1));
+		*/
 		return top;
+		
 	}
 
 	public JPanel showMapping(Environment environment, /* String c, */
@@ -658,7 +671,9 @@ public class Display {
 				}
 
 				public Unit visit(Unit env, Exp e) {
-					throw new RuntimeException();
+					g2.addEdge(new Pair<>(guid.pp(), e), e.a, k);
+					g2.addEdge(new Pair<>(guid.pp(), e), e.b, k);
+					return null;
 				}
 
 				public Unit visit(Unit env, Const e) {
@@ -701,6 +716,15 @@ public class Display {
 
 				public Unit visit(Unit env, FullEval e) {
 					g2.addEdge(new Pair<>(guid.pp(), e), e.e, k);
+					return null;
+				}
+
+				@Override
+				public Unit visit(Unit env, Kernel e) {
+					TransExp t = prog.transforms.get(e.trans);
+					Pair<String, String> p = t.type(prog);
+					g2.addEdge(new Pair<>(guid.pp(), e), p.first, k);
+					g2.addEdge(new Pair<>(guid.pp(), e), p.second, k);
 					return null;
 				}
 
@@ -899,6 +923,11 @@ public class Display {
 
 			public Object visit(Unit env, FullEval e) {
 				return e.q;
+			}
+
+			@Override
+			public Object visit(Unit env, Kernel e) {
+				return null;
 			}
 
 			

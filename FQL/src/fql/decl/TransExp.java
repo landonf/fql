@@ -73,14 +73,13 @@ public abstract class TransExp {
 	
 public static class UnChi extends TransExp {
 		
-		public String a, trans;
+		public String a;
 
 		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
 			result = prime * result + ((a == null) ? 0 : a.hashCode());
-			result = prime * result + ((trans == null) ? 0 : trans.hashCode());
 			return result;
 		}
 
@@ -98,23 +97,17 @@ public static class UnChi extends TransExp {
 					return false;
 			} else if (!a.equals(other.a))
 				return false;
-			if (trans == null) {
-				if (other.trans != null)
-					return false;
-			} else if (!trans.equals(other.trans))
-				return false;
 			return true;
 		}
 
-		public UnChi(String a, String trans) {
+		public UnChi(String a) {
 			super();
 			this.a = a;
-			this.trans = trans;
 		}
 
 		@Override
 		public boolean gather() {
-			return false;
+			return true;
 		}
 
 		@Override
@@ -123,7 +116,7 @@ public static class UnChi extends TransExp {
 		}
 		@Override
 		public String toString() {
-			return "unchi " + a + " " + trans;
+			return a + ".kernel";
 		}
 	}
 	

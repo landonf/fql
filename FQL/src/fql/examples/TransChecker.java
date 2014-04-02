@@ -617,26 +617,17 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 
 	@Override
 	public Pair<String, String> visit(FQLProgram env, UnChi e) {
-		if (seen.contains(e.trans)) {
-			throw new RuntimeException("Circular transform " + e);
-		}
-		seen.add(e.trans);
-		TransExp t = env.transforms.get(e.trans);
-		if (t == null) {
-			throw new RuntimeException("Missing transform " + t);
-		}
-		Pair<String, String> k = t.accept(env, this);
-		InstExp p = env.insts.get(k.second);
-		if (!(p instanceof InstExp.Two)) {
-			throw new RuntimeException("Not a prop " + e);
-		}
-	//	InstExp b = env.insts.get(k.first); //b -> prop
-		
-		InstExp a = env.insts.get(e.a);
-		if (a == null) {
+		InstExp p = env.insts.get(e.a);
+		if (p == null) {
 			throw new RuntimeException("Missing instance " + e.a);
 		}
-		return new Pair<>(e.a, k.first);
+		if (!(p instanceof InstExp.Kernel)) {
+			throw new RuntimeException("Not a kernel " + e);
+		}
+		InstExp.Kernel k = (InstExp.Kernel) p;
+		Pair<String, String> trans = env.transforms.get(k.trans).type(env);
+		
+		return new Pair<>(e.a, trans.first); 
 	}
 	
 	//TODO check circularity

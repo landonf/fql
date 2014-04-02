@@ -78,9 +78,9 @@ public abstract class Type {
 			super();
 			this.name = name;
 			this.values = values;
-			if (values.size() == 0) {
-				throw new RuntimeException("Empty enum: " + name);
-			}
+		//	if (values.size() == 0) {
+		//		throw new RuntimeException("Empty enum: " + name);
+		//	}
 		}
 		@Override
 		public boolean in(Object o) {

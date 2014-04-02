@@ -1,6 +1,7 @@
 package fql.sql;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,8 @@ import fql.DEBUG;
 import fql.Pair;
 import fql.Quad;
 import fql.Triple;
+import fql.cat.Arr;
+import fql.decl.Attribute;
 import fql.decl.Edge;
 import fql.decl.Instance;
 import fql.decl.Node;
@@ -36,6 +39,10 @@ public class PSMInterp {
 	Map<String, Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>>> prop1 = new HashMap<>();
 	Map<String, Pair<Instance, Map<Node, Pair<Map<Object, Instance>, Map<Instance, Object>>>>> prop2 = new HashMap<>();
 
+	Map<String, Map<Node, Map<Object, Pair<Object, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>>>> prop3 = new HashMap<>();
+	Map<String, Map<Node, Map<Pair<Object, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>, Object>>> prop4 = new HashMap<>();
+
+	
 	public  Pair<Map<String, Set<Map<Object, Object>>>, List<Throwable>> interpX(List<PSM> prog,
 			Map<String, Set<Map<Object, Object>>> state) {
 		List<Throwable> ret = new LinkedList<>();

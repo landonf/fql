@@ -2,6 +2,7 @@ package fql.decl;
 
 import fql.FQLException;
 import fql.Pair;
+import fql.Triple;
 import fql.decl.InstExp.Const;
 import fql.decl.InstExp.Delta;
 import fql.decl.InstExp.Eval;
@@ -10,6 +11,7 @@ import fql.decl.InstExp.External;
 import fql.decl.InstExp.FullEval;
 import fql.decl.InstExp.FullSigma;
 import fql.decl.InstExp.InstExpVisitor;
+import fql.decl.InstExp.Kernel;
 import fql.decl.InstExp.One;
 import fql.decl.InstExp.Pi;
 import fql.decl.InstExp.Plus;
@@ -28,12 +30,26 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 
 	@Override
 	public SigExp visit(FQLProgram env, One e) {
-		return e.sig.typeOf(env);
+		SigExp s = e.sig.typeOf(env);
+		fql.decl.SigExp.Const sig = s.toConst(env);
+		for (Triple<String, String, String> k : sig.attrs) {
+			if (k.third.equals("string") || k.third.equals("int")) {
+				throw new RuntimeException("Cannot use unit with string or int (try enums instead).");
+			}
+		}
+		return s;
 	}
 
 	@Override
 	public SigExp visit(FQLProgram env, Two e) {
-		return e.sig.typeOf(env);
+		SigExp s = e.sig.typeOf(env);
+		fql.decl.SigExp.Const sig = s.toConst(env);
+		for (Triple<String, String, String> k : sig.attrs) {
+			if (k.third.equals("string") || k.third.equals("int")) {
+				throw new RuntimeException("Cannot use prop with string or int (try enums instead).");
+			}
+		}
+		return s;
 	}
 	
 	private SigExp visit2(FQLProgram env, String a, String b) {
@@ -217,6 +233,16 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 					+ k.first.unresolve(env.sigs) + " but computed " + v.unresolve(env.sigs));
 		}
 		return k.second;
+	}
+
+	@Override
+	public SigExp visit(FQLProgram env, Kernel e) {
+		TransExp t = env.transforms.get(e.trans);
+		if (t == null) {
+			throw new RuntimeException("Missing transform: " + t);
+		}
+		Pair<String, String> u = t.type(env);
+		return env.insts.get(u.first).accept(env, this);
 	}
 
 	

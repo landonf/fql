@@ -10,6 +10,9 @@ import fql.LineException;
 
 public class FQLProgram {
 
+	@Override public boolean equals(Object o) {
+		return (this == o);
+	}
 
 		public FQLProgram(LinkedHashMap<String, Type> enums,
 			LinkedHashMap<String, SigExp> sigs,
