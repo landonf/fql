@@ -84,7 +84,14 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 
 	@Override
 	public SigExp visit(FQLProgram env, Exp e) {
-		return visit2(env, e.a, e.b);
+		SigExp ret = visit2(env, e.a, e.b);
+		fql.decl.SigExp.Const sig = ret.toConst(env);
+		for (Triple<String, String, String> k : sig.attrs) {
+			if (k.third.equals("string") || k.third.equals("int")) {
+				throw new RuntimeException("Cannot use exponentials with string or int (try enums instead).");
+			}
+		}
+		return ret;
 	}
 
 	/*

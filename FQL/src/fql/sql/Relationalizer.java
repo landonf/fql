@@ -2,33 +2,26 @@ package fql.sql;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import fql.FQLException;
 import fql.Fn;
 import fql.Pair;
 import fql.Triple;
-import fql.Unit;
 import fql.cat.Arr;
 import fql.cat.FinCat;
-import fql.cat.Inst;
 import fql.decl.Attribute;
 import fql.decl.Edge;
 import fql.decl.FQLProgram;
 import fql.decl.InstExp;
 import fql.decl.InstExp.Const;
-import fql.decl.Instance;
 import fql.decl.Node;
 import fql.decl.Path;
 import fql.decl.SigExp;
 import fql.decl.Signature;
-import fql.decl.Type;
 
 /**
  * 
@@ -56,10 +49,11 @@ public class Relationalizer {
 			Signature sig = sig0.toSig(prog);
 			Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> start = sig
 					.toCategory2();
-			FinCat<Node, Path> cat = start.first;
+			//FinCat<Node, Path> cat = start.first;
 			Fn<Path, Arr<Node, Path>> map = start.second;
-
-			Map<Node, List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>> m = fast_obs(sig);
+			Map<Node, List<Pair<Arr<Node, Path>, Attribute<Node>>>> obs = sig.obs();
+			
+			Map<Node, List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>> m = sig.obsbar();
 			
 			List<Pair<String, List<Pair<Object, Object>>>> nodes = new LinkedList<>();
 			List<Pair<String, List<Pair<Object, Object>>>> attrs = new LinkedList<>();
@@ -89,7 +83,7 @@ public class Relationalizer {
 				List<Pair<Object, Object>> set = new LinkedList<>();
 				for (Pair<Object, Object> k : PropPSM.lookup(nodes, a.source.string)) {
 					LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> new_id = m1.get(a.source).get(k.first);
-					set.add(new Pair<Object, Object>(k.first, new_id.get(new Pair<>(new Arr<>(new Path(sig, a.source), a.source, a.source), a))));
+					set.add(new Pair<Object, Object>(k.first, new_id.get(new Pair<>(map.of(new Path(sig, a.source)), a))));
 				}
 				attrs.add(new Pair<>(a.name, set));
 			}
@@ -97,7 +91,10 @@ public class Relationalizer {
 				List<Pair<Object, Object>> set = new LinkedList<>();
 				for (Pair<Object, Object> k : PropPSM.lookup(nodes, a.source.string)) {
 					LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> new_id = m1.get(a.source).get(k.first);
-					LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> new_id0 = PropPSM.truncate(sig, new_id, a, m.get(a.target));
+					LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> new_id0 = PropPSM.truncate2(sig, new_id, new Arr<>(new Path(sig, a), a.source, a.target), obs.get(a.target));
+				//	LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> new_id0 = PropPSM.truncate(sig, new_id, a, m.get(a.target));
+				//	System.out.println("new " + new_id1);
+				//	System.out.println("old " + new_id0);
 					Object o = m2.get(a.target).get(new_id0);
 					set.add(new Pair<>(k.first, o));
 				}
@@ -105,7 +102,7 @@ public class Relationalizer {
 			}
 			//			Instance ret0 = new Instance(sig, data);
 			InstExp.Const retX = new InstExp.Const(nodes, attrs, arrows, sig.toConst());
-			Triple ret = new Triple<>(retX, m1, m2);
+			Triple<Const, Map<Node, Map<Object, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>>, Map<Node, Map<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Object>>> ret = new Triple<>(retX, m1, m2);
 
 			// System.out.println(ret);
 			cache.put(new Pair<>(prog, sig0), ret);
@@ -320,45 +317,9 @@ public class Relationalizer {
 	 * return ret; }
 	 */
 
-	public static LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> flag(
-			Node c, Instance I, Object id) throws FQLException {
-		LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> ret = new LinkedHashMap<>();
-		Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> xxx = I.thesig.toCategory2();
-		for (Node d : I.thesig.nodes) {
-			for (Arr<Node, Path> p : xxx.first.hom(c, d)) {
-				Object new_id = I.follow(p.arr, id);
-				for (Attribute<Node> a : I.thesig.attrsFor(d)) {
-					ret.put(new Pair<>(p, a), PropPSM.lookup(I.data.get(a.name), new_id));
-				}
-			}
-		}
-		return ret;
-	}
+	
 
-	public static Map<Node, List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>> fast_obs(
-			Signature sig) throws FQLException {
-		Map<Node, List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>> ret = new HashMap<>();
-
-		Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> xxx = sig
-				.toCategory2();
-		FinCat<Node, Path> cat = xxx.first;
-
-		for (Node c : sig.nodes) {
-			Map<Pair<Arr<Node, Path>, Attribute<Node>>, List<Object>> m = new HashMap<>();
-
-			for (Node d : sig.nodes) {
-				for (Arr<Node, Path> p : cat.hom(c, d)) {
-					for (Attribute<Node> a : sig.attrsFor(d)) {
-						Type.Enum en = (Type.Enum) a.target;
-						m.put(new Pair<>(p, a), new LinkedList<Object>(en.values));
-					}
-				}
-			}
-			List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>> set = Inst.homomorphs(m);
-			ret.put(c, set);
-		}
-		return ret;
-	}
+	
 
 	// Set<Pair<Path, Set<Pair<Attribue
 	/*
@@ -391,6 +352,7 @@ public class Relationalizer {
 	 */
 	/*
 	 */
+	/*
 	public static Map<Node, Set<Set<Triple<Arr<Node, Path>, Attribute<Node>, Object>>>> obsbar0(
 			Signature sig) throws FQLException {
 		Map<Node, Set<Set<Triple<Arr<Node, Path>, Attribute<Node>, Object>>>> m = obsbar(sig);
@@ -410,8 +372,8 @@ public class Relationalizer {
 			}
 		}
 		return m;
-	}
-
+	} */
+/*
 	private static Map<Node, Set<Set<Triple<Arr<Node, Path>, Attribute<Node>, Object>>>> obsbar(
 			Signature sig) throws FQLException {
 		Map<Node, Set<Set<Triple<Arr<Node, Path>, Attribute<Node>, Object>>>> inst = new HashMap<>();
@@ -462,7 +424,7 @@ public class Relationalizer {
 		}
 		return inst;
 	}
-
+*/
 	public static Pair<Map<Node, List<String>>, List<PSM>> observations(
 			Signature sig, String out, String in, boolean relationalize)
 			throws FQLException {

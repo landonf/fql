@@ -56,7 +56,7 @@ public class DEBUG implements Serializable {
 	public String look_and_feel = UIManager.getSystemLookAndFeelClassName();
 
 
-	public SQLKIND sqlKind = SQLKIND.H2;
+	public SQLKIND sqlKind = SQLKIND.NATIVE;
 
 	public String FILE_PATH = "";
 

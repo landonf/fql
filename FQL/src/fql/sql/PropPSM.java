@@ -42,7 +42,10 @@ public class PropPSM extends PSM {
 		
 			Signature sigX = new Signature(sig.nodes, sig.edges, new LinkedList<Attribute<Node>>(), sig.eqs);
 			
-			//Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> ooo = sig.toCategory2();
+			Map<Node, List<Pair<Arr<Node, Path>, Attribute<Node>>>> obs = sig.obs();
+			
+			Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> ooo = sig.toCategory2();
+			Fn<Path, Arr<Node, Path>> fn = ooo.second;
 		//	FinCat<Node, Path> cat = ooo.first;
 			
 			Pair<Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>>, Pair<Instance, Map<Node, Pair<Map<Object, Instance>, Map<Instance, Object>>>>> xxx = sigX.omega(ref);
@@ -50,7 +53,7 @@ public class PropPSM extends PSM {
 			interp.prop2.put(pre, xxx.second);
 			Instance old = xxx.second.first;
 			//System.out.println("start obsvar");
-			Map<Node, List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>> m = Relationalizer.fast_obs(sig);
+			Map<Node, List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>> m = sig.obsbar();
 		//	Map<Node, Set<Set<Triple<Arr<Node, Path>, Attribute<Node>, Object>>>> me = Relationalizer.obsbar0(sig);
 		//	Map<Node, Set<Set<Triple<Arr<Node, Path>, Attribute<Node>, Object>>>> m = Relationalizer.obsbar1(sig);
 		   // System.out.println(kkk);
@@ -95,7 +98,7 @@ public class PropPSM extends PSM {
 					Object old_id = kk.first;
 					Object old_id0 = lookup(old.data.get(a.name), old_id);
 					LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> new_id = kk.second;
-					LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> new_id0 = truncate(sig, new_id, a, m.get(a.target));
+					LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> new_id0 = truncate2(sig, new_id, fn.of(new Path(sig, a)), obs.get(a.target));
 					Object o = m2.get(a.target).get(new Pair<>(old_id0, new_id0));
 					set.add(new Pair<>(k.first, o));
 				}
@@ -208,7 +211,22 @@ public class PropPSM extends PSM {
 		//System.out.println("returning true on " + bigger + "\n and \n" + smaller);
 		return true;
 	}
-	public static LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> truncate(Signature sig,
+	
+	public static LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> truncate2(Signature sig,
+			LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> new_id, Arr<Node, Path> p,
+			List<Pair<Arr<Node, Path>, Attribute<Node>>> obsD
+			) throws FQLException {
+		LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> ret = new LinkedHashMap<>();
+		
+		for (Pair<Arr<Node, Path>, Attribute<Node>> obD : obsD) {
+			Pair<Arr<Node, Path>, Attribute<Node>> q = new Pair<>(sig.toCategory2().first.compose(p, obD.first), obD.second);
+			ret.put(obD, new_id.get(q));
+		}
+
+		return ret;
+	}
+	
+/*	public static LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> truncate(Signature sig,
 			LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> new_id, Edge e, 
 			List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>> list) throws FQLException {
 		//System.out.println("start");
@@ -249,7 +267,7 @@ public class PropPSM extends PSM {
 			throw new RuntimeException("Cannot truncate:\n" + new_id + "\n\non edge\n" + e + "\n\nagainst " + list + "\n\npossible candidates\n" + ret);
 	//	}
 	//	return ret.get(0);
-	}
+	} */
 	/*public static Map<Arr<Node, Path>, Map<Attribute<Node>, Object>> truncate(Signature sig,
 			Map<Arr<Node, Path>, Map<Attribute<Node>, Object>> new_id, Edge e, 
 			List<Map<Arr<Node, Path>, Map<Attribute<Node>, Object>>> list) throws FQLException {

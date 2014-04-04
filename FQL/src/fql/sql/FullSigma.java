@@ -31,7 +31,7 @@ public class FullSigma extends PSM {
 	
 	@Override 
 	public String toString() {
-		return pre + " := SIGMA " + f + " " + inst;
+		return pre + " := SIGMA " + f + " : " + f.source + " -> " + f.target + " " + inst;
 	}
 
 	public FullSigma(Mapping f, String pre, String inst) {

@@ -33,7 +33,7 @@ public class InsertEmptyKeygen extends InsertKeygen {
 		}
 		Set<Map<Object, Object>> ret = new HashSet<>();
 		Map<Object, Object> m = new HashMap<>();
-		m.put("guid", ++interp.guid);
+		m.put("guid", Integer.toString(++interp.guid));
 		ret.add(m);
 
 		state.put(name, ret);

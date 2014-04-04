@@ -198,9 +198,11 @@ public class Flower extends SQL {
 				int xxx2 = timesInWhere(o2);
 				if (xxx1 == xxx2) {
 					if (from.get(o1) == null || state.get(from.get(o1)) == null) {
+						System.out.println(state.keySet());
 						throw new RuntimeException("Missing: " + o1);
 					}
 					if (from.get(o2) == null || state.get(from.get(o2)) == null) {
+						System.out.println(state.keySet());
 						throw new RuntimeException("Missing: " + o2);
 					}
 				return Integer.compare(state.get(from.get(o1)).size(), state.get(from.get(o2)).size()); 

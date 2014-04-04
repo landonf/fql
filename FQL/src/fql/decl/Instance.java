@@ -2,6 +2,7 @@ package fql.decl;
 
 import java.awt.BasicStroke;
 import java.awt.CardLayout;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Paint;
@@ -44,6 +45,7 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import fql.DEBUG;
 import fql.FQLException;
+import fql.Fn;
 import fql.Pair;
 import fql.Quad;
 import fql.Triple;
@@ -65,6 +67,7 @@ public class Instance {
 		}
 		return ret;
 	}
+
 	public Map<Object, Object> getNode2(Node n) {
 		Map<Object, Object> ret = new HashMap<>();
 		for (Pair<Object, Object> k : data.get(n.string)) {
@@ -110,12 +113,15 @@ public class Instance {
 					throw new RuntimeException("Not string ID in attr " + this);
 				}
 				if (!a.target.in(p.second)) {
-					throw new RuntimeException("Bad attr domain: " + p.second + " not in " + a.target + " in " + this);
+					throw new RuntimeException("Bad attr domain: " + p.second
+							+ " not in " + a.target + " in " + this);
 				}
 			}
 			if (data.get(a.source.string).size() != x.size()) {
 				throw new RuntimeException("Instance " + this
-						+ " does not map all domain values in " + a.name + "\n\ndata size " + data.get(a.source.string).size() + " expected " + x.size());
+						+ " does not map all domain values in " + a.name
+						+ "\n\ndata size " + data.get(a.source.string).size()
+						+ " expected " + x.size());
 			}
 
 			for (Pair<Object, Object> p1 : i) {
@@ -191,14 +197,14 @@ public class Instance {
 		 */
 		// toFunctor();
 	}
-	
+
 	public Map<String, Set<Pair<Object, Object>>> shred(String pre) {
 		Map<String, Set<Pair<Object, Object>>> ret = new HashMap<>();
-		
+
 		for (String k : data.keySet()) {
 			ret.put(pre + "_" + k, data.get(k));
 		}
-		
+
 		return ret;
 	}
 
@@ -216,7 +222,7 @@ public class Instance {
 		}
 		return id;
 	}
-	
+
 	public Set<Pair<Object, Object>> evaluate(Path p) {
 		Set<Pair<Object, Object>> x = data.get(p.source.string);
 		if (x == null) {
@@ -232,8 +238,8 @@ public class Instance {
 		return x;
 	}
 
-	public static <X, Y, Z> Set<Pair<X, Z>> compose(
-			Set<Pair<X, Y>> x, Set<Pair<Y, Z>> y) {
+	public static <X, Y, Z> Set<Pair<X, Z>> compose(Set<Pair<X, Y>> x,
+			Set<Pair<Y, Z>> y) {
 		Set<Pair<X, Z>> ret = new HashSet<>();
 
 		for (Pair<X, Y> p1 : x) {
@@ -343,7 +349,7 @@ public class Instance {
 			throw new FQLException("Type-checking failure " + this);
 		}
 		conformsTo(thesig);
-		
+
 	}
 
 	private Set<Pair<Object, Object>> makeFirst(String string,
@@ -353,8 +359,9 @@ public class Instance {
 				return secol(p.second);
 			}
 		}
-		throw new RuntimeException("conformsTo failure: cannot find table " + string);
-//				+ " in " + data2);
+		throw new RuntimeException("conformsTo failure: cannot find table "
+				+ string);
+		// + " in " + data2);
 	}
 
 	private Set<Pair<Object, Object>> secol(List<Pair<Object, Object>> second) {
@@ -494,57 +501,31 @@ public class Instance {
 
 	@Override
 	public String toString() {
-/*		StringBuffer sb = new StringBuffer("{\n");
-
-		boolean first = true;
-		sb.append("nodes\n");
-		for (Node k : thesig.nodes) {
-			Set<Pair<Object, Object>> v = data.get(k.string);
-			if (!first) {
-				sb.append(",\n");
-			}
-			first = false;
-			sb.append(k.string);
-			sb.append(" -> { ");
-			sb.append(printNode(v));
-			sb.append(" }");
-		}
-		sb.append("\n ;\n");
-
-		first = true;
-		sb.append("attributes\n");
-		for (Attribute<Node> k : thesig.attrs) {
-			Set<Pair<Object, Object>> v = data.get(k.name);
-			if (!first) {
-				sb.append(",\n");
-			}
-			first = false;
-			sb.append(k.name);
-			sb.append(" -> { ");
-			sb.append(printSet(v));
-			sb.append(" }");
-		}
-		sb.append("\n ;\n");
-
-		first = true;
-		sb.append("arrows\n");
-		for (Edge k : thesig.edges) {
-			Set<Pair<Object, Object>> v = data.get(k.name);
-			if (!first) {
-				sb.append(",\n");
-			}
-			first = false;
-			sb.append(k.name);
-			sb.append(" -> { ");
-			sb.append(printSet(v));
-			sb.append(" }");
-		}
-
-		sb.append(";\n}");
-		return sb.toString(); */
+		/*
+		 * StringBuffer sb = new StringBuffer("{\n");
+		 * 
+		 * boolean first = true; sb.append("nodes\n"); for (Node k :
+		 * thesig.nodes) { Set<Pair<Object, Object>> v = data.get(k.string); if
+		 * (!first) { sb.append(",\n"); } first = false; sb.append(k.string);
+		 * sb.append(" -> { "); sb.append(printNode(v)); sb.append(" }"); }
+		 * sb.append("\n ;\n");
+		 * 
+		 * first = true; sb.append("attributes\n"); for (Attribute<Node> k :
+		 * thesig.attrs) { Set<Pair<Object, Object>> v = data.get(k.name); if
+		 * (!first) { sb.append(",\n"); } first = false; sb.append(k.name);
+		 * sb.append(" -> { "); sb.append(printSet(v)); sb.append(" }"); }
+		 * sb.append("\n ;\n");
+		 * 
+		 * first = true; sb.append("arrows\n"); for (Edge k : thesig.edges) {
+		 * Set<Pair<Object, Object>> v = data.get(k.name); if (!first) {
+		 * sb.append(",\n"); } first = false; sb.append(k.name);
+		 * sb.append(" -> { "); sb.append(printSet(v)); sb.append(" }"); }
+		 * 
+		 * sb.append(";\n}"); return sb.toString();
+		 */
 		String x = "\n nodes\n";
 		boolean b = false;
-		
+
 		for (Node k0 : thesig.nodes) {
 			Set<Pair<Object, Object>> k = data.get(k0.string);
 			if (b) {
@@ -579,7 +560,8 @@ public class Instance {
 					x += ", ";
 				}
 				d = true;
-				x += "(" + PrettyPrinter.q(v.first) + ", " + PrettyPrinter.q(v.second) + ")";
+				x += "(" + PrettyPrinter.q(v.first) + ", "
+						+ PrettyPrinter.q(v.second) + ")";
 			}
 			x += "}";
 		}
@@ -600,7 +582,8 @@ public class Instance {
 					x += ", ";
 				}
 				d = true;
-				x += "(" + PrettyPrinter.q(v.first) + ", " + PrettyPrinter.q(v.second) + ")";
+				x += "(" + PrettyPrinter.q(v.first) + ", "
+						+ PrettyPrinter.q(v.second) + ")";
 			}
 			x += "}";
 		}
@@ -608,48 +591,26 @@ public class Instance {
 
 		return "{\n " + x + ";\n}";
 	}
-/*
-	private String printNode(Set<Pair<Object, Object>> v) {
-		StringBuffer sb = new StringBuffer();
-		boolean first = true;
-		for (Pair<Object, Object> p : v) {
-			if (!first) {
-				sb.append(", ");
-			}
-			first = false;
-			sb.append(maybeQuote(p.first.toString()));
-		}
-		return sb.toString();
-	} */
-/*
-	private String printSet(Set<Pair<Object, Object>> v) {
-		StringBuffer sb = new StringBuffer();
-		boolean first = true;
-		if (v == null) {
-			return "null";
-		}
-		for (Pair<Object, Object> p : v) {
-			if (!first) {
-				sb.append(", ");
-			}
-			first = false;
-			sb.append("(");
-			sb.append(maybeQuote(p.first.toString()));
-			sb.append(",");
-			sb.append(maybeQuote(p.second.toString()));
-			sb.append(")");
-		}
-		return sb.toString();
-	} */
-/*
-	private String maybeQuote(String s) {
-		if (s.contains(" ") || s.contains("\n") || s.contains("\r")
-				|| s.contains("\t")) {
-			return "\"" + s + "\"";
-		}
-		return s;
-	}
-*/
+
+	/*
+	 * private String printNode(Set<Pair<Object, Object>> v) { StringBuffer sb =
+	 * new StringBuffer(); boolean first = true; for (Pair<Object, Object> p :
+	 * v) { if (!first) { sb.append(", "); } first = false;
+	 * sb.append(maybeQuote(p.first.toString())); } return sb.toString(); }
+	 */
+	/*
+	 * private String printSet(Set<Pair<Object, Object>> v) { StringBuffer sb =
+	 * new StringBuffer(); boolean first = true; if (v == null) { return "null";
+	 * } for (Pair<Object, Object> p : v) { if (!first) { sb.append(", "); }
+	 * first = false; sb.append("("); sb.append(maybeQuote(p.first.toString()));
+	 * sb.append(","); sb.append(maybeQuote(p.second.toString()));
+	 * sb.append(")"); } return sb.toString(); }
+	 */
+	/*
+	 * private String maybeQuote(String s) { if (s.contains(" ") ||
+	 * s.contains("\n") || s.contains("\r") || s.contains("\t")) { return "\"" +
+	 * s + "\""; } return s; }
+	 */
 	public JPanel view() throws FQLException {
 		List<JPanel> panels = new LinkedList<JPanel>();
 		// Map<String, Set<Pair<String,String>>> data;
@@ -782,12 +743,12 @@ public class Instance {
 
 		for (Edge e : thesig.edges) {
 			jnd.get(e.source.string).put(e.name, data.get(e.name));
-	//		names.add(e.name);
+			// names.add(e.name);
 		}
 
 		for (Attribute<Node> a : thesig.attrs) {
 			jnd.get(a.source.string).put(a.name, data.get(a.name));
-		//	names.add(a.name);
+			// names.add(a.name);
 		}
 
 		Comparator<String> strcmp = new Comparator<String>() {
@@ -797,7 +758,7 @@ public class Instance {
 		};
 		Collections.sort(names, strcmp);
 		joined = makejoined(jnd, nd, names);
-		
+
 		for (Edge e : thesig.edges) {
 			String name = e.name;
 			Object[][] rowData = new Object[data.get(name).size()][2];
@@ -823,12 +784,12 @@ public class Instance {
 
 			// p.setMaximumSize(new Dimension(200,200));
 			p.setBorder(BorderFactory.createTitledBorder(
-					BorderFactory.createEmptyBorder(), name + " (" + data.get(name).size()
-							+ " rows)"));
-		//	System.out.println("adding " + name );
+					BorderFactory.createEmptyBorder(),
+					name + " (" + data.get(name).size() + " rows)"));
+			// System.out.println("adding " + name );
 			vwr.add(p, name);
 		}
-		
+
 		for (Attribute<Node> e : thesig.attrs) {
 			String name = e.name;
 			Object[][] rowData = new Object[data.get(name).size()][2];
@@ -838,7 +799,8 @@ public class Instance {
 				rowData[i][1] = k.second;
 				i++;
 			}
-			Object[] colNames = new Object[] { e.source.string, e.target.toString() };
+			Object[] colNames = new Object[] { e.source.string,
+					e.target.toString() };
 			JTable t = new JTable(rowData, colNames) {
 				public Dimension getPreferredScrollableViewportSize() {
 					Dimension d = getPreferredSize();
@@ -854,12 +816,12 @@ public class Instance {
 
 			// p.setMaximumSize(new Dimension(200,200));
 			p.setBorder(BorderFactory.createTitledBorder(
-					BorderFactory.createEmptyBorder(), name + " (" + data.get(name).size()
-							+ " rows)"));
-		//	System.out.println("adding " + name );
+					BorderFactory.createEmptyBorder(),
+					name + " (" + data.get(name).size() + " rows)"));
+			// System.out.println("adding " + name );
 			vwr.add(p, name);
 		}
-		
+
 		for (Attribute<Node> e : thesig.attrs) {
 			String name = e.name;
 			Object[][] rowData = new Object[data.get(name).size()][1];
@@ -882,12 +844,11 @@ public class Instance {
 			sorter.allRowsChanged();
 			p.add(new JScrollPane(t));
 
-			
 			// p.setMaximumSize(new Dimension(200,200));
 			p.setBorder(BorderFactory.createTitledBorder(
-					BorderFactory.createEmptyBorder(), "domain of " + name + " (" + data.get(name).size()
-							+ " rows)"));
-		//	System.out.println("adding " + name );
+					BorderFactory.createEmptyBorder(), "domain of " + name
+							+ " (" + data.get(name).size() + " rows)"));
+			// System.out.println("adding " + name );
 			vwr.add(p, "domain of " + name);
 		}
 
@@ -1018,184 +979,150 @@ public class Instance {
 
 		return tap;
 	}
+
 	/*
-	<rdfs:Class rdf:ID="staffMember">
-	<rdfs:comment>The class of staff members </rdfs:comment>
-</rdfs:Class>
-<rdf:Property rdf:ID="isTaughtBy">
-		<rdfs:domain rdf:resource="#course"/>
-	<rdfs:range rdf:resource="#lecturer"/>
-</rdf:Property>
-*/
+	 * <rdfs:Class rdf:ID="staffMember"> <rdfs:comment>The class of staff
+	 * members </rdfs:comment> </rdfs:Class> <rdf:Property rdf:ID="isTaughtBy">
+	 * <rdfs:domain rdf:resource="#course"/> <rdfs:range
+	 * rdf:resource="#lecturer"/> </rdf:Property>
+	 */
 	public String rdfX(String name) {
 		String xxx = "";
 		String prefix = "fql://entity/"; // + name + "/";
-				
+
 		for (Node n : thesig.nodes) {
 			Set<Pair<Object, Object>> ids = data.get(n.string);
 			for (Pair<Object, Object> idX : ids) {
 				Object id = idX.first;
 				xxx += "<rdf:Description rdf:about=\"" + prefix + id + "\">\n";
-				xxx += "    <rdf:type rdf:resource=\"fql://node/" + n.string + "\"/>\n"; //+
-						//"/fql://node/Department"/>
-					//xxx += "    <node:" + n.string + "/>\n";
+				xxx += "    <rdf:type rdf:resource=\"fql://node/" + n.string
+						+ "\"/>\n"; // +
+				// "/fql://node/Department"/>
+				// xxx += "    <node:" + n.string + "/>\n";
 
-			//	xxx += "    <node:node>" + n.string + "</node:node>\n";
+				// xxx += "    <node:node>" + n.string + "</node:node>\n";
 				for (Attribute<Node> a : thesig.attrsFor(n)) {
-					xxx += "    <attribute:" + a.name +">" + lookupX(data.get(a.name), id) + "</attribute:" + a.name + ">\n";
+					xxx += "    <attribute:" + a.name + ">"
+							+ lookupX(data.get(a.name), id) + "</attribute:"
+							+ a.name + ">\n";
 				}
 				for (Edge a : thesig.edges) {
 					if (!a.source.equals(n)) {
 						continue;
 					}
-				//	xxx += "    <arrow:value rdf:resource=\""+ prefix + a.name +"\">" + lookupX(data.get(a.name), id) + "</arrow:value>\n";					
+					// xxx += "    <arrow:value rdf:resource=\""+ prefix +
+					// a.name +"\">" + lookupX(data.get(a.name), id) +
+					// "</arrow:value>\n";
 
-					xxx += "    <arrow:" + a.name + " rdf:resource=\"" + prefix + lookupX(data.get(a.name), id) + "\"/>\n";					
+					xxx += "    <arrow:" + a.name + " rdf:resource=\"" + prefix
+							+ lookupX(data.get(a.name), id) + "\"/>\n";
 				}
 				xxx += "</rdf:Description>\n\n";
 			}
-//			xxx += "\n";
+			// xxx += "\n";
 		}
-		
-		String ret =
-		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-		"\n<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"" +
-		"\n    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"" +		
-		"\n    xmlns:node=\"fql://node/\"" +		
-		"\n    xmlns:arrow=\"fql://arrow/\"" +
-		"\n    xmlns:attribute=\"fql://attribute/\">\n\n" + 
-		xxx
-		+ "</rdf:RDF>";
-/*			<rdf:Description rdf:about="http://en.wikipedia.org/wiki/Oxford">
-				<dc:title>Oxford</dc:title>
-				<dc:coverage>Oxfordshire</dc:coverage>
-				<dc:publisher>Wikipedia</dc:publisher>
-				<region:population>10000</region:population>
-				<region:principaltown rdf:resource="http://www.country-regions.fake/oxford"/>
-			</rdf:Description>
 
-		</rdf:RDF> */
+		String ret = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+				+ "\n<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\""
+				+ "\n    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\""
+				+ "\n    xmlns:node=\"fql://node/\""
+				+ "\n    xmlns:arrow=\"fql://arrow/\""
+				+ "\n    xmlns:attribute=\"fql://attribute/\">\n\n" + xxx
+				+ "</rdf:RDF>";
+		/*
+		 * <rdf:Description rdf:about="http://en.wikipedia.org/wiki/Oxford">
+		 * <dc:title>Oxford</dc:title> <dc:coverage>Oxfordshire</dc:coverage>
+		 * <dc:publisher>Wikipedia</dc:publisher>
+		 * <region:population>10000</region:population> <region:principaltown
+		 * rdf:resource="http://www.country-regions.fake/oxford"/>
+		 * </rdf:Description>
+		 * 
+		 * </rdf:RDF>
+		 */
 		return ret;
 	}
 
 	/*
-	public String rdfX(String name) {
-		String xxx = "";
-		String prefix = "fql://entity/"; // + name + "/";
-		
-		for (Node n : thesig.nodes) {
-			Set<Pair<Object, Object>> ids = data.get(n.string);
-			for (Pair<Object, Object> idX : ids) {
-				Object id = idX.first;
-				xxx += "<rdf:Description rdf:about=\"" + prefix + id + "\">\n";
-					xxx += "    <node:" + n.string + "/>\n";
+	 * public String rdfX(String name) { String xxx = ""; String prefix =
+	 * "fql://entity/"; // + name + "/";
+	 * 
+	 * for (Node n : thesig.nodes) { Set<Pair<Object, Object>> ids =
+	 * data.get(n.string); for (Pair<Object, Object> idX : ids) { Object id =
+	 * idX.first; xxx += "<rdf:Description rdf:about=\"" + prefix + id +
+	 * "\">\n"; xxx += "    <node:" + n.string + "/>\n";
+	 * 
+	 * // xxx += "    <node:node>" + n.string + "</node:node>\n"; for
+	 * (Attribute<Node> a : thesig.attrsFor(n)) { xxx += "    <attribute:" +
+	 * a.name +">" + lookupX(data.get(a.name), id) + "</attribute:" + a.name +
+	 * ">\n"; } for (Edge a : thesig.edges) { if (!a.source.equals(n)) {
+	 * continue; } // xxx += "    <arrow:value rdf:resource=\""+ prefix + a.name
+	 * +"\">" + lookupX(data.get(a.name), id) + "</arrow:value>\n";
+	 * 
+	 * xxx += "    <arrow:" + a.name + " rdf:resource=\"" + prefix +
+	 * lookupX(data.get(a.name), id) + "\"/>\n"; } xxx +=
+	 * "</rdf:Description>\n\n"; } xxx += "\n"; }
+	 * 
+	 * String ret = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+	 * "\n<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"" +
+	 * "\n    xmlns:node=\"fql://node/\"" + "\n    xmlns:arrow=\"fql://arrow/\""
+	 * + "\n    xmlns:attribute=\"fql://attribute/\">\n\n" + xxx + "</rdf:RDF>";
+	 * /* <rdf:Description rdf:about="http://en.wikipedia.org/wiki/Oxford">
+	 * <dc:title>Oxford</dc:title> <dc:coverage>Oxfordshire</dc:coverage>
+	 * <dc:publisher>Wikipedia</dc:publisher>
+	 * <region:population>10000</region:population> <region:principaltown
+	 * rdf:resource="http://www.country-regions.fake/oxford"/>
+	 * </rdf:Description>
+	 * 
+	 * </rdf:RDF> return ret; }
+	 */
 
-			//	xxx += "    <node:node>" + n.string + "</node:node>\n";
-				for (Attribute<Node> a : thesig.attrsFor(n)) {
-					xxx += "    <attribute:" + a.name +">" + lookupX(data.get(a.name), id) + "</attribute:" + a.name + ">\n";
-				}
-				for (Edge a : thesig.edges) {
-					if (!a.source.equals(n)) {
-						continue;
-					}
-				//	xxx += "    <arrow:value rdf:resource=\""+ prefix + a.name +"\">" + lookupX(data.get(a.name), id) + "</arrow:value>\n";					
+	/*
+	 * public String rdfY(String name) { String xxx = ""; String prefix =
+	 * "http://categoricaldata.net/fql/ref/" + name + "/";
+	 * 
+	 * for (Node n : thesig.nodes) { xxx += "<rdf:Description rdf:about=\"" +
+	 * prefix + n.string + "\">\n"; xxx += "    <node:name>" + n.string +
+	 * "</node:name>\n"; xxx += "</rdf:Description>\n"; xxx += "\n"; } xxx +=
+	 * "\n"; for (Attribute<Node> a : thesig.attrs) { xxx +=
+	 * "<rdf:Description rdf:about=\"" + prefix + a.name + "\">\n"; xxx +=
+	 * "    <attribute:name>" + a.name + "</attribute:name>\n"; xxx +=
+	 * "    <attribute:source rdf:resource=\"" + prefix + a.source.string +
+	 * "\"/>\n"; xxx += "    <attribute:type>" + a.target.toString() +
+	 * "</attribute:type>\n"; xxx += "</rdf:Description>\n"; xxx += "\n"; } xxx
+	 * += "\n"; for (Edge a : thesig.edges) { xxx +=
+	 * "<rdf:Description rdf:about=\"" + prefix + a.name + "\">\n"; xxx +=
+	 * "    <arrow:name>" + a.name + "</arrow:name>\n"; xxx +=
+	 * "    <arrow:source rdf:resource=\"" + prefix + a.source.string +
+	 * "\"/>\n"; xxx += "    <arrow:target rdf:resource=\"" + prefix +
+	 * a.target.string + "\"/>\n"; xxx += "</rdf:Description>\n"; xxx += "\n"; }
+	 * xxx += "\n"; for (Node n : thesig.nodes) { Set<Pair<Object, Object>> ids
+	 * = data.get(n.string); for (Pair<Object, Object> idX : ids) { Object id =
+	 * idX.first; xxx += "<rdf:Description rdf:about=\"" + prefix + id +
+	 * "\">\n"; xxx += "    <node:value rdf:resource=\"" + prefix + n.string +
+	 * "\"/>\n"; for (Attribute<Node> a : thesig.attrsFor(n)) { xxx +=
+	 * "    <attribute:value rdf:resource=\""+ prefix + a.name +"\">" +
+	 * lookupX(data.get(a.name), id) + "</attribute:value>\n"; } for (Edge a :
+	 * thesig.edges) { if (!a.source.equals(n)) { continue; } xxx +=
+	 * "    <arrow:value rdf:resource=\""+ prefix + a.name +"\">" +
+	 * lookupX(data.get(a.name), id) + "</arrow:value>\n"; } xxx +=
+	 * "</rdf:Description>\n\n"; } xxx += "\n"; }
+	 * 
+	 * String ret = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+	 * "\n<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"" +
+	 * "\n    xmlns:node=\"http://categoricaldata.net/fql/node\"" +
+	 * "\n    xmlns:arrow=\"http://categoricaldata.net/fql/arrow\"" +
+	 * "\n    xmlns:attribute=\"http://categoricaldata.net/fql/attribute\">\n\n"
+	 * + xxx + "</rdf:RDF>"; /* <rdf:Description
+	 * rdf:about="http://en.wikipedia.org/wiki/Oxford">
+	 * <dc:title>Oxford</dc:title> <dc:coverage>Oxfordshire</dc:coverage>
+	 * <dc:publisher>Wikipedia</dc:publisher>
+	 * <region:population>10000</region:population> <region:principaltown
+	 * rdf:resource="http://www.country-regions.fake/oxford"/>
+	 * </rdf:Description>
+	 * 
+	 * </rdf:RDF> return ret; }
+	 */
 
-					xxx += "    <arrow:" + a.name + " rdf:resource=\"" + prefix + lookupX(data.get(a.name), id) + "\"/>\n";					
-				}
-				xxx += "</rdf:Description>\n\n";
-			}
-			xxx += "\n";
-		}
-		
-		String ret =
-		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-		"\n<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"" +
-		"\n    xmlns:node=\"fql://node/\"" +		
-		"\n    xmlns:arrow=\"fql://arrow/\"" +
-		"\n    xmlns:attribute=\"fql://attribute/\">\n\n" + 
-		xxx
-		+ "</rdf:RDF>";
-/*			<rdf:Description rdf:about="http://en.wikipedia.org/wiki/Oxford">
-				<dc:title>Oxford</dc:title>
-				<dc:coverage>Oxfordshire</dc:coverage>
-				<dc:publisher>Wikipedia</dc:publisher>
-				<region:population>10000</region:population>
-				<region:principaltown rdf:resource="http://www.country-regions.fake/oxford"/>
-			</rdf:Description>
-
-		</rdf:RDF> 
-		return ret;
-	} */
-
-/*	public String rdfY(String name) {
-		String xxx = "";
-		String prefix = "http://categoricaldata.net/fql/ref/" + name + "/";
-		
-		for (Node n : thesig.nodes) {
-			xxx += "<rdf:Description rdf:about=\"" + prefix + n.string + "\">\n";
-			xxx += "    <node:name>" + n.string + "</node:name>\n";
-			xxx += "</rdf:Description>\n";
-			xxx += "\n";
-		}
-		xxx += "\n";
-		for (Attribute<Node> a : thesig.attrs) {
-			xxx += "<rdf:Description rdf:about=\"" + prefix + a.name + "\">\n";
-			xxx += "    <attribute:name>" + a.name + "</attribute:name>\n";
-			xxx += "    <attribute:source rdf:resource=\"" + prefix + a.source.string + "\"/>\n";
-			xxx += "    <attribute:type>" + a.target.toString() + "</attribute:type>\n";
-			xxx += "</rdf:Description>\n";
-			xxx += "\n";
-		}
-		xxx += "\n";
-		for (Edge a : thesig.edges) {
-			xxx += "<rdf:Description rdf:about=\"" + prefix + a.name + "\">\n";
-			xxx += "    <arrow:name>" + a.name + "</arrow:name>\n";
-			xxx += "    <arrow:source rdf:resource=\"" + prefix + a.source.string + "\"/>\n";
-			xxx += "    <arrow:target rdf:resource=\"" + prefix + a.target.string + "\"/>\n";
-			xxx += "</rdf:Description>\n";
-			xxx += "\n";
-		}
-		xxx += "\n";
-		for (Node n : thesig.nodes) {
-			Set<Pair<Object, Object>> ids = data.get(n.string);
-			for (Pair<Object, Object> idX : ids) {
-				Object id = idX.first;
-				xxx += "<rdf:Description rdf:about=\"" + prefix + id + "\">\n";
-				xxx += "    <node:value rdf:resource=\"" + prefix + n.string + "\"/>\n";
-				for (Attribute<Node> a : thesig.attrsFor(n)) {
-					xxx += "    <attribute:value rdf:resource=\""+ prefix + a.name +"\">" + lookupX(data.get(a.name), id) + "</attribute:value>\n";
-				}
-				for (Edge a : thesig.edges) {
-					if (!a.source.equals(n)) {
-						continue;
-					}
-					xxx += "    <arrow:value rdf:resource=\""+ prefix + a.name +"\">" + lookupX(data.get(a.name), id) + "</arrow:value>\n";					
-				}
-				xxx += "</rdf:Description>\n\n";
-			}
-			xxx += "\n";
-		}
-		
-		String ret =
-		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-		"\n<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"" +
-		"\n    xmlns:node=\"http://categoricaldata.net/fql/node\"" +		
-		"\n    xmlns:arrow=\"http://categoricaldata.net/fql/arrow\"" +
-		"\n    xmlns:attribute=\"http://categoricaldata.net/fql/attribute\">\n\n" + 
-		xxx
-		+ "</rdf:RDF>";
-/*			<rdf:Description rdf:about="http://en.wikipedia.org/wiki/Oxford">
-				<dc:title>Oxford</dc:title>
-				<dc:coverage>Oxfordshire</dc:coverage>
-				<dc:publisher>Wikipedia</dc:publisher>
-				<region:population>10000</region:population>
-				<region:principaltown rdf:resource="http://www.country-regions.fake/oxford"/>
-			</rdf:Description>
-
-		</rdf:RDF> 
-		return ret;
-	} */
-	
 	private static Object lookupX(Set<Pair<Object, Object>> set, Object id) {
 		for (Pair<Object, Object> k : set) {
 			if (k.first.equals(id)) {
@@ -1205,15 +1132,14 @@ public class Instance {
 		throw new RuntimeException("Not found: " + id + " in " + set);
 	}
 
-
 	public JPanel rdf(String name) {
 		JTextArea ta = new JTextArea(rdfX(name));
 		JPanel tap = new JPanel(new GridLayout(1, 1));
 		ta.setBorder(BorderFactory.createEmptyBorder());
 		//
 		tap.setBorder(BorderFactory.createEmptyBorder());
-	//	ta.setWrapStyleWord(true);
-	//	ta.setLineWrap(true);
+		// ta.setWrapStyleWord(true);
+		// ta.setLineWrap(true);
 		JScrollPane xxx = new JScrollPane(ta);
 		// xxx.setBorder(BorderFactory.createEmptyBorder());
 		//
@@ -1235,12 +1161,11 @@ public class Instance {
 		for (Node n : sig.nodes) {
 			String k = n.string;
 
-			Object i1i2X = Inst.bijections(
-					dedupl(i1.data.get(k)), dedupl(i2.data.get(k)));
-			Object i2i1X = Inst.bijections(
-					dedupl(i2.data.get(k)), dedupl(i1.data.get(k)));
+			Object i1i2X = Inst.bijections(dedupl(i1.data.get(k)),
+					dedupl(i2.data.get(k)));
+			Object i2i1X = Inst.bijections(dedupl(i2.data.get(k)),
+					dedupl(i1.data.get(k)));
 
-			
 			List<Map<Object, Object>> i1i2 = (List<Map<Object, Object>>) i1i2X;
 			List<Map<Object, Object>> i2i1 = (List<Map<Object, Object>>) i2i1X;
 
@@ -1453,66 +1378,69 @@ public class Instance {
 
 		// Layout<String, String> layout = new FRLayout(sgv);
 		try {
-			Class<?> c = Class.forName(DEBUG.layout_prefix + DEBUG.debug.inst_graph);
+			Class<?> c = Class.forName(DEBUG.layout_prefix
+					+ DEBUG.debug.inst_graph);
 			Constructor<?> x = c.getConstructor(Graph.class);
-			Layout<String, String> layout = (Layout<String, String>) x.newInstance(sgv);
+			Layout<String, String> layout = (Layout<String, String>) x
+					.newInstance(sgv);
 
-//		Layout<String, String> layout = new ISOMLayout<String, String>(sgv);
-		// Layout<String, String> layout = new CircleLayout<>(sgv);
-		layout.setSize(new Dimension(600, 400));
-		final VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
-				layout);
-		// vv.setPreferredSize(new Dimension(600, 400));
-		// vv.getRenderContext().setEdgeLabelRerderer(new MyEdgeT());
-		// Setup up a new vertex to paint transformer...
-		Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
-			public Paint transform(String i) {
-				if (thesig.isAttribute(i)) {
-					return UIManager.getColor("Panel.background");
-				} else {
-					return thesig.colors.get(i);
+			// Layout<String, String> layout = new ISOMLayout<String,
+			// String>(sgv);
+			// Layout<String, String> layout = new CircleLayout<>(sgv);
+			layout.setSize(new Dimension(600, 400));
+			final VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
+					layout);
+			// vv.setPreferredSize(new Dimension(600, 400));
+			// vv.getRenderContext().setEdgeLabelRerderer(new MyEdgeT());
+			// Setup up a new vertex to paint transformer...
+			Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
+				public Paint transform(String i) {
+					if (thesig.isAttribute(i)) {
+						return UIManager.getColor("Panel.background");
+					} else {
+						return thesig.colors.get(i);
+					}
+					// return color;
 				}
-				// return color;
-			}
-		};
-		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-		// gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
-		vv.setGraphMouse(gm);
-		gm.setMode(Mode.PICKING);
-		// gm.add(new AnnotatingGraphMousePlugin(vv.getRenderContext()) {
-		//
-		//
-		//
-		// }.);
+			};
+			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
+			// gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+			vv.setGraphMouse(gm);
+			gm.setMode(Mode.PICKING);
+			// gm.add(new AnnotatingGraphMousePlugin(vv.getRenderContext()) {
+			//
+			//
+			//
+			// }.);
 
-		// Set up a new stroke Transformer for the edges
-		// float dash[] = { 10.0f };
-		// final Stroke edgeStroke = new BasicStroke(1.0f, BasicStroke.CAP_BUTT,
-		// BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
-		// Transformer<String, Stroke> edgeStrokeTransformer = new
-		// Transformer<String, Stroke>() {
-		// public Stroke transform(String s) {
-		// return edgeStroke;
-		// }
-		// };
-		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
-		// vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
-		//vv.getRenderContext().setVertexLabelRenderer(new MyVertexT());
-		 vv.getRenderContext().setVertexLabelTransformer(new
-		 Transformer() {
+			// Set up a new stroke Transformer for the edges
+			// float dash[] = { 10.0f };
+			// final Stroke edgeStroke = new BasicStroke(1.0f,
+			// BasicStroke.CAP_BUTT,
+			// BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
+			// Transformer<String, Stroke> edgeStrokeTransformer = new
+			// Transformer<String, Stroke>() {
+			// public Stroke transform(String s) {
+			// return edgeStroke;
+			// }
+			// };
+			vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+			// vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
+			// vv.getRenderContext().setVertexLabelRenderer(new MyVertexT());
+			vv.getRenderContext().setVertexLabelTransformer(new Transformer() {
 
-			@Override
-			public Object transform(Object arg0) {
-				String str = (String) arg0;
-				if (thesig.isAttribute(str)) {
-					str = thesig.getTypeLabel(str);
+				@Override
+				public Object transform(Object arg0) {
+					String str = (String) arg0;
+					if (thesig.isAttribute(str)) {
+						str = thesig.getTypeLabel(str);
+					}
+					return str;
 				}
-				return str;
-			}
-			 
-		 });
 
-		 vv.getPickedVertexState().addItemListener(new ItemListener() {
+			});
+
+			vv.getPickedVertexState().addItemListener(new ItemListener() {
 
 				@Override
 				public void itemStateChanged(ItemEvent e) {
@@ -1527,13 +1455,13 @@ public class Instance {
 						cards.show(vwr, str);
 					} else {
 						cards.show(vwr, "domain of " + str);
-							
+
 					}
-//					yyy.setSelectedValue(indices.get(str), true);
+					// yyy.setSelectedValue(indices.get(str), true);
 				}
-				
+
 			});
-		 vv.getPickedEdgeState().addItemListener(new ItemListener() {
+			vv.getPickedEdgeState().addItemListener(new ItemListener() {
 
 				@Override
 				public void itemStateChanged(ItemEvent e) {
@@ -1543,124 +1471,106 @@ public class Instance {
 					vv.getPickedVertexState().clear();
 					String str = ((String) e.getItem());
 					prejoin();
-//					System.out.println("trying to show " + str);
+					// System.out.println("trying to show " + str);
 					cards.show(vwr, str);
-					//yyy.setSelectedValue(indices.get(str), true);
+					// yyy.setSelectedValue(indices.get(str), true);
 				}
-				
+
 			});
-		// new MyEdgeT()); // {
+			// new MyEdgeT()); // {
 
-		// vv.getRenderContext().setEdgeLabelTransformer(new
-		// MyEdgeT2(vv.getPickedEdgeState()));
-		// vv.getRenderContext().setVertexLabelTransformer(new
-		// MyVertexT(vv.getPickedVertexState()));
-		// vv.getRenderer().getVertexRenderer().
-		vv.getRenderContext().setLabelOffset(20);
-		vv.getRenderContext().setEdgeLabelTransformer(
-				new Transformer() {
+			// vv.getRenderContext().setEdgeLabelTransformer(new
+			// MyEdgeT2(vv.getPickedEdgeState()));
+			// vv.getRenderContext().setVertexLabelTransformer(new
+			// MyVertexT(vv.getPickedVertexState()));
+			// vv.getRenderer().getVertexRenderer().
+			vv.getRenderContext().setLabelOffset(20);
+			vv.getRenderContext().setEdgeLabelTransformer(new Transformer() {
 
-					@Override
-					public Object transform(Object arg0) {
-						String s = arg0.toString();
-						if (thesig.isAttribute(s)) {
-							return "";
-						}
-						return s;
+				@Override
+				public Object transform(Object arg0) {
+					String s = arg0.toString();
+					if (thesig.isAttribute(s)) {
+						return "";
 					}
-					
-				});
-		// vv.getRenderContext().getEdgeLabelRenderer().
-		// vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
-
-		float dash[] = { 1.0f };
-		final Stroke edgeStroke = new BasicStroke(0.5f, BasicStroke.CAP_BUTT,
-				BasicStroke.JOIN_MITER, 10.0f, dash, 10.0f);
-		// Transformer<String, Stroke> edgeStrokeTransformer = new
-		// Transformer<String, Stroke>() {
-		// public Stroke transform(String s) {
-		// return edgeStroke;
-		// }
-		// };
-		final Stroke bs = new BasicStroke();
-		Transformer<String, Stroke> edgeStrokeTransformer = new Transformer<String, Stroke>() {
-			public Stroke transform(String s) {
-				if (thesig.isAttribute(s)) {
-					return edgeStroke;
+					return s;
 				}
-				return bs;
-			}
-		};
 
-		// vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
-		vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
-		vv.getRenderContext().setVertexLabelTransformer(
-				new ToStringLabeller<String>());
+			});
+			// vv.getRenderContext().getEdgeLabelRenderer().
+			// vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
 
-		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
-		// JPanel ret = new JPanel(new GridLayout(1,1));
-		// ret.add(zzz);
-		// ret.setBorder(BorderFactory.createEtchedBorder());
+			float dash[] = { 1.0f };
+			final Stroke edgeStroke = new BasicStroke(0.5f,
+					BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash,
+					10.0f);
+			// Transformer<String, Stroke> edgeStrokeTransformer = new
+			// Transformer<String, Stroke>() {
+			// public Stroke transform(String s) {
+			// return edgeStroke;
+			// }
+			// };
+			final Stroke bs = new BasicStroke();
+			Transformer<String, Stroke> edgeStrokeTransformer = new Transformer<String, Stroke>() {
+				public Stroke transform(String s) {
+					if (thesig.isAttribute(s)) {
+						return edgeStroke;
+					}
+					return bs;
+				}
+			};
 
-		JSplitPane newthing = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-		newthing.setResizeWeight(.8d); // setDividerLocation(.9d);
-		newthing.add(zzz);
-		newthing.add(vwr);
-		JPanel xxx = new JPanel(new GridLayout(1, 1));
-		xxx.add(newthing);
-		// xxx.setMaximumSize(new Dimension(400,400));
-		return xxx;
+			// vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+			vv.getRenderContext().setEdgeStrokeTransformer(
+					edgeStrokeTransformer);
+			vv.getRenderContext().setVertexLabelTransformer(
+					new ToStringLabeller<String>());
+
+			GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
+			// JPanel ret = new JPanel(new GridLayout(1,1));
+			// ret.add(zzz);
+			// ret.setBorder(BorderFactory.createEtchedBorder());
+
+			JSplitPane newthing = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+			newthing.setResizeWeight(.8d); // setDividerLocation(.9d);
+			newthing.add(zzz);
+			newthing.add(vwr);
+			JPanel xxx = new JPanel(new GridLayout(1, 1));
+			xxx.add(newthing);
+			// xxx.setMaximumSize(new Dimension(400,400));
+			return xxx;
 		} catch (Throwable t) {
 			t.printStackTrace();
 			throw new RuntimeException();
 		}
 	}
-/*
-	private class MyVertexT implements VertexLabelRenderer {
 
-		public MyVertexT() {
-		}
-
-		@Override
-		public <T> Component getVertexLabelRendererComponent(JComponent arg0,
-				Object arg1, Font arg2, boolean arg3, T arg4) {
-			if (arg3) {
-				prejoin();
-
-				cards.show(vwr, (String) arg4);
-
-				String s = (String) arg4;
-				if (thesig.isAttribute(s)) {
-					s = thesig.getTypeLabel(s);
-				}
-				return new JLabel(s);
-
-				// JTable t = joined.get(arg4);
-				//
-				// JPanel p = new JPanel(new GridLayout(1,1));
-				// //p.add(t);
-				// p.add(new JScrollPane(t));
-				// // p.setMaximumSize(new Dimension(200,200));
-				// p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(),
-				// (String)arg4));
-				//
-				//
-				// // JPanel p = new JPanel(new GridLayout(1,1));
-				// // p.add(new JScrollPane(joined.get(arg4)));
-				// // p.setMaximumSize(new Dimension(100,100));
-				// // p.setPreferredSize(new Dimension(100,100));
-				// // p.setSize(new Dimension(100,100));
-				// return p;
-			} else {
-				String s = (String) arg4;
-				if (thesig.isAttribute(s)) {
-					s = thesig.getTypeLabel(s);
-				}
-				return new JLabel(s);
-			}
-		}
-	}
-	*/
+	/*
+	 * private class MyVertexT implements VertexLabelRenderer {
+	 * 
+	 * public MyVertexT() { }
+	 * 
+	 * @Override public <T> Component getVertexLabelRendererComponent(JComponent
+	 * arg0, Object arg1, Font arg2, boolean arg3, T arg4) { if (arg3) {
+	 * prejoin();
+	 * 
+	 * cards.show(vwr, (String) arg4);
+	 * 
+	 * String s = (String) arg4; if (thesig.isAttribute(s)) { s =
+	 * thesig.getTypeLabel(s); } return new JLabel(s);
+	 * 
+	 * // JTable t = joined.get(arg4); // // JPanel p = new JPanel(new
+	 * GridLayout(1,1)); // //p.add(t); // p.add(new JScrollPane(t)); // //
+	 * p.setMaximumSize(new Dimension(200,200)); //
+	 * p.setBorder(BorderFactory.createTitledBorder
+	 * (BorderFactory.createEmptyBorder(), // (String)arg4)); // // // // JPanel
+	 * p = new JPanel(new GridLayout(1,1)); // // p.add(new
+	 * JScrollPane(joined.get(arg4))); // // p.setMaximumSize(new
+	 * Dimension(100,100)); // // p.setPreferredSize(new Dimension(100,100)); //
+	 * // p.setSize(new Dimension(100,100)); // return p; } else { String s =
+	 * (String) arg4; if (thesig.isAttribute(s)) { s = thesig.getTypeLabel(s); }
+	 * return new JLabel(s); } } }
+	 */
 
 	// private class MyEdgeT extends DefaultEdgeLabelRenderer {
 	// // private final PickedInfo<String> pi;
@@ -1777,15 +1687,16 @@ public class Instance {
 	// return ret;
 	// }
 
-	public static Instance terminal(Signature s, String init) throws FQLException {
+	public static Instance terminal(Signature s, String init)
+			throws FQLException {
 		List<Pair<String, List<Pair<Object, Object>>>> ret = new LinkedList<>();
 
 		int i = 0;
 		String g = init;
 		Map<Node, String> map = new HashMap<>();
 		for (Node node : s.nodes) {
-//			System.out.println("i is" + i);
-//			System.out.println("g is" + g);
+			// System.out.println("i is" + i);
+			// System.out.println("g is" + g);
 			List<Pair<Object, Object>> tuples = new LinkedList<>();
 
 			if (init == null) {
@@ -1808,8 +1719,6 @@ public class Instance {
 		// return null;
 		return new Instance(s, ret);
 	}
-	
-	
 
 	public Inst<Node, Path, Object, Object> toFunctor2() throws FQLException {
 		FinCat<Node, Path> cat = thesig.toCategory2().first;
@@ -1898,7 +1807,7 @@ public class Instance {
 		ret.add(new JScrollPane(table));
 
 		String str = rows.length + " IDs, " + proj1(rows)
-				+ " unique attribute combinations"; 
+				+ " unique attribute combinations";
 		ret.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createEmptyBorder(), str));
 
@@ -2111,17 +2020,18 @@ public class Instance {
 			}
 		}
 		return true;
-		//return l;
+		// return l;
 	}
-	
-	public static Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>> prod(IntRef idx, Instance I, Instance J) throws FQLException {
+
+	public static Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>> prod(
+			IntRef idx, Instance I, Instance J) throws FQLException {
 		if (!I.thesig.equals(J.thesig)) {
 			throw new RuntimeException();
 		}
 		Map<String, Set<Pair<Object, Object>>> d = new HashMap<>();
 		Map<Object, Pair<Object, Object>> m1 = new HashMap<>();
 		Map<Pair<Object, Object>, Object> m2 = new HashMap<>();
-		
+
 		for (Node n : I.thesig.nodes) {
 			Set<Pair<Object, Object>> s = new HashSet<>();
 			for (Pair<Object, Object> id1 : I.data.get(n.string)) {
@@ -2139,34 +2049,134 @@ public class Instance {
 			Set<Pair<Object, Object>> s = new HashSet<>();
 			for (Pair<Object, Object> k : d.get(e.source.string)) {
 				Pair<Object, Object> y = m1.get(k.first);
-				Object p = m2.get(new Pair<>(lookupX(I.data.get(e.name), y.first),
-				lookupX(J.data.get(e.name), y.second)));
+				Object p = m2.get(new Pair<>(lookupX(I.data.get(e.name),
+						y.first), lookupX(J.data.get(e.name), y.second)));
 				s.add(new Pair<>(k.first, p));
 			}
 			d.put(e.name, s);
 		}
-//		System.out.println("d" + d);
+		// System.out.println("d" + d);
 		Instance K = new Instance(I.thesig, d);
-		return new Triple<>(K, m1, m2) ;
+		return new Triple<>(K, m1, m2);
 	}
-	
-	public static Quad<Instance, Map<Node, Map<Object, Transform>>, Map<Node, Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>>>, Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>>> exp(IntRef idx, Instance J, Instance I) throws FQLException {
-		//System.out.println("*** " + Inst.hom(I, J).size());
+
+	/*
+	 * Signature untyped_sig = new Signature(I.thesig.nodes, I.thesig.edges, new
+	 * LinkedList<Attribute<Node>>(), I.thesig.eqs);
+	 * 
+	 * Map<Node, List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>,
+	 * Object>>> obsbar = I.thesig.obsbar(); for (Node n : I.thesig.nodes) {
+	 * System.out.println("nnnnn " + n); for (LinkedHashMap<Pair<Arr<Node,
+	 * Path>, Attribute<Node>>, Object> w : obsbar.get(n)) { Instance Iw =
+	 * I.omega(n, w, idx); //TODO remove System.out.println(Iw); } }
+	 */
+
+	public static Quad<Instance, Map<Pair<Node, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>, Triple<Instance, Map<Node, Map<Object, Pair<Arr<Node, Path>, Object>>>, Map<Node, Map<Pair<Arr<Node, Path>, Object>, Object>>>>, Map<Node, Map<Object, Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform>>>, Map<Node, Map<Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform>, Object>>> exp2(
+			IntRef idx, Instance J, Instance I) throws FQLException {
+		if (!J.thesig.equals(I.thesig)) {
+			throw new RuntimeException();
+		}
+
+		Map<Node, List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>> obsbar = I.thesig.obsbar();
+		Map<Node, List<Pair<Arr<Node, Path>, Attribute<Node>>>> obs = I.thesig.obs();
+		Fn<Path, Arr<Node, Path>> fn = I.thesig.toCategory2().second;
+		FinCat<Node, Path> cat = I.thesig.toCategory2().first;
 		
-		Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>> xxx = I.thesig.repX(idx);
+		Map<String, Set<Pair<Object, Object>>> data = new HashMap<>();
+		Map<Node, Map<Object, Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform>>> map1 = new HashMap<>();
+		Map<Node, Map<Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform>, Object>> map2 = new HashMap<>();
+		Map<Pair<Node, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>, Triple<Instance, Map<Node, Map<Object, Pair<Arr<Node, Path>, Object>>>, Map<Node, Map<Pair<Arr<Node, Path>, Object>, Object>>>> instances = new HashMap<>();
+		
+		for (Node n : I.thesig.nodes) {
+			Set<Pair<Object, Object>> d = new HashSet<>();
+			Map<Object, Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform>> m1 = new HashMap<>();
+			Map<Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform>, Object> m2 = new HashMap<>();
+			for (LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> w : obsbar.get(n)) {
+				Triple<Instance, Map<Node, Map<Object, Pair<Arr<Node, Path>, Object>>>, Map<Node, Map<Pair<Arr<Node, Path>, Object>, Object>>> Iw = I.omega(n, w, idx);
+				instances.put(new Pair<>(n, w),  Iw);
+				for (Transform t : Inst.hom(Iw.first, J)) {
+					Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform> p = new Pair<>(w, t);
+					Object str = Integer.toString(++idx.i);
+					m1.put(str, p);
+					m2.put(p, str);
+					d.add(new Pair<>(str, str));
+				}
+			}
+			data.put(n.string, d);
+			map1.put(n, m1);
+			map2.put(n, m2);
+		}
+		for (Attribute<Node> a : I.thesig.attrs) {
+			Set<Pair<Object, Object>> d = new HashSet<>();
+			for (Pair<Object, Object> k : data.get(a.source.string)) {
+				Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform> k0 = map1.get(a.source).get(k.first);
+				Object v = k0.first.get(new Pair<>(cat.id(a.source), a));
+				d.add(new Pair<>(k.first, v));
+			}
+			data.put(a.name, d);
+		}
+		for (Edge e : I.thesig.edges) {
+			Set<Pair<Object, Object>> d = new HashSet<>();
+			for (Pair<Object, Object> k : data.get(e.source.string)) {
+				Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform> k0 = map1.get(e.source).get(k.first);
+				LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> w0 = PropPSM.truncate2(I.thesig, k0.first, fn.of(new Path(I.thesig, e)), obs.get(e.target));
+			
+				Triple<Instance, Map<Node, Map<Object, Pair<Arr<Node, Path>, Object>>>, Map<Node, Map<Pair<Arr<Node, Path>, Object>, Object>>> Iw  = instances.get(new Pair<>(e.source, k0.first));
+				Triple<Instance, Map<Node, Map<Object, Pair<Arr<Node, Path>, Object>>>, Map<Node, Map<Pair<Arr<Node, Path>, Object>, Object>>> Iw0 = instances.get(new Pair<>(e.target, w0));
+				
+				List<Pair<String, List<Pair<Object, Object>>>> tbd = new LinkedList<>();
+				for (Node node : I.thesig.nodes) {
+					 List<Pair<Object, Object>> set = new LinkedList<>();
+					 for (Pair<Object, Object> id0 : Iw0.first.data.get(node.string)) {
+						 Pair<Arr<Node, Path>, Object> p0 = Iw0.second.get(node).get(id0.first);
+						 Pair<Arr<Node, Path>, Object> p = new Pair<>(cat.compose(fn.of(new Path(I.thesig, e)), p0.first), p0.second);
+						 Object id = Iw.third.get(node).get(p);
+						 set.add(new Pair<>(id0.first, id));
+					 }
+					 tbd.add(new Pair<>(node.string, set));
+				}
+				Transform f = new Transform(Iw0.first, Iw.first, tbd);
+			
+				// (- o f) : I_wf -> I_w
+				// k0.second : I_w -> J
+				// need t : I_wf -> J
+				// 
+				Transform t = Transform.composeX(f, k0.second);
+				Object u = map2.get(e.target).get(new Pair<>(w0, t));
+				d.add(new Pair<>(k.first, u));
+			}
+			data.put(e.name, d);
+		}
+		Instance ret = new Instance(I.thesig, data);
+		return new Quad<>(ret, instances, map1, map2);
+	}
+
+	// untyped
+	public static Quad<Instance, Map<Node, Map<Object, Transform>>, Map<Node, Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>>>, Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>>> exp(
+			IntRef idx, Instance J, Instance I) throws FQLException {
+		// System.out.println("*** " + Inst.hom(I, J).size());
+		if (!J.thesig.equals(I.thesig)) {
+			throw new RuntimeException();
+		}
+//		System.out.println("on " + J + " ^ " + I + " yields " + exp2(idx, J, I).first); //TODO remove
+		
+		Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>> xxx = I.thesig
+				.repX(idx);
 		Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>> nm = xxx.first;
 		Map<Edge, Transform> em = xxx.second;
-		
+
 		Map<Node, Map<Object, Transform>> map1 = new HashMap<>();
 		Map<Node, Map<Transform, Object>> map2 = new HashMap<>();
 		Map<Node, Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>>> map4 = new HashMap<>();
 		Map<String, Set<Pair<Object, Object>>> data = new HashMap<>();
 
 		for (Node n : I.thesig.nodes) {
+
 			Map<Object, Transform> m1 = new HashMap<>();
 			Map<Transform, Object> m2 = new HashMap<>();
 			Set<Pair<Object, Object>> d = new HashSet<>();
-			Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>> yyy = prod(idx, I, nm.get(n).first);
+			Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>> yyy = prod(
+					idx, I, nm.get(n).first);
 			map4.put(n, yyy);
 			for (Transform t : Inst.hom(yyy.first, J)) {
 				Object str = Integer.toString(++idx.i);
@@ -2182,79 +2192,88 @@ public class Instance {
 			Set<Pair<Object, Object>> d = new HashSet<>();
 			for (Entry<Object, Transform> k : map1.get(e.source).entrySet()) {
 				Transform h0 = em.get(e);
-				Transform h = Transform.prod(I, map4.get(e.target), map4.get(e.source), h0);
+				Transform h = Transform.prod(I, map4.get(e.target),
+						map4.get(e.source), h0);
 				Transform t = Transform.composeX(h, k.getValue());
 				Object o = map2.get(e.target).get(t);
 				d.add(new Pair<>(k.getKey(), o));
 			}
 			data.put(e.name, d);
 		}
-		
+
 		Instance IJ = new Instance(I.thesig, data);
-						
+
 		return new Quad<>(IJ, map1, map4, xxx);
 	}
-	
+
 	public List<Pair<Object, Object>> ids() {
 		List<Pair<Object, Object>> ret = new LinkedList<>();
-		
+
 		for (Node n : thesig.nodes) {
 			ret.addAll(data.get(n.string));
 		}
-		
+
 		return ret;
 	}
-	
+
 	public List<Instance> subInstances_slow() {
 		List<Instance> ret = new LinkedList<>();
-		
+
 		List<Pair<Object, Object>> ids = ids();
-//		List<Boolean> tf = new LinkedList<>();
-//		tf.add(true);
-//		tf.add(false);
-		
-		List<LinkedHashMap<Pair<Object, Object>, Boolean>> subsets = Inst.homomorphs(ids, tf);
+		// List<Boolean> tf = new LinkedList<>();
+		// tf.add(true);
+		// tf.add(false);
+
+		List<LinkedHashMap<Pair<Object, Object>, Boolean>> subsets = Inst
+				.homomorphs(ids, tf);
 		for (LinkedHashMap<Pair<Object, Object>, Boolean> subset : subsets) {
 			try {
 				ret.add(filter(subset));
-			} catch (FQLException fe) { }			
+			} catch (FQLException fe) {
+			}
 		}
-		//System.out.println("tf " + tf);
-//		System.out.println("subinstances for " + this);
-	//	System.out.println("Correct answer: " + ret.size());
-		//System.out.println("Correct answer: " + ret);
-	//	List<Instance> uuu = subInstances_fast();
-		//System.out.println("New answer: " + uuu);
+		// System.out.println("tf " + tf);
+		// System.out.println("subinstances for " + this);
+		// System.out.println("Correct answer: " + ret.size());
+		// System.out.println("Correct answer: " + ret);
+		// List<Instance> uuu = subInstances_fast();
+		// System.out.println("New answer: " + uuu);
 		return ret;
 	}
-	
+
 	static List<Boolean> tf = Arrays.asList(new Boolean[] { true, false });
-			
-	public static Set<Map<String, Set<Pair<Object, Object>>>> subInstances_fast0(Signature sig, List<Node> list, Map<String, Set<Pair<Object, Object>>> inst) {
-	//	System.out.println("Called on " + list + " and " + inst);
+
+	public static Set<Map<String, Set<Pair<Object, Object>>>> subInstances_fast0(
+			Signature sig, List<Node> list,
+			Map<String, Set<Pair<Object, Object>>> inst) {
+		// System.out.println("Called on " + list + " and " + inst);
 		Set<Map<String, Set<Pair<Object, Object>>>> ret = new HashSet<>();
 		if (list.size() == 0) {
 			ret.add(inst);
-		//	System.out.println("bottom out with " + inst);
+			// System.out.println("bottom out with " + inst);
 			return ret;
 		}
 		List<Node> rest = new LinkedList<>(list);
 		Node n = rest.remove(0);
-		List<LinkedHashMap<Object, Boolean>> subsets = Inst.homomorphs(toList(inst.get(n.string)), tf);
-	//	Map<LinkedHashMap<Object, Boolean>, Map<String, Set<Pair<Object, Object>>>> cur = new HashMap<>();
+		List<LinkedHashMap<Object, Boolean>> subsets = Inst.homomorphs(
+				toList(inst.get(n.string)), tf);
+		// Map<LinkedHashMap<Object, Boolean>, Map<String, Set<Pair<Object,
+		// Object>>>> cur = new HashMap<>();
 		for (LinkedHashMap<Object, Boolean> subset : subsets) {
-			//System.out.println("doing subset " + subset);
-			Map<String, Set<Pair<Object, Object>>> j = recDel(sig, n, inst, subset);
+			// System.out.println("doing subset " + subset);
+			Map<String, Set<Pair<Object, Object>>> j = recDel(sig, n, inst,
+					subset);
 			if (rest.size() == 0) {
 				ret.add(j);
 			} else {
-				Set<Map<String, Set<Pair<Object, Object>>>> h = subInstances_fast0(sig, rest, j);
+				Set<Map<String, Set<Pair<Object, Object>>>> h = subInstances_fast0(
+						sig, rest, j);
 				ret.addAll(h);
 			}
 		}
-	//	System.out.println("returning " + ret);
-		//System.out.println("New answer: " + ret.size());
-		
+		// System.out.println("returning " + ret);
+		// System.out.println("New answer: " + ret.size());
+
 		return ret;
 	}
 
@@ -2265,17 +2284,20 @@ public class Instance {
 			m.put(k, new HashSet<>(inst.get(k)));
 		}
 		return m;
-	} 
+	}
+
 	public List<Instance> subInstances() {
 		List<Instance> ret = new LinkedList<>();
-		for (Map<String, Set<Pair<Object, Object>>> k : subInstances_fast0(thesig, thesig.order(), data)) {
+		for (Map<String, Set<Pair<Object, Object>>> k : subInstances_fast0(
+				thesig, thesig.order(), data)) {
 			try {
 				ret.add(new Instance(thesig, k));
-			} catch (Exception e) { }
+			} catch (Exception e) {
+			}
 		}
 		return ret;
 	}
-	
+
 	private static List<Object> toList(Set<Pair<Object, Object>> set) {
 		List<Object> ret = new LinkedList<>();
 		for (Pair<Object, Object> s : set) {
@@ -2283,7 +2305,7 @@ public class Instance {
 		}
 		return ret;
 	}
-	
+
 	private static void remove(Set<Pair<Object, Object>> set, Object o) {
 		Iterator<Pair<Object, Object>> it = set.iterator();
 		while (it.hasNext()) {
@@ -2292,18 +2314,13 @@ public class Instance {
 			}
 		}
 	} /*
-	private static Set<Object> clear(Set<Pair<Object, Object>> set, Object o) {
-		Iterator<Pair<Object, Object>> it = set.iterator();
-		Set<Object> ret = new HashSet<>();
-		while (it.hasNext()) {
-			Pair<Object, Object> kkk = it.next();
-			if (kkk.first.equals(o)) {
-				it.remove();
-				ret.add(kkk.second);
-			}
-		}
-		return ret;
-	} */
+	 * private static Set<Object> clear(Set<Pair<Object, Object>> set, Object o)
+	 * { Iterator<Pair<Object, Object>> it = set.iterator(); Set<Object> ret =
+	 * new HashSet<>(); while (it.hasNext()) { Pair<Object, Object> kkk =
+	 * it.next(); if (kkk.first.equals(o)) { it.remove(); ret.add(kkk.second); }
+	 * } return ret; }
+	 */
+
 	private static Set<Object> clearX(Set<Pair<Object, Object>> set, Object o) {
 		Iterator<Pair<Object, Object>> it = set.iterator();
 		Set<Object> ret = new HashSet<>();
@@ -2316,52 +2333,61 @@ public class Instance {
 		}
 		return ret;
 	}
-	
-	private static Map<String, Set<Pair<Object, Object>>> recDel(Signature sig, Node init, Map<String, Set<Pair<Object, Object>>> inst, LinkedHashMap<Object, Boolean> del0) {
-		//System.out.println("recursive delete on " + init + " with " + del0 + " against " + inst);
+
+	private static Map<String, Set<Pair<Object, Object>>> recDel(Signature sig,
+			Node init, Map<String, Set<Pair<Object, Object>>> inst,
+			LinkedHashMap<Object, Boolean> del0) {
+		// System.out.println("recursive delete on " + init + " with " + del0 +
+		// " against " + inst);
 		Map<String, Set<Pair<Object, Object>>> ret = copyMap(inst);
 		Map<Node, Set<Object>> del = new HashMap<>();
 		for (Node node : sig.nodes) {
 			del.put(node, new HashSet<>());
 		}
-		
+
 		for (Entry<Object, Boolean> k : del0.entrySet()) {
 			if (!k.getValue()) {
 				del.get(init).add(k.getKey());
 			}
 		}
 
-		
 		for (;;) {
-			Pair<Node, Object> toDel = pick(del); //removes in place
+			Pair<Node, Object> toDel = pick(del); // removes in place
 			if (toDel == null) {
-			//	System.out.println("del fin " + ret);
+				// System.out.println("del fin " + ret);
 				return ret;
 			}
 			Node n = toDel.first;
 			Object kill = toDel.second;
-	//		System.out.println("killing ID " + kill + " on table " + n);
-			//delete from n, and clear attrs
+			// System.out.println("killing ID " + kill + " on table " + n);
+			// delete from n, and clear attrs
 			remove(ret.get(n.string), kill);
 			for (Attribute<Node> a : sig.attrsFor(n)) {
 				remove(ret.get(a.name), kill);
 			}
-	//		System.out.println("after remove from node and attrs " + ret);
+			// System.out.println("after remove from node and attrs " + ret);
 			for (Edge e : sig.edgesFrom(n)) {
 				remove(ret.get(e.name), kill);
-//				Set<Object> cleared = clear(ret.get(e.name), kill); //returns elements that deleted mapped to
-			//	del.get(e.target).addAll(cleared);
-		//		System.out.println("cleared from " + e + " now " + ret + ", toDel now " + del);
+				// Set<Object> cleared = clear(ret.get(e.name), kill); //returns
+				// elements that deleted mapped to
+				// del.get(e.target).addAll(cleared);
+				// System.out.println("cleared from " + e + " now " + ret +
+				// ", toDel now " + del);
 			}
 			for (Edge e : sig.edgesTo(n)) {
-				Set<Object> cleared = clearX(ret.get(e.name), kill); //returns elements that deleted mapped to
+				Set<Object> cleared = clearX(ret.get(e.name), kill); // returns
+																		// elements
+																		// that
+																		// deleted
+																		// mapped
+																		// to
 				del.get(e.source).addAll(cleared);
-			//	System.out.println("cleared from " + e + " now " + ret + ", toDel now " + del);
+				// System.out.println("cleared from " + e + " now " + ret +
+				// ", toDel now " + del);
 			}
 		}
 	}
 
-	
 	private static Pair<Node, Object> pick(Map<Node, Set<Object>> del) {
 		for (Entry<Node, Set<Object>> k : del.entrySet()) {
 			Iterator<Object> it = k.getValue().iterator();
@@ -2373,9 +2399,11 @@ public class Instance {
 		}
 		return null;
 	}
-	private Instance filter(LinkedHashMap<Pair<Object, Object>, Boolean> subset) throws FQLException {
+
+	private Instance filter(LinkedHashMap<Pair<Object, Object>, Boolean> subset)
+			throws FQLException {
 		Map<String, Set<Pair<Object, Object>>> d = new HashMap<>();
-		
+
 		for (Node n : thesig.nodes) {
 			Set<Pair<Object, Object>> set = new HashSet<>();
 			for (Pair<Object, Object> k : data.get(n.string)) {
@@ -2407,8 +2435,98 @@ public class Instance {
 			}
 			d.put(n.name, set);
 		}
-		
+
 		return new Instance(thesig, d);
+	}
+
+	public LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> flag(
+			Node c, Object id) throws FQLException {
+		LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> ret = new LinkedHashMap<>();
+		Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> xxx = thesig
+				.toCategory2();
+		for (Node d : thesig.nodes) {
+			for (Arr<Node, Path> p : xxx.first.hom(c, d)) {
+				Object new_id = follow(p.arr, id);
+				for (Attribute<Node> a : thesig.attrsFor(d)) {
+					ret.put(new Pair<>(p, a),
+							PropPSM.lookup(data.get(a.name), new_id));
+				}
+			}
+		}
+		return ret;
+	}
+
+	/*
+	 * J^I(c) = Union_{w in barObs(c)} Hom(I_w,J) where I_w(d)=Union_{p:c -> d}
+	 * {y in I(d) | forall a in Obs(d) w(p.a)=y(a)}.
+	 * 
+	 * I_w(d)=Union_{p:c -> d} {y in I(d) | truncate(w,p) = flag(y) }.
+	 */
+	// must also return map, take in intref
+	public Triple<Instance, Map<Node, Map<Object, Pair<Arr<Node, Path>, Object>>>, Map<Node, Map<Pair<Arr<Node, Path>, Object>, Object>>> omega(Node c,
+			LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> w,
+			IntRef ref) throws FQLException {
+		Map<String, Set<Pair<Object, Object>>> map = new HashMap<>();
+
+		FinCat<Node, Path> cat = thesig.toCategory2().first;
+		Fn<Path, Arr<Node, Path>> fn = thesig.toCategory2().second;
+		Map<Node, List<Pair<Arr<Node, Path>, Attribute<Node>>>> obs = thesig
+				.obs();
+
+		Map<Node, Map<Object, Pair<Arr<Node, Path>, Object>>> map1 = new HashMap<>();
+		Map<Node, Map<Pair<Arr<Node, Path>, Object>, Object>> map2 = new HashMap<>();
+
+		for (Node d : thesig.nodes) {
+			Set<Pair<Object, Object>> set = new HashSet<>();
+			Map<Object, Pair<Arr<Node, Path>, Object>> m1 = new HashMap<>();
+			Map<Pair<Arr<Node, Path>, Object>, Object> m2 = new HashMap<>();
+			for (Arr<Node, Path> p : cat.hom(c, d)) {
+				for (Pair<Object, Object> y : data.get(d.string)) {
+					LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> rhs = flag(
+							d, y.first);
+					LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> lhs = PropPSM
+							.truncate2(thesig, w, p, obs.get(d));
+					if (lhs.equals(rhs)) {
+						Object newid = Integer.toString(++ref.i);
+						Pair<Arr<Node, Path>, Object> add = new Pair<>(p,
+								y.first);
+						set.add(new Pair<>(newid, newid));
+						m1.put(newid, add);
+						m2.put(add, newid);
+					}
+				}
+			}
+			map.put(d.string, set);
+			map1.put(d, m1);
+			map2.put(d, m2);
+		}
+		for (Attribute<Node> a : thesig.attrs) {
+			Set<Pair<Object, Object>> set = new HashSet<>();
+			for (Pair<Object, Object> k : map.get(a.source.string)) {
+				Pair<Arr<Node, Path>, Object> v = map1.get(a.source).get(
+						k.first); // v.second is ID in I(d)
+				set.add(new Pair<>(k.first, lookupX(data.get(a.name), v.second)));
+			}
+			map.put(a.name, set);
+		}
+		for (Edge e : thesig.edges) {
+			Set<Pair<Object, Object>> set = new HashSet<>();
+			for (Pair<Object, Object> k : map.get(e.source.string)) {
+				Pair<Arr<Node, Path>, Object> v = map1.get(e.source).get(
+						k.first); // v.second is ID in I(d1)
+				Object u = lookupX(data.get(e.name), v.second); // is ID in
+																// I(d2)
+				Arr<Node, Path> j = cat.compose(v.first,
+						fn.of(new Path(thesig, e)));
+				Pair<Arr<Node, Path>, Object> g = new Pair<>(j, u);
+				Object t = map2.get(e.target).get(g);
+				set.add(new Pair<>(k.first, t));
+			}
+			map.put(e.name, set);
+		}
+
+		Instance ret = new Instance(thesig, map);
+		return new Triple<>(ret, map1, map2);
 	}
 
 }

@@ -977,7 +977,7 @@ public class PSMGen {
 			Set<Map<Object, Object>> v = state.get(pre + "_" + n.string);
 			if (v == null) {
 				throw new RuntimeException("Missing: " + pre + "_" + n.string
-						+ " in " + state);
+						+ " in " + state.keySet());
 			}
 			ret.add(new Pair<>(n.string, gather0(v)));
 		}

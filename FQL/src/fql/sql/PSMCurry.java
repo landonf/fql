@@ -1,5 +1,6 @@
 package fql.sql;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import fql.Pair;
 import fql.Quad;
 import fql.Triple;
 import fql.cat.Arr;
+import fql.decl.Attribute;
 import fql.decl.Edge;
 import fql.decl.Instance;
 import fql.decl.Node;
@@ -28,6 +30,77 @@ public class PSMCurry extends PSM {
 	public Signature sig;
 
 	@Override
+	public void exec(PSMInterp interp,
+			Map<String, Set<Map<Object, Object>>> state) {
+		try {
+
+			Instance IJ = new Instance(sig, PSMGen.gather(trans_src,
+					sig, state));
+			Instance K = new Instance(sig, PSMGen.gather(trans_dst,
+					sig, state));
+			Transform t = new Transform(IJ, K, PSMGen.gather(
+					trans, sig, state));
+
+			Instance I = new Instance(sig, PSMGen.gather(inst_src, sig, state));
+			Instance J = new Instance(sig, PSMGen.gather(exp, sig, state));
+
+			Instance JK = new Instance(sig, PSMGen.gather(inst_dst, sig,
+					state));
+
+			Transform trans_src0_fst = new Transform(IJ, I,
+					PSMGen.gather(trans_src + "_fst", sig, state));
+			Transform trans_src0_snd = new Transform(IJ, J,
+					PSMGen.gather(trans_src + "_snd", sig, state));
+			
+			Map<Node, List<Pair<Arr<Node, Path>, Attribute<Node>>>> obs = I.thesig.obs();
+
+			List<Pair<String, List<Pair<Object, Object>>>> l = new LinkedList<>();
+			for (Node c : sig.nodes) {
+				Quad<Instance, Map<Pair<Node, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>, Triple<Instance, Map<Node, Map<Object, Pair<Arr<Node, Path>, Object>>>, Map<Node, Map<Pair<Arr<Node, Path>, Object>, Object>>>>, Map<Node, Map<Object, Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform>>>, Map<Node, Map<Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform>, Object>>> kkk = interp.exps2.get(inst_dst);
+				List<Pair<Object, Object>> s = new LinkedList<>();
+				for (Pair<Object, Object> xx : I.data.get(c.string)) {
+					Object x = xx.first;
+					LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> w = I.flag(c, x);
+					Triple<Instance, Map<Node, Map<Object, Pair<Arr<Node, Path>, Object>>>, Map<Node, Map<Pair<Arr<Node, Path>, Object>, Object>>> HcJ = kkk.second.get(new Pair<>(c, w));
+					
+					// construct transform depending on x, lookup in kkk.second
+
+					List<Pair<String, List<Pair<Object, Object>>>> tx = new LinkedList<>();
+					for (Node d : sig.nodes) {
+						List<Pair<Object, Object>> tx0 = new LinkedList<>();
+						for (Arr<Node, Path> f : sig.toCategory2().first.hom(c, d)) {
+							for (Pair<Object, Object> y : J.data.get(d.string)) {
+								//only if y(p.a) = w(p.a)
+								if (!PropPSM.truncate2(I.thesig, w, f, obs.get(d)).equals(J.flag(d, y.first))) {
+									continue;
+								}
+								Object Ifx = lookup(I.evaluate(f.arr), x);
+//								Object Ifx = lookup(HcJ.first.evaluate(f.arr), x);
+								Object u = find(d, trans_src0_fst,
+										trans_src0_snd, Ifx, y.first);
+								Object v = lookup(t.data.get(d.string), u);
+								Object iii = HcJ.third.get(d).get(new Pair<>(f, y.first));
+								tx0.add(new Pair<>(iii, v)); 
+							}
+						}
+						tx.add(new Pair<>(d.string, tx0)); //I*J -> K
+					}
+					Transform xxx = new Transform(HcJ.first, K, tx); 
+					Object yyy = kkk.fourth.get(c).get(new Pair<>(w, xxx));
+					s.add(new Pair<>(x, yyy));
+				}
+				l.add(new Pair<>(c.string, s));
+			}
+			Transform zzz = new Transform(I, JK, l);
+			PSMGen.shred(ret, zzz, state);
+
+		} catch (FQLException fe) {
+			fe.printStackTrace();
+			throw new RuntimeException(fe.getMessage());
+		}
+	}
+	/*
+	 * @Override
 	public void exec(PSMInterp interp,
 			Map<String, Set<Map<Object, Object>>> state) {
 		try {
@@ -101,7 +174,8 @@ public class PSMCurry extends PSM {
 			fe.printStackTrace();
 			throw new RuntimeException(fe.getMessage());
 		}
-	}
+	} */
+	 
 
 	private Object lookup2(Map<Object, Transform> map, Transform xxx) {
 		for (Entry<Object, Transform> o : map.entrySet()) {
@@ -120,7 +194,7 @@ public class PSMCurry extends PSM {
 				return o.first;
 			}
 		}
-		throw new RuntimeException();
+		throw new RuntimeException("Cannot find (" + a + "," + b + ") in " + fst + " and " + snd);
 	}
 
 	private Object lookup(Set<Pair<Object, Object>> s, Object t) {

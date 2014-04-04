@@ -24,7 +24,7 @@ import fql.decl.SigExp;
 import fql.decl.Signature;
 import fql.decl.TransExp;
 import fql.sql.CreateTable;
-import fql.sql.Exp;
+import fql.sql.ExpPSM;
 import fql.sql.FullSigma;
 import fql.sql.InsertValues;
 import fql.sql.PSM;
@@ -59,7 +59,9 @@ public class JDBCBridge {
 		switch (DEBUG.debug.sqlKind) {
 		case NATIVE:
 			psm.addAll(v.accept(k, ops));
+			//System.out.println("beging exec " + psm);
 			interp.interpX(psm, ret);
+			//System.out.println("end exec " + ret.keySet());
 			break;
 		default:
 			if (v instanceof TransExp.External
@@ -116,7 +118,7 @@ public class JDBCBridge {
 				if (xxx.size() != 1) {
 					throw new RuntimeException();
 				}
-				Exp yyy = (Exp) xxx.get(0);
+				ExpPSM yyy = (ExpPSM) xxx.get(0);
 				int theguid = getGuid(Stmt);
 				interp.guid = theguid;
 				yyy.exec(interp, ret);
@@ -225,9 +227,6 @@ public class JDBCBridge {
 				throw new RuntimeException();
 			}
 
-			// TODO make a maybeExec for insts, have the bridge
-			// run them in the order specified by the user
-			
 			for (String k : prog.order) {
 				InstExp v1 = prog.insts.get(k);
 				TransExp v2 = prog.transforms.get(k);

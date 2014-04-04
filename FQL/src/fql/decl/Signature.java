@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,7 @@ import fql.Pair;
 import fql.Triple;
 import fql.cat.Arr;
 import fql.cat.FinCat;
+import fql.cat.Inst;
 import fql.cat.LeftKanCat;
 import fql.gui.FQLTextPanel;
 import fql.sql.EmbeddedDependency;
@@ -1014,12 +1016,20 @@ public class Signature {
 
 	JPanel den = null;
 
-	public JPanel denotation() throws FQLException {
-		if (den == null) {
-			toCategory2();
-			den = makePanel();
+	public JPanel denotation() {
+		try {
+			if (den == null) {
+				toCategory2();
+				den = makePanel();
+			}
+			return den;
+		} catch (FQLException fe) {
+			den = new JPanel(new GridLayout(1,1));
+			JTextArea a = new JTextArea(fe.getMessage());
+			JScrollPane jsp = new JScrollPane(a);
+			den.add(jsp);
+			return den;
 		}
-		return den;
 	}
 
 	public JPanel makePanel() throws FQLException {
@@ -1628,7 +1638,61 @@ public class Signature {
 		return new Pair<>(m1, m2);
 	}
 
+	Map<Node, List<Pair<Arr<Node, Path>, Attribute<Node>>>> obs_cached = null;
+	public  Map<Node, List<Pair<Arr<Node, Path>, Attribute<Node>>>> obs() 
+			throws FQLException {
+		if (obs_cached != null) {
+			return obs_cached;
+		}
+		Map<Node, List<Pair<Arr<Node, Path>, Attribute<Node>>>> ret = new HashMap<>();
+
+		Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> xxx = 
+				toCategory2();
+		FinCat<Node, Path> cat = xxx.first;
+
+		for (Node c : nodes) {
+			List<Pair<Arr<Node, Path>, Attribute<Node>>> l = new LinkedList<>();
+			for (Node d : nodes) {
+				for (Arr<Node, Path> p : cat.hom(c, d)) {
+					for (Attribute<Node> a : attrsFor(d)) {
+						l.add(new Pair<>(p, a));
+					}
+				}
+			}
+			ret.put(c, l);
+		}
+		obs_cached = ret;
+		return ret;
+	}
 	
-	
+	Map<Node, List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>> obsbar_cached = null;
+	public  Map<Node, List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>> obsbar() 
+			throws FQLException {
+		if (obsbar_cached != null) {
+			return obsbar_cached;
+		}
+		Map<Node, List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>> ret = new HashMap<>();
+
+		Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> xxx = 
+				toCategory2();
+		FinCat<Node, Path> cat = xxx.first;
+
+		for (Node c : nodes) {
+			Map<Pair<Arr<Node, Path>, Attribute<Node>>, List<Object>> m = new HashMap<>();
+
+			for (Node d : nodes) {
+				for (Arr<Node, Path> p : cat.hom(c, d)) {
+					for (Attribute<Node> a : attrsFor(d)) {
+						Type.Enum en = (Type.Enum) a.target;
+						m.put(new Pair<>(p, a), new LinkedList<Object>(en.values));
+					}
+				}
+			}
+			List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>> set = Inst.homomorphs(m);
+			ret.put(c, set);
+		}
+		obsbar_cached = ret;
+		return ret;
+	}
 	
 }

@@ -13,7 +13,10 @@ public class EmployeesExample extends Example {
 	}
 	
 	public static final String s = 
-					"/* this is an example of an infinite schema.  \nto compile it, check 'allow infinte schemas' in the options menu */\n"
+					"/* This is an example of an infinite schema. To compile it, "
+			        + "\n  - check 'allow infinte schemas' in the options menu"
+			        + "\n  - set 'maximum category iterations' to a low value like 400"
+			        + "\n*/"
 			        + "\nschema S = { "
 					+ "\n nodes"
 					+ "\n 	Employee, Department, FirstName, LastName, DepartmentName;"

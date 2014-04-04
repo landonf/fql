@@ -99,7 +99,7 @@ public class PSMChi extends PSM {
 				List<Pair<Object, Object>> set = new LinkedList<>();
 				for (Pair<Object, Object> k : ret.data.get(n.string)) {
 					Object lhs = k.second;
-					LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> rhs = Relationalizer.flag(n, Jfull, k.first);
+					LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> rhs = Jfull.flag(n, k.first);
 					Object xxx = interp.prop4.get(prop).get(n).get(new Pair<>(lhs, rhs));
 					set.add(new Pair<>(k.first, xxx));
 				}

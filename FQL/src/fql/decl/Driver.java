@@ -207,7 +207,7 @@ public class Driver {
 
 //		System.out.println("before " + prog);
 		prog = rewriteQueries(prog);
-	//	System.out.println("after " + prog);
+//		System.out.println("after " + prog);
 		
 		Triple<Map<String, Set<Map<Object, Object>>>, String, List<Throwable>> res = JDBCBridge
 				.run(prog);
@@ -222,6 +222,8 @@ public class Driver {
 						.gather(k, s, res.first);
 				insts.put(k, new Instance(s, b));
 			} catch (Exception re) {
+				System.out.println("key " + k + " exp " + prog.insts.get(k));
+				System.out.println(prog);
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
 						k, "instance");
@@ -276,25 +278,32 @@ public class Driver {
 	}
 
 	private static FQLProgram rewriteQueries(FQLProgram prog) {
-		
+		List<String> norder = new LinkedList<>();
 		LinkedHashMap<String, InstExp> insts = new LinkedHashMap<>();
-		for (String k : prog.insts.keySet()) {
+		for (String k : prog.order) {
+			if (prog.insts.get(k) == null) {
+				norder.add(k);
+				continue;
+			}
 			InstExp v = prog.insts.get(k);
 			if (v instanceof InstExp.FullEval) {
 				InstExp.FullEval u = (InstExp.FullEval) v;
 				List<Pair<String, InstExp>> n = u.q.toFullQueryExp(prog).accept(u.e, new ExpandFull(prog.full_queries));
 				n.get(n.size()-1).first = k;
+				//int pos = prog.order.indexOf(k);
 				for (Pair<String, InstExp> x : n) {
 					insts.put(x.first, x.second);
+					norder.add(x.first);
 				}
 			} else {
+				norder.add(k);
 				insts.put(k, v);
 			}
 		}
 		
 		return new FQLProgram(prog.enums, prog.sigs, prog.maps, insts,
 				prog.full_queries, prog.queries, prog.transforms, prog.lines,
-				prog.drop, prog.order);
+				prog.drop, norder);
 	}
 	
 	private static class ExpandFull implements FullQueryExpVisitor<List<Pair<String, InstExp>>, String> {

@@ -51,7 +51,7 @@ import fql.decl.TransExp.Var;
 import fql.sql.CopyFlower;
 import fql.sql.CreateTable;
 import fql.sql.DropTable;
-import fql.sql.Exp;
+import fql.sql.ExpPSM;
 import fql.sql.Flower;
 import fql.sql.FullSigmaCounit;
 import fql.sql.FullSigmaTrans;
@@ -824,7 +824,7 @@ public class InstOps implements
 	public Pair<List<PSM>, Object> visit(String dst, fql.decl.InstExp.Exp e) {
 		List<PSM> ret = new LinkedList<>();
 		
-		ret.add(new Exp(dst, e.a, e.b, prog.insts.get(e.a).type(prog).toSig(prog)));
+		ret.add(new ExpPSM(dst, e.a, e.b, prog.insts.get(e.a).type(prog).toSig(prog)));
 		
 		return new Pair<>(ret, new Object());
 	}

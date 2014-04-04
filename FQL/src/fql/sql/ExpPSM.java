@@ -1,5 +1,6 @@
 package fql.sql;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -7,6 +8,8 @@ import fql.FQLException;
 import fql.Pair;
 import fql.Quad;
 import fql.Triple;
+import fql.cat.Arr;
+import fql.decl.Attribute;
 import fql.decl.Edge;
 import fql.decl.Instance;
 import fql.decl.IntRef;
@@ -15,7 +18,7 @@ import fql.decl.Path;
 import fql.decl.Signature;
 import fql.decl.Transform;
 
-public class Exp extends PSM {
+public class ExpPSM extends PSM {
 
 	public String pre, I, J;
 	public Signature sig;
@@ -39,7 +42,7 @@ public class Exp extends PSM {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Exp other = (Exp) obj;
+		ExpPSM other = (ExpPSM) obj;
 		if (I == null) {
 			if (other.I != null)
 				return false;
@@ -63,7 +66,7 @@ public class Exp extends PSM {
 		return true;
 	}
 
-	public Exp(String pre, String i, String j, Signature sig) {
+	public ExpPSM(String pre, String i, String j, Signature sig) {
 		super();
 		this.pre = pre;
 		I = i;
@@ -78,9 +81,11 @@ public class Exp extends PSM {
 			Instance Ix = new Instance(sig, PSMGen.gather(I, sig, state));
 			Instance Jx = new Instance(sig, PSMGen.gather(J, sig, state));
 			IntRef idx = new IntRef(interp.guid);
-			Quad<Instance, Map<Node, Map<Object, Transform>>, Map<Node, Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>>>, Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>>> ret = Instance.exp(idx, Ix, Jx);
+//			Quad<Instance, Map<Node, Map<Object, Transform>>, Map<Node, Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>>>, Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>>> ret = Instance.exp(idx, Ix, Jx);
+			Quad<Instance, Map<Pair<Node, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>, Triple<Instance, Map<Node, Map<Object, Pair<Arr<Node, Path>, Object>>>, Map<Node, Map<Pair<Arr<Node, Path>, Object>, Object>>>>, Map<Node, Map<Object, Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform>>>, Map<Node, Map<Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform>, Object>>> ret = Instance.exp2(idx, Ix, Jx);
 			interp.guid = idx.i;
-			interp.exps.put(pre, ret);
+		//	interp.exps.put(pre, ret);
+			interp.exps2.put(pre, ret);
 			PSMGen.shred(pre, ret.first, state);
 		} catch (FQLException fe) {
 			fe.printStackTrace();
