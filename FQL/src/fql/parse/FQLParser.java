@@ -47,7 +47,7 @@ public class FQLParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?" };
 
-	static String[] res = new String[] { "return", "coreturn", "opposite", "EVAL", "QUERY", "union",
+	static String[] res = new String[] { "not", "and", "or", "implies", "return", "coreturn", "opposite", "EVAL", "QUERY", "union",
 			"subschema", "match", "drop", "nodes", "attributes", "enum",
 			"ASWRITTEN", "schema", "transform", "dist1", "dist2", "arrows",
 			"equations", "id", "delta", "sigma", "pi", "SIGMA", "eval", /* "eq" , */
@@ -321,6 +321,10 @@ public class FQLParser {
 				Parsers.tuple(ident(), term("."), term("void"), ident()),
 				Parsers.tuple(ident(), term("."), term("curry"), ident()),
 				Parsers.tuple(ident(), term("."), term("fst")),
+				Parsers.tuple(ident(), term("."), term("not")),
+				Parsers.tuple(ident(), term("."), term("and")),
+				Parsers.tuple(ident(), term("."), term("or")),
+				Parsers.tuple(ident(), term("."), term("implies")),
 				Parsers.tuple(ident(), term("."), term("return")),
 				Parsers.tuple(ident(), term("."), term("coreturn")),
 				Parsers.tuple(ident(), term("."), term("snd")),
@@ -469,7 +473,16 @@ public class FQLParser {
 				return new TransExp.TransIso(false, p2.toString(), p3.toString());
 			} else if (p3.toString().equals("fst")) {
 				return new TransExp.Fst(p1);
-			} else if (p3.toString().equals("eval")) { 
+			} else if (p3.toString().equals("not")) {
+				return new TransExp.Not(p1);
+		    } else if (p3.toString().equals("and")) {
+				return new TransExp.And(p1);
+		    } else if (p3.toString().equals("or")) {
+				return new TransExp.Or(p1);
+		    } else if (p3.toString().equals("implies")) {
+				return new TransExp.Implies(p1);
+		    }
+		    else if (p3.toString().equals("eval")) { 
 				return new TransExp.TransEval(p1);
 			} else if (p3.toString().equals("relationalize")) {
 				return new TransExp.Squash(p1);

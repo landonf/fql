@@ -7,7 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import fql.FQLException;
@@ -200,7 +199,7 @@ public class PropPSM extends PSM {
 			throw new RuntimeException(fe.getMessage());
 		}
 	} */
-
+/*
 	private static <K,V> boolean containsAll(Map<K,V> bigger, Map<K,V> smaller) {
 		for (Entry<K, V> k : smaller.entrySet()) {
 			if (!bigger.get(k.getKey()).equals(k.getValue())) {
@@ -210,7 +209,7 @@ public class PropPSM extends PSM {
 		}
 		//System.out.println("returning true on " + bigger + "\n and \n" + smaller);
 		return true;
-	}
+	} */
 	
 	public static LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> truncate2(Signature sig,
 			LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> new_id, Arr<Node, Path> p,

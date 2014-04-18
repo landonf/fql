@@ -4,7 +4,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import fql.FQLException;
@@ -13,7 +12,6 @@ import fql.Quad;
 import fql.Triple;
 import fql.cat.Arr;
 import fql.decl.Attribute;
-import fql.decl.Edge;
 import fql.decl.Instance;
 import fql.decl.Node;
 import fql.decl.Path;
@@ -176,7 +174,7 @@ public class PSMCurry extends PSM {
 		}
 	} */
 	 
-
+/*
 	private Object lookup2(Map<Object, Transform> map, Transform xxx) {
 		for (Entry<Object, Transform> o : map.entrySet()) {
 			if (o.getValue().equals(xxx)) {
@@ -184,7 +182,7 @@ public class PSMCurry extends PSM {
 			}
 		}
 		throw new RuntimeException("Cannot find " + xxx + " in " + map);
-	}
+	} */
 
 	private Object find(Node d, Transform fst, Transform snd, Object a, Object b) {
 		for (Pair<Object, Object> o : fst.data.get(d.string)) {

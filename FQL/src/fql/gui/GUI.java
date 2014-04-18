@@ -623,6 +623,12 @@ public class GUI extends JPanel {
 		return dirty.get(i);
 	}
 
+	public static void setFontSize(int size) {
+		for (CodeEditor c : keys.values()) {
+			c.setFontSize(size);
+		}
+	}
+	
 	static Map<Integer, Boolean> dirty = new HashMap<>();
 	static Map<Integer, CodeEditor> keys = new HashMap<>();
 	static Map<Integer, File> files = new HashMap<>();

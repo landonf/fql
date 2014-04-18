@@ -51,8 +51,9 @@ public class Examples {
 	public static Example exp2 = new Exponentials2Example();
 	public static Example prop = new PropExample();
 	public static Example chare = new CharExample();
+	public static Example im = new ImageExample();
 	
-	public static Example[] examples = new Example[] { prop, exp2, auto, exp, fncomp, graph, eds2fql, cat, surj,
+	public static Example[] examples = new Example[] { im, prop, exp2, auto, exp, fncomp, graph, eds2fql, cat, surj,
 			full2, match2, match, sub, /* functor, */enums, people, chare,
 			external, typeddelta, /* delta, pi, */ typedPi,
 			typedsigma,  /* sigma, */  full, employess, typedemployees, /* composition, */
@@ -60,7 +61,7 @@ public class Examples {
 			/* foil, */ typedFoil, sql2fql, /* weird, */ written, /* monad, */ typedWeird,
 			relative, plusSig, products, transform, gene };
 	
-	public static Example[] key_examples = new Example[] { prop, exp, surj,
+	public static Example[] key_examples = new Example[] { im, prop, exp, surj,
 		 enums, people, chare,
 		external, typeddelta, typedPi,
 		typedsigma, full, typedemployees, 

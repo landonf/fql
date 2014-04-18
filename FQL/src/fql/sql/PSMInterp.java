@@ -64,6 +64,7 @@ public class PSMInterp {
 		return new Pair<>(state, ret);
 	}
 	
+	@SuppressWarnings("unused")
 	private void check(PSM p, Map<String, Set<Map<Object, Object>>> state) {
 		for (String k : state.keySet()) {
 			for (Map<Object, Object> v : state.get(k)) {

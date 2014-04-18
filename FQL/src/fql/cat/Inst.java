@@ -658,9 +658,6 @@ public class Inst<Obj, Arrow, Y, X> {
 			List<Y> B) {
 		List<LinkedHashMap<X, Y>> ret = new LinkedList<>();
 
-		// System.out.println("Expecting " + Math.pow(B.size(), A.size())
-		// + " morphs " + B.size() + " and " + A.size());
-
 		if (A.size() == 0) {
 			ret.add(new LinkedHashMap<X, Y>());
 			return ret;
@@ -669,33 +666,20 @@ public class Inst<Obj, Arrow, Y, X> {
 			return ret;
 		}
 
-		// if (B.size() == 0) {
-		// throw new RuntimeException();
-		// }
-
 		int[] counters = new int[A.size() + 1];
 
-		// int i = 0;
 		for (;;) {
-
 			if (counters[A.size()] == 1) {
 				break;
 			}
 			ret.add(make2(counters, A, B));
 			inc(counters, B.size());
-			// i++;
-			// if (i == 100) {
-			// System.out.println(A);
-			// System.out.println(B);
-			// for (int j = 0; j < counters.length; j++) {
-			// System.out.println(j + " = " + counters[j] + ",");
-			// }
-			// }
 		}
 
 		return ret;
 	}
 
+	
 	//
 
 	public static <X> List<LinkedHashMap<X, X>> bijections(List<X> A, List<X> B) {

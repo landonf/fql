@@ -65,7 +65,7 @@ public class PSMBool extends PSM {
 		//	Map<Node, Map<Object, Object>> subst = new HashMap<>();
 			for (Node n : sig.nodes) {
 				Map<Object, Object> m = new HashMap<>();
-				Map<Object, Object> m2 = new HashMap<>();
+				//Map<Object, Object> m2 = new HashMap<>();
 				Set<Map<Object, Object>> g = state.get(unit + "_" + n + "_subst_inv");
 				for (Map<Object, Object> j : g) {
 					m.put(j.get("c0"), j.get("c1"));

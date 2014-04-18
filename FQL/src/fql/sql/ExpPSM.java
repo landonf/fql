@@ -10,7 +10,6 @@ import fql.Quad;
 import fql.Triple;
 import fql.cat.Arr;
 import fql.decl.Attribute;
-import fql.decl.Edge;
 import fql.decl.Instance;
 import fql.decl.IntRef;
 import fql.decl.Node;

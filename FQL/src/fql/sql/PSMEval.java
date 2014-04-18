@@ -13,7 +13,6 @@ import fql.Triple;
 import fql.cat.Arr;
 import fql.cat.FinCat;
 import fql.decl.Attribute;
-import fql.decl.Edge;
 import fql.decl.Instance;
 import fql.decl.Node;
 import fql.decl.Path;

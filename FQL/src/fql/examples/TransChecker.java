@@ -12,22 +12,24 @@ import fql.decl.Instance;
 import fql.decl.SigExp;
 import fql.decl.Signature;
 import fql.decl.TransExp;
+import fql.decl.TransExp.And;
 import fql.decl.TransExp.Bool;
 import fql.decl.TransExp.Case;
 import fql.decl.TransExp.Chi;
 import fql.decl.TransExp.Comp;
 import fql.decl.TransExp.Const;
 import fql.decl.TransExp.Coreturn;
-import fql.decl.TransExp.TransCurry;
-import fql.decl.TransExp.TransEval;
 import fql.decl.TransExp.Delta;
 import fql.decl.TransExp.External;
 import fql.decl.TransExp.FF;
 import fql.decl.TransExp.Fst;
 import fql.decl.TransExp.FullSigma;
 import fql.decl.TransExp.Id;
+import fql.decl.TransExp.Implies;
 import fql.decl.TransExp.Inl;
 import fql.decl.TransExp.Inr;
+import fql.decl.TransExp.Not;
+import fql.decl.TransExp.Or;
 import fql.decl.TransExp.Pi;
 import fql.decl.TransExp.Prod;
 import fql.decl.TransExp.Relationalize;
@@ -36,6 +38,8 @@ import fql.decl.TransExp.Sigma;
 import fql.decl.TransExp.Snd;
 import fql.decl.TransExp.Squash;
 import fql.decl.TransExp.TT;
+import fql.decl.TransExp.TransCurry;
+import fql.decl.TransExp.TransEval;
 import fql.decl.TransExp.TransExpVisitor;
 import fql.decl.TransExp.TransIso;
 import fql.decl.TransExp.UnChi;
@@ -594,6 +598,48 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		return new Pair<>(e.unit, e.prop);
 	}
 
+	@Override
+	public Pair<String, String> visit(FQLProgram env, Not e) {
+		InstExp v = env.insts.get(e.prop);
+		if (v == null) {
+			throw new RuntimeException("Missing instance: " + e.prop);
+		}
+		if (!(v instanceof InstExp.Two)) {
+			throw new RuntimeException("Not a prop in " + e);
+		}
+		
+		return new Pair<>(e.prop, e.prop);
+	}
+	
+	@Override
+	public Pair<String, String> visit(FQLProgram env, And e) {
+		InstExp v = env.insts.get(e.prop);
+		if (v == null) {
+			throw new RuntimeException("Missing instance: " + e.prop);
+		}
+		if (!(v instanceof InstExp.Times)) {
+			throw new RuntimeException("Not a product in " + e);
+		}
+		InstExp.Times v0 = (InstExp.Times) v;
+		if (!v0.a.equals(v0.b)) {
+			throw new RuntimeException("Not the same prop in " + e);
+		}
+		if (!(env.insts.get(v0.a) instanceof InstExp.Two)) {
+			throw new RuntimeException("Not a prop in " + e);
+		}
+		
+		return new Pair<>(e.prop, v0.a);
+	}
+	
+	public Pair<String, String> visit(FQLProgram env, Or e) {
+		return new And(e.prop).accept(env, this);
+	}
+	
+	public Pair<String, String> visit(FQLProgram env, Implies e) {
+		return new And(e.prop).accept(env, this);
+	}
+
+	
 	@Override
 	public Pair<String, String> visit(FQLProgram env, Chi e) {
 		InstExp prop = env.insts.get(e.prop);

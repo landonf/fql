@@ -27,6 +27,7 @@ import fql.decl.InstExp.Pi;
 import fql.decl.InstExp.Relationalize;
 import fql.decl.InstExp.Sigma;
 import fql.decl.InstExp.Two;
+import fql.decl.TransExp.And;
 import fql.decl.TransExp.Bool;
 import fql.decl.TransExp.Case;
 import fql.decl.TransExp.Chi;
@@ -35,8 +36,11 @@ import fql.decl.TransExp.Coreturn;
 import fql.decl.TransExp.FF;
 import fql.decl.TransExp.Fst;
 import fql.decl.TransExp.Id;
+import fql.decl.TransExp.Implies;
 import fql.decl.TransExp.Inl;
 import fql.decl.TransExp.Inr;
+import fql.decl.TransExp.Not;
+import fql.decl.TransExp.Or;
 import fql.decl.TransExp.Prod;
 import fql.decl.TransExp.Return;
 import fql.decl.TransExp.Snd;
@@ -60,7 +64,9 @@ import fql.sql.InsertSQL;
 import fql.sql.InsertSQL2;
 import fql.sql.InsertValues;
 import fql.sql.PSM;
+import fql.sql.PSMAnd;
 import fql.sql.PSMGen;
+import fql.sql.PSMNot;
 import fql.sql.PropPSM;
 import fql.sql.Relationalizer;
 import fql.sql.SQL;
@@ -1456,6 +1462,55 @@ public class InstOps implements
 		return new Pair<>(ret, new Object());
 	}
 
+	@Override
+	public List<PSM> visit(String env, Not e) {
+		List<PSM> ret = new LinkedList<>();
+		
+		InstExp p = prog.insts.get(e.prop);
+		Signature sig = p.type(prog).toSig(prog);
+		
+		ret.add(new PSMNot(sig, env, e.prop));
+
+		return ret;
+	}
 	
+	@Override
+	public List<PSM> visit(String env, And e) {
+		List<PSM> ret = new LinkedList<>();
+		
+		InstExp.Times pr = (InstExp.Times) prog.insts.get(e.prop);
+		Signature sig = pr.type(prog).toSig(prog);
+		
+		ret.add(new PSMAnd(sig, env, e.prop, pr.a, "and"));
+
+		return ret;
+	}
+
+
+	@Override
+	public List<PSM> visit(String env, Or e) {
+		List<PSM> ret = new LinkedList<>();
+		
+		InstExp.Times pr = (InstExp.Times) prog.insts.get(e.prop);
+		Signature sig = pr.type(prog).toSig(prog);
+		
+		ret.add(new PSMAnd(sig, env, e.prop, pr.a, "or"));
+
+		return ret;
+	}
+	
+	@Override
+	public List<PSM> visit(String env, Implies e) {
+		List<PSM> ret = new LinkedList<>();
+		
+		InstExp.Times pr = (InstExp.Times) prog.insts.get(e.prop);
+		Signature sig = pr.type(prog).toSig(prog);
+		
+		ret.add(new PSMAnd(sig, env, e.prop, pr.a, "implies"));
+
+		return ret;
+	}
+
+
 
 }

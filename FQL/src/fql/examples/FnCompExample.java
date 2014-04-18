@@ -4,14 +4,14 @@ public class FnCompExample extends Example {
 
 	@Override
 	public String getName() {
-		return "Function Composition";
+		return "Function Operations";
 	}
 
 	@Override
 	public String getText() {
 		return s;
 	}
-	
+
 	String s = "/* Here we show that all three data migration functors (delta, pi, SIGMA) "
 			+ "\n * can be used to compute composition of functions."
 			+ "\n * It's good to TURN OBSERVABLES ON."
@@ -67,9 +67,86 @@ public class FnCompExample extends Example {
 			+ "\n	arrows sq->A,inc->A.sqinc;"
 			+ "\n} : TwoMaps -> OneMap"
 			+ "\n"
-			+ "\ninstance ComposeUsingPi = pi ForPi I";
-
-
-
-
+			+ "\ninstance ComposeUsingPi = pi ForPi I"
+			+ "\n"
+			+ "\n//////////////////////////////////"
+			+ "\n"
+			+ "\n/* This part of the file starts with a function f:x->y "
+			+ "\n * and factors it as a surjection, x->im, followed by an injection im->y."
+			+ "\n * This is done using data migration queries delta, pi, SIGMA."
+			+ "\n * The function f is encoded as an A-instance J: A->Set. "
+			+ "\n */"
+			+ "\n"
+			+ "\nschema A = {"
+			+ "\n	nodes x,y;"
+			+ "\n	attributes;"
+			+ "\n	arrows f:x->y;"
+			+ "\n	equations;"
+			+ "\n}"
+			+ "\n"
+			+ "\nschema B = {"
+			+ "\n	nodes a,b,c,d;"
+			+ "\n	attributes;"
+			+ "\n	arrows f:a->b,g:a->c,h:b->d,i:c->d;"
+			+ "\n	equations;//?"
+			+ "\n}"
+			+ "\n"
+			+ "\nschema C = {"
+			+ "\n	nodes a,b,c,d,e;"
+			+ "\n	attributes;"
+			+ "\n	arrows f:a->b,g:a->c,h:b->d,i:c->d, ff:e->b,gg:e->c;"
+			+ "\n	equations e.ff.h=e.gg.i;"
+			+ "\n}"
+			+ "\n"
+			+ "\nschema D = {"
+			+ "\n	nodes v,w,x,y;"
+			+ "\n	attributes;"
+			+ "\n	arrows f:v->w,ff:v->w,g:w->x,h:x->y;"
+			+ "\n	equations v.f.g=v.ff.g;"
+			+ "\n}"
+			+ "\n"
+			+ "\nschema E = {"
+			+ "\n	nodes x,im,y;"
+			+ "\n	attributes;"
+			+ "\n	arrows f:x->im, g:im->y;"
+			+ "\n	equations;"
+			+ "\n}"
+			+ "\n"
+			+ "\nmapping F = {"
+			+ "\n	nodes a->x,b->x,c->x,d->y;"
+			+ "\n	attributes;"
+			+ "\n	arrows f->x,g->x,h->x.f,i->x.f;"
+			+ "\n} : B -> A"
+			+ "\n"
+			+ "\nmapping G = {"
+			+ "\n	nodes a->a,b->b,c->c,d->d;"
+			+ "\n	attributes ;"
+			+ "\n	arrows f->a.f,g->a.g,h->b.h,i->c.i;"
+			+ "\n} : B -> C"
+			+ "\n"
+			+ "\nmapping H = {"
+			+ "\n	nodes e->v,a->w,b->w,c->w,d->y;"
+			+ "\n	attributes;"
+			+ "\n	arrows f->w,g->w,h->w.g.h,i->w.g.h,ff->v.f,gg->v.ff;"
+			+ "\n} : C -> D"
+			+ "\n"
+			+ "\nmapping Ix = {"
+			+ "\n	nodes x->w,im->x,y->y;"
+			+ "\n	attributes;"
+			+ "\n	arrows f->w.g, g->x.h;"
+			+ "\n} : E -> D"
+			+ "\n"
+			+ "\n"
+			+ "\ninstance J = {"
+			+ "\n	nodes x->{1,2,3,4,5,6},y->{1,2,3,4};"
+			+ "\n	attributes;"
+			+ "\n	arrows f->{(1,1),(2,1),(3,1),(4,2),(5,2),(6,3)};"
+			+ "\n} :  A"
+			+ "\n"
+			+ "\ninstance J2=delta F J"
+			+ "\n"
+			+ "\ninstance J3=pi G J2"
+			+ "\n"
+			+ "\ninstance J4=SIGMA H J3"
+			+ "\n" + "\ninstance ImageFactorization=delta Ix J4";
 }

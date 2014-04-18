@@ -26,6 +26,7 @@
     <keyword>ASWRITTEN</keyword>
     <keyword>EVAL</keyword>
     <keyword>SIGMA</keyword>
+    <keyword>and</keyword>
     <keyword>apply</keyword>
     <keyword>arrows</keyword>
     <keyword>attributes</keyword>
@@ -40,6 +41,7 @@
     <keyword>false</keyword>
     <keyword>fst</keyword>
     <keyword>id</keyword>
+    <keyword>implies</keyword>
     <keyword>inl</keyword>
     <keyword>inr</keyword>
     <keyword>iso1</keyword>
@@ -47,7 +49,9 @@
     <keyword>kernel</keyword>
     <keyword>match</keyword>
     <keyword>nodes</keyword>
+    <keyword>not</keyword>
     <keyword>opposite</keyword>
+    <keyword>or</keyword>
     <keyword>pi</keyword>
     <keyword>prop</keyword>
     <keyword>relationalize</keyword>

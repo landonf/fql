@@ -180,8 +180,8 @@ public class DEBUG implements Serializable {
 
 		JTabbedPane jtb = new JTabbedPane();
 
-		JPanel general1 = new JPanel(new GridLayout(11, 1));
-		JPanel general2 = new JPanel(new GridLayout(11, 1));
+		JPanel general1 = new JPanel(new GridLayout(12, 1));
+		JPanel general2 = new JPanel(new GridLayout(12, 1));
 
 		JPanel sql1 = new JPanel(new GridLayout(10, 1));
 		JPanel sql2 = new JPanel(new GridLayout(10, 1));
@@ -325,10 +325,18 @@ public class DEBUG implements Serializable {
 		JTextField iter = new JTextField(
 				Integer.toString(MAX_DENOTE_ITERATIONS));
 		JLabel label7 = new JLabel(
-				"Maximum iterations for category computation:");
+				"Maximum iterations for left-kan computation:");
 		label7.setToolTipText(label7text);
 		general1.add(label7);
 		general2.add(iter);
+		
+		JTextField font_field = new JTextField(
+				Integer.toString(FONT_SIZE));
+		JLabel font_label = new JLabel(
+				"Editor font size:");
+		font_label.setToolTipText("Sets the size of the font used in all editors.");
+		general1.add(font_label);
+		general2.add(font_field);
 
 		JTextField vlen = new JTextField(Integer.toString(varlen));
 		JLabel label8 = new JLabel("VARCHAR size:");
@@ -542,7 +550,7 @@ public class DEBUG implements Serializable {
 		sql1.add(new JLabel());
 		sql2.add(new JLabel());
 		sql1.add(new JLabel());
-		sql2.add(new JLabel());
+		sql2.add(new JLabel()); 
 
 		general1.add(new JLabel("Look and feel:"));
 		String[] items = new String[UIManager.getInstalledLookAndFeels().length];
@@ -574,10 +582,15 @@ public class DEBUG implements Serializable {
 			int a = MAX_PATH_LENGTH;
 			int b = MAX_DENOTE_ITERATIONS;
 			int d = varlen;
+			int f = FONT_SIZE;
 			try {
 				a = Integer.parseInt(plen.getText());
 				b = Integer.parseInt(iter.getText());
 				d = Integer.parseInt(vlen.getText());
+				f = Integer.parseInt(font_field.getText());
+				if (f < 1) {
+					f = FONT_SIZE;
+				}
 			} catch (NumberFormatException nfe) {
 				return;
 			}
@@ -598,6 +611,9 @@ public class DEBUG implements Serializable {
 			varlen = d;
 			prelude = area.getText();
 			afterlude = area2.getText();
+			
+			GUI.setFontSize(f);
+			FONT_SIZE = f;
 
 			schema_denotation = schema_denotation_box.isSelected();
 			schema_ed = schema_ed_box.isSelected();
@@ -605,8 +621,7 @@ public class DEBUG implements Serializable {
 			schema_tabular = schema_tabular_box.isSelected();
 			schema_textual = schema_textual_box.isSelected();
 			schema_rdf = schema_rdf_box.isSelected();
-
-
+			
 			mapping_ed = mapping_ed_box.isSelected();
 			mapping_graphical = mapping_graphical_box.isSelected();
 			mapping_tabular = mapping_tabular_box.isSelected();
@@ -718,6 +733,8 @@ public class DEBUG implements Serializable {
 			"<li>SpringLayout: simple force-directed layout</li>" +
 			"" +
 			"</html>";
+	
+	public int FONT_SIZE = 12;
 			
 	
 	/*

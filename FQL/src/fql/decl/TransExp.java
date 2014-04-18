@@ -119,6 +119,186 @@ public static class UnChi extends TransExp {
 			return a + ".kernel";
 		}
 	}
+
+	public static class Not extends TransExp {
+		public String prop;
+
+		public Not(String prop) {
+			this.prop = prop;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((prop == null) ? 0 : prop.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Not other = (Not) obj;
+			if (prop == null) {
+				if (other.prop != null)
+					return false;
+			} else if (!prop.equals(other.prop))
+				return false;
+			return true;
+		}
+		@Override
+		public boolean gather() {
+			return false;
+		}
+		@Override
+		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		@Override
+		public String toString() {
+			return prop + ".not";
+		}
+	}
+	
+	public static class And extends TransExp {
+		public String prop;
+
+		public And(String prop) {
+			this.prop = prop;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((prop == null) ? 0 : prop.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			And other = (And) obj;
+			if (prop == null) {
+				if (other.prop != null)
+					return false;
+			} else if (!prop.equals(other.prop))
+				return false;
+			return true;
+		}
+		@Override
+		public boolean gather() {
+			return false;
+		}
+		@Override
+		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		@Override
+		public String toString() {
+			return prop + ".and";
+		}
+	}
+	
+	public static class Or extends TransExp {
+		public String prop;
+
+		public Or(String prop) {
+			this.prop = prop;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((prop == null) ? 0 : prop.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Or other = (Or) obj;
+			if (prop == null) {
+				if (other.prop != null)
+					return false;
+			} else if (!prop.equals(other.prop))
+				return false;
+			return true;
+		}
+		@Override
+		public boolean gather() {
+			return false;
+		}
+		@Override
+		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		@Override
+		public String toString() {
+			return prop + ".or";
+		}
+	}
+	
+	public static class Implies extends TransExp {
+		public String prop;
+
+		public Implies(String prop) {
+			this.prop = prop;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((prop == null) ? 0 : prop.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Implies other = (Implies) obj;
+			if (prop == null) {
+				if (other.prop != null)
+					return false;
+			} else if (!prop.equals(other.prop))
+				return false;
+			return true;
+		}
+		@Override
+		public boolean gather() {
+			return false;
+		}
+		@Override
+		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		@Override
+		public String toString() {
+			return prop + ".implies";
+		}
+	}
 	
 	public static class Bool extends TransExp {
 		
@@ -1821,7 +2001,10 @@ public static class UnChi extends TransExp {
 	public abstract int hashCode();
 
 	public interface TransExpVisitor<R, E> {
-
+		public R visit(E env, Or e);
+		public R visit(E env, Implies e);
+		public R visit(E env, And e);
+		public R visit(E env, Not e);
 		public R visit(E env, Id e);
 		public R visit(E env, Comp e);
 		public R visit(E env, Var e);

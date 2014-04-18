@@ -2,6 +2,7 @@ package fql.gui;
 
 import java.awt.Dimension;
 import java.awt.Event;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -390,6 +391,9 @@ public class CodeEditor extends JPanel implements Runnable {
 		topArea.setText(content);
 		topArea.setCaretPosition(0);
 		topArea.setAutoscrolls(true);
+		
+		Font font = new Font(topArea.getFont().getFontName(), topArea.getFont().getStyle(), DEBUG.debug.FONT_SIZE);
+		topArea.setFont(font);
 
 		Separator s = new Separator();
 		JMenuItem visualEdit = new JMenuItem("Visual Edit");
@@ -505,6 +509,51 @@ public class CodeEditor extends JPanel implements Runnable {
 		// topArea.getPopupMenu().setLightWeightPopupEnabled(true);
 
 		// topArea.getP
+		
+		key = KeyStroke.getKeyStroke(KeyEvent.VK_EQUALS, Event.META_MASK);
+		key2 = KeyStroke.getKeyStroke(KeyEvent.VK_EQUALS, Event.CTRL_MASK);
+
+		al = new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Font font = new Font(topArea.getFont().getFontName(), topArea.getFont().getStyle(), topArea.getFont().getSize()+1);
+				DEBUG.debug.FONT_SIZE++;
+				topArea.setFont(font);
+			}
+		};
+		topArea.getActionMap().put("IncreaseFont", al);
+		inputMap.put(key, "IncreaseFont");
+		inputMap.put(key2, "IncreaseFont");
+		
+		key = KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, Event.META_MASK);
+		key2 = KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, Event.CTRL_MASK);
+
+		al = new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (topArea.getFont().getSize() == 1) {
+					return;
+				}
+				Font font = new Font(topArea.getFont().getFontName(), topArea.getFont().getStyle(), topArea.getFont().getSize()-1);
+				DEBUG.debug.FONT_SIZE--;
+				topArea.setFont(font);
+			}
+		};
+		topArea.getActionMap().put("DecreaseFont", al);
+		inputMap.put(key, "DecreaseFont");
+		inputMap.put(key2, "DecreaseFont");
+	}
+	
+	public void setFontSize(int size) {
+		if (size < 1) {
+			return;
+		}
+		Font font = new Font(topArea.getFont().getFontName(), topArea.getFont().getStyle(), size);
+		topArea.setFont(font);
 	}
 
 	protected void findAction() {
