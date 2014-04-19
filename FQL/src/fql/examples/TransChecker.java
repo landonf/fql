@@ -655,7 +655,7 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		seen.add(e.trans);
 		TransExp t = env.transforms.get(e.trans);
 		if (t == null) {
-			throw new RuntimeException("Missing transform " + t);
+			throw new RuntimeException("Missing transform " + e.trans);
 		}
 		Pair<String, String> k = t.accept(env, this);
 		return new Pair<>(k.second, e.prop);

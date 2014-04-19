@@ -18,6 +18,7 @@ import fql.decl.Instance;
 import fql.decl.Node;
 import fql.decl.Path;
 import fql.decl.Transform;
+import fql.parse.PrettyPrinter;
 
 /**
  * 
@@ -61,6 +62,7 @@ public class PSMInterp {
 		//	System.out.println("After " + cmd);
 		//	System.out.println(state);
 		}
+//		 PrettyPrinter.printDB(state);
 		return new Pair<>(state, ret);
 	}
 	

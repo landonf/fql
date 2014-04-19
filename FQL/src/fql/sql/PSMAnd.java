@@ -165,25 +165,29 @@ public class PSMAnd extends PSM {
 		Map<String, Set<Pair<Object, Object>>> notA_data = new HashMap<>();
 		for (Node d : sig.nodes) {
 			Set<Pair<Object,Object>> dd = new HashSet<>();
-			for (Object f : Hc.first.getNode(d)) {
+			xxx : for (Object f : Hc.first.getNode(d)) {
 				Path ff = Hc.second.get(f);
 				for (Node d0 : sig.nodes) {
 					for (Arr<Node, Path> g : sig.toCategory2().first.hom(d, d0)) {
 						Arr<Node, Path> fg = sig.toCategory2().first.compose(sig.toCategory2().second.of(ff), g);
 						Object xxx = H1.first.get(d0).third.get(fg.arr);
-						
+						if (xxx == null) {
+							throw new RuntimeException();
+						}
 						if (!A.getNode(d0).contains(xxx) || B.getNode(d0).contains(xxx)) {
-							dd.add(new Pair<>(f, f));
+						} else {
+							continue xxx;
 						}
 					}
 				}
+				dd.add(new Pair<>(f, f));
 			}
 			
 			notA_data.put(d.string, dd);
 		}
 		for (Edge h : sig.edges) {
 			Set<Pair<Object,Object>> dd = new HashSet<>();
-			for (Object f : Hc.first.getNode(h.source)) { 
+			for (Object f : notA_data.get(h.source.string)) { 
 				Path ff = Hc.second.get(f);
 				Arr<Node, Path> fg = sig.toCategory2().first.compose(sig.toCategory2().second.of(ff), sig.toCategory2().second.of(new Path(sig, h)));
 				Object xxx = Hc.third.get(fg.arr);

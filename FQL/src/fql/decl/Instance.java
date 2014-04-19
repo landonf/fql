@@ -158,7 +158,7 @@ public class Instance {
 			if (data.get(e.source.string).size() != x.size()) {
 				throw new FQLException(
 						"Instance does not map all domain values in " + e.name
-								+ " in " + this);
+								+ " in " + this + "\n\n" + data.get(e.source.string).size() + " vs " + x.size());
 			}
 
 			for (Pair<Object, Object> p1 : i) {
@@ -178,7 +178,7 @@ public class Instance {
 				}
 				if (!contained(p1.second, data.get(e.target.string))) {
 					throw new FQLException("Range has non foreign key: "
-							+ p1.second + " in " + e.target.string);
+							+ p1.second + " in " + e.target.string + " \n\n " + this);
 				}
 			}
 		}
@@ -222,18 +222,23 @@ public class Instance {
 		return id;
 	}
 
+	Map<Path, Set<Pair<Object, Object>>> cache = new HashMap<>();
 	public Set<Pair<Object, Object>> evaluate(Path p) {
 		Set<Pair<Object, Object>> x = data.get(p.source.string);
 		if (x == null) {
 			throw new RuntimeException("Couldnt find " + p.source.string);
+		}
+		if (cache.containsKey(p)) {
+			return cache.get(p);
 		}
 		for (Edge e : p.path) {
 			if (data.get(e.name) == null) {
 				throw new RuntimeException("Couldnt find " + e.name);
 			}
 
-			x = compose(x, data.get(e.name));
+			x = compose4(x, data.get(e.name));
 		}
+		cache.put(p, x);
 		return x;
 	}
 
@@ -250,7 +255,51 @@ public class Instance {
 			}
 		}
 		return ret;
+	} 
+	
+	public static <X, Y, Z> Set<Pair<X, Z>> compose2(Set<Pair<X, Y>> x,
+			Set<Pair<Y, Z>> y) {
+		Set<Pair<X, Z>> ret = new HashSet<>();
+
+		for (Pair<X, Y> p1 : x) {
+			for (Pair<Y, Z> p2 : y) {
+				if (p1.second.equals(p2.first)) {
+					Pair<X, Z> p = new Pair<>(p1.first, p2.second);
+					ret.add(p);
+				}
+			}
+		}
+		return ret;
+	} 
+	public static <X, Y, Z> Set<Pair<X, Z>> compose3(Set<Pair<X, Y>> x,
+			Set<Pair<Y, Z>> y) {
+		Set<Pair<X, Z>> ret = new HashSet<>();
+
+		for (Pair<X, Y> p1 : x) {
+			for (Pair<Y, Z> p2 : y) {
+				if (p1.second.equals(p2.first)) {
+					Pair<X, Z> p = new Pair<>(p1.first, p2.second);
+					ret.add(p);
+				}
+			}
+		}
+		return ret;
 	}
+	
+	public static <X, Y, Z> Set<Pair<X, Z>> compose4(Set<Pair<X, Y>> x,
+			Set<Pair<Y, Z>> y) {
+		Set<Pair<X, Z>> ret = new HashSet<>();
+
+		for (Pair<X, Y> p1 : x) {
+			for (Pair<Y, Z> p2 : y) {
+				if (p1.second.equals(p2.first)) {
+					Pair<X, Z> p = new Pair<>(p1.first, p2.second);
+					ret.add(p);
+				}
+			}
+		}
+		return ret;
+	} 
 
 	private boolean contained(Object second, Set<Pair<Object, Object>> set) {
 		for (Pair<Object, Object> p : set) {
@@ -1737,7 +1786,7 @@ public class Instance {
 			String h = es.get(0);
 			Set<Pair<Object, Object>> h0 = data.get(h);
 			for (int i = 1; i < es.size(); i++) {
-				h0 = compose(h0, data.get(es.get(i)));
+				h0 = compose2(h0, data.get(es.get(i)));
 			}
 			Map<Value<Object, Object>, Value<Object, Object>> xxx = FDM
 					.degraph(h0);

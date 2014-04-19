@@ -208,9 +208,9 @@ public class InstOps implements
 			String temp2 = next();
 			ret.addAll(PSMGen.makeTables(temp2, s, false));
 
-			Pair<Map<Node, List<String>>, List<PSM>> xxx = Relationalizer
+			Pair<Map<Node, List<Pair<Path, Attribute<Node>>>>, List<PSM>> xxx = Relationalizer
 					.observations(s, temp1, e.tgt, false);
-			Pair<Map<Node, List<String>>, List<PSM>> yyy = Relationalizer
+			Pair<Map<Node, List<Pair<Path, Attribute<Node>>>>, List<PSM>> yyy = Relationalizer
 					.observations(s, temp2, e.obj, false);
 			if (!xxx.first.equals(yyy.first)) {
 				throw new RuntimeException("not equal: " + xxx + " and " + yyy);
@@ -219,7 +219,7 @@ public class InstOps implements
 			ret.addAll(yyy.second);
 
 			for (Node n : s.nodes) {
-				List<String> cols = xxx.first.get(n);
+				List<?> cols = xxx.first.get(n);
 				Map<String, String> from = new HashMap<>();
 				from.put("t1", e.tgt + "_" + n);
 				from.put("t1_obs", temp1 + "_" + n + "_" + "observables");
@@ -688,50 +688,70 @@ public class InstOps implements
 			List<PSM> ret = new LinkedList<>();
 			ret.addAll(PSMGen.makeTables(dst + "_fst", s, false));
 			ret.addAll(PSMGen.makeTables(dst + "_snd", s, false));
+			
+			Pair<Map<Node, List<Pair<Path, Attribute<Node>>>>, List<PSM>> l_obs = Relationalizer.observations(s, dst + "_l_obs", e.a, false);
+			Pair<Map<Node, List<Pair<Path, Attribute<Node>>>>, List<PSM>> r_obs = Relationalizer.observations(s, dst + "_r_obs", e.b, false);
+			if (!(l_obs.first.equals(r_obs.first))) {
+				throw new RuntimeException("Internal error, please report.");
+			}
+			
+			ret.addAll(PSMGen.makeTables(dst + "_l_obs", s, false));
+			ret.addAll(l_obs.second);
+			ret.addAll(PSMGen.dropTables(dst + "_l_obs", s));
+			ret.addAll(PSMGen.makeTables(dst + "_r_obs", s, false));
+			ret.addAll(r_obs.second);
+			ret.addAll(PSMGen.dropTables(dst + "_r_obs", s));
+			
 			for (Node n : s.nodes) {
+				List<Pair<Path, Attribute<Node>>> lats = l_obs.first.get(n);
+			//	List<Pair<Path, Attribute<Node>>> rats = r_obs.first.get(n);
+				
 				LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 				Map<String, String> from = new HashMap<>();
 				List<String> attrs = new LinkedList<>();
 				Map<String, String> attrsM = new HashMap<>();
 				List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
-				from.put("lft", e.a + "_" + n.string);
-				from.put("rght", e.b + "_" + n.string);
+				from.put("lft", dst + "_l_obs_" + n.string + "_observables");
+				from.put("rght", dst + "_r_obs_" + n.string + "_observables");
 				attrs.add("lft");
 				attrs.add("rght");
 				attrsM.put("lft", PSM.VARCHAR());
 				attrsM.put("rght", PSM.VARCHAR());
-				select.put("lft", new Pair<>("lft", "c0"));
-				select.put("rght", new Pair<>("rght", "c0"));
-				for (Attribute<Node> a : s.attrsFor(n)) {
-					from.put("lft_" + a.name, e.a + "_" + a.name);
-					from.put("right_" + a.name, e.b + "_" + a.name);
-					where.add(new Pair<>(new Pair<>("lft_" + a.name, "c0"),
-							new Pair<>("lft", "c0")));
-					where.add(new Pair<>(new Pair<>("right_" + a.name, "c0"),
-							new Pair<>("rght", "c0")));
-					where.add(new Pair<>(new Pair<>("lft_" + a.name, "c1"),
-							new Pair<>("right_" + a.name, "c1")));
-					select.put(a.name, new Pair<>("lft_" + a.name, "c1"));
-					attrs.add(a.name);
-					attrsM.put(a.name, a.target.psm());
+				select.put("lft", new Pair<>("lft", "id"));
+				select.put("rght", new Pair<>("rght", "id"));
+				int idx = 0;
+				for (Pair<Path, Attribute<Node>> aa : lats) {
+					Attribute<Node> a = aa.second;
+					//from.put("lft_" + a.name, e.a + "_" + a.name);
+					//from.put("rght_" + a.name, e.b + "_" + a.name);
+					//where.add(new Pair<>(new Pair<>("lft_" + a.name, "c0"),
+						//	new Pair<>("lft", "c0")));
+					//where.add(new Pair<>(new Pair<>("rght_" + a.name, "c0"),
+						//	new Pair<>("rght", "c0")));
+					where.add(new Pair<>(new Pair<>("lft", "c" + idx),
+						                 new Pair<>("rght", "c" + idx)));
+					select.put("c" + idx,new Pair<>("lft", "c" + idx));
+					attrs.add( "c" + idx);
+					attrsM.put("c" + idx, a.target.psm());
+					idx++;
 				}
 				Flower f = new Flower(select, from, where);
 				ret.add(new CreateTable(dst + "_prod_temp_" + n.string, attrsM,
 						false));
 				ret.add(new InsertSQL2(dst + "_prod_temp_" + n.string, f, attrs));
 				Map<String, String> attrsM0 = new HashMap<>(attrsM);
-				attrsM0.put("guid", PSM.VARCHAR());
+				attrsM0.put("gguid", PSM.VARCHAR());
 				ret.add(new CreateTable(dst + "_prod_guid_" + n.string,
 						attrsM0, false));
 				ret.add(new InsertKeygen(dst + "_prod_guid_" + n.string,
-						"guid", dst + "_prod_temp_" + n.string, attrs));
+						"gguid", dst + "_prod_temp_" + n.string, attrs));
 
 				List<Pair<Pair<String, String>, Pair<String, String>>> where0 = new LinkedList<>();
 
 				from = new HashMap<>();
 				from.put("t", dst + "_prod_guid_" + n.string);
 				select = new LinkedHashMap<>();
-				select.put("c0", new Pair<>("t", "guid"));
+				select.put("c0", new Pair<>("t", "gguid"));
 				select.put("c1", new Pair<>("t", "lft"));
 				f = new Flower(select, from, where0);
 				ret.add(new InsertSQL(dst + "_fst_" + n, f, "c0", "c1"));
@@ -739,28 +759,30 @@ public class InstOps implements
 				from = new HashMap<>();
 				from.put("t", dst + "_prod_guid_" + n.string);
 				select = new LinkedHashMap<>();
-				select.put("c0", new Pair<>("t", "guid"));
+				select.put("c0", new Pair<>("t", "gguid"));
 				select.put("c1", new Pair<>("t", "rght"));
 				f = new Flower(select, from, where0);
 				ret.add(new InsertSQL(dst + "_snd_" + n, f, "c0", "c1"));
 
 				LinkedHashMap<String, Pair<String, String>> select0 = new LinkedHashMap<>();
-				select0.put("c0", new Pair<>("t", "guid"));
-				select0.put("c1", new Pair<>("t", "guid"));
+				select0.put("c0", new Pair<>("t", "gguid"));
+				select0.put("c1", new Pair<>("t", "gguid"));
 				Map<String, String> from0 = new HashMap<>();
 				from0.put("t", dst + "_prod_guid_" + n.string);
 				Flower sql = new Flower(select0, from0, where0);
 				ret.add(new InsertSQL(dst + "_" + n.string, sql, "c0", "c1"));
 				for (Attribute<Node> a : s.attrsFor(n)) {
 					select0 = new LinkedHashMap<>();
-					select0.put("c0", new Pair<>("t", "guid"));
-					select0.put("c1", new Pair<>("t", a.name));
+					select0.put("c0", new Pair<>("t", "gguid"));
+					Arr<Node, Path> ppp = s.toCategory2().first.id(n);
+					int ppp0 = lats.indexOf(new Pair<>(ppp.arr, a));
+					select0.put("c1", new Pair<>("t", "c" + ppp0));
 					from0 = new HashMap<>();
 					from0.put("t", dst + "_prod_guid_" + n.string);
 					sql = new Flower(select0, from0, where0);
 					ret.add(new InsertSQL(dst + "_" + a.name, sql, "c0", "c1"));
 				}
-				ret.add(new DropTable(dst + "_prod_temp_" + n));
+			//	ret.add(new DropTable(dst + "_prod_temp_" + n)); TODO !!!!!!
 
 			}
 
@@ -780,8 +802,8 @@ public class InstOps implements
 				where.add(new Pair<>(new Pair<>("rightEdge", "c1"), new Pair<>(
 						"dstGuid", "rght")));
 				LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
-				select.put("c0", new Pair<>("srcGuid", "guid"));
-				select.put("c1", new Pair<>("dstGuid", "guid"));
+				select.put("c0", new Pair<>("srcGuid", "gguid"));
+				select.put("c1", new Pair<>("dstGuid", "gguid"));
 				Flower f = new Flower(select, from, where);
 				ret.add(new InsertSQL(dst + "_" + edge.name, f, "c0", "c1"));
 			}
@@ -811,7 +833,7 @@ public class InstOps implements
 								new Pair<>("g", "c1")));
 						LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 						select.put("c0", new Pair<>("f", "c0"));
-						select.put("c1", new Pair<>("lim", "guid"));
+						select.put("c1", new Pair<>("lim", "gguid"));
 						Flower flower = new Flower(select, from, where);
 						ret.add(new InsertSQL(dst0 + "_" + n.string, flower,
 								"c0", "c1"));

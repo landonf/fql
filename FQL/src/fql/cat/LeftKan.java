@@ -241,7 +241,7 @@ public class LeftKan {
 	public Set<Pair<Integer, Integer>> eval(Path p) {
 		Set<Pair<Integer, Integer>> ret = Pb.get(p.source);
 		for (Edge e : p.path) {
-			ret = Instance.compose(ret, Pg.get(e));
+			ret = Instance.compose3(ret, Pg.get(e));
 		}
 //		System.out.println("eval " + p + " result: " + ret);
 

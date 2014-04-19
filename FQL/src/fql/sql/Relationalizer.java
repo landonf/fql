@@ -425,12 +425,12 @@ public class Relationalizer {
 		return inst;
 	}
 */
-	public static Pair<Map<Node, List<String>>, List<PSM>> observations(
+	public static Pair<Map<Node, List<Pair<Path, Attribute<Node>>>>, List<PSM>> observations(
 			Signature sig, String out, String in, boolean relationalize)
 			throws FQLException {
 		List<PSM> ret = new LinkedList<>();
-		Map<Node, List<String>> attrs = new HashMap<>();
-		attrs = new HashMap<Node, List<String>>();
+		Map<Node, List<Pair<Path, Attribute<Node>>>> attrs = new HashMap<>();
+		//attrs = new HashMap<Node, List<Pair<Path, Attribute<Node>>>>();
 		Map<String, String> edge_types = new HashMap<>();
 		edge_types.put("c0", PSM.VARCHAR());
 		edge_types.put("c1", PSM.VARCHAR());
@@ -440,7 +440,7 @@ public class Relationalizer {
 
 		FinCat<Node, Path> cat = sig.toCategory2().first;
 		for (Node n : sig.nodes) {
-			attrs.put(n, new LinkedList<String>());
+			attrs.put(n, new LinkedList<Pair<Path, Attribute<Node>>>());
 			int count = 0;
 			List<Map<String, String>> alltypes = new LinkedList<>();
 			for (Arr<Node, Path> p : cat.arrows) {
@@ -477,7 +477,7 @@ public class Relationalizer {
 					where.add(new Pair<>(lhs, rhs));
 					select.put("c" + i, new Pair<>(a.name, "c1"));
 					types.put("c" + i, a.target.psm());
-					attrs.get(n).add(p.toString() + "." + a.name);
+					attrs.get(n).add(new Pair<>(p.arr, a));
 					i++;
 				}
 				alltypes.add(types);
@@ -545,7 +545,7 @@ public class Relationalizer {
 	// around
 	// suppress = false for the compiler, since we just want the relationalized
 	// result
-	public static Pair<Map<Node, List<String>>, List<PSM>> compile(
+	public static Pair<Map<Node, List<Pair<Path, Attribute<Node>>>>, List<PSM>> compile(
 			Signature sig, String out, String in) throws FQLException {
 		return observations(sig, out, in, true);
 	}

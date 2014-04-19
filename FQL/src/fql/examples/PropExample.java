@@ -13,7 +13,7 @@ public class PropExample extends Example {
 	}
 	
 	String s = 
-			"/* you must disable: "
+			"/* for better performance, disable: "
 	        + "\n *  - observables, elements, rdf for instances"
 			+ "\n *  - graph for transforms"
 			+ "\n */"

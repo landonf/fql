@@ -42,6 +42,7 @@ import fql.decl.SigExp;
 import fql.decl.SigExp.Const;
 import fql.examples.Example;
 import fql.gui.FQLTextPanel;
+import fql.parse.PrettyPrinter;
 
 /**
  * 
@@ -50,10 +51,11 @@ import fql.gui.FQLTextPanel;
  * Translates SPCU (in the guise of SQL) to FQL using an active domain construction.
  */
 public class RaToFql {
+	
+	protected Example[] examples = { new PeopleExample(), new NegExample() };
 
-	protected Example[] examples = { new PeopleExample() };
-
-	String help = "Bags of tuples can be represented in FQL using an explicit active domain construction.  See the People example.  Unions of conjunctive queries are supported, using DISTINCT and ALL for set semantics.  Primary and foreign keys are not supported by this encoding.  WHERE clauses must have equalities between variables, not constants.";
+	//TODO
+	String help = "Bags of tuples can be represented in FQL using an explicit active domain construction.  See the People example.  Unions of conjunctive queries are supported, using DISTINCT and ALL for set semantics.  Primary and foreign keys are not supported by this encoding.  WHERE clauses must have equalities between variables, not constants.  SQL keywords MUST be capitalized.  The observables viewer pane is useful for visualizing instances.";
 
 	protected String kind() {
 		return "SPCU";
@@ -70,9 +72,21 @@ public class RaToFql {
 			return extext1;
 		}
 	}
+	
+	static class NegExample extends Example {
+		@Override
+		public String getName() {
+			return "Negation";
+		}
+
+		@Override
+		public String getText() {
+			return negText;
+		}
+	}
 
 	String translate(String in) {
-		List<EExternal> list = program(in);
+		List<Pair<String, EExternal>> list = program(in);
 		return transSQLSchema(list);
 	}
 
@@ -178,7 +192,7 @@ public class RaToFql {
 		f.setVisible(true);
 	}
 
-	static String extext1 = "CREATE TABLE Place ("
+	static String extext1 ="CREATE TABLE Place ("
 			+ "\n description VARCHAR(255)"
 			+ "\n);  "
 			+ "\n"
@@ -190,15 +204,119 @@ public class RaToFql {
 			+ "\nINSERT INTO Place VALUES (\"New York\"),(\"Chicago\"),(\"New York\"); //bag semantics "
 			+ "\nINSERT INTO Person VALUES (\"Alice\", \"Chicago\");"
 			+ "\n"
-			+ "\nSELECT DISTINCT x.description AS col0, z.name AS col1"
-			+ "\nFROM Place AS x, Place AS y, Person AS z "
-			+ "\nWHERE x.description = y.description AND x.description = z.home;"
+			+ "\nq1 = SELECT DISTINCT x.description AS col0, z.name AS col1"
+			+ "\n     FROM Place AS x, Place AS y, Person AS z "
+			+ "\n     WHERE x.description = y.description AND x.description = z.home"
 			+ "\n"
-			+ "\n(SELECT x.name AS col FROM Person AS x) "
-			+ "\n UNION "
-			+ "\n(SELECT x.name AS col FROM Person AS x);";
+			+ "\nq2 = SELECT x.description AS col0, z.name AS col1"
+			+ "\n     FROM Place AS x, Place AS y, Person AS z "
+			+ "\n     WHERE x.description = y.description AND x.description = z.home"
+			+ "\n"
+			+ "\nq3 = q1 UNION q2"
+			+ "\n"
+			+ "\nq4 = q1 UNION ALL q2"
+			+ "\n";
 
-	public static String transSQLSchema(List<EExternal> in) {
+	static String negText =  "//our encoding of negation doesn't work correctly yet\n"
+			+ "\nCREATE TABLE A ("
+			+ "\n a VARCHAR(255)"
+			+ "\n);  "
+			+ "\n"
+			+ "\nINSERT INTO A VALUES (\"a\"),(\"a\"),(\"a\"); "
+			+ "\n"
+			+ "\nCREATE TABLE B ("
+			+ "\n b VARCHAR(255)"
+			+ "\n);"
+			+ "\n"
+			+ "\nINSERT INTO B VALUES (\"b\"),(\"b\");"
+			+ "\n"
+			+ "\na1 = SELECT DISTINCT x.a AS c FROM A AS x "
+			+ "\n"
+			+ "\na3 = SELECT x.a AS c FROM A AS x"
+			+ "\n"
+			+ "\nb2 = SELECT x.b AS c FROM B AS x"
+			+ "\n"
+			+ "\na3b2 = a3 UNION ALL b2"
+			+ "\n"
+			+ "\na2b2 = a3b2 EXCEPT a1"
+			+ "\n"
+			+ "\na1b1 = a3 UNION b2"
+			+ "\n"
+			+ "\nb1 = a1b1 EXCEPT a1\n"
+			+ "\n\n///////// the active domain has an effect on difference: "
+			+ "\n/*enum str = {a,b}"
++ "\n"
++ "\nschema X = {"
++ "\n nodes"
++ "\n  adom,"
++ "\n  guid;"
++ "\n attributes"
++ "\n  att: adom -> str;"
++ "\n arrows"
++ "\n  c: guid -> adom;"
++ "\n equations;"
++ "\n}"
++ "\n"
++ "\ninstance F1 = {"
++ "\n nodes"
++ "\n  adom -> {123, 124}, "
++ "\n  guid -> {125, 126};"
++ "\n attributes"
++ "\n  att -> {(124, b), (123, a)};"
++ "\n arrows"
++ "\n  c -> {(126, 123), (125, 124)};"
++ "\n} : X"
++ "\n"
++ "\n//encodes {a}"
++ "\ninstance F2 = {"
++ "\n nodes"
++ "\n  adom -> {27}, "
++ "\n  guid -> {28};"
++ "\n attributes"
++ "\n  att -> {(27, a)};"
++ "\n arrows"
++ "\n  c -> {(28, 27)};"
++ "\n} : X"
++ "\n"
++ "\n//encodes {a}, but includes b in active domain"
++ "\n//having b in active domain will kill b in the output of the difference"
++ "\n"
++ "\n//instance F2 = {"
++ "\n// nodes"
++ "\n//  adom -> {26, 27}, "
++ "\n//  guid -> {28};"
++ "\n// attributes"
++ "\n//  att -> {(26, b), (27, a)};"
++ "\n// arrows"
++ "\n//  c -> {(28, 27)};"
++ "\n//} : X"
++ "\n"
++ "\ninstance tprp = prop X"
++ "\ninstance tone = unit X"
++ "\n"
++ "\ninstance prpprp = (tprp * tprp)"
++ "\n"
++ "\ntransform F1t = tone.unit F1"
++ "\ntransform F2t = tone.unit F2"
++ "\n"
++ "\ntransform chiF1t = tprp.char F1t"
++ "\ntransform chiF2t = tprp.char F2t"
++ "\ntransform negchiF2t = (tprp.char F2t then tprp.not)"
++ "\n"
++ "\ntransform t0 = prpprp.(chiF1t * negchiF2t)"
++ "\ntransform t1 = (t0 then prpprp.and)"
++ "\n"
++ "\ninstance F1minusF2 = kernel t1\n*/";
+
+
+
+
+
+
+
+
+
+	public static String transSQLSchema(List<Pair<String, EExternal>> in) {
 		List<Pair<List<String>, List<String>>> eqs = new LinkedList<>();
 		List<Triple<String, String, String>> arrows = new LinkedList<>();
 		List<Triple<String, String, String>> attrs = new LinkedList<>();
@@ -213,16 +331,19 @@ public class RaToFql {
 		LinkedList<Pair<Object, Object>> attT = new LinkedList<>();
 		inodes.add(new Pair<String, List<Pair<Object, Object>>>(adom, adomT));
 		iattrs.add(new Pair<String, List<Pair<Object, Object>>>("att", attT));
-		attrs.add(new Triple<>("att", adom, "string"));
+		attrs.add(new Triple<>("att", adom, "str"));
+		Set<Object> enums = new HashSet<>();
 
 		HashMap<String, Integer> dom1 = new HashMap<String, Integer>();
 
-		List<EExternal> queries = new LinkedList<>();
+		List<Pair<String, EExternal>> queries = new LinkedList<>();
 
 		int count = 0;
 		Set<String> seen = new HashSet<>();
 		HashMap<String, List<String>> cols = new HashMap<String, List<String>>();
-		for (EExternal k0 : in) {
+		for (Pair<String, EExternal> kk0 : in) {
+			EExternal k0 = kk0.second;
+		//	String key = kk0.first;
 			if (k0 instanceof ECreateTable) {
 				ECreateTable k = (ECreateTable) k0;
 				if (seen.contains(k.name)) {
@@ -240,7 +361,7 @@ public class RaToFql {
 				for (Pair<String, String> col : k.types) {
 					lcols.add(col.first);
 					if (seen.contains(col.first)) {
-						throw new RuntimeException("Duplicate name: " + k.name);
+						throw new RuntimeException("Duplicate name: " + col.first);
 					}
 					seen.add(col.first);
 					arrows.add(new Triple<>(k.name + "_" + col.first, k.name,
@@ -271,6 +392,7 @@ public class RaToFql {
 						Integer xxx = dom1.get(tuple.get(colNum));
 						if (xxx == null) {
 							dom1.put(tuple.get(colNum), count);
+							enums.add(tuple.get(colNum));
 							adomT.add(new Pair<Object, Object>(count, count));
 							attT.add(new Pair<Object, Object>(count, "\""
 									+ tuple.get(colNum) + "\""));
@@ -285,8 +407,8 @@ public class RaToFql {
 					}
 				}
 			}
-			if (k0 instanceof EFlower || k0 instanceof EUnion) {
-				queries.add(k0);
+			if (k0 instanceof EFlower || k0 instanceof EUnion || k0 instanceof EDiff) {
+				queries.add(kk0);
 			}
 		}
 
@@ -294,32 +416,81 @@ public class RaToFql {
 		InstExp.Const inst = new InstExp.Const(inodes, iattrs, iarrows,
 				new SigExp.Var("S"));
 
-		int ctx = 0;
-		String xxx = "";
-		for (EExternal gh : queries) {
+		//int ctx = 0;
+		String xxx = "\n\n";
+		Map<String, String> schemas = new HashMap<>();
+		for (Pair<String, EExternal> gh0 : queries) {
+			String k = gh0.first;
+			EExternal gh = gh0.second;
 			if (gh instanceof EFlower) {
 				EFlower fl = (EFlower) gh;
-				String yyy = trans(exp, fl, "out" + ctx++ + "_");
-				xxx += "\n\n" + yyy;
-			} else if (gh instanceof EUnion){
+				String yyy = trans(exp, fl, k);
+				xxx += yyy + "\n\n" ;
+				schemas.put(k, k + "Schema");
+
+			} else if (gh instanceof EUnion) {
 				EUnion g = (EUnion) gh;
-				int lc = ctx++;
-				int rc = ctx++;
-				int uc = ctx++;
-				xxx += trans(exp, g.l, "out" + lc + "_");
-				xxx += "\n\n";
-				xxx += trans(exp, g.r, "out" + rc + "_");
-				xxx += "\n\n";
-				xxx += longSlash + "\n/* out" + uc + ": Translation of\n" + gh + "  */\n" + longSlash;
-				String ls = g.l.distinct ? "out" + lc + "_" + "relationalizeInstance" : "out" + lc + "_" + "selectInstance";
-				String rs = g.r.distinct ? "out" + rc + "_" + "relationalizeInstance" : "out" + rc + "_" + "selectInstance";
-								
-				xxx += "\n\n" + "instance " + "out" + uc + "_" + "plusInstance = (" + ls + " + " + rs + ")";
-				
+				String s1 = schemas.get(g.l);
+				schemas.put(k, s1);
+
+				xxx += longSlash + "\n/* Translation of " + k + "  */\n" + longSlash;
+
 				if (g.distinct) {
-					xxx += "\n\n" + "instance " + "out" + uc + "_" + "unionInstance = relationalize " + "out" + uc + "_plusInstance";
-				} 
+					xxx += "\n\n" + "instance " + k + "_temp = (" + g.l + " + " + g.r + ")";
+					xxx += "\n\n" + "instance " + k + " = relationalize " + k + "_temp";
+				}  else {
+					xxx += "\n\n" + "instance " + k + " = (" + g.l + " + " + g.r + ")";
+				}
+				xxx += "\n\n";
 				
+			} else if (gh instanceof EDiff) {
+				String f1 = ((EDiff)gh).l;
+				String f2 = ((EDiff)gh).r;
+				
+				String s1 = schemas.get(f1);
+				schemas.put(k, s1);
+				
+				xxx += longSlash + "\n/* Translation of " + k + "  */\n" + longSlash;
+
+				xxx += "\n\ninstance " + k + "prp = prop " + s1;
+				xxx += "\n\ninstance " + k + "one = unit " + s1;
+				xxx += "\n\ninstance " + k + "prp2 = (" + k + "prp * " + k + "prp)";
+				xxx += "\n\ntransform " + k + f1 + "t = " + k + "one.unit " + f1;
+				xxx += "\n\ntransform " + k + f2 + "t = " + k + "one.unit " + f2;
+				xxx += "\n\ntransform " + k + f1 + "tchi = " + k + "prp.char " + k + f1 + "t";
+				xxx += "\n\ntransform " + k + f2 + "tchi = " + k + "prp.char " + k + f2 + "t";
+				xxx += "\n\ntransform " + k + "n = (" + k + f2 + "tchi then " + k + "prp.not)"; 
+				xxx += "\n\ntransform " + k + "j1 = " + k + "prp2.(" + k + f1 + "tchi * " + k + "n)";
+				xxx += "\n\ntransform " + k + "j2 = (" + k + "j1 then " + k + "prp2.and)";
+				
+				if (((EDiff)gh).distinct) {
+					xxx += "\n\ninstance " + k + "temp = kernel " + k + "j2";
+					xxx += "\n\ninstance " + k + " = relationalize " + k + "temp";
+				} else {
+					xxx += "\n\ninstance " + k + " = kernel " + k + "j2";
+				}
+				xxx += "\n\n";
+			/* 
+instance F1
+instance F2 
+
+instance tprp = prop X
+instance tone = unit X
+
+instance prpprp = (tprp * tprp)
+
+transform F1t = tone.unit F1
+transform F2t = tone.unit F2
+
+transform chiF1t = tprp.char F1t
+transform chiF2t = tprp.char F2t
+transform negchiF2t = (tprp.char F2t then tprp.not)
+
+transform t0 = prpprp.(chiF1t * negchiF2t)
+transform t1 = (t0 then prpprp.and)
+
+instance F1minusF2 = kernel t1 */
+
 			} else {
 				throw new RuntimeException();
 			}
@@ -327,8 +498,18 @@ public class RaToFql {
 
 		// FQLProgram ret = new FQLProgram();
 		// ret.sigs.put("S", exp);
+		String enum0 = "";
+		boolean b = false;
+		for (Object o : enums) {
+			if (b) {
+				enum0 += ", ";
+			}
+			b = true;
+			enum0 += "\"" + o + "\"";
+		}
 		String comment = "//schema S and instance I represent the entire input database.\n\n";
-		return comment + "schema S = " + exp + "\n\ninstance I = " + inst + " : S" + xxx;
+		String preS = "enum str = { " + enum0 + " }";
+		return comment + preS + "\n\nschema S = " + exp + "\n\ninstance I = " + inst + " : S" + xxx;
 	}
 
 	private static String trans(Const src, EFlower fl, String pre) {
@@ -345,7 +526,7 @@ public class RaToFql {
 		nodes3.add("adom");
 
 		List<Triple<String, String, String>> attrs = new LinkedList<>();
-		attrs.add(new Triple<>("att", "adom", "string"));
+		attrs.add(new Triple<>("att", "adom", "str"));
 
 		List<Triple<String, String, String>> edges1 = new LinkedList<>();
 		List<Triple<String, String, String>> edges2 = new LinkedList<>();
@@ -434,12 +615,19 @@ public class RaToFql {
 			Triple<String, String, String> t = new Triple<>(v.first + "_"
 					+ fl.from.get(v.first) + "_" + v.second, "guid", "adom");
 			// System.out.println("t " + t);
+			 if (fl.from.get(v.first) == null) {
+				 throw new RuntimeException(v.first + " is not selectable in " + fl);
+			 }
 			for (List<Triple<String, String, String>> eqc : eqcs) {
+			//	System.out.println("eqc " + eqc);
 				if (eqc.contains(t)) {
 					List<String> li = new LinkedList<>();
 					li.add("guid");
 					li.add(eqc.get(0).first);
 					iedges3.add(new Pair<>(k, li));
+					//System.out.println("added " + new Pair<>(k, li));
+				} else {
+				//	System.out.println("not added");
 				}
 			}
 		}
@@ -471,18 +659,21 @@ public class RaToFql {
 		xxx += "\n\ninstance " + pre + "whereInstance = pi " + pre
 				+ "whereMapping " + pre + "fromInstance";
 
-		xxx += "\n\nschema " + pre + "selectSchema = " + sig3.toString();
+		xxx += "\n\nschema " + pre + "Schema = " + sig3.toString();
 		xxx += "\n\nmapping " + pre + "selectMapping = " + map3.toString()
-				+ " : " + pre + "selectSchema -> " + pre + "whereSchema";
-		xxx += "\n\ninstance " + pre + "selectInstance = delta " + pre
-				+ "selectMapping " + pre + "whereInstance";
-
-		if (fl.distinct) {
+				+ " : " + pre + "Schema -> " + pre + "whereSchema";
+		
+		if (!fl.distinct) {
+			xxx += "\n\ninstance " + pre + " = delta " + pre
+					+ "selectMapping " + pre + "whereInstance";
+		} else {
+			xxx += "\n\ninstance " + pre + "selectInstance = delta " + pre
+					+ "selectMapping " + pre + "whereInstance";
 			xxx += "\n\ninstance " + pre
-					+ "relationalizeInstance = relationalize " + pre
-					+ "selectInstance\n\n";
+					+ " = relationalize " + pre
+					+ "selectInstance";
 		}
-		String comment = longSlash + "\n/* " + pre.substring(0, pre.length()-1) + ": Translation of\n" + fl.toString() + "  */\n" + longSlash;
+		String comment = longSlash + "\n/* " + "Translation of " + pre + "  */\n" + longSlash;
 		return comment + xxx;
 	}
 	
@@ -652,9 +843,9 @@ public class RaToFql {
 
 	public static class EUnion extends EExternal {
 		boolean distinct;
-		EFlower l, r;
+		String l, r;
 
-		public EUnion(boolean distinct, EFlower l, EFlower r) {
+		public EUnion(boolean distinct, String l, String r) {
 			super();
 			this.distinct = distinct;
 			this.l = l;
@@ -668,6 +859,27 @@ public class RaToFql {
 				x += " ALL";
 			}
 			return l.toString() + "\n" + "UNION" + x + "\n" + r.toString();
+		}
+	}
+	
+	public static class EDiff extends EExternal {
+		boolean distinct;
+		String l, r;
+
+		public EDiff(boolean distinct, String l, String r) {
+			super();
+			this.distinct = distinct;
+			this.l = l;
+			this.r = r;
+		}
+		
+		@Override
+		public String toString() {
+			String x = "";
+			if (!distinct) {
+				x += " ALL";
+			}
+			return l.toString() + "\n" + "EXCEPT" + x + "\n" + r.toString();
 		}
 	}
 
@@ -694,7 +906,7 @@ public class RaToFql {
 
 
 	static String[] res = new String[] { "VARCHAR", "INT", "SELECT", "FROM",
-			"WHERE", "DISTINCT", "UNION", "ALL", "CREATE", "TABLE", "AS",
+			"WHERE", "DISTINCT", "UNION", "EXCEPT", "ALL", "CREATE", "TABLE", "AS",
 			"AND", "OR", "NOT", "INSERT", "INTO", "VALUES" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
@@ -716,21 +928,23 @@ public class RaToFql {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static final List<EExternal> program(String s) {
-		List<EExternal> ret = new LinkedList<>();
+	public static final List<Pair<String, EExternal>> program(String s) {
+		List<Pair<String, EExternal>> ret = new LinkedList<>();
 		List<Tuple3> decls = (List<Tuple3>) program.parse(s);
 
 		for (Tuple3 decl : decls) {
 			if (decl.a.toString().equals("CREATE")) {
-				ret.add(toECreateTable(decl));
-			} else if (decl.toString().startsWith("((INSERT")) {
-				ret.add(toEInsertValues(decl));
-			} else if (decl.toString().startsWith("((SELECT")) {
-				ret.add(toFlower(decl));
+				ret.add(new Pair<String, EExternal>(null, toECreateTable(decl)));
+			} else if (decl.toString().contains("INSERT")) {
+				ret.add(new Pair<String, EExternal>(null, toEInsertValues(decl)));
+			} else if (decl.toString().contains("SELECT")) {
+				ret.add(new Pair<String, EExternal>(decl.a.toString(), toFlower(decl.c)));
 			} else if (decl.toString().contains("UNION")) {
-				ret.add(toUnion(decl));
+				ret.add(new Pair<String, EExternal>(decl.a.toString(), toUnion(decl.c)));
+			} else if (decl.toString().contains("EXCEPT")) {
+				ret.add(new Pair<String, EExternal>(decl.a.toString(), toDiff(decl.c)));
 			} else {
-				throw new RuntimeException(decl.toString());
+				throw new RuntimeException();
 			}
 		}
 		return ret;
@@ -837,12 +1051,20 @@ public class RaToFql {
 	@SuppressWarnings("rawtypes")
 	public static final EUnion toUnion(Object o) {
 		Tuple4 t = (Tuple4) o;
-		return new EUnion(t.c == null, toFlower(t.a), toFlower(t.d));
+		return new EUnion(t.c == null, t.a.toString(), t.d.toString());
+	}
+	public static final EDiff toDiff(Object o) {
+		Tuple4 t = (Tuple4) o;
+		return new EDiff(t.c == null, t.a.toString(), t.d.toString());
 	}
 
 	public static final Parser<?> union() {
-		Parser<?> p = flower().between(term("("), term(")"));
-		return Parsers.tuple(p, term("UNION"), term("ALL").optional(), p);
+//		Parser<?> p = flower().between(term("("), term(")"));
+		return Parsers.tuple(ident(), term("UNION"), term("ALL").optional(), ident());
+	}
+	public static final Parser<?> diff() {
+//		Parser<?> p = flower().between(term("("), term(")"));
+		return Parsers.tuple(ident(), term("EXCEPT"), term("ALL").optional(), ident());
 	}
 
 	public static final Parser<?> insertValues() {
@@ -863,8 +1085,11 @@ public class RaToFql {
 	}
 
 	public static final Parser<?> program() {
-		return Parsers.or(createTable(), insertValues(), flower().followedBy(term(";")), union().followedBy(term(";")))
-				.many();
+		Parser<?> p1 = 	Parsers.tuple(ident(), term("="), flower());
+		Parser<?> p2 = 	Parsers.tuple(ident(), term("="), union());
+		Parser<?> p3 = 	Parsers.tuple(ident(), term("="), diff());
+
+		return Parsers.or(createTable(), insertValues(), p1, p2, p3).many();
 	}
 
 	private static Parser<?> string() {
