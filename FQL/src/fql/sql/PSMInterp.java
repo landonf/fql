@@ -18,7 +18,6 @@ import fql.decl.Instance;
 import fql.decl.Node;
 import fql.decl.Path;
 import fql.decl.Transform;
-import fql.parse.PrettyPrinter;
 
 /**
  * 

@@ -3,6 +3,7 @@ package fql.decl;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -144,24 +145,24 @@ public class InstanceEditor {
 		return g2;
 	}
 
-	JComponent makePanel() {
+	JComponent makePanel(Color c) {
 		Graph<String, String> g = build();
 		if (g.getVertexCount() == 0) {
 			JPanel p = new JPanel();
 			p.setSize(new Dimension(600, 400));
 			return p;
 		}
-		return doView(g);
+		return doView(c, g);
 	}
 
 	
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public InstExp.Const show() {
+	public InstExp.Const show(Color c) {
 		String title = "Visual Editor for Instance " + name;
 		prejoin();
 
-		JComponent message = makePanel();
+		JComponent message = makePanel(c);
 
 		int i = JOptionPane.showConfirmDialog(null, message, title,
 				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
@@ -214,7 +215,7 @@ public class InstanceEditor {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public JComponent doView(
+	public JComponent doView(final Color clr,
 	/* final Environment env , *//* final Color color */Graph<String, String> sgv) {
 		try {
 			Class<?> c = Class.forName(DEBUG.layout_prefix
@@ -231,7 +232,7 @@ public class InstanceEditor {
 					if (thesig.isAttribute(i)) {
 						return UIManager.getColor("Panel.background");
 					} else {
-						return thesig.colors.get(i);
+						return clr;
 					}
 					// return color;
 				}

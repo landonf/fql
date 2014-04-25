@@ -89,16 +89,16 @@ public class Signature {
 	public List<Edge> edges;
 	public List<Attribute<Node>> attrs;
 
-	public Map<String, Color> colors;
+//	public Map<String, Color> colors;
 
-	public static Color[] colors_arr = new Color[] { Color.RED, Color.GREEN,
-			Color.BLUE, Color.MAGENTA, Color.yellow, Color.CYAN, Color.GRAY,
-			Color.ORANGE, Color.PINK, Color.BLACK };
+//	public static Color[] colors_arr = new Color[] { Color.RED, Color.GREEN,
+	//		Color.BLUE, Color.MAGENTA, Color.yellow, Color.CYAN, Color.GRAY,
+		//	Color.ORANGE, Color.PINK, Color.BLACK };
 
 	public Set<Eq> eqs;
 
 	// public String name0;
-
+/*
 	public void doColors() {
 		colors = new HashMap<>();
 		int i = 0;
@@ -109,7 +109,7 @@ public class Signature {
 				colors.put(n.string, colors_arr[i++]);
 			}
 		}
-	}
+	} */
 
 	public Signature clone() {
 		Signature s = new Signature();
@@ -117,7 +117,7 @@ public class Signature {
 		s.edges = new LinkedList<>(edges);
 		s.attrs = new LinkedList<>(attrs);
 		s.eqs = new HashSet<>(eqs);
-		s.colors = new HashMap<>(colors);
+//		s.colors = new HashMap<>(colors);
 		// s.name0 = newname;
 		return s;
 	}
@@ -230,7 +230,7 @@ public class Signature {
 			// throw fe;
 			// }
 		}
-		doColors();
+//		doColors();
 	}
 
 	/*
@@ -815,16 +815,16 @@ public class Signature {
 		return g2;
 	}
 
-	public JComponent makeViewer(/* final Environment env */) {
+	public JComponent makeViewer(Color clr) {
 		Graph<String, String> g = build();
 		if (g.getVertexCount() == 0) {
 			return new JPanel();
 		}
-		return doView(/* env, */g);
+		return doView(clr, g);
 	}
 
 	@SuppressWarnings("unchecked")
-	public JComponent doView(
+	public JComponent doView(final Color clr,
 	/* final Environment env, */Graph<String, String> sgv) {
 		// Layout<V, E>, BasicVisualizationServer<V,E>
 		// Layout<String, String> layout = new FRLayout(sgv);
@@ -853,7 +853,7 @@ public class Signature {
 						return UIManager.getColor("Panel.background");
 						// return env.colors.get(name0);
 					} else {
-						return colors.get(i);
+						return clr;
 					}
 				}
 			};
@@ -936,8 +936,8 @@ public class Signature {
 		return false;
 	}
 
-	public JComponent pretty(/* final Environment env */) throws FQLException {
-		return makeViewer();
+	public JComponent pretty(Color clr) throws FQLException {
+		return makeViewer(clr);
 	}
 
 	// public String type() {

@@ -38,7 +38,6 @@ import javax.swing.event.ListSelectionListener;
 import org.apache.commons.collections15.Transformer;
 
 import edu.uci.ics.jung.algorithms.layout.Layout;
-import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
@@ -79,7 +78,6 @@ import fql.decl.Query;
 import fql.decl.QueryExp;
 import fql.decl.SigExp;
 import fql.decl.Signature;
-import fql.decl.TransExp;
 import fql.decl.Transform;
 import fql.decl.Unresolver;
 //import org.apache.commons.collections15.Transformer;
@@ -94,13 +92,13 @@ public class Display {
 
 	List<Pair<String, JComponent>> frames = new LinkedList<>();
 
-	public JPanel showInst(String c,
+	public JPanel showInst(String c, Color clr,
 	/* Color color Environment environment, String c, */Instance view)
 			throws FQLException {
 		JTabbedPane px = new JTabbedPane();
 
 		if (DEBUG.debug.inst_graphical) {
-			JPanel gp = view.pretty();
+			JPanel gp = view.pretty(clr);
 			// JPanel gp0 = new JPanel(new GridLayout(1, 1));
 			// gp0.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 			// gp0.add(gp);
@@ -124,7 +122,7 @@ public class Display {
 		}
 
 		if (DEBUG.debug.inst_gr) {
-			JPanel groth = view.groth();
+			JPanel groth = view.groth(clr);
 			px.add("Elements", groth);
 		}
 
@@ -155,13 +153,13 @@ public class Display {
 		
 	}
 
-	public JPanel showMapping(Environment environment, /* String c, */
+	public JPanel showMapping(Environment environment, Color scolor, Color tcolor,
 			Mapping view) throws FQLException {
 
 		JTabbedPane px = new JTabbedPane();
 
 		if (DEBUG.debug.mapping_graphical) {
-			JPanel gp = view.pretty(environment);
+			JPanel gp = view.pretty(scolor, tcolor, environment);
 			// JPanel gp0 = new JPanel(new GridLayout(1, 1));
 			// gp0.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 			// gp0.add(gp);
@@ -192,12 +190,12 @@ public class Display {
 		return top;
 	}
 
-	public JPanel showTransform(Environment environment, String src_n,
+	public JPanel showTransform(Color scolor, Color tcolor, Environment environment, String src_n,
 			String dst_n, Transform view) throws FQLException {
 		JTabbedPane px = new JTabbedPane();
 
 		if (DEBUG.debug.transform_graphical) {
-			JPanel gp = view.graphical(src_n, dst_n);
+			JPanel gp = view.graphical(scolor, tcolor, src_n, dst_n);
 			// JPanel gp0 = new JPanel(new GridLayout(1, 1));
 			// gp0.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 			// gp0.add(gp);
@@ -223,12 +221,14 @@ public class Display {
 		return top;
 	}
 
-	public JPanel showSchema(Environment environment, /* String c, */
+//	FQLProgram prog;
+	
+	public JPanel showSchema(Environment environment, Color clr,
 			Signature view) throws FQLException {
 		JTabbedPane px = new JTabbedPane();
 
 		if (DEBUG.debug.schema_graphical) {
-			JComponent gp = view.pretty();
+			JComponent gp = view.pretty(clr);
 			// JPanel gp0 = new JPanel(new GridLayout(1, 1));
 			// gp0.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 			// gp0.add(gp);
@@ -288,7 +288,7 @@ public class Display {
 
 	}
 
-	public JPanel showQuery(Environment environment /* , String c */, Query view)
+	public JPanel showQuery(FQLProgram prog, Environment environment /* , String c */, Query view)
 			throws FQLException {
 		JTabbedPane px = new JTabbedPane();
 
@@ -300,13 +300,13 @@ public class Display {
 		Signature i2 = p.target;
 		Signature t = u.target;
 
-		px.add("Source", showSchema(environment, s));
-		px.add("Delta", showMapping(environment, d));
-		px.add("Intermediate 1", showSchema(environment, i1));
-		px.add("Pi", showMapping(environment, p));
-		px.add("Intermediate 2", showSchema(environment, i2));
-		px.add("Sigma", showMapping(environment, u));
-		px.add("Target", showSchema(environment, t));
+		px.add("Source", showSchema(environment, prog.smap(s.toConst()), s));
+		px.add("Delta", showMapping(environment, prog.smap(i1.toConst()),  prog.smap(s.toConst()), d));
+		px.add("Intermediate 1", showSchema(environment, prog.smap(i1.toConst()), i1));
+		px.add("Pi", showMapping(environment, prog.smap(i1.toConst()), prog.smap(i2.toConst()), p));
+		px.add("Intermediate 2", showSchema(environment, prog.smap(i2.toConst()), i2));
+		px.add("Sigma", showMapping(environment, prog.smap(i2.toConst()), prog.smap(t.toConst()), u));
+		px.add("Target", showSchema(environment, prog.smap(t.toConst()), t));
 
 		JPanel top = new JPanel(new GridLayout(1, 1));
 		top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
@@ -317,14 +317,17 @@ public class Display {
 	FQLProgram prog;
 	Environment env;
 
+//	private Map<String, Color> cmap = new HashMap<>();
 	public Display(FQLProgram p, final Environment environment)
 			throws FQLException {
 		this.prog = p;
 		this.env = environment;
+		p.doColors();
+		
 		for (String c : p.order) {
 			if (environment.signatures.get(c) != null) {
 				frames.add(new Pair<String, JComponent>("schema " + c,
-						showSchema(environment, environment.getSchema(c))));
+						showSchema(environment, p.nmap.get(c), environment.getSchema(c))));
 			} else if (environment.mappings.get(c) != null) {
 				Pair<SigExp, SigExp> xxx = p.maps.get(c).type(p);
 				String a = xxx.first.accept(p.sigs, new Unresolver())
@@ -333,12 +336,12 @@ public class Display {
 						.toString();
 				frames.add(new Pair<String, JComponent>("mapping " + c + " : "
 						+ a + " -> " + b, showMapping(environment,
-						environment.getMapping(c))));
+								prog.smap(xxx.first), prog.smap(xxx.second), environment.getMapping(c))));
 			} else if (environment.instances.get(c) != null) {
 				String xxx = p.insts.get(c).type(p)
 						.accept(p.sigs, new Unresolver()).toString();
 				frames.add(new Pair<String, JComponent>("instance " + c + " : "
-						+ xxx, showInst(c, environment.instances.get(c))));
+						+ xxx, showInst(c, p.nmap.get(c), environment.instances.get(c))));
 			} else if (environment.queries.get(c) != null) {
 				Pair<SigExp, SigExp> xxx = p.queries.get(c).type(p);
 				String a = xxx.first.accept(p.sigs, new Unresolver())
@@ -346,13 +349,13 @@ public class Display {
 				String b = xxx.second.accept(p.sigs, new Unresolver())
 						.toString();
 				frames.add(new Pair<String, JComponent>("query " + c + " : "
-						+ a + " -> " + b, showQuery(environment,
+						+ a + " -> " + b, showQuery(prog, environment,
 						environment.queries.get(c))));
 			} else if (environment.transforms.get(c) != null) {
 				Pair<String, String> xxx = p.transforms.get(c).type(p);
 				frames.add(new Pair<String, JComponent>("transform " + c
 						+ " : " + xxx.first + " -> " + xxx.second,
-						showTransform(environment, xxx.first, xxx.second,
+						showTransform(prog.nmap.get(xxx.first), prog.nmap.get(xxx.second), environment, xxx.first, xxx.second,
 								environment.transforms.get(c))));
 			} else if (p.enums.get(c) != null) {
 
@@ -427,7 +430,7 @@ public class Display {
 		north.add(instanceFlowButton);
 		instanceFlowButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				showInstanceFlow();
+				showInstanceFlow(prog);
 			}
 		});
 		north.add(schemaFlowButton);
@@ -484,7 +487,7 @@ public class Display {
 
 	}
 
-	public void showInstanceFlow() {
+	public void showInstanceFlow(FQLProgram prog) {
 		final JFrame f = new JFrame();
 
 		ActionListener escListener = new ActionListener() {
@@ -505,7 +508,7 @@ public class Display {
 		f.getRootPane().registerKeyboardAction(escListener, commandW,
 				JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-		Graph<String, Object> g = build();
+		Graph<String, Object> g = prog.build;
 		if (g.getVertexCount() == 0) {
 			f.add(new JPanel());
 			// return new JPanel();
@@ -540,7 +543,7 @@ public class Display {
 		f.getRootPane().registerKeyboardAction(escListener, commandW,
 				JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-		Graph<String, Object> g = build2();
+		Graph<String, Object> g = prog.build2;
 		if (g.getVertexCount() == 0) {
 			f.add(new JPanel());
 			// return new JPanel();
@@ -553,19 +556,19 @@ public class Display {
 		f.setLocationRelativeTo(null);
 		f.setVisible(true);
 	}
-	Map<SigExp.Const, Paint> colorMap = new HashMap<>();
-	Map<String, Paint> colorMap2 = new HashMap<>();
-	Map<String, Paint> colorMap3 = new HashMap<>();
+//	Map<SigExp.Const, Color> smap = new HashMap<>();
+	/*
 	Color[] colors = { Color.ORANGE, Color.PINK, Color.WHITE, Color.YELLOW,
 			Color.CYAN, Color.MAGENTA, Color.BLUE, Color.RED, Color.GREEN  };
 	int colorIdx = 0;
 
+	
 	public Color nextColor() {
 		if (colorIdx < colors.length) {
 			return colors[colorIdx++];
 		}
 		return Color.black;
-	}
+	} */
 
 	public static class MutableInteger {
 		int i;
@@ -579,163 +582,6 @@ public class Display {
 		}
 	}
 
-	public Graph<String, Object> build2() {
-		final Graph<String, Object> g2 = new DirectedSparseMultigraph<>();
-//		final MutableInteger guid = new MutableInteger(0);
-
-		for (final String k : prog.sigs.keySet()) {
-			SigExp.Const c = prog.sigs.get(k).toConst(prog);
-			if (colorMap.get(c) == null) {
-				colorMap.put(c, nextColor());
-			}
-			colorMap3.put(k, colorMap.get(c));
-			g2.addVertex(k);
-		}
-		for (final String k : env.signatures.keySet()) {
-			if (!colorMap3.containsKey(k)) {
-				colorMap3.put(k, nextColor());
-			}
-		}
-		for (final String k : env.mappings.keySet()) {
-			Mapping i = env.mappings.get(k);
-			Signature src = i.source;
-			Signature dst = i.target;
-			String src_k = revLookup(env.signatures, src);
-			String dst_k = revLookup(env.signatures, dst);
-			if (src_k == null || dst_k == null) {
-				continue;
-			}
-			Paint src_c = colorMap3.get(src_k);
-			Paint dst_c = colorMap3.get(dst_k);
-			if (src_c == null || dst_c == null) {
-				continue;
-			}
-			g2.addEdge(k, src_k, dst_k);
-		}
-		
-		return g2;
-	}
-	
-	private static <K,V> K revLookup(Map<K,V> map, V v) {
-		for (K k : map.keySet()) {
-			V v0 = map.get(k);
-			if (v.equals(v0)) {
-				return k;
-			}
-		}
-		return null;
-	}
-	
-	public Graph<String, Object> build() {
-		// Graph<V, E> where V is the type of the vertices
-
-		final Graph<String, Object> g2 = new DirectedSparseMultigraph<>();
-		final MutableInteger guid = new MutableInteger(0);
-
-		for (final String k : prog.insts.keySet()) {
-			InstExp i = prog.insts.get(k);
-			SigExp.Const c = i.type(prog).toConst(prog);
-			if (colorMap.get(c) == null) {
-				colorMap.put(c, nextColor());
-			}
-			Signature sig = c.toSig(prog);
-			String sig_k = revLookup(env.signatures, sig);
-			colorMap3.put(sig_k, colorMap.get(c));
-			colorMap2.put(k, colorMap.get(c));
-			// Paint color = map.get(c);
-			g2.addVertex(k);
-
-			i.accept(new Unit(), new InstExpVisitor<Unit, Unit>() {
-				public Unit visit(Unit env, Zero e) {
-					return null;
-				}
-
-				public Unit visit(Unit env, One e) {
-					return null;
-				}
-
-				public Unit visit(Unit env, Two e) {
-					throw new RuntimeException();
-				}
-
-				public Unit visit(Unit env, Plus e) {
-					g2.addEdge(new Pair<>(guid.pp(), e), e.a, k);
-					g2.addEdge(new Pair<>(guid.pp(), e), e.b, k);
-					return null;
-				}
-
-				public Unit visit(Unit env, Times e) {
-					g2.addEdge(new Pair<>(guid.pp(), e), e.a, k);
-					g2.addEdge(new Pair<>(guid.pp(), e), e.b, k);
-					return null;
-				}
-
-				public Unit visit(Unit env, Exp e) {
-					g2.addEdge(new Pair<>(guid.pp(), e), e.a, k);
-					g2.addEdge(new Pair<>(guid.pp(), e), e.b, k);
-					return null;
-				}
-
-				public Unit visit(Unit env, Const e) {
-					return null;
-				}
-
-				public Unit visit(Unit env, Delta e) {
-					g2.addEdge(new Pair<>(guid.pp(), e), e.I, k);
-					return null;
-				}
-
-				public Unit visit(Unit env, Sigma e) {
-					g2.addEdge(new Pair<>(guid.pp(), e), e.I, k);
-					return null;
-				}
-
-				public Unit visit(Unit env, Pi e) {
-					g2.addEdge(new Pair<>(guid.pp(), e), e.I, k);
-					return null;
-				}
-
-				public Unit visit(Unit env, FullSigma e) {
-					g2.addEdge(new Pair<>(guid.pp(), e), e.I, k);
-					return null;
-				}
-
-				public Unit visit(Unit env, Relationalize e) {
-					g2.addEdge(new Pair<>(guid.pp(), e), e.I, k);
-					return null;
-				}
-
-				public Unit visit(Unit env, External e) {
-					return null;
-				}
-
-				public Unit visit(Unit env, Eval e) {
-					g2.addEdge(new Pair<>(guid.pp(), e), e.e, k);
-					return null;
-				}
-
-				public Unit visit(Unit env, FullEval e) {
-					g2.addEdge(new Pair<>(guid.pp(), e), e.e, k);
-					return null;
-				}
-
-				@Override
-				public Unit visit(Unit env, Kernel e) {
-					TransExp t = prog.transforms.get(e.trans);
-					Pair<String, String> p = t.type(prog);
-					g2.addEdge(new Pair<>(guid.pp(), e), p.first, k);
-					g2.addEdge(new Pair<>(guid.pp(), e), p.second, k);
-					return null;
-				}
-
-				
-
-			});
-
-		}
-
-		return g2;
-	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public JComponent doView(
@@ -757,7 +603,7 @@ public class Display {
 					layout);
 			Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
 				public Paint transform(String i) {
-					return colorMap2.get(i);
+					return prog.nmap.get(i);
 				}
 			};
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
@@ -943,7 +789,7 @@ public class Display {
 				return;
 			}
 
-			String k = revLookup(prog.queries, q);
+			String k = FQLProgram.revLookup(prog.queries, q);
 			if (k != null) {
 				yyy.setSelectedValue(indices.get(k), true);
 				return;
@@ -952,7 +798,7 @@ public class Display {
 			if (!extraInsts.contains(str)) {
 				Query view = q.toQuery(prog);
 				try {
-					JPanel p = showQuery(env, view);
+					JPanel p = showQuery(prog, env, view);
 					x.add(p, str);
 					extraInsts.add(str);
 				} catch (FQLException fe) {
@@ -973,7 +819,7 @@ public class Display {
 				return;
 			}
 
-			String k = revLookup(prog.full_queries, q);
+			String k = FQLProgram.revLookup(prog.full_queries, q);
 			if (k != null) {
 				yyy.setSelectedValue(indices.get(k), true);
 				return;
@@ -1003,7 +849,7 @@ public class Display {
 				return;
 			}
 			
-			String k = revLookup(prog.maps, q);
+			String k = FQLProgram.revLookup(prog.maps, q);
 			if (k != null) {
 				yyy.setSelectedValue(indices.get(k), true);
 				return;
@@ -1012,7 +858,7 @@ public class Display {
 			if (!extraInsts.contains(str)) {
 				Mapping view = q.toMap(prog);
 				try {
-					JPanel p = showMapping(env, view);
+					JPanel p = showMapping(env, prog.smap(view.source.toConst()), prog.smap(view.target.toConst()), view);
 					x.add(p, str);
 					extraInsts.add(str);
 				} catch (FQLException fe) {
@@ -1054,7 +900,7 @@ public class Display {
 							layout);
 					Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
 						public Paint transform(String i) {
-							return colorMap3.get(i);
+							return prog.smap(new SigExp.Var(i));
 						}
 					};
 					DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();

@@ -307,7 +307,7 @@ public class LeftKanSigma {
 			source.edges.add(new Edge(a.name + "_edge", a.source, dst));
 		}
 		source.attrs.clear();
-		source.doColors();
+//		source.doColors();
 	}
 
 	private static Set<Pair<Object, Object>> conc(Set<Pair<Integer, Integer>> t) {

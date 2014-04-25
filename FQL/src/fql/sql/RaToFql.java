@@ -42,7 +42,6 @@ import fql.decl.SigExp;
 import fql.decl.SigExp.Const;
 import fql.examples.Example;
 import fql.gui.FQLTextPanel;
-import fql.parse.PrettyPrinter;
 
 /**
  * 
@@ -52,10 +51,297 @@ import fql.parse.PrettyPrinter;
  */
 public class RaToFql {
 	
-	protected Example[] examples = { new PeopleExample(), new NegExample() };
+	//always adom and guid
+	public static String doAdom(SigExp.Const A, String a) {
+		String k = a;
+		List<Pair<List<String>, List<String>>> eeqs = new LinkedList<>();
+		List<Triple<String, String, String>> attrs = new LinkedList<>();
+		attrs.add(new Triple<>("att", "adom", "str"));
+		List<Triple<String, String, String>> dd_attrs = new LinkedList<>();
+		dd_attrs.add(new Triple<>("att", "x", "str"));
+		
+		List<Triple<String, String, String>> e_attrs = new LinkedList<>();
+		
+		List<String> bn = new LinkedList<>();
+		bn.add("r");
+		bn.add("d");
+		List<Triple<String, String, String>> barrs = new LinkedList<>();
+		List<Pair<String, String>> abn = new LinkedList<>();
+		abn.add(new Pair<>("r", "guid"));
+		abn.add(new Pair<>("d", "adom"));
+		List<Pair<String, String>> abatt = new LinkedList<>();
+		abatt.add(new Pair<>("att", "att"));
+		List<Pair<String, String>> e_abatt = new LinkedList<>();
 
-	//TODO
-	String help = "Bags of tuples can be represented in FQL using an explicit active domain construction.  See the People example.  Unions of conjunctive queries are supported, using DISTINCT and ALL for set semantics.  Primary and foreign keys are not supported by this encoding.  WHERE clauses must have equalities between variables, not constants.  SQL keywords MUST be capitalized.  The observables viewer pane is useful for visualizing instances.";
+		List<Pair<String, List<String>>> abarr = new LinkedList<>();
+		
+		List<String> cn = new LinkedList<>();
+		cn.add("r");
+		cn.add("d");
+		cn.add("m");
+		
+		List<Triple<String, String, String>> carrs = new LinkedList<>();
+		carrs.add(new Triple<>("f", "m", "d"));
+		
+		List<Pair<String, String>> bcn = new LinkedList<>();
+		bcn.add(new Pair<>("r", "r"));
+		bcn.add(new Pair<>("d", "d"));
+
+		List<Pair<String, List<String>>> bcarr = new LinkedList<>();
+
+		List<Triple<String, String, String>> bbarrs = new LinkedList<>();
+		bbarrs.add(new Triple<>("f", "a", "b"));
+		bbarrs.add(new Triple<>("g", "a", "c"));
+		bbarrs.add(new Triple<>("h", "b", "d"));
+		bbarrs.add(new Triple<>("i", "c", "d"));
+		List<String> bbn = new LinkedList<>();
+		bbn.add("r");
+		bbn.add("a");
+		bbn.add("b");
+		bbn.add("c");
+		bbn.add("d");
+
+		List<Triple<String, String, String>> ccarrs = new LinkedList<>();
+		List<String> ccn = new LinkedList<>();
+		List<Pair<List<String>, List<String>>> cceqs = new LinkedList<>();	
+		ccn.add("r");
+		ccn.add("a");
+		ccn.add("b");
+		ccn.add("c");
+		ccn.add("d");
+		ccn.add("e");
+		ccarrs.add(new Triple<>("f", "a", "b"));
+		ccarrs.add(new Triple<>("g", "a", "c"));
+		ccarrs.add(new Triple<>("h", "b", "d"));
+		ccarrs.add(new Triple<>("i", "c", "d"));
+		ccarrs.add(new Triple<>("ff", "e", "b"));
+		ccarrs.add(new Triple<>("gg", "e", "c"));
+		List<String> l1 = new LinkedList<>();
+		l1.add("e"); l1.add("ff"); l1.add("h");
+		List<String> l2 = new LinkedList<>();
+		l2.add("e"); l2.add("gg"); l2.add("i");
+		cceqs.add(new Pair<>(l1, l2));
+
+		List<Triple<String, String, String>> ddarrs = new LinkedList<>();
+		List<Pair<List<String>, List<String>>> ddeqs = new LinkedList<>();	
+		List<String> ddn = new LinkedList<>();
+		ddn.add("r");
+		ddn.add("v");
+		ddn.add("w");
+		ddn.add("x");
+		ddn.add("y");
+		ddarrs.add(new Triple<>("f", "v", "w"));
+		ddarrs.add(new Triple<>("g", "w", "x"));
+		ddarrs.add(new Triple<>("h", "x", "y"));
+		ddarrs.add(new Triple<>("ff", "v", "w"));
+		l1 = new LinkedList<>();
+		l1.add("v"); l1.add("f"); l1.add("g");
+		l2 = new LinkedList<>();
+		l2.add("v"); l2.add("ff"); l2.add("g");
+		ddeqs.add(new Pair<>(l1, l2));
+
+		List<Pair<String, String>> ffn = new LinkedList<>();
+		List<Pair<String, List<String>>> ffarr = new LinkedList<>();
+		ffn.add(new Pair<>("r", "r"));
+		ffn.add(new Pair<>("a", "m"));
+		ffn.add(new Pair<>("b", "m"));
+		ffn.add(new Pair<>("c", "m"));
+		ffn.add(new Pair<>("d", "d"));
+		l1 = new LinkedList<>();
+		l1.add("m");
+		ffarr.add(new Pair<>("f", l1));
+		l1 = new LinkedList<>();
+		l1.add("m");
+		ffarr.add(new Pair<>("g", l1));
+		l1 = new LinkedList<>();
+		l1.add("m");
+		l1.add("f");
+		ffarr.add(new Pair<>("h", l1));
+		l1 = new LinkedList<>();
+		l1.add("m");
+		l1.add("f");
+		ffarr.add(new Pair<>("i", l1));
+
+		List<Pair<String, String>> ggn = new LinkedList<>();
+		ggn.add(new Pair<>("r", "r"));
+		ggn.add(new Pair<>("a", "a"));
+		ggn.add(new Pair<>("b", "b"));
+		ggn.add(new Pair<>("c", "c"));
+		ggn.add(new Pair<>("d", "d"));
+		List<Pair<String, List<String>>> ggarr = new LinkedList<>();
+		l1 = new LinkedList<>();
+		l1.add("a");
+		l1.add("f");
+		ggarr.add(new Pair<>("f", l1));
+		l1 = new LinkedList<>();
+		l1.add("a");
+		l1.add("g");
+		ggarr.add(new Pair<>("g", l1));
+		l1 = new LinkedList<>();
+		l1.add("b");
+		l1.add("h");
+		ggarr.add(new Pair<>("h", l1));
+		l1 = new LinkedList<>();
+		l1.add("c");
+		l1.add("i");
+		ggarr.add(new Pair<>("i", l1));
+		
+		List<Pair<String, String>> hhn = new LinkedList<>();
+		hhn.add(new Pair<>("r", "r"));
+		hhn.add(new Pair<>("e", "v"));
+		hhn.add(new Pair<>("a", "w"));
+		hhn.add(new Pair<>("b", "w"));
+		hhn.add(new Pair<>("c", "w"));
+		hhn.add(new Pair<>("d", "y"));
+		List<Pair<String, List<String>>> hharr = new LinkedList<>();
+		l1 = new LinkedList<>();
+		l1.add("w");
+		hharr.add(new Pair<>("f", l1));
+		l1 = new LinkedList<>();
+		l1.add("w");
+		hharr.add(new Pair<>("g", l1));
+		l1 = new LinkedList<>();
+		l1.add("w");
+		l1.add("g");
+		l1.add("h");
+		hharr.add(new Pair<>("h", l1));
+		l1 = new LinkedList<>();
+		l1.add("w");
+		l1.add("g");
+		l1.add("h");
+		hharr.add(new Pair<>("i", l1));
+		l1 = new LinkedList<>();
+		l1.add("v");
+		l1.add("f");
+		hharr.add(new Pair<>("ff", l1));
+		l1 = new LinkedList<>();
+		l1.add("v");
+		l1.add("ff");
+		hharr.add(new Pair<>("gg", l1));
+
+		List<Pair<String, String>> iin = new LinkedList<>();
+		iin.add(new Pair<>("guid", "r"));
+		iin.add(new Pair<>("adom", "x"));
+		List<Pair<String, List<String>>> iiarr = new LinkedList<>();
+		
+		int i = 0;
+		for (Triple<String, String, String> m0 : A.arrows) {
+			String m = m0.first;
+			bn.add("m" + i);
+			barrs.add(new Triple<>("i" + i, "r", "m" + i));
+			barrs.add(new Triple<>("f" + i, "m" + i, "d"));
+			
+			abn.add(new Pair<>("m" + i, "guid"));
+			List<String> l = new LinkedList<>();
+			l.add("guid");
+			abarr.add(new Pair<>("i" + i, l));
+			l = new LinkedList<>();
+			l.add("guid");
+			l.add(m);
+			abarr.add(new Pair<>("f" + i, l));
+		
+			carrs.add(new Triple<>("i" + i, "r", "m"));
+			
+			bcn.add(new Pair<>("m" + i, "m"));
+			
+			l = new LinkedList<>();
+			l.add("r");
+			l.add("i" + i);
+			bcarr.add(new Pair<>("i" + i, l));
+
+			l = new LinkedList<>();
+			l.add("m");
+			l.add("f");
+			bcarr.add(new Pair<>("f" + i, l));
+			
+			bbarrs.add(new Triple<>("i" + i, "r", "a"));
+			ccarrs.add(new Triple<>("i" + i, "r", "a"));
+			ddarrs.add(new Triple<>("i" + i, "r", "w"));
+
+			l = new LinkedList<>();
+			l.add("r");
+			l.add("i" + i);
+			ffarr.add(new Pair<>("i" + i, l));
+
+			l = new LinkedList<>();
+			l.add("r");
+			l.add("i" + i);
+			ggarr.add(new Pair<>("i" + i, l));
+
+			l = new LinkedList<>();
+			l.add("r");
+			l.add("i" + i);
+			hharr.add(new Pair<>("i" + i, l));
+
+
+			l = new LinkedList<>();
+			l.add("r");
+			l.add("i" + i);
+			l.add("g");
+			iiarr.add(new Pair<>(m, l));
+
+			i++;
+		}
+		
+		SigExp.Const b = new SigExp.Const(bn, e_attrs, barrs, eeqs);
+		MapExp.Const ab = new MapExp.Const(abn, e_abatt, abarr, b, A); //F
+		
+		SigExp.Const c = new SigExp.Const(cn, e_attrs, carrs, eeqs);
+		MapExp.Const bc = new MapExp.Const(bcn, e_abatt, bcarr, b, c); //G
+
+		SigExp.Const bb = new SigExp.Const(bbn, e_attrs, bbarrs, eeqs);
+		SigExp.Const cc = new SigExp.Const(ccn, e_attrs, ccarrs, cceqs);
+		SigExp.Const dd = new SigExp.Const(ddn, dd_attrs, ddarrs, ddeqs);
+
+		MapExp.Const ff = new MapExp.Const(ffn, e_abatt, ffarr, bb, c); 
+		MapExp.Const gg = new MapExp.Const(ggn, e_abatt, ggarr, bb, cc); 
+		MapExp.Const hh = new MapExp.Const(hhn, e_abatt, hharr, c, dd); 
+		MapExp.Const ii = new MapExp.Const(iin, abatt, iiarr, A, dd); 
+
+		
+		String ret = "///////////////\n";
+		ret += "schema " + k + "_B = " + b + "\n\n";
+		ret += "mapping " + k + "_F = " + ab + " : " + k + "_B -> " + a + "\n\n";
+		ret += "schema " + k + "_C = " + c + "\n\n";
+		ret += "mapping " + k + "_G = " + bc + " : " + k + "_B -> " + k + "_C\n\n";
+
+		ret += "schema " + k + "_BB = " + bb + "\n\n";
+		ret += "schema " + k + "_CC = " + cc + "\n\n";
+		ret += "schema " + k + "_DD = " + dd + "\n\n";
+
+		ret += "mapping " + k + "_FF = " + ff + " : " + k + "_BB -> " + k + "_C\n\n";
+		ret += "mapping " + k + "_GG = " + gg + " : " + k + "_BB -> " + k + "_CC\n\n";
+		ret += "mapping " + k + "_HH = " + hh + " : " + k + "_CC -> " + k + "_DD\n\n";
+		ret += "mapping " + k + "_II = " + ii + " : " + a + " -> " + k + "_DD\n\n";
+		
+		ret += "//////////////\n";
+		return ret;
+		//emit as "as_rel"
+	}
+	
+	private static String doAdom2(String k, String in, String out) {
+		String ret = "";
+		ret += "\n\ninstance " + out + "_y = delta " + k + "_F " + in;
+		ret += "\n\ninstance " + out + "_z = sigma " + k + "_G " + out + "_y"; 
+		ret += "\n\ninstance " + out + "_w1= delta " + k + "_FF "+ out + "_z";
+		ret += "\n\ninstance " + out + "_w2= pi "    + k + "_GG "+ out + "_w1";
+		ret += "\n\ninstance " + out + "_w3= SIGMA " + k + "_HH "+ out + "_w2";
+		ret += "\n\ninstance " + out + "_rel= delta "+ k + "_II "+ out + "_w3";
+		/*
+		instance Y3=delta F3 X3
+		instance Z3=sigma G3 Y3
+
+		instance W1=delta F Z3
+		instance W2=pi G W1 
+		instance W3=SIGMA H W2
+		instance RelationImage=delta I W3 
+			 */
+		return ret;
+	}
+	
+	protected Example[] examples = { new PeopleExample() /*, new NegExample() */ };
+
+	String help = "Bags of tuples can be represented in FQL using an explicit active domain construction.  See the People example.  Unions of conjunctive queries *of base relations* are supported, using DISTINCT and ALL for set semantics.  (The translated FQL will not compile if not translating unions of conjunctive queries of base relations).  Primary and foreign keys are not supported by this encoding.  WHERE clauses must have equalities between variables, not constants.  SQL keywords MUST be capitalized.  The observables viewer pane is useful for visualizing instances.";
 
 	protected String kind() {
 		return "SPCU";
@@ -419,19 +705,23 @@ public class RaToFql {
 		//int ctx = 0;
 		String xxx = "\n\n";
 		Map<String, String> schemas = new HashMap<>();
+		Map<String, SigExp.Const> schemas0 = new HashMap<>();
+		Map<String, Boolean> done = new HashMap<>();
 		for (Pair<String, EExternal> gh0 : queries) {
 			String k = gh0.first;
 			EExternal gh = gh0.second;
 			if (gh instanceof EFlower) {
 				EFlower fl = (EFlower) gh;
-				String yyy = trans(exp, fl, k);
-				xxx += yyy + "\n\n" ;
+				Pair<String, Const> yyy = trans(exp, fl, k);
+				xxx += yyy.first + "\n\n" ;
 				schemas.put(k, k + "Schema");
+				schemas0.put(k, yyy.second);
 
 			} else if (gh instanceof EUnion) {
 				EUnion g = (EUnion) gh;
 				String s1 = schemas.get(g.l);
 				schemas.put(k, s1);
+				schemas0.put(k, schemas0.get(g.l));
 
 				xxx += longSlash + "\n/* Translation of " + k + "  */\n" + longSlash;
 
@@ -444,14 +734,36 @@ public class RaToFql {
 				xxx += "\n\n";
 				
 			} else if (gh instanceof EDiff) {
-				String f1 = ((EDiff)gh).l;
-				String f2 = ((EDiff)gh).r;
+				String f1x = ((EDiff)gh).l;
+				String f2x = ((EDiff)gh).r;
 				
-				String s1 = schemas.get(f1);
+				String s1 = schemas.get(f1x);
+			//	System.out.println("s1 is " + s1);
+			//	System.out.println("schemas0 " + schemas0);
+			//	System.out.println("scheas " + schemas);
+				Const s1x = schemas0.get(f1x);
 				schemas.put(k, s1);
+
+				String f1y = doAdom(s1x, s1);
+//				String f2y = doAdom(f2x, s1x);
+				
+				if (!done.containsKey(s1)) {
+					xxx += "\n\n" + f1y;
+					done.put(s1, true);
+				}
+				
+				xxx += doAdom2(s1, f1x, k + "_l");
+				xxx += doAdom2(s1, f2x, k + "_r");
+				
+				String f1 = k + "_l" + "_rel";
+				String f2 = k + "_r" + "_rel";
 				
 				xxx += longSlash + "\n/* Translation of " + k + "  */\n" + longSlash;
 
+//				Boolean done0 = done.get(s1);
+			
+			//	xxx += "\n\n" + f2y;
+				
 				xxx += "\n\ninstance " + k + "prp = prop " + s1;
 				xxx += "\n\ninstance " + k + "one = unit " + s1;
 				xxx += "\n\ninstance " + k + "prp2 = (" + k + "prp * " + k + "prp)";
@@ -512,7 +824,7 @@ instance F1minusF2 = kernel t1 */
 		return comment + preS + "\n\nschema S = " + exp + "\n\ninstance I = " + inst + " : S" + xxx;
 	}
 
-	private static String trans(Const src, EFlower fl, String pre) {
+	private static Pair<String, Const> trans(Const src, EFlower fl, String pre) {
 		// SigExp src0 = new SigExp.Var("S");
 
 		LinkedList<Pair<List<String>, List<String>>> eqs = new LinkedList<>();
@@ -674,7 +986,7 @@ instance F1minusF2 = kernel t1 */
 					+ "selectInstance";
 		}
 		String comment = longSlash + "\n/* " + "Translation of " + pre + "  */\n" + longSlash;
-		return comment + xxx;
+		return new Pair<>(comment + xxx, sig3);
 	}
 	
 	static String longSlash = "////////////////////////////////////////////////////////////////////////////////";
@@ -1053,6 +1365,7 @@ instance F1minusF2 = kernel t1 */
 		Tuple4 t = (Tuple4) o;
 		return new EUnion(t.c == null, t.a.toString(), t.d.toString());
 	}
+	@SuppressWarnings("rawtypes")
 	public static final EDiff toDiff(Object o) {
 		Tuple4 t = (Tuple4) o;
 		return new EDiff(t.c == null, t.a.toString(), t.d.toString());

@@ -40,6 +40,10 @@ public class Path  {
 		}
 		return ret;
 	}
+	
+	public void validate(Signature s) throws FQLException {
+		new Path(s, asList());
+	}
 
 	public Path(Signature schema, List<String> strings) throws FQLException {
 		if (strings.isEmpty()) {

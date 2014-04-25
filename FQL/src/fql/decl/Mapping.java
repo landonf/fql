@@ -789,8 +789,16 @@ public class Mapping {
 			Path arrow = arroweqc.arr;
 
 			Path mapped = appy(arrow);
+		//	System.out.println("mapped " + mapped);
+			try {
+				mapped.validate(target);
+			} catch (RuntimeException fe) {
+				fe.printStackTrace();
+				throw new FQLException("Path " + arroweqc.arr.toLong() + " gets mapped to a bad path: " + mapped.toLong());
+			}
 			arrowMapping.put(new Arr<>(arrow, arrow.source, arrow.target),
 					dstCat0.second.of(mapped));
+			//System.out.println("ok");
 		}
 
 		FinFunctor<Node, Path, Node, Path> F = new FinFunctor<>(objMapping,
@@ -867,12 +875,12 @@ public class Mapping {
 	 * return Query.convert(i1); }
 	 */
 
-	public JPanel pretty(final Environment env) throws FQLException {
+	public JPanel pretty(final Color scolor, final Color tcolor, final Environment env) throws FQLException {
 		Graph<String, String> g = build();
 		if (g.getVertexCount() == 0) {
 			return new JPanel();
 		}
-		return doView(env, g);
+		return doView(scolor, tcolor, env, g);
 	}
 
 	public Graph<String, String> build() {
@@ -942,7 +950,7 @@ public class Mapping {
 	// };
 
 	@SuppressWarnings("unchecked")
-	public JPanel doView(final Environment env, Graph<String, String> sgv) {
+	public JPanel doView(final Color scolor, final Color tcolor, final Environment env, Graph<String, String> sgv) {
 		// Layout<V, E>, BasicVisualizationServer<V,E>
 		try {
 			Class<?> c = Class.forName(DEBUG.layout_prefix + DEBUG.debug.mapping_graph);
@@ -972,11 +980,12 @@ public class Mapping {
 					return UIManager.getColor("Panel.background");
 				}
 				if (p.equals("@source")) {
-					return Color.RED;
+					return scolor;
+					//return Color.RED;
 					// return source.colors.get(j);
 				}
 				// return target.colors.get(j);
-				return Color.BLUE;
+				return tcolor;
 				// return env.colors.get(target.name0);
 			}
 		};

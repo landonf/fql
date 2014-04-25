@@ -7,14 +7,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GridLayout;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.Paint;
 import java.awt.Stroke;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Point2D;
 import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,7 +29,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.SwingConstants;
 import javax.swing.table.TableRowSorter;
 
 import org.apache.commons.collections15.Transformer;
@@ -43,15 +37,12 @@ import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
-import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
-import edu.uci.ics.jung.visualization.renderers.Renderer;
 import edu.uci.ics.jung.visualization.renderers.VertexLabelRenderer;
-import edu.uci.ics.jung.visualization.transform.shape.GraphicsDecorator;
 import fql.DEBUG;
 import fql.FQLException;
 import fql.Pair;
@@ -231,8 +222,8 @@ public class Transform {
 		return ret;
 	}
 
-	public JPanel graphical(String src, String dst) {
-		return makePanel(src, dst);
+	public JPanel graphical(Color scolor, Color tcolor, String src, String dst) {
+		return makePanel(scolor, tcolor, src, dst);
 	}
 
 	public JPanel view(String src_n, String dst_n) throws FQLException {
@@ -465,43 +456,30 @@ public class Transform {
 	// c.setMaximumSize(new Dimension(400,100));
 	// return c;
 	// }
-
-	public JComponent lowerComp(String s, String d) {
-		int size = src.thesig.nodes.size();
-
-		JPanel pan = new JPanel(new GridLayout(1, size + 1));
-		for (Node n : src.thesig.nodes) {
-			JLabel l = new JLabel(n.string);
-			l.setOpaque(true);
-			l.setHorizontalAlignment(SwingConstants.CENTER);
-			l.setBackground(src.thesig.colors.get(n.string));
-			pan.add(l);
-		}
-
-		JPanel xxx = new JPanel();
-		// xxx.add(new JLabel(" "));
-		//JPanel yu = new MyLabel2();
-		// yu.setSize(20, 12);
-		xxx.add(new MyLabel2());
-		xxx.add(new JLabel(s + " (source)"));
-		xxx.add(new JLabel("    "));
-		JPanel uy = new MyLabel();
-		// uy.setSize(20,20);
-		xxx.add(uy);
-		xxx.add(new JLabel(d + " (target)"));
-		pan.add(xxx);
-		// pan.set
-		JScrollPane p = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_NEVER,
-				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-
-		pan.setBorder(BorderFactory.createTitledBorder(
-				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Legend"));
-		p.setViewportView(pan);
-		return p;
-	}
+	/*
+	 * public JComponent lowerComp(String s, String d) { int size =
+	 * src.thesig.nodes.size();
+	 * 
+	 * // JPanel pan = new JPanel(new GridLayout(1, size + 1)); // for (Node n :
+	 * src.thesig.nodes) { //TODO // JLabel l = new JLabel(n.string); //
+	 * l.setOpaque(true); // l.setHorizontalAlignment(SwingConstants.CENTER); //
+	 * l.setBackground(sColor); // pan.add(l); // }
+	 * 
+	 * //JPanel xxx = new JPanel(); // xxx.add(new JLabel(" ")); //JPanel yu =
+	 * new MyLabel2(); // yu.setSize(20, 12); //xxx.add(new MyLabel2()); //
+	 * xxx.add(new JLabel(s + " (source)")); // xxx.add(new JLabel("    ")); //
+	 * JPanel uy = new MyLabel(); // uy.setSize(20,20); // xxx.add(uy); //
+	 * xxx.add(new JLabel(d + " (target)")); // pan.add(xxx); // pan.set
+	 * JScrollPane p = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_NEVER,
+	 * JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+	 * 
+	 * pan.setBorder(BorderFactory.createTitledBorder(
+	 * BorderFactory.createEmptyBorder(2, 2, 2, 2), "Legend"));
+	 * p.setViewportView(pan); return p; }
+	 */
 
 	@SuppressWarnings("unchecked")
-	public JPanel doView(
+	public JPanel doView(final Color scolor, final Color tcolor,
 			final String src_n,
 			final String dst_n,
 			Graph<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>> first,
@@ -533,13 +511,17 @@ public class Transform {
 					layout);
 			// vv.setPreferredSize(new Dimension(600, 350));
 			// Setup up a new vertex to paint transformer...
-			/*
-			 * Transformer<Quad<Node, Object, String, Boolean>, Paint>
-			 * vertexPaint = new Transformer<Quad<Node, Object, String,
-			 * Boolean>, Paint>() { public Paint transform(Quad<Node, Object,
-			 * String, Boolean> i) { return
-			 * src.thesig.colors.get(i.first.string); } };
-			 */
+
+			Transformer<Quad<Node, Object, String, Boolean>, Paint> vertexPaint = new Transformer<Quad<Node, Object, String, Boolean>, Paint>() {
+				public Paint transform(Quad<Node, Object, String, Boolean> i) {
+					if (i.fourth) {
+						return scolor;
+					} else {
+						return tcolor;
+					}
+				}
+			};
+
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 			gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 			vv.setGraphMouse(gm);
@@ -565,7 +547,7 @@ public class Transform {
 					return bs;
 				}
 			};
-			// vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+			 vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 			vv.getRenderContext().setEdgeStrokeTransformer(
 					edgeStrokeTransformer);
 			// vv.getRenderContext().setVertexLabelTransformer(
@@ -599,7 +581,7 @@ public class Transform {
 								}
 
 							});
-			vv.getRenderer().setVertexRenderer(new MyRenderer());
+			// vv.getRenderer().setVertexRenderer(new MyRenderer());
 
 			JPanel ret = new JPanel(new BorderLayout());
 			JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
@@ -641,9 +623,9 @@ public class Transform {
 			cards.setPreferredSize(new Dimension(400, 100));
 
 			ret.add(pane, BorderLayout.CENTER);
-			JComponent iii = lowerComp(src_n, dst_n);
-			iii.setPreferredSize(new Dimension(1, 60));
-			ret.add(iii, BorderLayout.NORTH);
+			// JComponent iii = lowerComp(src_n, dst_n);
+			// iii.setPreferredSize(new Dimension(1, 60));
+			// ret.add(iii, BorderLayout.NORTH);
 			ret.setBorder(BorderFactory.createEtchedBorder());
 			return ret;
 		} catch (Throwable t) {
@@ -652,14 +634,14 @@ public class Transform {
 		}
 	}
 
-	public JPanel makePanel(String src_n, String dst_n) {
+	public JPanel makePanel(Color scolor, Color tcolor, String src_n, String dst_n) {
 		try {
 			Pair<Graph<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>>, HashMap<Quad<Node, Object, String, Boolean>, Map<Attribute<Node>, Object>>> g = build(
 					src_n, dst_n);
 			if (g.first.getVertexCount() == 0) {
 				return new JPanel();
 			}
-			return doView(src_n, dst_n, g.first, g.second);
+			return doView(scolor, tcolor, src_n, dst_n, g.first, g.second);
 		} catch (FQLException e) {
 			JPanel p = new JPanel(new GridLayout(1, 1));
 			JTextArea a = new JTextArea(e.getMessage());
@@ -692,62 +674,40 @@ public class Transform {
 		}
 	}
 
-	@SuppressWarnings("serial")
-	class MyLabel extends JPanel {
-		@Override
-		public void paintComponent(Graphics g) {
-			super.paintComponent(g);
-			Graphics2D g2d = (Graphics2D) g;
-			Shape shape = new Ellipse2D.Double(0, 0, 10, 10);
-			g2d.setColor(Color.black);
-			g2d.setPaint(Color.black);
-			// g2d.draw(shape);
-			g2d.fill(shape);
-		}
-	}
-
-	@SuppressWarnings("serial")
-	class MyLabel2 extends JPanel {
-		@Override
-		public void paintComponent(Graphics g) {
-			super.paintComponent(g);
-			Graphics2D g2d = (Graphics2D) g;
-			Shape shape = new Rectangle(0, 0, 26, 26);
-			g2d.setColor(Color.black);
-			g2d.setPaint(Color.black);
-			// g2d.draw(shape);
-			g2d.fill(shape);
-		}
-	}
-
-	// Quad<Node, Object, String, Boolean>
-	class MyRenderer
-			implements
-			Renderer.Vertex<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>> {
-
-		@Override
-		public void paintVertex(
-				RenderContext<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>> rc,
-				Layout<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>> layout,
-				Quad<Node, Object, String, Boolean> vertex) {
-			GraphicsDecorator graphicsContext = rc.getGraphicsContext();
-			Point2D center = layout.transform(vertex);
-			Shape shape = null;
-			// src.thesig.colors.get(n.string)
-			Color color = src.thesig.colors.get(vertex.first.string);
-			// Shape shape2 = null;
-			if (vertex.fourth) {
-				shape = new Rectangle((int) center.getX() - 10,
-						(int) center.getY() - 10, 20, 20);
-			} else {
-				shape = new Ellipse2D.Double(center.getX() - 10,
-						center.getY() - 10, 20, 20);
-			}
-			graphicsContext.setPaint(color);
-			// graphicsContext.
-			graphicsContext.fill(shape);
-		}
-	}
+	/*
+	 * @SuppressWarnings("serial") class MyLabel extends JPanel {
+	 * 
+	 * @Override public void paintComponent(Graphics g) {
+	 * super.paintComponent(g); Graphics2D g2d = (Graphics2D) g; Shape shape =
+	 * new Ellipse2D.Double(0, 0, 10, 10); g2d.setColor(Color.black);
+	 * g2d.setPaint(Color.black); // g2d.draw(shape); g2d.fill(shape); } }
+	 */
+	/*
+	 * @SuppressWarnings("serial") class MyLabel2 extends JPanel {
+	 * 
+	 * @Override public void paintComponent(Graphics g) {
+	 * super.paintComponent(g); Graphics2D g2d = (Graphics2D) g; Shape shape =
+	 * new Rectangle(0, 0, 26, 26); g2d.setColor(Color.black);
+	 * g2d.setPaint(Color.black); // g2d.draw(shape); g2d.fill(shape); } }
+	 */
+	/*
+	 * // Quad<Node, Object, String, Boolean> class MyRenderer implements
+	 * Renderer.Vertex<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>>
+	 * {
+	 * 
+	 * @Override public void paintVertex( RenderContext<Quad<Node, Object,
+	 * String, Boolean>, Pair<Path, Integer>> rc, Layout<Quad<Node, Object,
+	 * String, Boolean>, Pair<Path, Integer>> layout, Quad<Node, Object, String,
+	 * Boolean> vertex) { GraphicsDecorator graphicsContext =
+	 * rc.getGraphicsContext(); Point2D center = layout.transform(vertex); Shape
+	 * shape = null; // src.thesig.colors.get(n.string) //Color color =
+	 * src.thesig.colors.get(vertex.first.string); // Shape shape2 = null; if
+	 * (vertex.fourth) { shape = new Rectangle((int) center.getX() - 10, (int)
+	 * center.getY() - 10, 20, 20); } else { shape = new
+	 * Ellipse2D.Double(center.getX() - 10, center.getY() - 10, 20, 20); } //
+	 * graphicsContext.setPaint(color); TODO // graphicsContext.
+	 * graphicsContext.fill(shape); } }
+	 */
 
 	public static Transform prod(
 			Instance I,
@@ -756,104 +716,101 @@ public class Transform {
 			Transform h0) {
 		List<Pair<String, List<Pair<Object, Object>>>> d = new LinkedList<>();
 
-		//System.out.println("h " + h0);
-		//System.out.println("Hc " + IHc);
-		//System.out.println("Hd " + IHd);
-		
+		// System.out.println("h " + h0);
+		// System.out.println("Hc " + IHc);
+		// System.out.println("Hd " + IHd);
+
 		for (Node n : IHc.first.thesig.nodes) {
 			Set<Pair<Object, Object>> v = IHc.first.data.get(n.string);
 			List<Pair<Object, Object>> l = new LinkedList<>();
 			for (Pair<Object, Object> p : v) {
-				Pair<Object, Object> u = IHc.second.get(p.first); //I, Hc
-				Object j = lookup(h0.data.get(n.string), u.second); //Hd
-				Object k = IHd.third.get(new Pair<>(u.first, j)); 
+				Pair<Object, Object> u = IHc.second.get(p.first); // I, Hc
+				Object j = lookup(h0.data.get(n.string), u.second); // Hd
+				Object k = IHd.third.get(new Pair<>(u.first, j));
 				l.add(new Pair<>(p.first, k));
 			}
 			d.add(new Pair<>(n.string, l));
 		}
-		
+
 		return new Transform(IHc.first, IHd.first, d);
 	}
-	
+
 	public Instance preimage(Instance a) throws FQLException {
-		//System.out.println("Doing preimage");
-		//System.out.println("Transform " + this);
-		//System.out.println("a " + a);
+		// System.out.println("Doing preimage");
+		// System.out.println("Transform " + this);
+		// System.out.println("a " + a);
 		Map<String, Set<Pair<Object, Object>>> map = new HashMap<>();
-		
+
 		for (Node n : src.thesig.nodes) {
 			Set<Pair<Object, Object>> kx = new HashSet<>();
 			for (Pair<Object, Object> i : src.data.get(n.string)) {
 				Object v = lookup(data.get(n.string), i.first);
-				if (a.data.get(n.string).contains(new Pair<>(v,v))) {
+				if (a.data.get(n.string).contains(new Pair<>(v, v))) {
 					kx.add(i);
 				}
 			}
 			map.put(n.string, kx);
 		}
-		
+
 		for (Edge n : src.thesig.edges) {
 			Set<Pair<Object, Object>> kx = new HashSet<>();
 			for (Pair<Object, Object> i : src.data.get(n.name)) {
-				if (map.get(n.source.string).contains(new Pair<>(i.first, i.first))) {
+				if (map.get(n.source.string).contains(
+						new Pair<>(i.first, i.first))) {
 					kx.add(i);
 				}
 			}
 			map.put(n.name, kx);
 		}
-		
+
 		for (Attribute<Node> n : src.thesig.attrs) {
 			Set<Pair<Object, Object>> kx = new HashSet<>();
 			for (Pair<Object, Object> i : src.data.get(n.name)) {
-				if (map.get(n.source.string).contains(new Pair<>(i.first, i.first))) {
-					kx.add(i);				
+				if (map.get(n.source.string).contains(
+						new Pair<>(i.first, i.first))) {
+					kx.add(i);
 				}
 			}
 			map.put(n.name, kx);
 		}
-		
+
 		Instance ret = new Instance(src.thesig, map);
-		//System.out.println("result " + ret);
+		// System.out.println("result " + ret);
 		return ret;
 	}
 
-
-
 	public Instance apply(Instance a) throws FQLException {
 		Map<String, Set<Pair<Object, Object>>> map = new HashMap<>();
-		
+
 		for (Node n : src.thesig.nodes) {
 			Set<Pair<Object, Object>> kx = new HashSet<>();
 			for (Pair<Object, Object> i : src.data.get(n.string)) {
 				Object v = lookup(data.get(n.string), i.first);
-				kx.add(new Pair<>(v,v));
+				kx.add(new Pair<>(v, v));
 			}
 			map.put(n.string, kx);
 		}
-		
+
 		for (Edge n : src.thesig.edges) {
 			Set<Pair<Object, Object>> kx = new HashSet<>();
 			for (Pair<Object, Object> i : src.data.get(n.name)) {
 				Object v1 = lookup(data.get(n.source.string), i.first);
 				Object v2 = lookup(data.get(n.target.string), i.second);
-				kx.add(new Pair<>(v1,v2));
+				kx.add(new Pair<>(v1, v2));
 			}
 			map.put(n.name, kx);
 		}
-		
+
 		for (Attribute<Node> n : src.thesig.attrs) {
 			Set<Pair<Object, Object>> kx = new HashSet<>();
 			for (Pair<Object, Object> i : src.data.get(n.name)) {
 				Object v1 = lookup(data.get(n.source.string), i.first);
-				kx.add(new Pair<>(v1,i.second));
+				kx.add(new Pair<>(v1, i.second));
 			}
 			map.put(n.name, kx);
 		}
-		
+
 		return new Instance(src.thesig, map);
 	}
 
 }
-
-
-

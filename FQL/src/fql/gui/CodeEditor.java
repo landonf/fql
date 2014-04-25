@@ -1,5 +1,6 @@
 package fql.gui;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.Font;
@@ -318,7 +319,7 @@ public class CodeEditor extends JPanel implements Runnable {
 		if (ie != null) {
 		InstExp.Const iec = (InstExp.Const) ie;
 			InstExp.Const n = new InstanceEditor(which, iec.sig
-					.toSig(init), iec).show();
+					.toSig(init), iec).show(Color.black);
 			if (n == null) {
 				return;
 			}
@@ -330,8 +331,10 @@ public class CodeEditor extends JPanel implements Runnable {
 			
 			InstExp.Const s = (InstExp.Const) init.insts.get(iec.src);
 			InstExp.Const t = (InstExp.Const) init.insts.get(iec.dst);
-			
-			TransExp.Const n = new TransformEditor(which, init.insts.get(iec.src).type(init).toSig(init), iec, s, t).show();
+		//	System.out.println("sig " + s.sig);
+		//	System.out.println("lookuped up to " + init.smap(s.sig));
+		//	init.doColors();
+			TransExp.Const n = new TransformEditor(which, init.insts.get(iec.src).type(init).toSig(init), iec, s, t).show(Color.black);
 			if (n == null) {
 				return;
 			}

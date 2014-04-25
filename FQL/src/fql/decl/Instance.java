@@ -2,6 +2,7 @@ package fql.decl;
 
 import java.awt.BasicStroke;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Paint;
@@ -1386,8 +1387,8 @@ public class Instance {
 		}
 	}
 
-	public JPanel pretty() throws FQLException {
-		return makeViewer();
+	public JPanel pretty(Color c) throws FQLException {
+		return makeViewer(c);
 	}
 
 	public Graph<String, String> build() {
@@ -1410,17 +1411,17 @@ public class Instance {
 		return g2;
 	}
 
-	public JPanel makeViewer(/* Color c */) {
+	public JPanel makeViewer(Color c) {
 		Graph<String, String> g = build();
 		if (g.getVertexCount() == 0) {
 			return new JPanel();
 		}
-		return doView(g);
+		return doView(c, g);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public JPanel doView(
-	/* final Environment env , *//* final Color color */Graph<String, String> sgv) {
+	 final Color clr, Graph<String, String> sgv) {
 		// Layout<V, E>, BasicVisualizationServer<V,E>
 		// Layout<String, String> layout = new KKLayout(sgv);
 
@@ -1446,7 +1447,7 @@ public class Instance {
 					if (thesig.isAttribute(i)) {
 						return UIManager.getColor("Panel.background");
 					} else {
-						return thesig.colors.get(i);
+						return clr;
 					}
 					// return color;
 				}
@@ -1835,8 +1836,8 @@ public class Instance {
 	CardLayout cards = new CardLayout();
 	Map<String, JTable> joined;
 
-	public JPanel groth() throws FQLException {
-		return CategoryOfElements.makePanel(this);
+	public JPanel groth(Color c) throws FQLException {
+		return CategoryOfElements.makePanel(this, c);
 	}
 
 	private JPanel makePanel2(Pair<Object[], Object[][]> res) {

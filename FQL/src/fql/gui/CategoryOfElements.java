@@ -1,6 +1,7 @@
 package fql.gui;
 
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -114,7 +115,7 @@ public class CategoryOfElements {
 		return false;
 	}
 
-	public static JPanel doView(final Instance inst, Graph<Pair<Node, Object>, Pair<Path, Integer>> sgv, HashMap<Pair<Node, Object>, Map<Attribute<Node>, Object>> map0) {
+	public static JPanel doView(final Color clr, final Instance inst, Graph<Pair<Node, Object>, Pair<Path, Integer>> sgv, HashMap<Pair<Node, Object>, Map<Attribute<Node>, Object>> map0) {
 	//	HashMap<Pair<Node, Object>,String> map = new HashMap<>();
 		JPanel cards = new JPanel(new CardLayout());
 
@@ -133,7 +134,7 @@ public class CategoryOfElements {
 		// Setup up a new vertex to paint transformer...
 		Transformer<Pair<Node, Object>, Paint> vertexPaint = new Transformer<Pair<Node, Object>, Paint>() {
 			public Paint transform(Pair<Node, Object> i) {
-				return inst.thesig.colors.get(i.first.string);
+				return clr;
 			}
 		};
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
@@ -227,7 +228,7 @@ public class CategoryOfElements {
 		return ret;
 	}
 
-	public static JPanel makePanel(Instance i) throws FQLException {
+	public static JPanel makePanel(Instance i, Color c) throws FQLException {
 				
 		try {
 		
@@ -235,7 +236,7 @@ public class CategoryOfElements {
 			if (g.first.getVertexCount() == 0) {
 				return new JPanel();
 			}
-			return doView(i, g.first, g.second);
+			return doView(c, i, g.first, g.second);
 
 		} catch (FQLException e) {
 			JPanel p = new JPanel(new GridLayout(1,1));

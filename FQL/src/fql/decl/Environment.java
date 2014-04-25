@@ -1,6 +1,5 @@
 package fql.decl;
 
-import java.awt.Color;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,7 +31,7 @@ public class Environment {
 
 //	public Map<String, Color> colors;
 
-	public static Color[] colors_arr = new Color[] { Color.RED, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.yellow, Color.CYAN, Color.GRAY, Color.ORANGE, Color.PINK, Color.BLACK};
+	//public static Color[] colors_arr = new Color[] { Color.RED, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.yellow, Color.CYAN, Color.GRAY, Color.ORANGE, Color.PINK, Color.BLACK};
 	
 	public Set<Eq> eqs;
 //	public String name0;
