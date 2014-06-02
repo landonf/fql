@@ -20,5 +20,10 @@ public class Unit {
 		}
 		return false;
 	}
+	
+	@Override
+	public int hashCode() {
+		return 0;
+	}
 
 }

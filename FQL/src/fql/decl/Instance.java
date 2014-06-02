@@ -550,28 +550,6 @@ public class Instance {
 
 	@Override
 	public String toString() {
-		/*
-		 * StringBuffer sb = new StringBuffer("{\n");
-		 * 
-		 * boolean first = true; sb.append("nodes\n"); for (Node k :
-		 * thesig.nodes) { Set<Pair<Object, Object>> v = data.get(k.string); if
-		 * (!first) { sb.append(",\n"); } first = false; sb.append(k.string);
-		 * sb.append(" -> { "); sb.append(printNode(v)); sb.append(" }"); }
-		 * sb.append("\n ;\n");
-		 * 
-		 * first = true; sb.append("attributes\n"); for (Attribute<Node> k :
-		 * thesig.attrs) { Set<Pair<Object, Object>> v = data.get(k.name); if
-		 * (!first) { sb.append(",\n"); } first = false; sb.append(k.name);
-		 * sb.append(" -> { "); sb.append(printSet(v)); sb.append(" }"); }
-		 * sb.append("\n ;\n");
-		 * 
-		 * first = true; sb.append("arrows\n"); for (Edge k : thesig.edges) {
-		 * Set<Pair<Object, Object>> v = data.get(k.name); if (!first) {
-		 * sb.append(",\n"); } first = false; sb.append(k.name);
-		 * sb.append(" -> { "); sb.append(printSet(v)); sb.append(" }"); }
-		 * 
-		 * sb.append(";\n}"); return sb.toString();
-		 */
 		String x = "\n nodes\n";
 		boolean b = false;
 
@@ -641,25 +619,7 @@ public class Instance {
 		return "{\n " + x + ";\n}";
 	}
 
-	/*
-	 * private String printNode(Set<Pair<Object, Object>> v) { StringBuffer sb =
-	 * new StringBuffer(); boolean first = true; for (Pair<Object, Object> p :
-	 * v) { if (!first) { sb.append(", "); } first = false;
-	 * sb.append(maybeQuote(p.first.toString())); } return sb.toString(); }
-	 */
-	/*
-	 * private String printSet(Set<Pair<Object, Object>> v) { StringBuffer sb =
-	 * new StringBuffer(); boolean first = true; if (v == null) { return "null";
-	 * } for (Pair<Object, Object> p : v) { if (!first) { sb.append(", "); }
-	 * first = false; sb.append("("); sb.append(maybeQuote(p.first.toString()));
-	 * sb.append(","); sb.append(maybeQuote(p.second.toString()));
-	 * sb.append(")"); } return sb.toString(); }
-	 */
-	/*
-	 * private String maybeQuote(String s) { if (s.contains(" ") ||
-	 * s.contains("\n") || s.contains("\r") || s.contains("\t")) { return "\"" +
-	 * s + "\""; } return s; }
-	 */
+	
 	public JPanel view() throws FQLException {
 		List<JPanel> panels = new LinkedList<JPanel>();
 		// Map<String, Set<Pair<String,String>>> data;

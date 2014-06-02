@@ -521,9 +521,10 @@ public class CodeEditor extends JPanel implements Runnable {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Font font = new Font(topArea.getFont().getFontName(), topArea.getFont().getStyle(), topArea.getFont().getSize()+1);
+			//	Font font = new Font(topArea.getFont().getFontName(), topArea.getFont().getStyle(), topArea.getFont().getSize()+1);
 				DEBUG.debug.FONT_SIZE++;
-				topArea.setFont(font);
+				GUI.setFontSize(DEBUG.debug.FONT_SIZE);
+				//topArea.setFont(font);
 			}
 		};
 		topArea.getActionMap().put("IncreaseFont", al);
@@ -541,9 +542,10 @@ public class CodeEditor extends JPanel implements Runnable {
 				if (topArea.getFont().getSize() == 1) {
 					return;
 				}
-				Font font = new Font(topArea.getFont().getFontName(), topArea.getFont().getStyle(), topArea.getFont().getSize()-1);
+//				Font font = new Font(topArea.getFont().getFontName(), topArea.getFont().getStyle(), topArea.getFont().getSize()-1);
 				DEBUG.debug.FONT_SIZE--;
-				topArea.setFont(font);
+				GUI.setFontSize(DEBUG.debug.FONT_SIZE);
+//				topArea.setFont(font);
 			}
 		};
 		topArea.getActionMap().put("DecreaseFont", al);

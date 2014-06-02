@@ -568,7 +568,8 @@ public class PSMGen {
 		for (Node d0 : D.objects) {
 			CommaCat<Node, Path, Node, Path, Node, Path> B = doComma(D, C, F,
 					d0, D0);
-
+			//System.out.println("comma cat at " + d0 + " is " + B);
+			
 			// System.out.println("Comma cat is " + B);
 
 			Map<Triple<Node, Node, Arr<Node, Path>>, String> xxx1 = new HashMap<>();

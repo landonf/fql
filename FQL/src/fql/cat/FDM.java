@@ -330,6 +330,7 @@ public class FDM {
 //		return raw;
 //	}
 	
+	
 	private static <ObjC, ArrowC, ObjD, ArrowD, Y, X> Set<Value<Y,X>[]> subset2(
 			FinCat<ObjD, ArrowD> cat,
 			Arr<ObjD, ArrowD> e,

@@ -22,21 +22,16 @@ public class MyTableRowSorter extends TableRowSorter<TableModel> {
 		return false;
 	}
 	
-
 	@Override 
 	public Comparator<?> getComparator(int c) {
 		return new Comparator<Object>() {
-
 			@Override
 			public int compare(Object o1, Object o2) {
 				if (o1 instanceof Integer && o2 instanceof Integer) {
-		//			System.out.println("XXXX");
 					return ((Integer)o1).compareTo((Integer)o2);
 				}
-			//	System.out.println("BBBB " + o1 + " and " + o2);
 				return o1.toString().compareTo(o2.toString());
 			}
-			
 		};
 	}
 }

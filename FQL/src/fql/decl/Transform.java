@@ -289,34 +289,8 @@ public class Transform {
 		return panel;
 	}
 
-	/*
-	 * private List<Pair<Object, Object>> get(String k, List<Pair<String,
-	 * List<Pair<Object, Object>>>> x) { for (Pair<String, List<Pair<Object,
-	 * Object>>> k0 : x) { if (k0.first.equals(k)) { return k0.second; } } throw
-	 * new RuntimeException(); }
-	 * 
-	 * private Collection<String> keySet( List<Pair<String, List<Pair<Object,
-	 * Object>>>> d) { List<String> ret = new LinkedList<>(); for (Pair<String,
-	 * List<Pair<Object, Object>>> k : d) { ret.add(k.first); } return ret; }
-	 */
-
 	@Override
 	public String toString() {
-		/*
-		 * String ret = "";
-		 * 
-		 * boolean b = false; for (String k0 : data.keySet()) { Pair<String,
-		 * Set<Pair<Object, Object>>> k = new Pair<>(k0, data.get(k0)); if (b) {
-		 * ret += ",\n"; } b = true;
-		 * 
-		 * String ret0 = ""; boolean c = false; for (Pair<Object, Object> v :
-		 * k.second) { if (c) { ret0 += ","; } c = true; ret0 += "(" + v.first +
-		 * "," + v.second + ")"; }
-		 * 
-		 * ret += k.first + " -> {" + ret0 + "}"; } return "{nodes\n" + ret +
-		 * ";}";
-		 */
-
 		String nm = "\n nodes\n";
 		boolean b = false;
 		for (Entry<String, Set<Pair<Object, Object>>> k : data.entrySet()) {

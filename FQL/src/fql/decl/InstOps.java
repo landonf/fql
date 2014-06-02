@@ -1,5 +1,6 @@
 package fql.decl;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -1205,6 +1206,8 @@ public class InstOps implements
 
 						Triple<Node, Node, Arr<Node, Path>>[] col = colmap
 								.get(n.string);
+					//	System.out.println("for node " + n + ", map is " + Arrays.toString(col));
+						
 						if (col.length == 0) {
 							LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 							Map<String, String> from = new HashMap<>();
@@ -1229,19 +1232,24 @@ public class InstOps implements
 						List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
 						int i = 0;
 						for (Triple<Node, Node, Arr<Node, Path>> col0 : col) {
+						
 							from.put("c" + i + "_subst_inv", middle + "_"
 									+ col0.second.string + "_subst_inv");
 							where.add(new Pair<>(new Pair<>("lim", "c" + i),
 									new Pair<>("c" + i + "_subst_inv", "c0")));
 							attrs.put("c" + i, PSM.VARCHAR());
+							
 							i++;
+							
 						}
 
 				//		if (col.length > 1) {
-							for (int j = 1; j < col.length; j++) {
+							for (int j = 0; j < col.length; j++) {
+								if (col[j].third.arr.equals(f.target.toCategory2().second.of(new Path(f.target, n)).arr)) {
 								where.add(new Pair<>(new Pair<>("c" + 0
 										+ "_subst_inv", "c1"), new Pair<>("c"
 										+ j + "_subst_inv", "c1")));
+								}
 							}
 							
 							select.put("c" + 0, new Pair<>("c" + 0

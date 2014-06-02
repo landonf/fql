@@ -76,6 +76,7 @@ public class ExampleMaker {
 				sb.append(l);
 				sb.append("\"\n");
 			}
+			sb.append("+ \"\\n\"");
 			sb.append("\n\n");				
 			return sb.toString();
 		} catch (IOException e) {

@@ -314,7 +314,7 @@ public class FinCat<Obj, Arrow> {
 
 	@Override
 	public String toString() {
-
+		
 		String o = "";
 		for (Obj oo : objects) {
 			o += "\t" + oo + "\n";

@@ -557,27 +557,6 @@ public class Signature {
 
 	@Override
 	public String toString() {
-		/*
-		 * StringBuffer sb = new StringBuffer("{\n");
-		 * 
-		 * boolean first = true; sb.append("nodes\n"); for (Node n : nodes) { if
-		 * (!first) { sb.append(",\n"); } first = false; sb.append(n.string); }
-		 * sb.append("\n ;\n");
-		 * 
-		 * first = true; sb.append("attributes\n"); for (Attribute<Node> a :
-		 * attrs) { if (!first) { sb.append(",\n"); } first = false;
-		 * sb.append(a); } sb.append("\n ;\n");
-		 * 
-		 * first = true; sb.append("arrows\n"); for (Edge e : edges) { if
-		 * (!first) { sb.append(",\n"); } first = false; sb.append(e); } //
-		 * first = true;
-		 * 
-		 * sb.append("\n ;\n");
-		 * 
-		 * first = true; sb.append("equations\n"); for (Eq eq : eqs) { if
-		 * (!first) { sb.append(",\n"); } first = false; sb.append(eq); }
-		 * sb.append("\n ;\n}"); return sb.toString();
-		 */
 		String x = "\n nodes\n";
 		boolean b = false;
 		for (Node n : nodes) {

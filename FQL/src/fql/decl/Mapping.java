@@ -607,60 +607,6 @@ public class Mapping {
 	}
 
 	public String toString2(boolean xxx) {
-/*		StringBuffer sb = new StringBuffer(); // "mapping " + name + " : "
-		// + source + " -> " + target + " = ");
-		// if (isId) {
-		// sb.append("id " + source.name0);
-		// return sb.toString();
-		// } else {
-		sb.append("{\n");
-		// }
-
-		boolean first = true;
-		sb.append("nodes\n");
-		for (Node k : nm.keySet()) {
-			Node v = nm.get(k);
-			if (!first) {
-				sb.append(",\n");
-			}
-			first = false;
-			// sb.append("(");
-			sb.append(k.string);
-			sb.append(" -> ");
-			sb.append(v.string);
-			// sb.append(")");
-		}
-		first = true;
-		sb.append("\n ;\nattributes\n");
-
-		for (Attribute<Node> k : am.keySet()) {
-			Attribute<Node> v = am.get(k);
-			if (!first) {
-				sb.append(",\n");
-			}
-			first = false;
-			// sb.append("(");
-			sb.append(k.name);
-			sb.append(" -> ");
-			sb.append(v.name);
-			// sb.append(")");
-		}
-		sb.append("\n ;\narrows\n");
-		first = true;
-		for (Edge k : em.keySet()) {
-			Path v = em.get(k);
-			if (!first) {
-				sb.append(",\n");
-			}
-			first = false;
-			// sb.append("(");
-			sb.append(k.name);
-			sb.append(" -> ");
-			sb.append(v);
-			// sb.append(")");
-		}
-		sb.append("\n ;\n}");
-		*/
 		String nm = "\n nodes\n";
 		boolean b = false;
 		for (Entry<Node, Node> k : this.nm.entrySet()) {

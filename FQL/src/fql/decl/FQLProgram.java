@@ -129,7 +129,7 @@ public class FQLProgram {
 
 		for (final String k : insts.keySet()) {
 			InstExp i = insts.get(k);
-			SigExp.Const c = i.type(this).toConst(this);
+			i.type(this).toConst(this);
 //			if (smap.get(c) == null) {
 	//			smap.put(c, nColor());
 	//		}
@@ -353,10 +353,10 @@ public class FQLProgram {
 	public LinkedHashMap<String, FullQueryExp> full_queries = new LinkedHashMap<>();
 	public LinkedHashMap<String, QueryExp> queries = new LinkedHashMap<>();
 	public LinkedHashMap<String, TransExp> transforms = new LinkedHashMap<>();
-
-	public LinkedHashMap<String, Integer> lines = new LinkedHashMap<>();
+ 
 	public List<String> drop = new LinkedList<>();
 	public List<String> order = new LinkedList<>();
+	public LinkedHashMap<String, Integer> lines = new LinkedHashMap<>();
 
 	public FQLProgram(List<NewDecl> decls) {
 		Set<String> seen = new HashSet<>();
