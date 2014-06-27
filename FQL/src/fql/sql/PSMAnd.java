@@ -159,7 +159,7 @@ public class PSMAnd extends PSM {
 	
 	private Instance implies(
 			Signature sig0,
-		    Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>> H1 ,
+		     Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>> H1 , 
 			Triple<Instance, Map<Object, Path>, Map<Path, Object>> Hc, Instance A, Instance B)
 			throws FQLException {
 		Map<String, Set<Pair<Object, Object>>> notA_data = new HashMap<>();

@@ -157,6 +157,8 @@ public class DEBUG implements Serializable {
 	public boolean inst_gr = true;
 	public boolean inst_obs = true;
 	public boolean limit_examples = true;
+	public boolean inst_adom = true;
+	
 	
 	public boolean allow_surjective = true;
 
@@ -445,6 +447,7 @@ public class DEBUG implements Serializable {
 		JCheckBox inst_gr_box = new JCheckBox("Elements", inst_gr);
 		JCheckBox inst_obs_box = new JCheckBox("Observables", inst_obs);
 		JCheckBox inst_rdf_box = new JCheckBox("RDF", inst_rdf);
+		JCheckBox inst_adom_box = new JCheckBox("Adom", inst_adom);
 		JComboBox<String> instBox = new JComboBox<>(layouts);
 		instBox.setToolTipText(layout_string);
 		instBox.setSelectedItem(inst_graph);
@@ -457,6 +460,7 @@ public class DEBUG implements Serializable {
 		instArea.add(inst_gr_box);
 		instArea.add(inst_obs_box);
 		instArea.add(inst_rdf_box);
+		instArea.add(inst_adom_box);
 		JLabel inst_label = new JLabel("Instance viewer panels:");
 		inst_label.setToolTipText("Sets which viewers to use for instances.");
 		viewer1.add(inst_label);
@@ -637,6 +641,7 @@ public class DEBUG implements Serializable {
 			inst_gr = inst_gr_box.isSelected();
 			inst_obs = inst_obs_box.isSelected();
 			inst_rdf = inst_rdf_box.isSelected();
+			inst_adom = inst_adom_box.isSelected();
 
 			schema_graph = (String) schemaBox.getSelectedItem();
 			mapping_graph = (String) mappingBox.getSelectedItem();

@@ -55,6 +55,7 @@ import fql.cat.FinCat;
 import fql.cat.Inst;
 import fql.cat.Value;
 import fql.gui.CategoryOfElements;
+import fql.gui.FQLTextPanel;
 import fql.parse.PrettyPrinter;
 import fql.sql.PropPSM;
 
@@ -2213,7 +2214,7 @@ public class Instance {
 		Instance IJ = new Instance(I.thesig, data);
 
 		return new Quad<>(IJ, map1, map4, xxx);
-	}
+	} 
 
 	public List<Pair<Object, Object>> ids() {
 		List<Pair<Object, Object>> ret = new LinkedList<>();
@@ -2536,6 +2537,47 @@ public class Instance {
 
 		Instance ret = new Instance(thesig, map);
 		return new Triple<>(ret, map1, map2);
+	}
+
+	public JPanel adom() {
+		String str2 = "";
+		Set<String> set = new HashSet<>();
+		
+		for (Attribute<Node> k : thesig.attrs) {
+			Set<String> setX = new HashSet<>();
+
+			for (Pair<Object, Object> v : data.get(k.name)) {
+				set.add(v.second.toString());
+				setX.add(v.second.toString());
+			}
+			str2 += k.name + ":\n";
+					
+			boolean first = true;
+			for (String s : setX) {
+				if (!first) {
+					str2 += ",\n";
+				}
+				first = false;
+				str2 += ("\"" + s + "\"");
+			}
+			
+			str2 += "\n\n";
+		}
+
+		String str = "";
+		boolean first = true;
+		for (String s : set) {
+			if (!first) {
+				str += ",\n";
+			}
+			first = false;
+			str += ("\"" + s + "\"");
+		}
+
+		str += "\n\n\n\n ------------------------------- \n\n\n\n";
+		str += str2;
+		
+		return new FQLTextPanel("Active Domain", str );
 	}
 
 }

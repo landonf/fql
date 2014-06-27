@@ -340,7 +340,8 @@ public class InstanceEditor {
 					int j = 0;
 					DefaultTableModel dtm = (DefaultTableModel) t.getModel();
 					for (int x : i) {
-						dtm.removeRow(x - (j++));
+						dtm.removeRow(t.convertRowIndexToModel(x) - j);
+						j++;
 					}
 					joined2.get(card).setBorder(
 							BorderFactory.createTitledBorder(

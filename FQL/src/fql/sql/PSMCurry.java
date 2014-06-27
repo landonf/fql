@@ -53,8 +53,8 @@ public class PSMCurry extends PSM {
 			Map<Node, List<Pair<Arr<Node, Path>, Attribute<Node>>>> obs = I.thesig.obs();
 
 			List<Pair<String, List<Pair<Object, Object>>>> l = new LinkedList<>();
+			Quad<Instance, Map<Pair<Node, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>, Triple<Instance, Map<Node, Map<Object, Pair<Arr<Node, Path>, Object>>>, Map<Node, Map<Pair<Arr<Node, Path>, Object>, Object>>>>, Map<Node, Map<Object, Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform>>>, Map<Node, Map<Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform>, Object>>> kkk = interp.exps2.get(inst_dst);
 			for (Node c : sig.nodes) {
-				Quad<Instance, Map<Pair<Node, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>, Triple<Instance, Map<Node, Map<Object, Pair<Arr<Node, Path>, Object>>>, Map<Node, Map<Pair<Arr<Node, Path>, Object>, Object>>>>, Map<Node, Map<Object, Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform>>>, Map<Node, Map<Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform>, Object>>> kkk = interp.exps2.get(inst_dst);
 				List<Pair<Object, Object>> s = new LinkedList<>();
 				for (Pair<Object, Object> xx : I.data.get(c.string)) {
 					Object x = xx.first;

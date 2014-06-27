@@ -61,6 +61,7 @@ public class ExampleMaker {
 	}
 
 	protected static String run(String s) {
+		s = s.replace("\"", "\\\"");
 		BufferedReader br = new BufferedReader(new StringReader(s.trim()));
 		StringBuffer sb = new StringBuffer();
 		String l;

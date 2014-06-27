@@ -69,7 +69,7 @@ public class PSMNot extends PSM {
 					Pair<Object, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>> id0 = I1.get(c).get(id);
 					Instance A = H2.second.get(c).first.get(id0.first);
 					//System.out.println("A " + A);
-					Instance notA = calcSub(sig0, H1, Hc, A);
+					Instance notA = calcSub(sig0, /*H1, */ Hc, A);
 					//System.out.println("not A" + notA);
 					Object notId = H2.second.get(c).second.get(notA);
 		//			System.out.println("notID " + notId);
@@ -92,7 +92,7 @@ public class PSMNot extends PSM {
 
 	private Instance calcSub(
 			Signature sig0,
-		    Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>> H1 ,
+		    /* Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>> H1 , */
 			Triple<Instance, Map<Object, Path>, Map<Path, Object>> Hc, Instance A)
 			throws FQLException {
 		Map<String, Set<Pair<Object, Object>>> notA_data = new HashMap<>();

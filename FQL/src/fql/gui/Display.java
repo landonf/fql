@@ -135,6 +135,12 @@ public class Display {
 			JPanel rel = view.rdf(c);
 			px.add("RDF", rel);
 		}
+		
+		if (DEBUG.debug.inst_adom) {
+			JPanel rel = view.adom();
+			px.add("Adom", rel);
+		}
+		
 
 		JPanel top = new JPanel(new GridLayout(1, 1));
 		top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
