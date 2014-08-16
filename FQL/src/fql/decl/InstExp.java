@@ -12,6 +12,64 @@ public abstract class InstExp {
 		return accept(prog, new InstChecker());
 	}
 	
+	public static class Step extends InstExp {
+		public String I;
+		public MapExp m, n;
+		
+		@Override
+		public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+		@Override
+		public String toString() {
+			return "step " + m + " " + n + " " + I;
+		}
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			result = prime * result + ((m == null) ? 0 : m.hashCode());
+			result = prime * result + ((n == null) ? 0 : n.hashCode());
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Step other = (Step) obj;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			if (m == null) {
+				if (other.m != null)
+					return false;
+			} else if (!m.equals(other.m))
+				return false;
+			if (n == null) {
+				if (other.n != null)
+					return false;
+			} else if (!n.equals(other.n))
+				return false;
+			return true;
+		}
+		public Step(String i, MapExp m, MapExp n) {
+			super();
+			I = i;
+			this.m = m;
+			this.n = n;
+		}
+		
+	}
+	
 	public static class Kernel extends InstExp {
 		public String trans;
 
@@ -987,6 +1045,7 @@ public abstract class InstExp {
 		public R visit(E env, Eval e);
 		public R visit(E env, FullEval e);
 		public R visit(E env, Kernel e);
+		public R visit(E env, Step e);
 	}
 
 }

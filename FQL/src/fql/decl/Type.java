@@ -131,6 +131,43 @@ public abstract class Type {
 
 	}
 	
+	public static class Float extends Type {
+
+		@Override
+		public boolean equals(Object o) {
+			if (o instanceof Double) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+
+			return 0;
+		}
+
+		@Override
+		public String toString() {
+			return "float";
+		}
+
+		@Override
+		public boolean in(Object o) {
+			try {
+				Double.parseDouble(o.toString());
+				return true;
+			} catch (Exception e) {
+				return false;
+			}
+		}
+		@Override
+		public String psm() {
+			return PSM.FLOAT;
+		}
+
+	}
+	
 	public static class Varchar extends Type {
 		
 		@Override

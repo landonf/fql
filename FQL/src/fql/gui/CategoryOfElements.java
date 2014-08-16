@@ -114,6 +114,40 @@ public class CategoryOfElements {
 		}
 		return false;
 	}
+	
+	public static JPanel dot(String name, final Instance inst, Graph<Pair<Node, Object>, 
+			Pair<Path, Integer>> sgv, HashMap<Pair<Node, Object>, Map<Attribute<Node>, Object>> map0) {
+//		String str = "digraph graphname {
+//     a -> b -> c;
+//     b -> d;
+// }"
+		String str = "";		
+		int i = 0;
+		Map<Pair<Node, Object>, Integer> map = new HashMap<>();
+		for (Pair<Node, Object> p : sgv.getVertices()) {
+			String s = p.toString() + map0.get(p);
+			s.replace("\"", "\\\"");
+			map.put(p, i); //a [label="Foo"];
+			str += i + " [label=\"" + s + "\"];\n";
+			i++;
+		}
+
+		for (Pair<Path, Integer> p : sgv.getEdges()) {
+			Pair<Node, Object> src = sgv.getSource(p);
+			Pair<Node, Object> dst = sgv.getDest(p);
+			int src_id = map.get(src);
+			int dst_id = map.get(dst);
+			str += src_id + " -> " + dst_id + " [label=\"" + p.first + "\"];\n";
+		}
+		
+		
+		str = "digraph " + name + " {\n" + str.trim() + "\n}";		
+		JPanel p = new JPanel(new GridLayout(1,1));
+		JTextArea area = new JTextArea(str);
+		JScrollPane jsp = new JScrollPane(area);
+		p.add(jsp);
+		return p;
+	}
 
 	public static JPanel doView(final Color clr, final Instance inst, Graph<Pair<Node, Object>, Pair<Path, Integer>> sgv, HashMap<Pair<Node, Object>, Map<Attribute<Node>, Object>> map0) {
 	//	HashMap<Pair<Node, Object>,String> map = new HashMap<>();
@@ -228,21 +262,25 @@ public class CategoryOfElements {
 		return ret;
 	}
 
-	public static JPanel makePanel(Instance i, Color c) throws FQLException {
-				
+	public static Pair<JPanel, JPanel> makePanel(String name, Instance i, Color c) throws FQLException {
 		try {
-		
+			JPanel ret;
+			JPanel ret2;
 			Pair<Graph<Pair<Node, Object>, Pair<Path, Integer>>, HashMap<Pair<Node, Object>, Map<Attribute<Node>, Object>>> g = build(i);
 			if (g.first.getVertexCount() == 0) {
-				return new JPanel();
+				ret = new JPanel();
 			}
-			return doView(c, i, g.first, g.second);
+			
+			ret = doView(c, i, g.first, g.second);
+			ret2 = dot(name, i, g.first, g.second);
+			
+			return new Pair<>(ret, ret2);
 
 		} catch (FQLException e) {
 			JPanel p = new JPanel(new GridLayout(1,1));
 			JTextArea a = new JTextArea(e.getMessage());
 			p.add(new JScrollPane(a));
-			return p;
+			return new Pair<>(p, p);
 		}
 
 		

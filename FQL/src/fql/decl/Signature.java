@@ -50,6 +50,7 @@ import fql.FQLException;
 import fql.Fn;
 import fql.Pair;
 import fql.Triple;
+import fql.Util;
 import fql.cat.Arr;
 import fql.cat.FinCat;
 import fql.cat.Inst;
@@ -427,7 +428,12 @@ public class Signature {
 			}
 		});
 
-		JTable eqsComponent = new JTable(arr, new Object[] { "lhs", "rhs" });
+		JTable eqsComponent = new JTable(arr, new Object[] { "lhs", "rhs" })  {
+			public Dimension getPreferredScrollableViewportSize() {
+				Dimension d = getPreferredSize();
+				return new Dimension(d.width, d.height);
+			}
+		};
 		// MouseListener[] listeners = eqsComponent.getMouseListeners();
 		// for (MouseListener l : listeners) {
 		// eqsComponent.removeMouseListener(l);
@@ -435,14 +441,15 @@ public class Signature {
 		// eqsComponent.setRowSelectionAllowed(false);
 		// eqsComponent.setColumnSelectionAllowed(false);
 
-		JPanel p = new JPanel(new GridLayout(2, 2));
-		p.setBorder(BorderFactory.createEtchedBorder());
+		List<JComponent> p = new LinkedList<>();
+//		JPanel p = new JPanel(new GridLayout(2, 2));
+//		p.setBorder(BorderFactory.createEtchedBorder());
 		// p.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 
 		JPanel eqsTemp = new JPanel(new GridLayout(1, 1));
 
 		eqsTemp.setBorder(BorderFactory.createTitledBorder(
-				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Equations"));
+				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Equations (" + eqs.size() + ")"));
 		eqsTemp.add(new JScrollPane(eqsComponent));
 
 		Object[][] sn = new String[nodes.size()][1];
@@ -456,10 +463,15 @@ public class Signature {
 			}
 		});
 
-		JTable nodesComponent = new JTable(sn, new String[] { "Name" });
+		JTable nodesComponent = new JTable(sn, new String[] { "Name" }) {
+			public Dimension getPreferredScrollableViewportSize() {
+				Dimension d = getPreferredSize();
+				return new Dimension(d.width, d.height);
+			}
+		};
 		JPanel nodesTemp = new JPanel(new GridLayout(1, 1));
 		nodesTemp.setBorder(BorderFactory.createTitledBorder(
-				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Nodes"));
+				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Nodes (" + nodes.size() + ")"));
 		nodesTemp.add(new JScrollPane(nodesComponent));
 		// nodesComponent.setRowSelectionAllowed(false);
 		// nodesComponent.setColumnSelectionAllowed(false);
@@ -482,11 +494,16 @@ public class Signature {
 			}
 		});
 
-		JTable esC = new JTable(es, new String[] { "Name", "Source", "Target" });
+		JTable esC = new JTable(es, new String[] { "Name", "Source", "Target" }) {
+			public Dimension getPreferredScrollableViewportSize() {
+				Dimension d = getPreferredSize();
+				return new Dimension(d.width, d.height);
+			}
+		};
 		JPanel edgesTemp = new JPanel(new GridLayout(1, 1));
 		edgesTemp.add(new JScrollPane(esC));
 		edgesTemp.setBorder(BorderFactory.createTitledBorder(
-				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Arrows"));
+				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Arrows (" + edges.size() + ")"));
 
 		// esC.setRowSelectionAllowed(false);
 		// esC.setColumnSelectionAllowed(false);
@@ -509,11 +526,16 @@ public class Signature {
 			}
 		});
 
-		JTable asC = new JTable(as, new String[] { "Name", "Source", "Type" });
+		JTable asC = new JTable(as, new String[] { "Name", "Source", "Type" }) {
+			public Dimension getPreferredScrollableViewportSize() {
+				Dimension d = getPreferredSize();
+				return new Dimension(d.width, d.height);
+			}
+		};
 		JPanel attrsTemp = new JPanel(new GridLayout(1, 1));
 		attrsTemp.add(new JScrollPane(asC));
 		attrsTemp.setBorder(BorderFactory.createTitledBorder(
-				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Attributes"));
+				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Attributes (" + attrs.size() + ")"));
 
 		// esC.setRowSelectionAllowed(false);
 		// esC.setColumnSelectionAllowed(false);
@@ -526,7 +548,7 @@ public class Signature {
 		p.add(attrsTemp);
 		p.add(eqsTemp);
 
-		return p;
+		return Util.makeGrid(p);
 	}
 
 	public static String toString(
@@ -724,15 +746,25 @@ public class Signature {
 	// TODO dangerous
 	Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> cached = null;
 
+	private void doInfiniteCheck() {
+		if (eqs.size() > 0) {
+			return;
+		}
+		for (Edge e : edges) {
+			if (e.source.equals(e.target)) {
+				throw new RuntimeException("Category is infinite (contains self-loop and no equations)");
+			}
+		}
+	}
+	
 	public Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> toCategory2()
 			throws FQLException {
 		if (cached != null) {
 			return cached;
 		}
-
-		/*
-		 * Denotation d = new Denotation(this); cached = d.toCategory(this);
-		 */
+		
+		doInfiniteCheck();
+		
 		cached = LeftKanCat.toCategory(this);
 		cached.first.attrs = attrs;
 
@@ -1672,6 +1704,40 @@ public class Signature {
 		}
 		obsbar_cached = ret;
 		return ret;
+	}
+	
+	public JPanel dot(String name) {
+		String str = "";		
+	//	int i = 0;
+//		Map<Pair<Node, Object>, Integer> map = new HashMap<>();
+		for (Node p : nodes) {
+			String s = p.toString();// + attrsFor(p); //map0.get(p);
+		//	s.replace("\"", "\\\"");
+		//	map.put(p, i); //a [label="Foo"];
+			str += s + " [shape=box];\n"; // + " [label=\"" + s + "\"];\n";
+//			i++;
+		}
+
+		for (Attribute<Node> a : attrs) {
+			String s = a.name;// + attrsFor(p); //map0.get(p);
+			//s.replace("\"", "\\\"");
+		//	map.put(p, i); //a [label="Foo"];
+			str += s + ";\n"; // + " [label=\"" + s + "\"];\n";
+		//	i++;
+			str += a.source + " -> " + s + " [dir=none];\n";
+		}
+		
+		for (Edge p : edges) {
+			str += p.source + " -> " + p.target + " [label=\"" + p.name + "\"];\n";
+		}
+		
+		
+		str = "digraph " + name + " {\n" + str.trim() + "\n}";		
+		JPanel p = new JPanel(new GridLayout(1,1));
+		JTextArea area = new JTextArea(str);
+		JScrollPane jsp = new JScrollPane(area);
+		p.add(jsp);
+		return p;
 	}
 	
 }

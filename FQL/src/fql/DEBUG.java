@@ -2,6 +2,7 @@ package fql;
 
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
@@ -56,7 +57,7 @@ public class DEBUG implements Serializable {
 	public String look_and_feel = UIManager.getSystemLookAndFeelClassName();
 
 
-	public SQLKIND sqlKind = SQLKIND.NATIVE;
+	public SQLKIND sqlKind = SQLKIND.H2;
 
 	public String FILE_PATH = "";
 
@@ -114,7 +115,7 @@ public class DEBUG implements Serializable {
 
 	public boolean MultiView = true;
 
-	public int varlen = 128;
+	public int varlen = 255;
 
 	public boolean VALIDATE = true;
 
@@ -140,6 +141,7 @@ public class DEBUG implements Serializable {
 	public boolean schema_textual = true;
 	public boolean schema_denotation = true;
 	public boolean schema_ed = true;
+	public boolean schema_dot = true;
 
 	public boolean mapping_graphical = true;
 	public boolean mapping_tabular = true;
@@ -158,6 +160,7 @@ public class DEBUG implements Serializable {
 	public boolean inst_obs = true;
 	public boolean limit_examples = true;
 	public boolean inst_adom = true;
+	public boolean inst_dot = true;
 	
 	
 	public boolean allow_surjective = true;
@@ -380,6 +383,7 @@ public class DEBUG implements Serializable {
 		JCheckBox schema_denotation_box = new JCheckBox("Denotation",
 				schema_denotation);
 		JCheckBox schema_rdf_box = new JCheckBox("OWL", schema_rdf);
+		JCheckBox schema_dot_box = new JCheckBox("Dot", schema_dot);
 
 		// JPanel schemaTemp = new JPanel();
 		// schemaTemp.setBorder(BorderFactory.createLineBorder(Color.BLACK));
@@ -448,6 +452,8 @@ public class DEBUG implements Serializable {
 		JCheckBox inst_obs_box = new JCheckBox("Observables", inst_obs);
 		JCheckBox inst_rdf_box = new JCheckBox("RDF", inst_rdf);
 		JCheckBox inst_adom_box = new JCheckBox("Adom", inst_adom);
+		JCheckBox inst_dot_box = new JCheckBox("Dot", inst_dot);
+		
 		JComboBox<String> instBox = new JComboBox<>(layouts);
 		instBox.setToolTipText(layout_string);
 		instBox.setSelectedItem(inst_graph);
@@ -461,6 +467,7 @@ public class DEBUG implements Serializable {
 		instArea.add(inst_obs_box);
 		instArea.add(inst_rdf_box);
 		instArea.add(inst_adom_box);
+		instArea.add(inst_dot_box);
 		JLabel inst_label = new JLabel("Instance viewer panels:");
 		inst_label.setToolTipText("Sets which viewers to use for instances.");
 		viewer1.add(inst_label);
@@ -625,6 +632,7 @@ public class DEBUG implements Serializable {
 			schema_tabular = schema_tabular_box.isSelected();
 			schema_textual = schema_textual_box.isSelected();
 			schema_rdf = schema_rdf_box.isSelected();
+			schema_dot = schema_dot_box.isSelected();
 			
 			mapping_ed = mapping_ed_box.isSelected();
 			mapping_graphical = mapping_graphical_box.isSelected();
@@ -642,6 +650,7 @@ public class DEBUG implements Serializable {
 			inst_obs = inst_obs_box.isSelected();
 			inst_rdf = inst_rdf_box.isSelected();
 			inst_adom = inst_adom_box.isSelected();
+			inst_dot = inst_dot_box.isSelected();
 
 			schema_graph = (String) schemaBox.getSelectedItem();
 			mapping_graph = (String) mappingBox.getSelectedItem();
@@ -668,6 +677,10 @@ public class DEBUG implements Serializable {
 			jdbcUrl = jdbcField.getText();
 			jdbcClass = jdbcField2.getText();
 			FILE_PATH = fileArea.getText();
+			File FILE = new File(FILE_PATH);
+			if (!FILE_PATH.trim().equals("") && (!FILE.exists() || !FILE.isDirectory())) {
+				JOptionPane.showMessageDialog(null, "Bad file-system path");				
+			}
 			
 		//	kan_option =  lkb.getSelectedItem().toString();
 			

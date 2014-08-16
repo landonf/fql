@@ -824,7 +824,6 @@ public class Chase {
 		// System.out.println("Add " + ret);
 
 		return ret;
-
 	}
 
 	private static List<Pair<Object, Object>> chaseEgd(

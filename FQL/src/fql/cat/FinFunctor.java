@@ -84,6 +84,7 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 	}
 
 	public void validate() {
+		//System.out.println("Validating " + this);
 		for (ObjA o : srcCat.objects) {
 			if (!objMapping.containsKey(o)) {
 				throw new RuntimeException("Functor does not map " + o + this);
@@ -105,10 +106,13 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 						+ "\n\n" + this + "\n\n dstCat " + dstCat);
 			}
 			for (Arr<ObjA, ArrowA> b : srcCat.arrows) {
-				Arr<ObjA, ArrowA> c = srcCat.compose(a, b);
-				if (c == null) {
+				if (!a.dst.equals(b.src)) {
 					continue;
 				}
+				Arr<ObjA, ArrowA> c = srcCat.compose(a, b);
+				//if (c == null) {
+				//	continue;
+				//}
 				Arr<ObjB, ArrowB> a0 = arrowMapping.get(a);
 				Arr<ObjB, ArrowB> b0 = arrowMapping.get(b);
 				Arr<ObjB, ArrowB> c0 = arrowMapping.get(c);
@@ -119,8 +123,15 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 							+ "\ncomp is " + dstCat.compose(a0, b0)
 							+ "\nsrcCat:\n" + srcCat + "\ndstcat:\n" + dstCat);
 				}
+			
+//			if (!applyA(srcCat.compose(a, b)).equals(dstCat.compose(applyA(a), applyA(b)))) {
+//				throw new RuntimeException("Composition not preserved on" + a + " and " + b
+//						+ ":\nLHS =\n" + applyA(srcCat.compose(a, b)) + "\nand RHS=\n"
+//						+ dstCat.compose(applyA(a), applyA(b)));
+//			}
 			}
 		}
+		
 	}
 
 	@Override

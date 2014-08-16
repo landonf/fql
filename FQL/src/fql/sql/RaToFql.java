@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
@@ -47,11 +48,12 @@ import fql.gui.FQLTextPanel;
  * 
  * @author ryan
  *
- * Translates SPCU (in the guise of SQL) to FQL using an active domain construction.
+ *         Translates SPCU (in the guise of SQL) to FQL using an active domain
+ *         construction.
  */
 public class RaToFql {
-	
-	//always adom and guid
+
+	// always adom and guid
 	public static String doAdom(SigExp.Const A, String a) {
 		String k = a;
 		List<Pair<List<String>, List<String>>> eeqs = new LinkedList<>();
@@ -59,9 +61,9 @@ public class RaToFql {
 		attrs.add(new Triple<>("att", "adom", "str"));
 		List<Triple<String, String, String>> dd_attrs = new LinkedList<>();
 		dd_attrs.add(new Triple<>("att", "x", "str"));
-		
+
 		List<Triple<String, String, String>> e_attrs = new LinkedList<>();
-		
+
 		List<String> bn = new LinkedList<>();
 		bn.add("r");
 		bn.add("d");
@@ -74,15 +76,15 @@ public class RaToFql {
 		List<Pair<String, String>> e_abatt = new LinkedList<>();
 
 		List<Pair<String, List<String>>> abarr = new LinkedList<>();
-		
+
 		List<String> cn = new LinkedList<>();
 		cn.add("r");
 		cn.add("d");
 		cn.add("m");
-		
+
 		List<Triple<String, String, String>> carrs = new LinkedList<>();
 		carrs.add(new Triple<>("f", "m", "d"));
-		
+
 		List<Pair<String, String>> bcn = new LinkedList<>();
 		bcn.add(new Pair<>("r", "r"));
 		bcn.add(new Pair<>("d", "d"));
@@ -103,7 +105,7 @@ public class RaToFql {
 
 		List<Triple<String, String, String>> ccarrs = new LinkedList<>();
 		List<String> ccn = new LinkedList<>();
-		List<Pair<List<String>, List<String>>> cceqs = new LinkedList<>();	
+		List<Pair<List<String>, List<String>>> cceqs = new LinkedList<>();
 		ccn.add("r");
 		ccn.add("a");
 		ccn.add("b");
@@ -117,13 +119,17 @@ public class RaToFql {
 		ccarrs.add(new Triple<>("ff", "e", "b"));
 		ccarrs.add(new Triple<>("gg", "e", "c"));
 		List<String> l1 = new LinkedList<>();
-		l1.add("e"); l1.add("ff"); l1.add("h");
+		l1.add("e");
+		l1.add("ff");
+		l1.add("h");
 		List<String> l2 = new LinkedList<>();
-		l2.add("e"); l2.add("gg"); l2.add("i");
+		l2.add("e");
+		l2.add("gg");
+		l2.add("i");
 		cceqs.add(new Pair<>(l1, l2));
 
 		List<Triple<String, String, String>> ddarrs = new LinkedList<>();
-		List<Pair<List<String>, List<String>>> ddeqs = new LinkedList<>();	
+		List<Pair<List<String>, List<String>>> ddeqs = new LinkedList<>();
 		List<String> ddn = new LinkedList<>();
 		ddn.add("r");
 		ddn.add("v");
@@ -135,9 +141,13 @@ public class RaToFql {
 		ddarrs.add(new Triple<>("h", "x", "y"));
 		ddarrs.add(new Triple<>("ff", "v", "w"));
 		l1 = new LinkedList<>();
-		l1.add("v"); l1.add("f"); l1.add("g");
+		l1.add("v");
+		l1.add("f");
+		l1.add("g");
 		l2 = new LinkedList<>();
-		l2.add("v"); l2.add("ff"); l2.add("g");
+		l2.add("v");
+		l2.add("ff");
+		l2.add("g");
 		ddeqs.add(new Pair<>(l1, l2));
 
 		List<Pair<String, String>> ffn = new LinkedList<>();
@@ -185,7 +195,7 @@ public class RaToFql {
 		l1.add("c");
 		l1.add("i");
 		ggarr.add(new Pair<>("i", l1));
-		
+
 		List<Pair<String, String>> hhn = new LinkedList<>();
 		hhn.add(new Pair<>("r", "r"));
 		hhn.add(new Pair<>("e", "v"));
@@ -223,14 +233,14 @@ public class RaToFql {
 		iin.add(new Pair<>("guid", "r"));
 		iin.add(new Pair<>("adom", "x"));
 		List<Pair<String, List<String>>> iiarr = new LinkedList<>();
-		
+
 		int i = 0;
 		for (Triple<String, String, String> m0 : A.arrows) {
 			String m = m0.first;
 			bn.add("m" + i);
 			barrs.add(new Triple<>("i" + i, "r", "m" + i));
 			barrs.add(new Triple<>("f" + i, "m" + i, "d"));
-			
+
 			abn.add(new Pair<>("m" + i, "guid"));
 			List<String> l = new LinkedList<>();
 			l.add("guid");
@@ -239,11 +249,11 @@ public class RaToFql {
 			l.add("guid");
 			l.add(m);
 			abarr.add(new Pair<>("f" + i, l));
-		
+
 			carrs.add(new Triple<>("i" + i, "r", "m"));
-			
+
 			bcn.add(new Pair<>("m" + i, "m"));
-			
+
 			l = new LinkedList<>();
 			l.add("r");
 			l.add("i" + i);
@@ -253,7 +263,7 @@ public class RaToFql {
 			l.add("m");
 			l.add("f");
 			bcarr.add(new Pair<>("f" + i, l));
-			
+
 			bbarrs.add(new Triple<>("i" + i, "r", "a"));
 			ccarrs.add(new Triple<>("i" + i, "r", "a"));
 			ddarrs.add(new Triple<>("i" + i, "r", "w"));
@@ -273,7 +283,6 @@ public class RaToFql {
 			l.add("i" + i);
 			hharr.add(new Pair<>("i" + i, l));
 
-
 			l = new LinkedList<>();
 			l.add("r");
 			l.add("i" + i);
@@ -282,23 +291,22 @@ public class RaToFql {
 
 			i++;
 		}
-		
+
 		SigExp.Const b = new SigExp.Const(bn, e_attrs, barrs, eeqs);
-		MapExp.Const ab = new MapExp.Const(abn, e_abatt, abarr, b, A); //F
-		
+		MapExp.Const ab = new MapExp.Const(abn, e_abatt, abarr, b, A); // F
+
 		SigExp.Const c = new SigExp.Const(cn, e_attrs, carrs, eeqs);
-		MapExp.Const bc = new MapExp.Const(bcn, e_abatt, bcarr, b, c); //G
+		MapExp.Const bc = new MapExp.Const(bcn, e_abatt, bcarr, b, c); // G
 
 		SigExp.Const bb = new SigExp.Const(bbn, e_attrs, bbarrs, eeqs);
 		SigExp.Const cc = new SigExp.Const(ccn, e_attrs, ccarrs, cceqs);
 		SigExp.Const dd = new SigExp.Const(ddn, dd_attrs, ddarrs, ddeqs);
 
-		MapExp.Const ff = new MapExp.Const(ffn, e_abatt, ffarr, bb, c); 
-		MapExp.Const gg = new MapExp.Const(ggn, e_abatt, ggarr, bb, cc); 
-		MapExp.Const hh = new MapExp.Const(hhn, e_abatt, hharr, c, dd); 
-		MapExp.Const ii = new MapExp.Const(iin, abatt, iiarr, A, dd); 
+		MapExp.Const ff = new MapExp.Const(ffn, e_abatt, ffarr, bb, c);
+		MapExp.Const gg = new MapExp.Const(ggn, e_abatt, ggarr, bb, cc);
+		MapExp.Const hh = new MapExp.Const(hhn, e_abatt, hharr, c, dd);
+		MapExp.Const ii = new MapExp.Const(iin, abatt, iiarr, A, dd);
 
-		
 		String ret = "///////////////\n";
 		ret += "schema " + k + "_B = " + b + "\n\n";
 		ret += "mapping " + k + "_F = " + ab + " : " + k + "_B -> " + a + "\n\n";
@@ -313,38 +321,54 @@ public class RaToFql {
 		ret += "mapping " + k + "_GG = " + gg + " : " + k + "_BB -> " + k + "_CC\n\n";
 		ret += "mapping " + k + "_HH = " + hh + " : " + k + "_CC -> " + k + "_DD\n\n";
 		ret += "mapping " + k + "_II = " + ii + " : " + a + " -> " + k + "_DD\n\n";
-		
+
 		ret += "//////////////\n";
 		return ret;
-		//emit as "as_rel"
+		// emit as "as_rel"
 	}
-	
+
 	private static String doAdom2(String k, String in, String out) {
 		String ret = "";
 		ret += "\n\ninstance " + out + "_y = delta " + k + "_F " + in;
-		ret += "\n\ninstance " + out + "_z = sigma " + k + "_G " + out + "_y"; 
-		ret += "\n\ninstance " + out + "_w1= delta " + k + "_FF "+ out + "_z";
-		ret += "\n\ninstance " + out + "_w2= pi "    + k + "_GG "+ out + "_w1";
-		ret += "\n\ninstance " + out + "_w3= SIGMA " + k + "_HH "+ out + "_w2";
-		ret += "\n\ninstance " + out + "_rel= delta "+ k + "_II "+ out + "_w3";
+		ret += "\n\ninstance " + out + "_z = sigma " + k + "_G " + out + "_y";
+		ret += "\n\ninstance " + out + "_w1= delta " + k + "_FF " + out + "_z";
+		ret += "\n\ninstance " + out + "_w2= pi " + k + "_GG " + out + "_w1";
+		ret += "\n\ninstance " + out + "_w3= SIGMA " + k + "_HH " + out + "_w2";
+		ret += "\n\ninstance " + out + "_rel= delta " + k + "_II " + out + "_w3";
 		/*
-		instance Y3=delta F3 X3
-		instance Z3=sigma G3 Y3
-
-		instance W1=delta F Z3
-		instance W2=pi G W1 
-		instance W3=SIGMA H W2
-		instance RelationImage=delta I W3 
-			 */
+		 * instance Y3=delta F3 X3 instance Z3=sigma G3 Y3
+		 * 
+		 * instance W1=delta F Z3 instance W2=pi G W1 instance W3=SIGMA H W2
+		 * instance RelationImage=delta I W3
+		 */
 		return ret;
 	}
-	
-	protected Example[] examples = { new PeopleExample() /*, new NegExample() */ };
+
+	protected Example[] examples = { new PeopleExample() /* , new NegExample() */, new EDExample() };
 
 	String help = "Bags of tuples can be represented in FQL using an explicit active domain construction.  See the People example.  Unions of conjunctive queries *of base relations* are supported, using DISTINCT and ALL for set semantics.  (The translated FQL will not compile if not translating unions of conjunctive queries of base relations).  Primary and foreign keys are not supported by this encoding.  WHERE clauses must have equalities between variables, not constants.  SQL keywords MUST be capitalized.  The observables viewer pane is useful for visualizing instances.";
 
 	protected String kind() {
 		return "SPCU";
+	}
+
+	static class EDExample extends Example {
+
+		@Override
+		public String getName() {
+			return "ED";
+		}
+
+		@Override
+		public String getText() {
+			return "CREATE TABLE P (" + "\n f VARCHAR(255)" + "\n);  " + "\n"
+					+ "\nCREATE TABLE Q (" + "\n g VARCHAR(255), " + "\n h VARCHAR(255)" + "\n);"
+					+ "\n" + "\nINSERT INTO P VALUES (\"a\"),(\"b\"),(\"c\");  "
+					+ "\nINSERT INTO Q VALUES (\"a\", \"b\"),(\"x\",\"x\");" + "\n"
+					+ "\nc1 = FORALL Q AS Q1 " + "\n     WHERE Q1.g = Q1.h"
+					+ "\n     EXISTS P AS P1, P AS P2" + "\n     WHERE P1.f = Q1.g " + "\n";
+		}
+
 	}
 
 	static class PeopleExample extends Example {
@@ -358,7 +382,7 @@ public class RaToFql {
 			return extext1;
 		}
 	}
-	
+
 	static class NegExample extends Example {
 		@Override
 		public String getName() {
@@ -396,7 +420,9 @@ public class RaToFql {
 		box.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				input.setText(((Example) box.getSelectedItem()).getText());
+				if (box.getSelectedItem() != null) {
+					input.setText(((Example) box.getSelectedItem()).getText());
+				}
 			}
 		});
 
@@ -422,8 +448,7 @@ public class RaToFql {
 				jta.setWrapStyleWord(true);
 				// jta.setEditable(false);
 				jta.setLineWrap(true);
-				JScrollPane p = new JScrollPane(jta,
-						JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane p = new JScrollPane(jta, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 						JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 				p.setPreferredSize(new Dimension(300, 200));
 
@@ -478,7 +503,7 @@ public class RaToFql {
 		f.setVisible(true);
 	}
 
-	static String extext1 ="CREATE TABLE Place ("
+	static String extext1 = "CREATE TABLE Place ("
 			+ "\n description VARCHAR(255)"
 			+ "\n);  "
 			+ "\n"
@@ -488,119 +513,45 @@ public class RaToFql {
 			+ "\n);"
 			+ "\n"
 			+ "\nINSERT INTO Place VALUES (\"New York\"),(\"Chicago\"),(\"New York\"); //bag semantics "
-			+ "\nINSERT INTO Person VALUES (\"Alice\", \"Chicago\");"
-			+ "\n"
+			+ "\nINSERT INTO Person VALUES (\"Alice\", \"Chicago\");" + "\n"
 			+ "\nq1 = SELECT DISTINCT x.description AS col0, z.name AS col1"
 			+ "\n     FROM Place AS x, Place AS y, Person AS z "
-			+ "\n     WHERE x.description = y.description AND x.description = z.home"
-			+ "\n"
+			+ "\n     WHERE x.description = y.description AND x.description = z.home" + "\n"
 			+ "\nq2 = SELECT x.description AS col0, z.name AS col1"
 			+ "\n     FROM Place AS x, Place AS y, Person AS z "
-			+ "\n     WHERE x.description = y.description AND x.description = z.home"
-			+ "\n"
-			+ "\nq3 = q1 UNION q2"
-			+ "\n"
-			+ "\nq4 = q1 UNION ALL q2"
-			+ "\n";
+			+ "\n     WHERE x.description = y.description AND x.description = z.home" + "\n"
+			+ "\nq3 = q1 UNION q2" + "\n" + "\nq4 = q1 UNION ALL q2" + "\n";
 
-	static String negText =  "//our encoding of negation doesn't work correctly yet\n"
-			+ "\nCREATE TABLE A ("
-			+ "\n a VARCHAR(255)"
-			+ "\n);  "
-			+ "\n"
-			+ "\nINSERT INTO A VALUES (\"a\"),(\"a\"),(\"a\"); "
-			+ "\n"
-			+ "\nCREATE TABLE B ("
-			+ "\n b VARCHAR(255)"
-			+ "\n);"
-			+ "\n"
-			+ "\nINSERT INTO B VALUES (\"b\"),(\"b\");"
-			+ "\n"
-			+ "\na1 = SELECT DISTINCT x.a AS c FROM A AS x "
-			+ "\n"
-			+ "\na3 = SELECT x.a AS c FROM A AS x"
-			+ "\n"
-			+ "\nb2 = SELECT x.b AS c FROM B AS x"
-			+ "\n"
-			+ "\na3b2 = a3 UNION ALL b2"
-			+ "\n"
-			+ "\na2b2 = a3b2 EXCEPT a1"
-			+ "\n"
-			+ "\na1b1 = a3 UNION b2"
-			+ "\n"
-			+ "\nb1 = a1b1 EXCEPT a1\n"
+	static String negText = "//our encoding of negation doesn't work correctly yet\n"
+			+ "\nCREATE TABLE A (" + "\n a VARCHAR(255)" + "\n);  " + "\n"
+			+ "\nINSERT INTO A VALUES (\"a\"),(\"a\"),(\"a\"); " + "\n" + "\nCREATE TABLE B ("
+			+ "\n b VARCHAR(255)" + "\n);" + "\n" + "\nINSERT INTO B VALUES (\"b\"),(\"b\");"
+			+ "\n" + "\na1 = SELECT DISTINCT x.a AS c FROM A AS x " + "\n"
+			+ "\na3 = SELECT x.a AS c FROM A AS x" + "\n" + "\nb2 = SELECT x.b AS c FROM B AS x"
+			+ "\n" + "\na3b2 = a3 UNION ALL b2" + "\n" + "\na2b2 = a3b2 EXCEPT a1" + "\n"
+			+ "\na1b1 = a3 UNION b2" + "\n" + "\nb1 = a1b1 EXCEPT a1\n"
 			+ "\n\n///////// the active domain has an effect on difference: "
-			+ "\n/*enum str = {a,b}"
-+ "\n"
-+ "\nschema X = {"
-+ "\n nodes"
-+ "\n  adom,"
-+ "\n  guid;"
-+ "\n attributes"
-+ "\n  att: adom -> str;"
-+ "\n arrows"
-+ "\n  c: guid -> adom;"
-+ "\n equations;"
-+ "\n}"
-+ "\n"
-+ "\ninstance F1 = {"
-+ "\n nodes"
-+ "\n  adom -> {123, 124}, "
-+ "\n  guid -> {125, 126};"
-+ "\n attributes"
-+ "\n  att -> {(124, b), (123, a)};"
-+ "\n arrows"
-+ "\n  c -> {(126, 123), (125, 124)};"
-+ "\n} : X"
-+ "\n"
-+ "\n//encodes {a}"
-+ "\ninstance F2 = {"
-+ "\n nodes"
-+ "\n  adom -> {27}, "
-+ "\n  guid -> {28};"
-+ "\n attributes"
-+ "\n  att -> {(27, a)};"
-+ "\n arrows"
-+ "\n  c -> {(28, 27)};"
-+ "\n} : X"
-+ "\n"
-+ "\n//encodes {a}, but includes b in active domain"
-+ "\n//having b in active domain will kill b in the output of the difference"
-+ "\n"
-+ "\n//instance F2 = {"
-+ "\n// nodes"
-+ "\n//  adom -> {26, 27}, "
-+ "\n//  guid -> {28};"
-+ "\n// attributes"
-+ "\n//  att -> {(26, b), (27, a)};"
-+ "\n// arrows"
-+ "\n//  c -> {(28, 27)};"
-+ "\n//} : X"
-+ "\n"
-+ "\ninstance tprp = prop X"
-+ "\ninstance tone = unit X"
-+ "\n"
-+ "\ninstance prpprp = (tprp * tprp)"
-+ "\n"
-+ "\ntransform F1t = tone.unit F1"
-+ "\ntransform F2t = tone.unit F2"
-+ "\n"
-+ "\ntransform chiF1t = tprp.char F1t"
-+ "\ntransform chiF2t = tprp.char F2t"
-+ "\ntransform negchiF2t = (tprp.char F2t then tprp.not)"
-+ "\n"
-+ "\ntransform t0 = prpprp.(chiF1t * negchiF2t)"
-+ "\ntransform t1 = (t0 then prpprp.and)"
-+ "\n"
-+ "\ninstance F1minusF2 = kernel t1\n*/";
-
-
-
-
-
-
-
-
+			+ "\n/*enum str = {a,b}" + "\n" + "\nschema X = {" + "\n nodes" + "\n  adom,"
+			+ "\n  guid;" + "\n attributes" + "\n  att: adom -> str;" + "\n arrows"
+			+ "\n  c: guid -> adom;" + "\n equations;" + "\n}" + "\n" + "\ninstance F1 = {"
+			+ "\n nodes" + "\n  adom -> {123, 124}, " + "\n  guid -> {125, 126};" + "\n attributes"
+			+ "\n  att -> {(124, b), (123, a)};" + "\n arrows"
+			+ "\n  c -> {(126, 123), (125, 124)};" + "\n} : X" + "\n" + "\n//encodes {a}"
+			+ "\ninstance F2 = {" + "\n nodes" + "\n  adom -> {27}, " + "\n  guid -> {28};"
+			+ "\n attributes" + "\n  att -> {(27, a)};" + "\n arrows" + "\n  c -> {(28, 27)};"
+			+ "\n} : X" + "\n" + "\n//encodes {a}, but includes b in active domain"
+			+ "\n//having b in active domain will kill b in the output of the difference" + "\n"
+			+ "\n//instance F2 = {" + "\n// nodes" + "\n//  adom -> {26, 27}, "
+			+ "\n//  guid -> {28};" + "\n// attributes" + "\n//  att -> {(26, b), (27, a)};"
+			+ "\n// arrows" + "\n//  c -> {(28, 27)};" + "\n//} : X" + "\n"
+			+ "\ninstance tprp = prop X" + "\ninstance tone = unit X" + "\n"
+			+ "\ninstance prpprp = (tprp * tprp)" + "\n" + "\ntransform F1t = tone.unit F1"
+			+ "\ntransform F2t = tone.unit F2" + "\n" + "\ntransform chiF1t = tprp.char F1t"
+			+ "\ntransform chiF2t = tprp.char F2t"
+			+ "\ntransform negchiF2t = (tprp.char F2t then tprp.not)" + "\n"
+			+ "\ntransform t0 = prpprp.(chiF1t * negchiF2t)"
+			+ "\ntransform t1 = (t0 then prpprp.and)" + "\n"
+			+ "\ninstance F1minusF2 = kernel t1\n*/";
 
 	public static String transSQLSchema(List<Pair<String, EExternal>> in) {
 		List<Pair<List<String>, List<String>>> eqs = new LinkedList<>();
@@ -629,15 +580,14 @@ public class RaToFql {
 		HashMap<String, List<String>> cols = new HashMap<String, List<String>>();
 		for (Pair<String, EExternal> kk0 : in) {
 			EExternal k0 = kk0.second;
-		//	String key = kk0.first;
+			// String key = kk0.first;
 			if (k0 instanceof ECreateTable) {
 				ECreateTable k = (ECreateTable) k0;
 				if (seen.contains(k.name)) {
 					throw new RuntimeException("Duplicate name: " + k.name);
 				}
 				if (k.name.equals("adom") || k.name.equals("att")) {
-					throw new RuntimeException(
-							"The names adom and att cannot be used.");
+					throw new RuntimeException("The names adom and att cannot be used.");
 				}
 				seen.add(k.name);
 				nodes.add(k.name);
@@ -650,11 +600,9 @@ public class RaToFql {
 						throw new RuntimeException("Duplicate name: " + col.first);
 					}
 					seen.add(col.first);
-					arrows.add(new Triple<>(k.name + "_" + col.first, k.name,
-							adom));
-					iarrows.add(new Pair<String, List<Pair<Object, Object>>>(
-							k.name + "_" + col.first,
-							new LinkedList<Pair<Object, Object>>()));
+					arrows.add(new Triple<>(k.name + "_" + col.first, k.name, adom));
+					iarrows.add(new Pair<String, List<Pair<Object, Object>>>(k.name + "_"
+							+ col.first, new LinkedList<Pair<Object, Object>>()));
 				}
 				cols.put(k.name, lcols);
 			}
@@ -663,8 +611,8 @@ public class RaToFql {
 				List<String> lcols = cols.get(k.target);
 				for (List<String> tuple : k.values) {
 					if (lcols.size() != tuple.size()) {
-						throw new RuntimeException("Column size mismatch "
-								+ tuple + " in " + k.target);
+						throw new RuntimeException("Column size mismatch " + tuple + " in "
+								+ k.target);
 					}
 					List<Pair<Object, Object>> node = lookup2(k.target, inodes);
 					if (node == null) {
@@ -680,29 +628,29 @@ public class RaToFql {
 							dom1.put(tuple.get(colNum), count);
 							enums.add(tuple.get(colNum));
 							adomT.add(new Pair<Object, Object>(count, count));
-							attT.add(new Pair<Object, Object>(count, "\""
-									+ tuple.get(colNum) + "\""));
+							attT.add(new Pair<Object, Object>(count, "\"" + tuple.get(colNum)
+									+ "\""));
 							xxx = count;
 							count++;
 						}
 
-						List<Pair<Object, Object>> yyy = lookup2(k.target + "_"
-								+ lcols.get(colNum), iarrows);
+						List<Pair<Object, Object>> yyy = lookup2(
+								k.target + "_" + lcols.get(colNum), iarrows);
 
 						yyy.add(new Pair<Object, Object>(id, xxx));
 					}
 				}
 			}
-			if (k0 instanceof EFlower || k0 instanceof EUnion || k0 instanceof EDiff) {
+			if (k0 instanceof EFlower || k0 instanceof EUnion || k0 instanceof EDiff
+					|| k0 instanceof EED) {
 				queries.add(kk0);
 			}
 		}
 
 		SigExp.Const exp = new SigExp.Const(nodes, attrs, arrows, eqs);
-		InstExp.Const inst = new InstExp.Const(inodes, iattrs, iarrows,
-				new SigExp.Var("S"));
+		InstExp.Const inst = new InstExp.Const(inodes, iattrs, iarrows, new SigExp.Var("S"));
 
-		//int ctx = 0;
+		// int ctx = 0;
 		String xxx = "\n\n";
 		Map<String, String> schemas = new HashMap<>();
 		Map<String, SigExp.Const> schemas0 = new HashMap<>();
@@ -713,7 +661,7 @@ public class RaToFql {
 			if (gh instanceof EFlower) {
 				EFlower fl = (EFlower) gh;
 				Pair<String, Const> yyy = trans(exp, fl, k);
-				xxx += yyy.first + "\n\n" ;
+				xxx += yyy.first + "\n\n";
 				schemas.put(k, k + "Schema");
 				schemas0.put(k, yyy.second);
 
@@ -728,42 +676,42 @@ public class RaToFql {
 				if (g.distinct) {
 					xxx += "\n\n" + "instance " + k + "_temp = (" + g.l + " + " + g.r + ")";
 					xxx += "\n\n" + "instance " + k + " = relationalize " + k + "_temp";
-				}  else {
+				} else {
 					xxx += "\n\n" + "instance " + k + " = (" + g.l + " + " + g.r + ")";
 				}
 				xxx += "\n\n";
-				
+
 			} else if (gh instanceof EDiff) {
-				String f1x = ((EDiff)gh).l;
-				String f2x = ((EDiff)gh).r;
-				
+				String f1x = ((EDiff) gh).l;
+				String f2x = ((EDiff) gh).r;
+
 				String s1 = schemas.get(f1x);
-			//	System.out.println("s1 is " + s1);
-			//	System.out.println("schemas0 " + schemas0);
-			//	System.out.println("scheas " + schemas);
+				// System.out.println("s1 is " + s1);
+				// System.out.println("schemas0 " + schemas0);
+				// System.out.println("scheas " + schemas);
 				Const s1x = schemas0.get(f1x);
 				schemas.put(k, s1);
 
 				String f1y = doAdom(s1x, s1);
-//				String f2y = doAdom(f2x, s1x);
-				
+				// String f2y = doAdom(f2x, s1x);
+
 				if (!done.containsKey(s1)) {
 					xxx += "\n\n" + f1y;
 					done.put(s1, true);
 				}
-				
+
 				xxx += doAdom2(s1, f1x, k + "_l");
 				xxx += doAdom2(s1, f2x, k + "_r");
-				
+
 				String f1 = k + "_l" + "_rel";
 				String f2 = k + "_r" + "_rel";
-				
+
 				xxx += longSlash + "\n/* Translation of " + k + "  */\n" + longSlash;
 
-//				Boolean done0 = done.get(s1);
-			
-			//	xxx += "\n\n" + f2y;
-				
+				// Boolean done0 = done.get(s1);
+
+				// xxx += "\n\n" + f2y;
+
 				xxx += "\n\ninstance " + k + "prp = prop " + s1;
 				xxx += "\n\ninstance " + k + "one = unit " + s1;
 				xxx += "\n\ninstance " + k + "prp2 = (" + k + "prp * " + k + "prp)";
@@ -771,37 +719,60 @@ public class RaToFql {
 				xxx += "\n\ntransform " + k + f2 + "t = " + k + "one.unit " + f2;
 				xxx += "\n\ntransform " + k + f1 + "tchi = " + k + "prp.char " + k + f1 + "t";
 				xxx += "\n\ntransform " + k + f2 + "tchi = " + k + "prp.char " + k + f2 + "t";
-				xxx += "\n\ntransform " + k + "n = (" + k + f2 + "tchi then " + k + "prp.not)"; 
-				xxx += "\n\ntransform " + k + "j1 = " + k + "prp2.(" + k + f1 + "tchi * " + k + "n)";
+				xxx += "\n\ntransform " + k + "n = (" + k + f2 + "tchi then " + k + "prp.not)";
+				xxx += "\n\ntransform " + k + "j1 = " + k + "prp2.(" + k + f1 + "tchi * " + k
+						+ "n)";
 				xxx += "\n\ntransform " + k + "j2 = (" + k + "j1 then " + k + "prp2.and)";
-				
-				if (((EDiff)gh).distinct) {
+
+				if (((EDiff) gh).distinct) {
 					xxx += "\n\ninstance " + k + "temp = kernel " + k + "j2";
 					xxx += "\n\ninstance " + k + " = relationalize " + k + "temp";
 				} else {
 					xxx += "\n\ninstance " + k + " = kernel " + k + "j2";
 				}
 				xxx += "\n\n";
-			/* 
-instance F1
-instance F2 
+				
 
-instance tprp = prop X
-instance tone = unit X
+			} else if (gh instanceof EED) {
+				EED c = (EED) gh;
+				fql.decl.MapExp.Const f = doED(cols, c.from1, c.where1, exp);
+				SigExp.Const src = (SigExp.Const) f.src;
+				System.out.println(f.src);
+				System.out.println(f.dst);
+				System.out.println(f);
 
-instance prpprp = (tprp * tprp)
+				c.from2.putAll(c.from1);
+				c.where2.addAll(c.where1);
+				fql.decl.MapExp.Const g = doED(cols, c.from2, c.where2, exp);
+				System.out.println("===");
+				System.out.println(g.src);
+				System.out.println(g.dst);
+				System.out.println(g);
+				
+				List<Pair<String, String>> l = new LinkedList<>();
+				for (String x : src.nodes) {
+					l.add(new Pair<>(x, x));
+				}
+				List<Pair<String, List<String>>> em = new LinkedList<>();
+				for (Triple<String, String, String> e : src.arrows) {
+					List<String> y = new LinkedList<>();
+					y.add(e.second);
+					y.add(e.first);
+					em.add(new Pair<>(e.first, y));
+				}
+				
+				fql.decl.MapExp.Const i = new MapExp.Const(l, new LinkedList<Pair<String,String>>(), em , f.src, g.src);
+				System.out.println("^^^");
+				System.out.println(i); 
+				
 
-transform F1t = tone.unit F1
-transform F2t = tone.unit F2
-
-transform chiF1t = tprp.char F1t
-transform chiF2t = tprp.char F2t
-transform negchiF2t = (tprp.char F2t then tprp.not)
-
-transform t0 = prpprp.(chiF1t * negchiF2t)
-transform t1 = (t0 then prpprp.and)
-
-instance F1minusF2 = kernel t1 */
+				xxx += longSlash + "\n/* Translation of " + k + " */\n" + longSlash;
+				 xxx += "\n\nschema " + k + "A = " + f.src;
+				xxx += "\n\nschema " + k + "E = " + g.src;
+				 xxx += "\n\nmapping " + k + "I = " + i + " : " + k + "A -> "
+				 + k + "E";
+				xxx += "\n\nmapping " + k + " = " + g + " : " + k + "E -> S";
+				xxx += "\n\n"; 
 
 			} else {
 				throw new RuntimeException();
@@ -822,6 +793,116 @@ instance F1minusF2 = kernel t1 */
 		String comment = "//schema S and instance I represent the entire input database.\n\n";
 		String preS = "enum str = { " + enum0 + " }";
 		return comment + preS + "\n\nschema S = " + exp + "\n\ninstance I = " + inst + " : S" + xxx;
+	}
+
+	/* private static String lookup(List<Pair<String, String>> l, String ret) {
+		for (Pair<String, String> x : l) {
+			if (x.first.equals(ret)) {
+				return x.second;
+			}
+		}
+		return ret;
+	} */
+	
+	private static fql.decl.MapExp.Const doED(HashMap<String, List<String>> cols, Map<String, String> from,
+			List<Pair<Pair<String, String>, Pair<String, String>>> where, SigExp.Const target 
+			/*, List<Pair<String, String>> pres, Map<String, Triple<String,String,String>> arr  */) {
+
+		Set<Triple<String, String, Map<String, String>>> s = new HashSet<>();
+		Set<Pair<String, String>> e = new HashSet<>(); // can process some
+	
+		Map<String, String> origin = new HashMap<>();
+		Map<String, String> origin2 = new HashMap<>();
+		Map<String, String> origin3 = new HashMap<>();
+
+		for (Entry<String, String> x : from.entrySet()) { // a AS b
+			Map<String, String> map = new HashMap<>();
+			if (!cols.containsKey(x.getValue())) {
+				throw new RuntimeException("No table " + x.getValue() + " found in " + cols);
+			}
+			origin.put(x.getKey(), x.getValue());
+			for (String col : cols.get(x.getValue())) {
+				map.put(col, x.getKey() + "_" + col);
+				origin.put(x.getKey() + "_" + col, "adom");
+				origin3.put(x.getKey() + "_" + col, x.getValue());
+				origin2.put(x.getKey() + "_" + col, col);
+			}
+			s.add(new Triple<>(x.getValue(), x.getKey(), map));
+		}
+		for (Pair<Pair<String, String>, Pair<String, String>> x : where) {
+			e.add(new Pair<>(x.first.first + "_" + x.first.second, x.second.first + "_"
+					+ x.second.second));
+		}
+		
+		///////////////////////////////
+		
+		Set<Pair<String, Pair<String, String>>> sx = new HashSet<>();
+		for (Triple<String, String, Map<String, String>> x : s) { // table name, fresh, map
+			// sx.add(new Pair<>(x.first, new Pair<>(x.second, x.second)));
+			for (Entry<String, String> y : x.third.entrySet()) {
+				sx.add(new Pair<>(x.first, new Pair<>(x.second, y.getValue())));
+				// sx.add(new Pair<>("att", new Pair<>(y.getValue(), y.getValue())));
+			}
+		}
+		
+		//////////////////////////////
+
+		List<String> wn = new LinkedList<>();
+		List<Triple<String, String, String>> wa = new LinkedList<>();
+		List<Pair<List<String>, List<String>>> we = new LinkedList<>();
+		List<Triple<String, String, String>> wat = new LinkedList<>();
+		
+		for (Pair<String, Pair<String, String>> x : sx) {
+			if (!wn.contains(x.second.first)) {
+				wn.add(x.second.first);
+			}
+			if (!wn.contains(x.second.second)) {
+				wn.add(x.second.second);
+			}
+			Triple<String,String,String> t = new Triple<>(x.first + "_" + x.second.first + "_" + x.second.second,
+					x.second.first, x.second.second);
+			if (!wa.contains(t)) {
+			//	arr.put(x.first + "_" + x.second.first + "_" + x.second.second, new Triple<>(x.first, x.second.first, x.second.second));
+				wa.add(t);
+			}
+		}
+		Set<Triple<String,String,String>> eqE = new HashSet<>();
+		for (Pair<String, String> eq : e) {
+			Triple<String,String,String> t = new Triple<>(eq.first + "_" + eq.second,
+					eq.first, eq.second);
+			if (!wa.contains(t)) {
+				wa.add(t);
+				eqE.add(t);
+			}
+		}
+	
+		SigExp.Const w = new SigExp.Const(wn, wat, wa, we);
+
+		List<Pair<String, String>> omx = new LinkedList<>();
+		for (String x : wn) {
+			omx.add(new Pair<>(x, origin.get(x)));
+		}
+		List<Pair<String, List<String>>> emx = new LinkedList<>();
+
+		for (Triple<String, String, String> x : wa) {
+			String n = origin3.get(x.third);
+			String m = origin2.get(x.third);
+			List<String> l = new LinkedList<>();
+			if (eqE.contains(x)) {
+				l.add("adom");	
+			} else {
+				l.add(n);
+				l.add(n + "_" + m);
+			}
+			if (!emx.contains(new Pair<>(x.first, l))) {
+				emx.add(new Pair<>(x.first, l));
+			}
+		}
+
+		MapExp.Const f = new MapExp.Const(omx, new LinkedList<Pair<String, String>>(), emx, w, target);
+
+		return f;
+		
 	}
 
 	private static Pair<String, Const> trans(Const src, EFlower fl, String pre) {
@@ -899,8 +980,7 @@ instance F1minusF2 = kernel t1 */
 
 		for (Pair<String, List<String>> kk : iedges2) {
 			// System.out.println("trying edge map " + kk);
-			Triple<String, String, String> k = new Triple<>(kk.second.get(1),
-					"guid", "adom");
+			Triple<String, String, String> k = new Triple<>(kk.second.get(1), "guid", "adom");
 			// System.out.println("k is " + k);
 			for (List<Triple<String, String, String>> v : eqcs) {
 				if (v.contains(k) && !v.get(0).equals(k)) {
@@ -924,22 +1004,22 @@ instance F1minusF2 = kernel t1 */
 		for (String k : fl.select.keySet()) {
 			Pair<String, String> v = fl.select.get(k);
 			edges3.add(new Triple<>(k, "guid", "adom"));
-			Triple<String, String, String> t = new Triple<>(v.first + "_"
-					+ fl.from.get(v.first) + "_" + v.second, "guid", "adom");
+			Triple<String, String, String> t = new Triple<>(v.first + "_" + fl.from.get(v.first)
+					+ "_" + v.second, "guid", "adom");
 			// System.out.println("t " + t);
-			 if (fl.from.get(v.first) == null) {
-				 throw new RuntimeException(v.first + " is not selectable in " + fl);
-			 }
+			if (fl.from.get(v.first) == null) {
+				throw new RuntimeException(v.first + " is not selectable in " + fl);
+			}
 			for (List<Triple<String, String, String>> eqc : eqcs) {
-			//	System.out.println("eqc " + eqc);
+				// System.out.println("eqc " + eqc);
 				if (eqc.contains(t)) {
 					List<String> li = new LinkedList<>();
 					li.add("guid");
 					li.add(eqc.get(0).first);
 					iedges3.add(new Pair<>(k, li));
-					//System.out.println("added " + new Pair<>(k, li));
+					// System.out.println("added " + new Pair<>(k, li));
 				} else {
-				//	System.out.println("not added");
+					// System.out.println("not added");
 				}
 			}
 		}
@@ -948,47 +1028,41 @@ instance F1minusF2 = kernel t1 */
 		Const sig2 = new Const(nodes2, attrs, edges2, eqs);
 		Const sig3 = new Const(nodes3, attrs, edges3, eqs);
 
-		MapExp.Const map1 = new MapExp.Const(inodes1, iattrs, iedges1, sig1,
-				new SigExp.Var("S"));
-		MapExp.Const map2 = new MapExp.Const(inodes2, iattrs, iedges2, src,
-				sig2);
-		MapExp.Const map3 = new MapExp.Const(inodes3, iattrs, iedges3, sig3,
-				sig2);
+		MapExp.Const map1 = new MapExp.Const(inodes1, iattrs, iedges1, sig1, new SigExp.Var("S"));
+		MapExp.Const map2 = new MapExp.Const(inodes2, iattrs, iedges2, src, sig2);
+		MapExp.Const map3 = new MapExp.Const(inodes3, iattrs, iedges3, sig3, sig2);
 
 		// return new Triple<>(new Pair<>(sig1, map1), new Pair<>(sig2, map2),
 		// new Pair<>(sig3, map3));
 
 		String xxx = "";
 		xxx += "\n\nschema " + pre + "fromSchema = " + sig1.toString();
-		xxx += "\n\nmapping " + pre + "fromMapping = " + map1.toString()
-				+ " : " + pre + "fromSchema -> S";
-		xxx += "\n\ninstance " + pre + "fromInstance = delta " + pre
-				+ "fromMapping I";
+		xxx += "\n\nmapping " + pre + "fromMapping = " + map1.toString() + " : " + pre
+				+ "fromSchema -> S";
+		xxx += "\n\ninstance " + pre + "fromInstance = delta " + pre + "fromMapping I";
 
 		xxx += "\n\nschema " + pre + "whereSchema = " + sig2.toString();
-		xxx += "\n\nmapping " + pre + "whereMapping = " + map2.toString()
-				+ " : " + pre + "fromSchema -> " + pre + "whereSchema";
-		xxx += "\n\ninstance " + pre + "whereInstance = pi " + pre
-				+ "whereMapping " + pre + "fromInstance";
+		xxx += "\n\nmapping " + pre + "whereMapping = " + map2.toString() + " : " + pre
+				+ "fromSchema -> " + pre + "whereSchema";
+		xxx += "\n\ninstance " + pre + "whereInstance = pi " + pre + "whereMapping " + pre
+				+ "fromInstance";
 
 		xxx += "\n\nschema " + pre + "Schema = " + sig3.toString();
-		xxx += "\n\nmapping " + pre + "selectMapping = " + map3.toString()
-				+ " : " + pre + "Schema -> " + pre + "whereSchema";
-		
+		xxx += "\n\nmapping " + pre + "selectMapping = " + map3.toString() + " : " + pre
+				+ "Schema -> " + pre + "whereSchema";
+
 		if (!fl.distinct) {
-			xxx += "\n\ninstance " + pre + " = delta " + pre
-					+ "selectMapping " + pre + "whereInstance";
+			xxx += "\n\ninstance " + pre + " = delta " + pre + "selectMapping " + pre
+					+ "whereInstance";
 		} else {
-			xxx += "\n\ninstance " + pre + "selectInstance = delta " + pre
-					+ "selectMapping " + pre + "whereInstance";
-			xxx += "\n\ninstance " + pre
-					+ " = relationalize " + pre
-					+ "selectInstance";
+			xxx += "\n\ninstance " + pre + "selectInstance = delta " + pre + "selectMapping " + pre
+					+ "whereInstance";
+			xxx += "\n\ninstance " + pre + " = relationalize " + pre + "selectInstance";
 		}
 		String comment = longSlash + "\n/* " + "Translation of " + pre + "  */\n" + longSlash;
 		return new Pair<>(comment + xxx, sig3);
 	}
-	
+
 	static String longSlash = "////////////////////////////////////////////////////////////////////////////////";
 
 	private static List<List<Triple<String, String, String>>> merge(
@@ -1010,17 +1084,15 @@ instance F1minusF2 = kernel t1 */
 		return eqcs;
 	}
 
-	private static void mergeEqc(
-			List<List<Triple<String, String, String>>> eqcs,
-			Pair<String, String> l, Pair<String, String> r,
-			Map<String, String> from) {
+	private static void mergeEqc(List<List<Triple<String, String, String>>> eqcs,
+			Pair<String, String> l, Pair<String, String> r, Map<String, String> from) {
 		// System.out.println("merge eqc on " + eqcs);
 		// System.out.println("l is " + l);
 		// System.out.println("r is " + r);
-		Triple<String, String, String> l0 = new Triple<>(l.first + "_"
-				+ from.get(l.first) + "_" + l.second, "guid", "adom");
-		Triple<String, String, String> r0 = new Triple<>(r.first + "_"
-				+ from.get(r.first) + "_" + r.second, "guid", "adom");
+		Triple<String, String, String> l0 = new Triple<>(l.first + "_" + from.get(l.first) + "_"
+				+ l.second, "guid", "adom");
+		Triple<String, String, String> r0 = new Triple<>(r.first + "_" + from.get(r.first) + "_"
+				+ r.second, "guid", "adom");
 		// System.out.println("l0 is " + l0);
 		// System.out.println("r0 is " + r0);
 
@@ -1095,21 +1167,100 @@ instance F1minusF2 = kernel t1 */
 	public abstract static class EExternal {
 	}
 
+	public static class EED extends EExternal {
+
+		public static <T> Set<T> diff(final Set<? extends T> s1, final Set<? extends T> s2) {
+			Set<T> symmetricDiff = new HashSet<T>(s1);
+			symmetricDiff.addAll(s2);
+			Set<T> tmp = new HashSet<T>(s1);
+			tmp.retainAll(s2);
+			symmetricDiff.removeAll(tmp);
+			return symmetricDiff;
+		}
+
+		public EED(Map<String, String> from1, Map<String, String> from2,
+				List<Pair<Pair<String, String>, Pair<String, String>>> where1,
+				List<Pair<Pair<String, String>, Pair<String, String>>> where2) {
+			super();
+			this.from1 = from1;
+			this.from2 = from2;
+			this.where1 = where1;
+			this.where2 = where2;
+			if (diff(from1.keySet(), from2.keySet()).isEmpty()) {
+				throw new RuntimeException("Non-disjoint AS clauses in " + this);
+			}
+		}
+
+		Map<String, String> from1, from2;
+		List<Pair<Pair<String, String>, Pair<String, String>>> where1, where2;
+
+		public String toString() {
+			String x = "FORALL ";
+			boolean b = false;
+			for (String k : from1.keySet()) {
+				if (b) {
+					x += ", ";
+				}
+				b = true;
+				String p = from1.get(k);
+				x += p + " AS " + k;
+			}
+			// if (where1.size() > 0) {
+			x += "\nWHERE ";
+			// }
+
+			b = false;
+			for (Pair<Pair<String, String>, Pair<String, String>> k : where1) {
+				if (b) {
+					x += " AND ";
+				}
+				b = true;
+				x += k.first.first + "." + k.first.second + " = " + k.second.first + "."
+						+ k.second.second;
+			}
+
+			b = false;
+			x += "\nEXISTS ";
+			for (String k : from2.keySet()) {
+				if (b) {
+					x += ", ";
+				}
+				b = true;
+				String p = from2.get(k);
+				x += p + " AS " + k;
+			}
+			// if (where1.size() > 0) {
+			x += "\nWHERE ";
+			// }
+
+			b = false;
+			for (Pair<Pair<String, String>, Pair<String, String>> k : where2) {
+				if (b) {
+					x += " AND ";
+				}
+				b = true;
+				x += k.first.first + "." + k.first.second + " = " + k.second.first + "."
+						+ k.second.second;
+			}
+
+			return x;
+		}
+	}
+
 	public static class EFlower extends EExternal {
 		Map<String, Pair<String, String>> select;
 		Map<String, String> from;
 		List<Pair<Pair<String, String>, Pair<String, String>>> where;
 		boolean distinct;
 
-		public EFlower(Map<String, Pair<String, String>> select,
-				Map<String, String> from,
-				List<Pair<Pair<String, String>, Pair<String, String>>> where,
-				boolean distinct) {
+		public EFlower(Map<String, Pair<String, String>> select, Map<String, String> from,
+				List<Pair<Pair<String, String>, Pair<String, String>>> where, boolean distinct) {
 			this.select = select;
 			this.from = from;
 			this.where = where;
 			this.distinct = distinct;
 		}
+
 		@Override
 		public String toString() {
 			String x = "SELECT ";
@@ -1126,7 +1277,7 @@ instance F1minusF2 = kernel t1 */
 				x += p.first + "." + p.second + " AS " + k;
 			}
 			x += "\nFROM ";
-			
+
 			b = false;
 			for (String k : from.keySet()) {
 				if (b) {
@@ -1139,16 +1290,17 @@ instance F1minusF2 = kernel t1 */
 			if (where.size() > 0) {
 				x += "\nWHERE ";
 			}
-			
+
 			b = false;
 			for (Pair<Pair<String, String>, Pair<String, String>> k : where) {
 				if (b) {
 					x += " AND ";
 				}
 				b = true;
-				x += k.first.first + "." + k.first.second + " = " + k.second.first + "." + k.second.second;
+				x += k.first.first + "." + k.first.second + " = " + k.second.first + "."
+						+ k.second.second;
 			}
-			
+
 			return x;
 		}
 	}
@@ -1163,7 +1315,7 @@ instance F1minusF2 = kernel t1 */
 			this.l = l;
 			this.r = r;
 		}
-		
+
 		@Override
 		public String toString() {
 			String x = "";
@@ -1173,7 +1325,7 @@ instance F1minusF2 = kernel t1 */
 			return l.toString() + "\n" + "UNION" + x + "\n" + r.toString();
 		}
 	}
-	
+
 	public static class EDiff extends EExternal {
 		boolean distinct;
 		String l, r;
@@ -1184,7 +1336,7 @@ instance F1minusF2 = kernel t1 */
 			this.l = l;
 			this.r = r;
 		}
-		
+
 		@Override
 		public String toString() {
 			String x = "";
@@ -1213,13 +1365,12 @@ instance F1minusF2 = kernel t1 */
 				}
 			});
 
-	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
-			")", "=", "->", "+", "*", "^", "|" };
+	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(", ")", "=", "->", "+",
+			"*", "^", "|" };
 
-
-	static String[] res = new String[] { "VARCHAR", "INT", "SELECT", "FROM",
-			"WHERE", "DISTINCT", "UNION", "EXCEPT", "ALL", "CREATE", "TABLE", "AS",
-			"AND", "OR", "NOT", "INSERT", "INTO", "VALUES" };
+	static String[] res = new String[] { "VARCHAR", "INT", "SELECT", "FROM", "WHERE", "DISTINCT",
+			"UNION", "EXCEPT", "ALL", "CREATE", "TABLE", "AS", "AND", "OR", "NOT", "INSERT",
+			"INTO", "VALUES", "FORALL", "EXISTS" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -1227,8 +1378,8 @@ instance F1minusF2 = kernel t1 */
 			Scanners.JAVA_BLOCK_COMMENT, Scanners.WHITESPACES).skipMany();
 
 	static final Parser<?> TOKENIZER = Parsers.or(
-			(Parser<?>) Terminals.StringLiteral.DOUBLE_QUOTE_TOKENIZER,
-			RESERVED.tokenizer(), (Parser<?>) Terminals.Identifier.TOKENIZER,
+			(Parser<?>) Terminals.StringLiteral.DOUBLE_QUOTE_TOKENIZER, RESERVED.tokenizer(),
+			(Parser<?>) Terminals.Identifier.TOKENIZER,
 			(Parser<?>) Terminals.IntegerLiteral.TOKENIZER);
 
 	static Parser<?> term(String... names) {
@@ -1255,6 +1406,8 @@ instance F1minusF2 = kernel t1 */
 				ret.add(new Pair<String, EExternal>(decl.a.toString(), toUnion(decl.c)));
 			} else if (decl.toString().contains("EXCEPT")) {
 				ret.add(new Pair<String, EExternal>(decl.a.toString(), toDiff(decl.c)));
+			} else if (decl.toString().contains("FORALL")) {
+				ret.add(new Pair<String, EExternal>(decl.a.toString(), toEd(decl.c)));
 			} else {
 				throw new RuntimeException();
 			}
@@ -1294,23 +1447,84 @@ instance F1minusF2 = kernel t1 */
 		return new EInsertValues(target, values);
 	}
 
+	public static final Parser<?> ed() {
+		Parser<?> tuple = Parsers.tuple(ident(), term("."), ident());
+
+		Parser<?> from0 = Parsers.tuple(ident(), term("AS"), ident()).sepBy1(term(","));
+		Parser<?> from1 = Parsers.tuple(term("FORALL"), from0);
+		Parser<?> from2 = Parsers.tuple(term("EXISTS"), from0);
+
+		Parser<?> where0 = Parsers.tuple(tuple, term("="), tuple).sepBy(term("AND"));
+		Parser<?> where = Parsers.tuple(term("WHERE"), where0).optional();
+
+		return Parsers.tuple(from1, where, from2, where);
+	}
+
 	public static final Parser<?> flower() {
 		Parser<?> tuple = Parsers.tuple(ident(), term("."), ident());
 
-		Parser<?> from0 = Parsers.tuple(ident(), term("AS"), ident()).sepBy1(
-				term(","));
+		Parser<?> from0 = Parsers.tuple(ident(), term("AS"), ident()).sepBy(term(","));
 		Parser<?> from = Parsers.tuple(term("FROM"), from0);
 
-		Parser<?> where0 = Parsers.tuple(tuple, term("="), tuple).sepBy(
-				term("AND"));
-		Parser<?> where = Parsers.tuple(term("WHERE"), where0).optional();
+		Parser<?> where0 = Parsers.tuple(tuple, term("="), tuple).sepBy(term("AND"));
+		Parser<?> where = Parsers.tuple(term("WHERE"), where0); // TODO
+																// .optional();
 
-		Parser<?> select0 = Parsers.tuple(tuple, term("AS"), ident()).sepBy1(
-				term(","));
-		Parser<?> select = Parsers.tuple(term("SELECT"), term("DISTINCT")
-				.optional(), select0);
+		Parser<?> select0 = Parsers.tuple(tuple, term("AS"), ident()).sepBy1(term(","));
+		Parser<?> select = Parsers.tuple(term("SELECT"), term("DISTINCT").optional(), select0);
 
 		return Parsers.tuple(select, from, where);
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static EED toEd(Object decl) {
+		Map<String, String> from1 = new LinkedHashMap<String, String>();
+		Map<String, String> from2 = new LinkedHashMap<String, String>();
+		List<Pair<Pair<String, String>, Pair<String, String>>> where1 = new LinkedList<>();
+		List<Pair<Pair<String, String>, Pair<String, String>>> where2 = new LinkedList<>();
+
+		Tuple4 o = (Tuple4) decl;
+
+		org.codehaus.jparsec.functors.Pair from10 = (org.codehaus.jparsec.functors.Pair) o.a;
+		org.codehaus.jparsec.functors.Pair where10 = (org.codehaus.jparsec.functors.Pair) o.b;
+		org.codehaus.jparsec.functors.Pair from11 = (org.codehaus.jparsec.functors.Pair) o.c;
+		org.codehaus.jparsec.functors.Pair where11 = (org.codehaus.jparsec.functors.Pair) o.d;
+
+		List<Tuple3> from10x = (List<Tuple3>) from10.b;
+		for (Tuple3 k : from10x) {
+			from1.put(k.c.toString(), k.a.toString());
+		}
+
+		// if (where0 == null) {
+		//
+		// } else {
+		List<Tuple3> where10x = (List<Tuple3>) where10.b;
+		for (Tuple3 k : where10x) {
+			Tuple3 l = (Tuple3) k.a;
+			Tuple3 r = (Tuple3) k.c;
+			where1.add(new Pair<>(new Pair<>(l.a.toString(), l.c.toString()), new Pair<>(r.a
+					.toString(), r.c.toString())));
+		}
+		// }
+
+		List<Tuple3> from11x = (List<Tuple3>) from11.b;
+		for (Tuple3 k : from11x) {
+			from2.put(k.c.toString(), k.a.toString());
+		}
+
+		// if (where0 == null) {
+		//
+		// } else {
+		List<Tuple3> where11x = (List<Tuple3>) where11.b;
+		for (Tuple3 k : where11x) {
+			Tuple3 l = (Tuple3) k.a;
+			Tuple3 r = (Tuple3) k.c;
+			where2.add(new Pair<>(new Pair<>(l.a.toString(), l.c.toString()), new Pair<>(r.a
+					.toString(), r.c.toString())));
+		}
+		// }
+
+		return new EED(from1, from2, where1, where2);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -1351,9 +1565,8 @@ instance F1minusF2 = kernel t1 */
 			for (Tuple3 k : where1) {
 				Tuple3 l = (Tuple3) k.a;
 				Tuple3 r = (Tuple3) k.c;
-				where.add(new Pair<>(
-						new Pair<>(l.a.toString(), l.c.toString()), new Pair<>(
-								r.a.toString(), r.c.toString())));
+				where.add(new Pair<>(new Pair<>(l.a.toString(), l.c.toString()), new Pair<>(r.a
+						.toString(), r.c.toString())));
 			}
 		}
 
@@ -1365,6 +1578,7 @@ instance F1minusF2 = kernel t1 */
 		Tuple4 t = (Tuple4) o;
 		return new EUnion(t.c == null, t.a.toString(), t.d.toString());
 	}
+
 	@SuppressWarnings("rawtypes")
 	public static final EDiff toDiff(Object o) {
 		Tuple4 t = (Tuple4) o;
@@ -1372,19 +1586,19 @@ instance F1minusF2 = kernel t1 */
 	}
 
 	public static final Parser<?> union() {
-//		Parser<?> p = flower().between(term("("), term(")"));
+		// Parser<?> p = flower().between(term("("), term(")"));
 		return Parsers.tuple(ident(), term("UNION"), term("ALL").optional(), ident());
 	}
+
 	public static final Parser<?> diff() {
-//		Parser<?> p = flower().between(term("("), term(")"));
+		// Parser<?> p = flower().between(term("("), term(")"));
 		return Parsers.tuple(ident(), term("EXCEPT"), term("ALL").optional(), ident());
 	}
 
 	public static final Parser<?> insertValues() {
 		Parser<?> p = string().sepBy(term(","));
-		return Parsers.tuple(Parsers.tuple(term("INSERT"), term("INTO")),
-				ident(), term("VALUES"), Parsers.tuple(term("("), p, term(")"))
-						.sepBy(term(",")), term(";"));
+		return Parsers.tuple(Parsers.tuple(term("INSERT"), term("INTO")), ident(), term("VALUES"),
+				Parsers.tuple(term("("), p, term(")")).sepBy(term(",")), term(";"));
 	}
 
 	public static final Parser<?> createTable() {
@@ -1398,15 +1612,16 @@ instance F1minusF2 = kernel t1 */
 	}
 
 	public static final Parser<?> program() {
-		Parser<?> p1 = 	Parsers.tuple(ident(), term("="), flower());
-		Parser<?> p2 = 	Parsers.tuple(ident(), term("="), union());
-		Parser<?> p3 = 	Parsers.tuple(ident(), term("="), diff());
+		Parser<?> p1 = Parsers.tuple(ident(), term("="), flower());
+		Parser<?> p2 = Parsers.tuple(ident(), term("="), union());
+		Parser<?> p3 = Parsers.tuple(ident(), term("="), diff());
+		Parser<?> p4 = Parsers.tuple(ident(), term("="), ed());
 
-		return Parsers.or(createTable(), insertValues(), p1, p2, p3).many();
+		return Parsers.or(createTable(), insertValues(), p1, p2, p3, p4).many();
 	}
 
 	private static Parser<?> string() {
-		return Parsers.or(Terminals.StringLiteral.PARSER,
-				Terminals.IntegerLiteral.PARSER, Terminals.Identifier.PARSER);
+		return Parsers.or(Terminals.StringLiteral.PARSER, Terminals.IntegerLiteral.PARSER,
+				Terminals.Identifier.PARSER);
 	}
 }

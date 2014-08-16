@@ -17,6 +17,7 @@ import fql.decl.InstExp.Pi;
 import fql.decl.InstExp.Plus;
 import fql.decl.InstExp.Relationalize;
 import fql.decl.InstExp.Sigma;
+import fql.decl.InstExp.Step;
 import fql.decl.InstExp.Times;
 import fql.decl.InstExp.Two;
 import fql.decl.InstExp.Zero;
@@ -250,6 +251,20 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 		}
 		Pair<String, String> u = t.type(env);
 		return env.insts.get(u.first).accept(env, this);
+	}
+
+	@Override
+	public SigExp visit(FQLProgram env, Step e) {
+		Pair<SigExp, SigExp> m = e.m.type(env);
+		Pair<SigExp, SigExp> n = e.n.type(env);
+		if (!m.second.equals(n.first)) {
+			throw new RuntimeException("Mappings do not compose in " + e);
+		}
+		InstExp i = env.insts.get(e.I);
+		if (i == null) {
+			throw new RuntimeException("Missing instance: " + e.I);
+		}
+		return i.accept(env, this);
 	}
 
 	

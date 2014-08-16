@@ -7,6 +7,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Stroke;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.Constructor;
@@ -24,6 +26,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -49,6 +52,7 @@ import fql.Fn;
 import fql.Pair;
 import fql.Quad;
 import fql.Triple;
+import fql.Util;
 import fql.cat.Arr;
 import fql.cat.FDM;
 import fql.cat.FinCat;
@@ -158,9 +162,16 @@ public class Instance {
 				x.add(p.first);
 			}
 			if (data.get(e.source.string).size() != x.size()) {
+				Set<Pair<Object,Object>> s1 = data.get(e.source.string);
+				Set<Object> y = new HashSet<>();
+				for (Pair<Object, Object> p : data.get(e.source.string)) {
+					y.add(p.first);
+				}
+//				Set sx = new HashSet<>(s1);
+				y.removeAll(x);
 				throw new FQLException(
 						"Instance does not map all domain values in " + e.name
-								+ " in " + this + "\n\n" + data.get(e.source.string).size() + " vs " + x.size());
+								+ " in " + this + "\n\n" + s1.size() + " vs " + x.size() + "\n\nmissing " + y );
 			}
 
 			for (Pair<Object, Object> p1 : i) {
@@ -650,7 +661,12 @@ public class Instance {
 				i++;
 			}
 			Pair<String, String> cns = thesig.getColumnNames(k);
-			JTable t = new JTable(arr, new Object[] { cns.first, cns.second });
+			JTable t = new JTable(arr, new Object[] { cns.first, cns.second })  {
+				public Dimension getPreferredScrollableViewportSize() {
+					Dimension d = getPreferredSize();
+					return new Dimension(d.width, d.height);
+				}
+			};
 			// //t.setRowSelectionAllowed(false);
 			// t.setColumnSelectionAllowed(false);
 			// MouseListener[] listeners = t.getMouseListeners();
@@ -663,35 +679,38 @@ public class Instance {
 			sorter.allRowsChanged();
 			sorter.toggleSortOrder(0);
 			t.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+//			t.setS
 			JPanel p = new JPanel(new GridLayout(1, 1));
 			p.add(new JScrollPane(t));
 			p.setBorder(BorderFactory.createTitledBorder(
 					BorderFactory.createEmptyBorder(2, 2, 2, 2), k + "   ("
 							+ xxx.size() + " rows)"));
 			panels.add(p);
-			p.setSize(60, 60);
+//			p.setPreferredSize(new Dimension(60, 60));
 		}
 
-		int x = (int) Math.ceil(Math.sqrt(panels.size()));
-		if (x == 0) {
-			return new JPanel();
-		}
-		JPanel panel = new JPanel(new GridLayout(x, x));
-		for (JPanel p : panels) {
-			panel.add(p);
-		}
-		panel.setBorder(BorderFactory.createEtchedBorder());
-		return panel;
+	//	int x = (int) Math.ceil(Math.sqrt(panels.size()));
+	//	if (x == 0) {
+	//		return new JPanel();
+	//	}
+		//List<JComponent> panel = new LinkedList<>();
+	//	JPanel panel = new JPanel(new GridLayout(x, x));
+	//	for (JPanel p : panels) {
+		//	panel.add(p);
+		//}
+//		panel.setBorder(BorderFactory.createEtchedBorder());
+		return Util.makeGrid((List<JComponent>)((Object)panels));
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public JPanel join() throws FQLException {
 		// Map<String, Set<Pair<String,String>>> data;
 
 		prejoin();
 
-		List<JPanel> pans = makePanels();
+		List pans = makePanels();
 
-		int x = (int) Math.ceil(Math.sqrt(pans.size()));
+		/*int x = (int) Math.ceil(Math.sqrt(pans.size()));
 		JPanel panel;
 		if (x == 0) {
 			panel = new JPanel();
@@ -701,8 +720,8 @@ public class Instance {
 		for (JPanel p : pans) {
 			panel.add(p);
 		}
-		panel.setBorder(BorderFactory.createEtchedBorder());
-		return panel;
+		panel.setBorder(BorderFactory.createEtchedBorder()); */
+		return Util.makeGrid(pans);
 	}
 
 	private List<JPanel> makePanels() {
@@ -1391,16 +1410,16 @@ public class Instance {
 			Class<?> c = Class.forName(DEBUG.layout_prefix
 					+ DEBUG.debug.inst_graph);
 			Constructor<?> x = c.getConstructor(Graph.class);
-			Layout<String, String> layout = (Layout<String, String>) x
+			final Layout<String, String> layout = (Layout<String, String>) x
 					.newInstance(sgv);
 
 			// Layout<String, String> layout = new ISOMLayout<String,
 			// String>(sgv);
 			// Layout<String, String> layout = new CircleLayout<>(sgv);
-			layout.setSize(new Dimension(600, 400));
+			//layout.setSize(new Dimension(600, 400));
 			final VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
 					layout);
-			// vv.setPreferredSize(new Dimension(600, 400));
+			//vv.setPreferredSize(new Dimension(600, 400));
 			// vv.getRenderContext().setEdgeLabelRerderer(new MyEdgeT());
 			// Setup up a new vertex to paint transformer...
 			Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
@@ -1536,7 +1555,7 @@ public class Instance {
 			vv.getRenderContext().setVertexLabelTransformer(
 					new ToStringLabeller<String>());
 
-			GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
+			final GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
 			// JPanel ret = new JPanel(new GridLayout(1,1));
 			// ret.add(zzz);
 			// ret.setBorder(BorderFactory.createEtchedBorder());
@@ -1545,8 +1564,22 @@ public class Instance {
 			newthing.setResizeWeight(.8d); // setDividerLocation(.9d);
 			newthing.add(zzz);
 			newthing.add(vwr);
-			JPanel xxx = new JPanel(new GridLayout(1, 1));
+			final JPanel xxx = new JPanel(new GridLayout(1, 1));
 			xxx.add(newthing);
+		/*	zzz.addComponentListener(new ComponentListener() {
+			    public void componentResized(ComponentEvent e) {
+			    	Dimension d = (Dimension) zzz.getSize();
+			    	d.setSize(d.width - 100, d.height - 100);
+			            layout.setSize(d);
+			    }
+				@Override
+				public void componentMoved(ComponentEvent e) { }
+				@Override
+				public void componentShown(ComponentEvent e) { }
+				@Override
+				public void componentHidden(ComponentEvent e) { }
+			}); */
+	            layout.setSize(new Dimension(400,400));
 			// xxx.setMaximumSize(new Dimension(400,400));
 			return xxx;
 		} catch (Throwable t) {
@@ -1797,8 +1830,8 @@ public class Instance {
 	CardLayout cards = new CardLayout();
 	Map<String, JTable> joined;
 
-	public JPanel groth(Color c) throws FQLException {
-		return CategoryOfElements.makePanel(this, c);
+	public Pair<JPanel, JPanel> groth(String name, Color c) throws FQLException {
+		return CategoryOfElements.makePanel(name, this, c);
 	}
 
 	private JPanel makePanel2(Pair<Object[], Object[][]> res) {
@@ -1807,7 +1840,12 @@ public class Instance {
 
 		JPanel ret = new JPanel(new GridLayout(1, 1));
 
-		JTable table = new JTable(rows, colnames);
+		JTable table = new JTable(rows, colnames)  {
+			public Dimension getPreferredScrollableViewportSize() {
+				Dimension d = getPreferredSize();
+				return new Dimension(d.width, d.height);
+			}
+		};
 		TableRowSorter<?> sorter = new MyTableRowSorter(table.getModel());
 
 		table.setRowSorter(sorter);

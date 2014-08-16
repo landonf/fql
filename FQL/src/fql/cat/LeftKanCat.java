@@ -84,12 +84,6 @@ public class LeftKanCat {
 		}
 
 		if (fn2.size() < numarrs) {
-			/*
-			 * for (Entry<Integer, Path> k : fn2.entrySet()) { if (k.getValue()
-			 * == null) { System.out.println("missing " + k.getKey()); if
-			 * (replacees.contains(k.getKey())) { throw new RuntimeException();
-			 * } } }
-			 */
 			String old_str = "Basis path lengths exceed allowed limit ("
 					+ DEBUG.debug.MAX_PATH_LENGTH
 					+ ").  Only have "
@@ -98,7 +92,6 @@ public class LeftKanCat {
 					+ numarrs
 					+ "."
 					+ "  Probable cause: using parallel or hybrid left-kan algorithm (see options).";
-			// + ".  Sig is " + sig;
 			throw new FQLException(old_str);
 		}
 
@@ -140,7 +133,7 @@ public class LeftKanCat {
 
 		FinCat<Node, Path> r1 = new FinCat<Node, Path>(objects,
 				new LinkedList<>(arrows), composition, identities);
-
+	//	r1.sig = B;
 //		System.out.println(r1);
 		
 		return new Pair<>(r1, r2);

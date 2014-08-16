@@ -18,7 +18,7 @@ public class EmptyExample extends Example {
 					+ "\n"
 					+ "\nschema C = {nodes; attributes; arrows; equations;}"
 					+ "\nschema C1 = void"
-					+ "\nschema C2 = unit {string, int, color}"
+					+ "\nschema C2 = unit {string, int, float, color}"
 					+ "\nschema C3 = (C + C)"
 					+ "\nschema C4 = (C * C)"
 					+ "\nschema C5 = (C union C)"

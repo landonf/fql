@@ -747,7 +747,7 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 				}
 				// System.out.println("nt " + nt);
 
-				Path j = nt.dst.appy(new Path(Bsig, n2));
+				Path j = nt.dst.appy(Asig, new Path(Bsig, n2));
 				// System.out.println("j " + j.toLong());
 
 				Path y = nt.arr.get(new Node(n2.get(0)));

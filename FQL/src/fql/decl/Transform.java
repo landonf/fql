@@ -48,6 +48,7 @@ import fql.FQLException;
 import fql.Pair;
 import fql.Quad;
 import fql.Triple;
+import fql.Util;
 import fql.cat.Arr;
 import fql.cat.FinCat;
 import fql.parse.PrettyPrinter;
@@ -255,7 +256,12 @@ public class Transform {
 				i++;
 			}
 			// Pair<String, String> cns = src.thesig.getColumnNames(k);
-			JTable t = new JTable(arr, new Object[] { src_n, dst_n });
+			JTable t = new JTable(arr, new Object[] { src_n, dst_n })  {
+				public Dimension getPreferredScrollableViewportSize() {
+					Dimension d = getPreferredSize();
+					return new Dimension(d.width, d.height);
+				}
+			};
 			// //t.setRowSelectionAllowed(false);
 			// t.setColumnSelectionAllowed(false);
 			// MouseListener[] listeners = t.getMouseListeners();
@@ -274,10 +280,10 @@ public class Transform {
 					BorderFactory.createEmptyBorder(2, 2, 2, 2), k + "  ("
 							+ xxx.size() + " rows)"));
 			panels.add(p);
-			p.setSize(60, 60);
+		//	p.setPreferredSize(new Dimension(60, 60));
 		}
 
-		int x = (int) Math.ceil(Math.sqrt(panels.size()));
+		/*int x = (int) Math.ceil(Math.sqrt(panels.size()));
 		if (x == 0) {
 			return new JPanel();
 		}
@@ -285,8 +291,8 @@ public class Transform {
 		for (JPanel p : panels) {
 			panel.add(p);
 		}
-		panel.setBorder(BorderFactory.createEtchedBorder());
-		return panel;
+		panel.setBorder(BorderFactory.createEtchedBorder()); */
+		return Util.makeGrid(((List<JComponent>)((Object)panels)));
 	}
 
 	@Override
@@ -577,7 +583,12 @@ public class Transform {
 
 				// }
 				JPanel p = new JPanel(new GridLayout(1, 1));
-				JTable table = new JTable(rowData, columnNames);
+				JTable table = new JTable(rowData, columnNames)  {
+					public Dimension getPreferredScrollableViewportSize() {
+						Dimension d = getPreferredSize();
+						return new Dimension(d.width, d.height);
+					}
+				};
 				JScrollPane jsp = new JScrollPane(table);
 				p.setBorder(BorderFactory.createTitledBorder(
 						BorderFactory.createEmptyBorder(), "Attributes for "

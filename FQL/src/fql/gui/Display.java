@@ -68,6 +68,7 @@ import fql.decl.InstExp.Pi;
 import fql.decl.InstExp.Plus;
 import fql.decl.InstExp.Relationalize;
 import fql.decl.InstExp.Sigma;
+import fql.decl.InstExp.Step;
 import fql.decl.InstExp.Times;
 import fql.decl.InstExp.Two;
 import fql.decl.InstExp.Zero;
@@ -121,11 +122,17 @@ public class Display {
 			px.add("Joined", joined);
 		}
 
-		if (DEBUG.debug.inst_gr) {
-			JPanel groth = view.groth(clr);
-			px.add("Elements", groth);
+		
+		if (DEBUG.debug.inst_gr || DEBUG.debug.inst_dot) {
+			Pair<JPanel, JPanel> groth = view.groth(c, clr);
+			if (DEBUG.debug.inst_gr) {
+				px.add("Elements", groth.first);
+			}
+			if (DEBUG.debug.inst_dot) {
+				px.add("Dot", groth.second);		
+			}
 		}
-
+		
 		if (DEBUG.debug.inst_obs) {
 			JPanel rel = view.observables2();
 			px.add("Observables", rel);
@@ -229,7 +236,7 @@ public class Display {
 
 //	FQLProgram prog;
 	
-	public JPanel showSchema(Environment environment, Color clr,
+	public JPanel showSchema(String name, Environment environment, Color clr,
 			Signature view) throws FQLException {
 		JTabbedPane px = new JTabbedPane();
 
@@ -265,6 +272,11 @@ public class Display {
 		if (DEBUG.debug.schema_rdf) {
 			JPanel rel = view.rdf();
 			px.add("OWL", rel);
+		}
+		
+		if (DEBUG.debug.schema_dot) {
+			JPanel dot = view.dot(name);
+			px.addTab("Dot", dot);
 		}
 
 		JPanel top = new JPanel(new GridLayout(1, 1));
@@ -306,13 +318,13 @@ public class Display {
 		Signature i2 = p.target;
 		Signature t = u.target;
 
-		px.add("Source", showSchema(environment, prog.smap(s.toConst()), s));
+		px.add("Source", showSchema("Source",environment, prog.smap(s.toConst()), s));
 		px.add("Delta", showMapping(environment, prog.smap(i1.toConst()),  prog.smap(s.toConst()), d));
-		px.add("Intermediate 1", showSchema(environment, prog.smap(i1.toConst()), i1));
+		px.add("Intermediate 1", showSchema("Int1",environment, prog.smap(i1.toConst()), i1));
 		px.add("Pi", showMapping(environment, prog.smap(i1.toConst()), prog.smap(i2.toConst()), p));
-		px.add("Intermediate 2", showSchema(environment, prog.smap(i2.toConst()), i2));
+		px.add("Intermediate 2", showSchema("Int2", environment, prog.smap(i2.toConst()), i2));
 		px.add("Sigma", showMapping(environment, prog.smap(i2.toConst()), prog.smap(t.toConst()), u));
-		px.add("Target", showSchema(environment, prog.smap(t.toConst()), t));
+		px.add("Target", showSchema("Target", environment, prog.smap(t.toConst()), t));
 
 		JPanel top = new JPanel(new GridLayout(1, 1));
 		top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
@@ -333,7 +345,7 @@ public class Display {
 		for (String c : p.order) {
 			if (environment.signatures.get(c) != null) {
 				frames.add(new Pair<String, JComponent>("schema " + c,
-						showSchema(environment, p.nmap.get(c), environment.getSchema(c))));
+						showSchema(c, environment, p.nmap.get(c), environment.getSchema(c))));
 			} else if (environment.mappings.get(c) != null) {
 				Pair<SigExp, SigExp> xxx = p.maps.get(c).type(p);
 				String a = xxx.first.accept(p.sigs, new Unresolver())
@@ -413,7 +425,7 @@ public class Display {
 				BorderFactory.createEmptyBorder(), "Select:"));
 		JScrollPane yyy1 = new JScrollPane(yyy);
 		temp1.add(yyy1);
-		temp1.setMinimumSize(new Dimension(200, 600));
+		temp1.setMinimumSize(new Dimension(10, 10));
 		yyy.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 		yyy.addListSelectionListener(new ListSelectionListener() {
@@ -433,6 +445,9 @@ public class Display {
 		JPanel north = new JPanel(new GridLayout(2, 1));
 		JButton instanceFlowButton = new JButton("Instance Dependence Graph");
 		JButton schemaFlowButton = new JButton("Schema Mapping Graph");
+		instanceFlowButton.setMinimumSize(new Dimension(10, 10));
+		schemaFlowButton.setMinimumSize(new Dimension(10, 10));
+
 		north.add(instanceFlowButton);
 		instanceFlowButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -447,6 +462,7 @@ public class Display {
 		});
 		FQLSplit px = new FQLSplit(.5, JSplitPane.HORIZONTAL_SPLIT);
 		px.setDividerSize(6);
+		px.setDividerLocation(220);
 		frame = new JFrame(/* "Viewer for " + */s);
 
 		JSplitPane temp2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
@@ -467,7 +483,7 @@ public class Display {
 
 		// frame.setContentPane(bd);
 		frame.setContentPane(px);
-		frame.setSize(850, 600);
+		frame.setSize(900, 600);
 
 		ActionListener escListener = new ActionListener() {
 			@Override
@@ -780,6 +796,11 @@ public class Display {
 			@Override
 			public Object visit(Unit env, Kernel e) {
 				return null;
+			}
+			
+			@Override
+			public Object visit(Unit env, Step e) {
+				return null; //TODO: (Step) this should return a pair
 			}
 
 			

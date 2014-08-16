@@ -116,9 +116,10 @@ public class LeftKan {
 			set.addAll(a);
 			filter(set, y);
 		}
-		
+	
+		//TODO: not needed?
 		lineage.remove(y);
-		for (Object k : lineage.keySet()) {
+/*		for (Object k : lineage.keySet()) {
 			List<Pair<String, Object>> v = lineage.get(k);
 			for (Pair<String, Object> p : v) {
 				if (p.second.equals(y)) {
@@ -126,7 +127,7 @@ public class LeftKan {
 					p.second = x;
 				}
 			}
-		}
+		} */
 //		System.out.println("after " + this);
 	}
 
@@ -190,7 +191,7 @@ public class LeftKan {
 		boolean ret = false;
 		try {
 			for (Edge e : A.edges) {
-				Path g = F.appy(new Path(A, e));
+				Path g = F.appy(B, new Path(A, e));
 				Set<Pair<Object, Integer>> lhs = Instance.compose(X.data.get(e.name), ua.get(e.target));
 				Set<Pair<Object, Integer>> rhs = Instance.compose(ua.get(e.source), eval(g));
 				Node n = g.target;

@@ -541,7 +541,7 @@ public class PSMGen {
 			if (!path.source.equals(c)) {
 				continue;
 			}
-			Path path_f = f.appy(path);
+			Path path_f = f.appy(D, path);
 			Fn<Path, Arr<Node, Path>> F = D.toCategory2().second;
 			if (F.of(path_f).equals(F.of(new Path(D, e)))) {
 				return path;

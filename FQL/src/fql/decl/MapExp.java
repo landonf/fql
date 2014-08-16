@@ -1,6 +1,7 @@
 package fql.decl;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -322,17 +323,34 @@ public abstract class MapExp {
 			if (src == null || dst == null) {
 				throw new RuntimeException(toString());
 			}
+			Set<String> seen1 = new HashSet<>();
+			Set<String> seen2 = new HashSet<>();
+			Set<String> seen3 = new HashSet<>();
 			for (Pair<String, String> k : objs) {
+				if (seen1.contains(k.first)) {
+					throw new RuntimeException("Duplicate object mapping: " + k.first + " in " + this);
+				}
+				seen1.add(k.first);
 				if (k.first == null || k.second == null) {
 					throw new RuntimeException(toString());
 				}
 			}
 			for (Pair<String, String> k : attrs) {
+				if (seen2.contains(k.first)) {
+					throw new RuntimeException("Duplicate attribute mapping: " + k.first+ " in " + this);
+				}
+				seen2.add(k.first);
+
 				if (k.first == null || k.second == null) {
 					throw new RuntimeException(toString());
 				}
 			}
 			for (Pair<String, List<String>> k : arrows) {
+				if (seen3.contains(k.first)) {
+					throw new RuntimeException("Duplicate arrow mapping: " + k.first+ " in " + this);
+				}
+				seen3.add(k.first);
+
 				if (k.first == null || k.second == null) {
 					throw new RuntimeException(toString());
 				} 
@@ -345,6 +363,7 @@ public abstract class MapExp {
  			
 			Collections.sort(this.objs);
 			Collections.sort(this.attrs);
+		//	System.out.println(arrows);
 			Collections.sort(this.arrows);
 		}
 

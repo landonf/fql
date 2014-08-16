@@ -20,7 +20,7 @@ public class SimpleCreateTable extends PSM {
 		this.name = name;
 		this.attr = attr;
 		this.suppress = suppress;
-		if (!(attr.equals(PSM.VARCHAR()) || attr.equals(PSM.INTEGER))) {
+		if (!(attr.equals(PSM.VARCHAR()) || attr.equals(PSM.INTEGER) || attr.equals(PSM.FLOAT))) {
 			throw new RuntimeException("bad attribute in " + this + ": " + attr);
 		}
 

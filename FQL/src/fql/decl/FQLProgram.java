@@ -29,6 +29,7 @@ import fql.decl.InstExp.Pi;
 import fql.decl.InstExp.Plus;
 import fql.decl.InstExp.Relationalize;
 import fql.decl.InstExp.Sigma;
+import fql.decl.InstExp.Step;
 import fql.decl.InstExp.Times;
 import fql.decl.InstExp.Two;
 import fql.decl.InstExp.Zero;
@@ -68,7 +69,6 @@ public class FQLProgram {
 		build = build();
 		build2 = build2();
 		//System.out.println("smap " + smap);
-		//TODO populate smap, mmap
 	}
 	
 	public Map<String, Paint> colorMap2 = new HashMap<>();
@@ -77,20 +77,6 @@ public class FQLProgram {
 	public Graph<String, Object> build2() {
 		final Graph<String, Object> g2 = new DirectedSparseMultigraph<>();
 
-//		for (final String k : sigs.keySet()) {
-//			if (nmap.get(k) )
-	//		SigExp.Const c = sigs.get(k).toConst(this);
-			//if (smap.get(c) == null) {
-		//		smap.put(c, nmap.get(k));
-			//}
-			//colorMap3.put(k, smap.get(c));
-		//	g2.addVertex(k);
-		//}
-//		for (final String k : sigs.keySet()) {
-	//		if (!colorMap3.containsKey(k)) {
-	//			colorMap3.put(k, nColor());
-	//		}
-	//	}
 		for (final String k : maps.keySet()) {
 			MapExp.Const i = maps.get(k).toConst(this);
 			SigExp src = i.src;
@@ -100,11 +86,6 @@ public class FQLProgram {
 			if (src_k == null || dst_k == null) {
 				continue;
 			}
-//			Paint src_c = colorMap3.get(src_k);
-	//		Paint dst_c = colorMap3.get(dst_k);
-	//		if (src_c == null || dst_c == null) {
-		//		continue;
-		//	}
 			g2.addEdge(k, src_k, dst_k);
 		}
 		
@@ -130,14 +111,6 @@ public class FQLProgram {
 		for (final String k : insts.keySet()) {
 			InstExp i = insts.get(k);
 			i.type(this).toConst(this);
-//			if (smap.get(c) == null) {
-	//			smap.put(c, nColor());
-	//		}
-//			SigExp sig = c.toSig(this);
-			//String sig_k = revLookup(sigs, c);
-	//		colorMap3.put(sig_k, smap.get(c));
-	//		colorMap2.put(k, smap.get(c));
-			// Paint color = map.get(c);
 			g2.addVertex(k);
 
 			i.accept(new Unit(), new InstExpVisitor<Unit, Unit>() {
@@ -220,6 +193,12 @@ public class FQLProgram {
 					Pair<String, String> p = t.type(FQLProgram.this);
 					g2.addEdge(new Pair<>(guid.pp(), e), p.first, k);
 					g2.addEdge(new Pair<>(guid.pp(), e), p.second, k);
+					return null;
+				}
+
+				@Override
+				public Unit visit(Unit env, Step e) {
+					// TODO (Step) this should add an edge
 					return null;
 				}
 			});
@@ -405,6 +384,7 @@ public class FQLProgram {
 		}
 		enums.put("int", new Type.Int());
 		enums.put("string", new Type.Varchar());
+		enums.put("float", new Type.Float());
 	}
 
 	@Override

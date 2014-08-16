@@ -178,13 +178,13 @@ public class Inst<Obj, Arrow, Y, X> {
 				}
 				for (Edge n : a.edges) {
 					if (!a1.second.of(new Path(a, n)).equals(
-							a1.second.of(r.appy(l.em.get(n))))) {
+							a1.second.of(r.appy(b, l.em.get(n))))) {
 						continue inner;
 					}
 				}
 				for (Edge m : b.edges) {
 					if (!b1.second.of(new Path(b, m)).equals(
-							b1.second.of(l.appy(r.em.get(m))))) {
+							b1.second.of(l.appy(b, r.em.get(m))))) {
 						continue inner;
 					}
 				}
@@ -487,8 +487,8 @@ public class Inst<Obj, Arrow, Y, X> {
 								// System.out.println("tappy "
 								// + t.appy(f.arr).toLong());
 								Path lhs = Path.append(base, k.get(x),
-										t.appy(f.arr));
-								Path rhs = Path.append(base, s.appy(f.arr),
+										t.appy(exp, f.arr));
+								Path rhs = Path.append(base, s.appy(exp, f.arr),
 										k.get(y));
 								// System.out.println("for " + k + " x " + x
 								// + " y " + y + " lhs " + lhs + " rhs "

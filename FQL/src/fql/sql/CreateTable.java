@@ -22,7 +22,7 @@ public class CreateTable extends PSM {
 		this.attrs = attrs;
 		this.suppress = suppress;
 		for (String k : attrs.values()) {
-			if (!(k.equals(PSM.VARCHAR()) || k.equals(PSM.INTEGER))) {
+			if (!(k.equals(PSM.VARCHAR()) || k.equals(PSM.INTEGER) || k.equals(PSM.FLOAT))) {
 				throw new RuntimeException("bad attribute in " + this + " are " + attrs.toString() + " problematic: " + k);
 			}
 		}

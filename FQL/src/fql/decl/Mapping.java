@@ -41,6 +41,7 @@ import fql.FQLException;
 import fql.Fn;
 import fql.Pair;
 import fql.Triple;
+import fql.Util;
 import fql.cat.Arr;
 import fql.cat.FinCat;
 import fql.cat.FinFunctor;
@@ -128,17 +129,17 @@ public class Mapping {
 			Triple<FinFunctor<Node, Path, Node, Path>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>> zzz = toFunctor2();
 
 			for (Eq x : source.eqs) {
-				appy(x.lhs);
+				appy(target, x.lhs);
 
-				if (!zzz.third.second.of(appy(x.lhs)).equals(
-						zzz.third.second.of(appy(x.rhs)))) {
+				if (!zzz.third.second.of(appy(target, x.lhs)).equals(
+						zzz.third.second.of(appy(target, x.rhs)))) {
 					throw new FQLException("On " + this + "\n\n equivalence "
-							+ x + " not respected on \n\n" + appy(x.lhs)
-							+ "\nand\n" + appy(x.rhs)
+							+ x + " not respected on \n\n" + appy(target, x.lhs)
+							+ "\nand\n" + appy(target, x.rhs)
 							+ "\n\ntransformed lhs is "
-							+ zzz.third.second.of(appy(x.lhs))
+							+ zzz.third.second.of(appy(target, x.lhs))
 							+ "\n\n transformed rhs is "
-							+ zzz.third.second.of(appy(x.rhs)) + "\n\nschemas:"
+							+ zzz.third.second.of(appy(target, x.rhs)) + "\n\nschemas:"
 							+ source + " and target " + target);
 
 				}
@@ -417,11 +418,13 @@ public class Mapping {
 			}
 		});
 
-		JTable nmC = new JTable(arr, new Object[] { "Source node"/*
-																 * +
-																 * source.name0
-																 */,
-				"Target node" /* + target.name0 */});
+		JTable nmC = new JTable(arr, new Object[] { "Source node",
+				"Target node" }){
+			public Dimension getPreferredScrollableViewportSize() {
+				Dimension d = getPreferredSize();
+				return new Dimension(d.width, d.height);
+			}
+		};
 
 		Object[][] arr2 = new Object[em.size()][2];
 		int i2 = 0;
@@ -436,11 +439,13 @@ public class Mapping {
 			}
 		});
 
-		JTable emC = new JTable(arr2, new Object[] { "Source edge" /*
-																	 * +
-																	 * source.name0
-																	 */,
-				"Target path" /* + target.name0 */});
+		JTable emC = new JTable(arr2, new Object[] { "Source edge" ,
+				"Target path" }){
+			public Dimension getPreferredScrollableViewportSize() {
+				Dimension d = getPreferredSize();
+				return new Dimension(d.width, d.height);
+			}
+		};
 
 		Object[][] arr3 = new Object[am.size()][2];
 		int i3 = 0;
@@ -454,15 +459,16 @@ public class Mapping {
 				return f1[0].toString().compareTo(f2[0].toString());
 			}
 		});
-		JTable amC = new JTable(arr3, new Object[] { "Source attribute" /*
-																		 * +
-																		 * source
-																		 * .
-																		 * name0
-																		 */,
-				"Target attribute" /* + target.name0 */});
+		JTable amC = new JTable(arr3, new Object[] { "Source attribute" ,
+				"Target attribute"}){
+			public Dimension getPreferredScrollableViewportSize() {
+				Dimension d = getPreferredSize();
+				return new Dimension(d.width, d.height);
+			}
+		};
 
-		JPanel p = new JPanel(new GridLayout(2, 2));
+		List<JComponent> p = new LinkedList<>();
+		//JPanel p = new JPanel(new GridLayout(2, 2));
 
 		JScrollPane q1 = new JScrollPane(nmC);
 		JScrollPane q2 = new JScrollPane(emC);
@@ -485,8 +491,8 @@ public class Mapping {
 		j3.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createEmptyBorder(), "Attribute mapping"));
 		p.add(j3);
-		p.setBorder(BorderFactory.createEtchedBorder());
-		return p;
+		//p.setBorder(BorderFactory.createEtchedBorder());
+		return Util.makeGrid(p);
 	}
 
 	/*
@@ -506,7 +512,8 @@ public class Mapping {
 		// ret += (a.trim());
 		// }
 
-		JPanel tap = new JPanel(new GridLayout(2, 2));
+		List<JComponent> tap = new LinkedList<>();
+	//	JPanel tap = new JPanel(new GridLayout(2, 2));
 
 		JTextArea ta = new JTextArea(toString());
 		ta.setWrapStyleWord(true);
@@ -585,8 +592,8 @@ public class Mapping {
 															 */));
 		p4.add(xxx4);
 		tap.add(p4);
-		tap.setBorder(BorderFactory.createEtchedBorder());
-		return tap;
+		//tap.setBorder(BorderFactory.createEtchedBorder());
+		return Util.makeGrid(tap);
 	}
 
 	static String printNicely(List<PSM> delta) {
@@ -656,7 +663,7 @@ public class Mapping {
 	/**
 	 * Applies to a path
 	 */
-	public Path appy(Path path) {
+	/* public Path appy(Signature val, Path path) {
 		List<Edge> r = new LinkedList<Edge>();
 		for (Edge e : path.path) {
 			Path p = em.get(e);
@@ -664,9 +671,34 @@ public class Mapping {
 				throw new RuntimeException("No mapping for " + e + " in " + this);
 			}
 			r.addAll(p.path);
+			new Path(nm.get(path.source), nm.get(path.target), r);
 		}
 
 		return new Path(nm.get(path.source), nm.get(path.target), r);
+	} */
+	public Path appy(Signature val, Path path) {
+		try {
+		Node s = nm.get(path.source);
+		Node t = nm.get(path.target);
+		Path ret = new Path(val, s);
+		for (Edge e : path.path) {
+			Path p = em.get(e);
+			if (p == null) {
+				throw new RuntimeException("No mapping for " + e + " in " + this);
+			}
+			ret = Path.append(val, ret, p);
+		}
+
+		if (!ret.target.equals(t)) {
+			throw new RuntimeException("Applying on " + path + " yields " + ret + " whose target is not " + t + " as required.");
+		}
+		
+		return ret;
+		} catch (FQLException fe) {
+			fe.printStackTrace();
+			throw new RuntimeException(fe.getMessage());
+		}
+
 	}
 
 	/**
@@ -734,16 +766,18 @@ public class Mapping {
 		for (Arr<Node, Path> arroweqc : srcCat.arrows) {
 			Path arrow = arroweqc.arr;
 
-			Path mapped = appy(arrow);
+
 		//	System.out.println("mapped " + mapped);
-			try {
+			//try {
+				Path mapped = appy(target, arrow);
 				mapped.validate(target);
-			} catch (RuntimeException fe) {
-				fe.printStackTrace();
-				throw new FQLException("Path " + arroweqc.arr.toLong() + " gets mapped to a bad path: " + mapped.toLong());
-			}
 			arrowMapping.put(new Arr<>(arrow, arrow.source, arrow.target),
 					dstCat0.second.of(mapped));
+		//	} catch (RuntimeException fe) {
+		//		fe.printStackTrace();
+		//		throw new FQLException("Path " + arroweqc.arr.toLong() + " gets mapped to a bad path: " + mapped.toLong());
+		//	}
+
 			//System.out.println("ok");
 		}
 
@@ -1012,7 +1046,7 @@ public class Mapping {
 
 		for (Edge e : l.source.edges) {
 			Path p = l.em.get(e);
-			yyy.add(new Pair<>(e.name, r.appy(p).asList()));
+			yyy.add(new Pair<>(e.name, r.appy(r.target, p).asList()));
 		}
 
 		for (Attribute<Node> a : l.source.attrs) {

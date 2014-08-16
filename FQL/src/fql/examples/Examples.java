@@ -52,8 +52,10 @@ public class Examples {
 	public static Example prop = new PropExample();
 	public static Example chare = new CharExample();
 	public static Example im = new ImageExample();
+	public static Example nist = new NistExample();
+	public static Example nist2 = new NistContExample();
 	
-	public static Example[] examples = new Example[] { im, prop, exp2, auto, exp, fncomp, graph, eds2fql, cat, surj,
+	public static Example[] examples = new Example[] { nist2, nist, im, prop, exp2, auto, exp, fncomp, graph, eds2fql, cat, surj,
 			full2, match2, match, sub, /* functor, */enums, people, chare,
 			external, typeddelta, /* delta, pi, */ typedPi,
 			typedsigma,  /* sigma, */  full, employess, typedemployees, /* composition, */
@@ -61,7 +63,7 @@ public class Examples {
 			/* foil, */ typedFoil, sql2fql, /* weird, */ written, /* monad, */ typedWeird,
 			relative, plusSig, products, transform, gene };
 	
-	public static Example[] key_examples = new Example[] { im, prop, exp, surj,
+	public static Example[] key_examples = new Example[] { nist2, nist, im, prop, exp, surj,
 		 enums, people, chare,
 		external, typeddelta, typedPi,
 		typedsigma, full, typedemployees, 
@@ -96,6 +98,8 @@ public class Examples {
 			+ "\nRDF output will not quote brackets or slashes or quotes, so certain input strings can cause the RDF output to be ill-formed."
 			+ "\n"
 			+ "\nProject webpage: categoricaldata.net"
+			+ "\n"
+			+ "\nSpecial thanks to Vit Koksa for measuring the performance of the Naive and H2 SQL engines."
 			+ "\n"
 			+ "\n -- Typing rules ------------ \n"
 			+ "\nid C : C -> C"
