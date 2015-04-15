@@ -344,7 +344,7 @@ public class RaToFql {
 		return ret;
 	}
 
-	protected Example[] examples = { new PeopleExample() /* , new NegExample() */, new EDExample() };
+	protected Example[] examples = { new PeopleExample()  , new NegExample() , new EDExample() };
 
 	String help = "Bags of tuples can be represented in FQL using an explicit active domain construction.  See the People example.  Unions of conjunctive queries *of base relations* are supported, using DISTINCT and ALL for set semantics.  (The translated FQL will not compile if not translating unions of conjunctive queries of base relations).  Primary and foreign keys are not supported by this encoding.  WHERE clauses must have equalities between variables, not constants.  SQL keywords MUST be capitalized.  The observables viewer pane is useful for visualizing instances.";
 

@@ -89,7 +89,7 @@ public class Instance {
 			Set<Pair<Object, Object>> i = data.get(n.string);
 			if (i == null) {
 				throw new FQLException("Missing node table " + n.string
-						+ " in " + this);
+						);
 			}
 			for (Pair<Object, Object> p : i) {
 				if (p.first == null || p.second == null) {
@@ -108,7 +108,7 @@ public class Instance {
 			Set<Pair<Object, Object>> i = data.get(a.name);
 			if (i == null) {
 				throw new FQLException("Missing Attribute<Node> table "
-						+ a.name + " in " + this);
+						+ a.name);
 			}
 
 			HashSet<Object> x = new HashSet<>();
@@ -119,12 +119,11 @@ public class Instance {
 				}
 				if (!a.target.in(p.second)) {
 					throw new RuntimeException("Bad attr domain: " + p.second
-							+ " not in " + a.target + " in " + this);
+							+ " not in " + a.target);
 				}
 			}
 			if (data.get(a.source.string).size() != x.size()) {
-				throw new RuntimeException("Instance " + this
-						+ " does not map all domain values in " + a.name
+				throw new RuntimeException("does not map exactly the domain values in " + a.name
 						+ "\n\ndata size " + data.get(a.source.string).size()
 						+ " expected " + x.size());
 			}
@@ -133,16 +132,15 @@ public class Instance {
 				for (Pair<Object, Object> p2 : i) {
 					if (p1.first.equals(p2.first)) {
 						if (!p1.second.equals(p2.second)) {
-							throw new FQLException("In " + this
-									+ ", not functional: " + " in " + s);
+							throw new FQLException("not functional: " + " in " + s);
 						}
 					}
 				}
 				// functional
 
 				if (!contained(p1.first, data.get(a.source.string))) {
-					throw new FQLException("Domain has non foreign key: " + s
-							+ " and " + this);
+					throw new FQLException("Domain has non foreign key: " + p1.first
+							+ " not contained in " + a.source.string);
 				}
 				if (!a.target.in(p1.second)) {
 					throw new FQLException("Not a " + a.target + ": "
@@ -153,8 +151,7 @@ public class Instance {
 		for (Edge e : s.edges) {
 			Set<Pair<Object, Object>> i = data.get(e.name);
 			if (i == null) {
-				throw new FQLException("Missing edge table " + e.name + " in "
-						+ this);
+				throw new FQLException("Missing edge table " + e.name );
 			}
 
 			HashSet<Object> x = new HashSet<>();
@@ -171,7 +168,7 @@ public class Instance {
 				y.removeAll(x);
 				throw new FQLException(
 						"Instance does not map all domain values in " + e.name
-								+ " in " + this + "\n\n" + s1.size() + " vs " + x.size() + "\n\nmissing " + y );
+								+ "\n\n" + s1.size() + " vs " + x.size() + "\n\nmissing " + y );
 			}
 
 			for (Pair<Object, Object> p1 : i) {
@@ -179,7 +176,7 @@ public class Instance {
 					if (p1.first.equals(p2.first)) {
 						if (!p1.second.equals(p2.second)) {
 							throw new FQLException("Not functional: " + " in "
-									+ s + " and " + this);
+									+ s);
 						}
 					}
 				}
@@ -191,7 +188,7 @@ public class Instance {
 				}
 				if (!contained(p1.second, data.get(e.target.string))) {
 					throw new FQLException("Range has non foreign key: "
-							+ p1.second + " in " + e.target.string + " \n\n " + this);
+							+ p1.second + " in " + e.name);
 				}
 			}
 		}
