@@ -1968,7 +1968,7 @@ public class Instance {
 				}
 				i++;
 			}
-			ret.put(n, new Pair<>(ar, rows.values().toArray(new Object[][] {})));
+			ret.put(n, new Pair<Object[], Object[][]>(ar, rows.values().toArray(new Object[][] {})));
 		}
 
 		return ret;
